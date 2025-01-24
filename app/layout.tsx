@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from './providers';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,20 +14,27 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const headersList = headers();
+  const useLayout = headersList.get('x-use-layout') === 'true';
+
+  if (!useLayout) {
+    return (
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    );
+  }
+
   return (
     <html lang="en">
-      <body
-        className={`antialiased`}
-      >
-        <Providers>
-          <div>
-            <Header />
-            <Sidebar />
-            <main className="pt-16 pl-64">
-              {children}
-            </main>
-          </div>
-        </Providers>
+      <body>
+        <div>
+          <Header />
+          <Sidebar />
+          <main className="pt-16 pl-64">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
