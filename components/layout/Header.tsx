@@ -1,9 +1,17 @@
+'use client';
 import { Bell, Search } from 'lucide-react';
 import Image from 'next/image';
+import { useSidebarStore } from '@/store/useSidebarStore';
+import { cn } from '@/lib/utils';
 
 const Header = () => {
+  const { isCollapsed } = useSidebarStore();
+
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b flex items-center justify-between px-6 z-50">
+    <header className={cn(
+      "fixed top-0 right-0 h-16 bg-white border-b flex items-center justify-between px-6 z-50 transition-all duration-300",
+      isCollapsed ? "left-16" : "left-64"
+    )}>
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-semibold">Your Timeline</h1>
         <div className="flex items-center gap-2 text-sm text-gray-500">
