@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 const Header = () => {
   return (
-    <header className="fixed top-0 right-0 left-0 h-16 bg-white border-b flex items-center justify-between px-6 z-50">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b flex items-center justify-between px-6 z-50">
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-semibold">Your Timeline</h1>
         <div className="flex items-center gap-2 text-sm text-gray-500">

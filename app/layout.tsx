@@ -28,12 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div>
+        <div className="min-h-screen flex flex-col">
           <Header />
-          <Sidebar />
-          <main className="pt-16 pl-64">
-            {children}
-          </main>
+          <div className="flex flex-1">
+            <Sidebar />
+            <main className="flex-1 ml-64 mt-16 p-6">
+              {children}
+            </main>
+          </div>
         </div>
       </body>
     </html>

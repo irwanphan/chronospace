@@ -36,7 +36,7 @@ const navigation = [
 
 const Sidebar = () => {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r pt-16">
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r overflow-y-auto pt-16">
       <nav className="p-4">
         {navigation.map((item) => (
           <Link
