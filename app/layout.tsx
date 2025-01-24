@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from './providers';
+import Header from '@/components/layout/Header';
+import Sidebar from '@/components/layout/Sidebar';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +19,15 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div>
+            <Header />
+            <Sidebar />
+            <main className="pt-16 pl-64">
+              {children}
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
