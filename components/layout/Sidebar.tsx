@@ -1,6 +1,7 @@
 'use client';
 import { Calendar, Users, BarChart2, Settings, Layout, Clock, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +39,7 @@ const navigation = [
 ];
 
 const Sidebar = () => {
+  const pathname = usePathname();
   const { isCollapsed, toggleSidebar } = useSidebarStore();
 
   return (
@@ -56,19 +58,29 @@ const Sidebar = () => {
       </button>
       
       <nav className="p-4">
-        {navigation.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg mb-1 transition-colors",
-              isCollapsed && "justify-center px-2"
-            )}
-          >
-            <item.icon className="w-5 h-5 min-w-5" />
-            {!isCollapsed && <span>{item.name}</span>}
-          </Link>
-        ))}
+        {navigation.map((item) => {
+          const isActive = pathname === item.href;
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-colors",
+                isCollapsed && "justify-center px-2",
+                isActive 
+                  ? "bg-blue-50 text-blue-600" 
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className={cn(
+                "w-5 h-5 min-w-5",
+                isActive && "text-blue-600"
+              )} />
+              {!isCollapsed && <span>{item.name}</span>}
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

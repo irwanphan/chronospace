@@ -11,8 +11,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  content,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
+  content: React.ReactNode;
 }) {
   const headersList = headers();
   const useLayout = headersList.get('x-use-layout') === 'true';
@@ -32,10 +34,11 @@ export default function RootLayout({
           <Header />
           <div className="flex flex-1">
             <Sidebar />
-            <main className="flex-1 ml-64 mt-16 p-6">
+            {/* <main className="flex-1 ml-64 mt-16 p-6">
               {children}
-            </main>
+            </main> */}
           </div>
+          {content}
         </div>
       </body>
     </html>

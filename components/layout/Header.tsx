@@ -44,7 +44,7 @@ const Header = () => {
             <p className="text-sm text-gray-500">Administrator</p>
           </div>
           <Image
-            src="/avatar.jpg"
+            src=""
             alt="User avatar"
             width={40}
             height={40}
