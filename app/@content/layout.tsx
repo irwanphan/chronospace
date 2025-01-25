@@ -4,7 +4,7 @@ export default function ContentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex-1 ml-64 mt-16 p-6 transition-all duration-300">
+    <main className="flex-1 ml-64 mt-16 min-h-screen p-6 bg-gray-50">
       {children}
     </main>
   );
