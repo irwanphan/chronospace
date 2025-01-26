@@ -1,5 +1,5 @@
 'use client';
-import { Star, Users, Building2, Network, FileCheck } from 'lucide-react';
+import { Star, Users, Building2, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
