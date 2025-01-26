@@ -1,5 +1,5 @@
 'use client';
-import { Calendar, Users, BarChart2, Settings, Layout, Clock, ChevronLeft } from 'lucide-react';
+import { Calendar, Users, BarChart2, Settings, Layout, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';

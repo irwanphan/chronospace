@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import { headers } from 'next/headers';
+import { montserrat } from './fonts';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,15 +22,15 @@ export default function RootLayout({
 
   if (!useLayout) {
     return (
-      <html lang="en">
-        <body>{children}</body>
+      <html lang="en" className={montserrat.variable}>
+        <body className="font-montserrat">{children}</body>
       </html>
     );
   }
 
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={montserrat.variable}>
+      <body className="font-montserrat">
         <div className="min-h-screen flex flex-col">
           <Header />
           <div className="flex flex-1">
