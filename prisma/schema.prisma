@@ -85,3 +85,16 @@ model Role {
 
   @@map("roles")
 }
+
+model WorkDivision {
+  id            String   @id @default(cuid())
+  divisionCode  String   @unique
+  divisionName  String
+  description   String?
+  upperDivision String?
+  divisionHead  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("work_divisions")
+}
