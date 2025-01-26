@@ -72,3 +72,16 @@ model Vendor {
 
   @@map("vendors")
 }
+
+model Role {
+  id            String   @id @default(cuid())
+  roleCode      String   @unique
+  roleName      String
+  description   String?
+  upperLevel    String?
+  approvalLimit Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("roles")
+}
