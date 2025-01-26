@@ -1,6 +1,7 @@
 'use client';
 import { Calendar, Users, BarChart2, Settings, Layout, Clock, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
@@ -44,18 +45,26 @@ const Sidebar = () => {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 h-screen bg-white border-r overflow-y-auto pt-16 transition-all duration-300",
+      "fixed left-0 top-0 h-screen bg-white border-r overflow-y-auto transition-all duration-300",
       isCollapsed ? "w-16" : "w-64"
     )}>
-      <button 
-        onClick={toggleSidebar}
-        className="absolute right-4 top-5 p-1.5 rounded-lg hover:bg-gray-100"
-      >
-        <ChevronLeft className={cn(
-          "w-5 h-5 transition-transform duration-300",
-          isCollapsed && "rotate-180"
-        )} />
-      </button>
+      <div className="flex items-center h-16 px-4 border-b">
+        <button 
+          onClick={toggleSidebar}
+          className="flex items-center gap-3 hover:opacity-75 transition-opacity"
+        >
+          <Image
+            src="/time.svg"
+            alt="ChronoSpace Logo"
+            width={32}
+            height={32}
+            className="min-w-[32px]"
+          />
+          {!isCollapsed && (
+            <span className="font-semibold text-xl">ChronoSpace</span>
+          )}
+        </button>
+      </div>
       
       <nav className="p-4">
         {navigation.map((item) => {
