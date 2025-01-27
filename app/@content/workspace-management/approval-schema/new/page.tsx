@@ -8,6 +8,7 @@ import { Role } from '@/types/role';
 import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
 import { User } from '@/types/user';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface ApprovalStepForm {
   roleId: string;
@@ -181,7 +182,7 @@ export default function NewApprovalSchemaPage() {
             <select
               value={formData.documentType}
               onChange={(e) => setFormData(prev => ({ ...prev, documentType: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               required
             >
               <option value="">Select Document Type</option>
@@ -216,11 +217,10 @@ export default function NewApprovalSchemaPage() {
 
           <div>
             <label className="block mb-1.5">Description</label>
-            <textarea
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              rows={4}
+              onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
+              className="min-h-[200px]"
             />
           </div>
 

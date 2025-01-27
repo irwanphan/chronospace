@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 export default function NewVendorPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function NewVendorPage() {
     address: '',
     phone: '',
     email: '',
+    documents: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,32 +82,10 @@ export default function NewVendorPage() {
             <label className="block mb-1.5">
               Vendor Address
             </label>
-            <div className="border rounded-lg overflow-hidden">
-              <div className="bg-gray-50 border-b px-3 py-2 flex gap-2">
-                <select className="bg-transparent text-sm px-2 py-1 rounded border">
-                  <option>Normal</option>
-                  <option>Sailec Light</option>
-                </select>
-                <div className="flex items-center gap-1 border-l pl-2">
-                  <button type="button" className="p-1.5 hover:bg-gray-100 rounded">
-                    <strong className="text-sm">B</strong>
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-gray-100 rounded italic">
-                    <strong className="text-sm">I</strong>
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-gray-100 rounded underline">
-                    <strong className="text-sm">U</strong>
-                  </button>
-                </div>
-              </div>
-              <textarea
-                value={formData.address}
-                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                className="w-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={4}
-                placeholder="Enter address..."
-              />
-            </div>
+            <RichTextEditor
+              value={formData.address}
+              onChange={(value: string) => setFormData(prev => ({ ...prev, address: value }))}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -135,13 +135,13 @@ export default function ApprovalSchemaPage() {
                 <div>
                   <span className="font-medium">Applicable Work Divisions:</span>
                   <p className="text-gray-600">
-                    {getDivisionNames(JSON.parse(schema.workDivisions as string))}
+                    {getDivisionNames(schema.workDivisions)}
                   </p>
                 </div>
                 <div>
                   <span className="font-medium">Applicable Roles:</span>
                   <p className="text-gray-600">
-                    {getRoleNames(JSON.parse(schema.roles as string))}
+                    {getRoleNames(schema.roles)}
                   </p>
                 </div>
                 {schema.description && (
