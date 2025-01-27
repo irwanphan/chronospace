@@ -98,3 +98,34 @@ model WorkDivision {
 
   @@map("work_divisions")
 }
+
+model ApprovalSchema {
+  id            String         @id @default(cuid())
+  name          String
+  documentType  String
+  description   String?
+  workDivisions Json          // Stored as JSON string
+  roles         Json          // Stored as JSON string
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  steps         ApprovalStep[]
+
+  @@map("approval_schemas")
+}
+
+model ApprovalStep {
+  id             String        @id @default(cuid())
+  schemaId       String
+  stepNumber     Int
+  roleId         String
+  specificUserId String?
+  budgetLimit    Float?
+  duration       Int          // dalam jam
+  overtimeAction String       // NOTIFY atau AUTO_REJECT
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  schema         ApprovalSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+
+  @@map("approval_steps")
+}
