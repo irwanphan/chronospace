@@ -3,13 +3,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>
-});
+import { RichTextEditor } from '@/app/components/rich-text-editor';
 
 export default function NewRolePage() {
   const router = useRouter();
@@ -89,32 +83,11 @@ export default function NewRolePage() {
             <label className="block mb-1.5">
               Role Description
             </label>
-            <div className="border rounded-lg overflow-hidden">
-              <ReactQuill
-                theme="snow"
-                value={formData.description}
-                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-                className="
-                  [&_.ql-toolbar.ql-snow]:border-0
-                  [&_.ql-toolbar.ql-snow]:bg-blue-50 
-                  [&_.ql-toolbar.ql-snow]:border-b
-                  [&_.ql-toolbar.ql-snow]:border-gray-200
-                  [&_.ql-container.ql-snow]:border-0
-                  [&_.ql-editor]:text-base
-                  [&_.ql-editor]:leading-relaxed
-                  [&_.ql-editor]:text-gray-500
-                  [&_.ql-editor]:h-20
-                "
-                modules={{
-                  toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['clean']
-                  ]
-                }}
-                placeholder="Enter description..."
-              />
-            </div>
+            <RichTextEditor
+              value={formData.description}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+              placeholder="Enter description..."
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
