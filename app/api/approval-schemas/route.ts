@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+interface ApprovalStep {
+  name: string;
+  description?: string;
+  approverRoleId: string;
+}
+
 export async function GET() {
   try {
     const schemas = await db.approvalSchema.findMany({
@@ -34,7 +40,7 @@ export async function POST(req: Request) {
       data: {
         ...schemaData,
         steps: {
-          create: steps.map((step: any, index: number) => ({
+          create: steps.map((step: ApprovalStep, index: number) => ({
             ...step,
             stepNumber: index + 1,
           })),
