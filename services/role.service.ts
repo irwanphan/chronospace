@@ -13,6 +13,7 @@ export const RoleService = {
       });
       return role;
     } catch (error) {
+      console.error('Failed to create role:', error);
       throw new Error('Failed to create role');
     }
   },
@@ -26,6 +27,7 @@ export const RoleService = {
       });
       return roles;
     } catch (error) {
+      console.error('Failed to fetch roles:', error);
       throw new Error('Failed to fetch roles');
     }
   },

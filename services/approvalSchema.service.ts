@@ -23,6 +23,7 @@ export const ApprovalSchemaService = {
       
       return schema;
     } catch (error) {
+      console.error('Failed to create approval schema:', error);
       throw new Error('Failed to create approval schema');
     }
   },
@@ -43,6 +44,7 @@ export const ApprovalSchemaService = {
       });
       return schemas;
     } catch (error) {
+      console.error('Failed to fetch approval schemas:', error);
       throw new Error('Failed to fetch approval schemas');
     }
   },
@@ -61,6 +63,7 @@ export const ApprovalSchemaService = {
       });
       return schema;
     } catch (error) {
+      console.error('Failed to fetch approval schema:', error);
       throw new Error('Failed to fetch approval schema');
     }
   },
@@ -83,6 +86,7 @@ export const ApprovalSchemaService = {
 
       return await this.getById(schemaId);
     } catch (error) {
+      console.error('Failed to update approval steps:', error);
       throw new Error('Failed to update approval steps');
     }
   },

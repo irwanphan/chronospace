@@ -13,6 +13,7 @@ export const WorkDivisionService = {
       });
       return division;
     } catch (error) {
+      console.error('Failed to create work division:', error);
       throw new Error('Failed to create work division');
     }
   },
@@ -26,6 +27,7 @@ export const WorkDivisionService = {
       });
       return divisions;
     } catch (error) {
+      console.error('Failed to fetch work divisions:', error);
       throw new Error('Failed to fetch work divisions');
     }
   },

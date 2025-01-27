@@ -7,12 +7,14 @@ export const VendorService = {
       const vendor = await db.vendor.create({
         data: {
           ...data,
+          documents: data.documents?.join(',') || null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       });
       return vendor;
     } catch (error) {
+      console.error('Failed to create vendor:', error);
       throw new Error('Failed to create vendor');
     }
   },
@@ -26,6 +28,7 @@ export const VendorService = {
       });
       return vendors;
     } catch (error) {
+      console.error('Failed to fetch vendors:', error);
       throw new Error('Failed to fetch vendors');
     }
   },
