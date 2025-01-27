@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { RichTextEditor } from '@/app/components/rich-text-editor';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 export default function NewRolePage() {
   const router = useRouter();
