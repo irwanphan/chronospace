@@ -3,32 +3,72 @@ import { useEffect, useState } from 'react';
 import { Search, Filter, MoreVertical, Plus, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { ApprovalSchema } from '@/types/approvalSchema';
+import { WorkDivision } from '@/types/workDivision';
+import { Role } from '@/types/role';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchSchemas();
+    Promise.all([
+      fetchSchemas(),
+      fetchDivisions(),
+      fetchRoles(),
+    ]);
   }, []);
 
   const fetchSchemas = async () => {
     try {
-      setIsLoading(true);
       const response = await fetch('/api/approval-schemas');
-      if (!response.ok) {
-        throw new Error('Failed to fetch approval schemas');
-      }
+      if (!response.ok) throw new Error('Failed to fetch schemas');
       const data = await response.json();
       setSchemas(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Failed to fetch approval schemas:', error);
+      console.error('Failed to fetch schemas:', error);
       setError('Failed to load approval schemas');
-      setSchemas([]);
+    }
+  };
+
+  const fetchDivisions = async () => {
+    try {
+      const response = await fetch('/api/work-divisions');
+      if (!response.ok) throw new Error('Failed to fetch divisions');
+      const data = await response.json();
+      setDivisions(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch divisions:', error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch('/api/roles');
+      if (!response.ok) throw new Error('Failed to fetch roles');
+      const data = await response.json();
+      setRoles(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch roles:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getDivisionNames = (divisionIds: string[]) => {
+    return divisions
+      .filter(div => divisionIds.includes(div.id!))
+      .map(div => div.divisionName)
+      .join(', ');
+  };
+
+  const getRoleNames = (roleIds: string[]) => {
+    return roles
+      .filter(role => roleIds.includes(role.id!))
+      .map(role => role.roleName)
+      .join(', ');
   };
 
   return (
@@ -74,39 +114,67 @@ export default function ApprovalSchemaPage() {
           schemas.map((schema) => (
             <div key={schema.id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">{schema.name}</h3>
+                <div>
+                  <h3 className="text-lg font-medium">{schema.name}</h3>
+                  <span className="text-sm text-gray-500">{schema.documentType}</span>
+                </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg">
+                  <Link
+                    href={`/workspace-management/approval-schema/${schema.id}`}
+                    className="p-2 hover:bg-gray-100 rounded-lg"
+                  >
                     <Eye className="w-4 h-4 text-gray-500" />
-                  </button>
+                  </Link>
                   <button className="p-2 hover:bg-gray-100 rounded-lg">
                     <MoreVertical className="w-4 h-4 text-gray-500" />
                   </button>
                 </div>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-4 text-sm text-gray-600">
+
+              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium">Document Type:</span> {schema.documentType}
+                  <span className="font-medium">Applicable Work Divisions:</span>
+                  <p className="text-gray-600">
+                    {getDivisionNames(JSON.parse(schema.workDivisions as string))}
+                  </p>
                 </div>
                 <div>
-                  <span className="font-medium">Work Division:</span> {schema.workDivision}
+                  <span className="font-medium">Applicable Roles:</span>
+                  <p className="text-gray-600">
+                    {getRoleNames(JSON.parse(schema.roles as string))}
+                  </p>
                 </div>
-                {schema.documentType === 'Purchase Request' && (
-                  <div>
-                    <span className="font-medium">Budget Limit:</span>{' '}
-                    {new Intl.NumberFormat('id-ID', {
-                      style: 'currency',
-                      currency: 'IDR',
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(schema.budgetLimit || 0)}
-                  </div>
-                )}
                 {schema.description && (
                   <div className="col-span-2">
-                    <span className="font-medium">Description:</span> {schema.description}
+                    <span className="font-medium">Description:</span>
+                    <p className="text-gray-600">{schema.description}</p>
                   </div>
                 )}
+              </div>
+
+              <div className="mt-4 border-t pt-4">
+                <h4 className="font-medium mb-2">Approval Steps</h4>
+                <div className="space-y-2">
+                  {schema.steps.map((step, index) => (
+                    <div key={step.id} className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="font-medium">Step {index + 1}:</span>
+                      <span>{roles.find(r => r.id === step.roleId)?.roleName}</span>
+                      {step.budgetLimit && (
+                        <span>
+                          (Up to{' '}
+                          {new Intl.NumberFormat('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                          }).format(step.budgetLimit)}
+                          )
+                        </span>
+                      )}
+                      <span>{step.duration}h</span>
+                      <span>{step.overtimeAction === 'NOTIFY' ? 'Notify Only' : 'Auto Reject'}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))
