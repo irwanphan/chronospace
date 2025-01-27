@@ -159,7 +159,7 @@ export default function NewWorkDivisionPage() {
               <select
                 value={formData.divisionHead}
                 onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%3E%3Cpath%20d%3D%22M10.293%204.293L6%208.586%201.707%204.293%203.121%202.879%206%205.757%208.879%202.879z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[center_right_1rem]"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               >
                 <option value="">-</option>
                 {users.map((user) => (
