@@ -7,6 +7,7 @@ export async function POST(req: Request) {
     const role = await RoleService.create(data);
     return NextResponse.json(role, { status: 201 });
   } catch (error) {
+    console.error('Failed to create role:', error);
     return NextResponse.json(
       { error: 'Failed to create role' },
       { status: 500 }
@@ -19,6 +20,7 @@ export async function GET() {
     const roles = await RoleService.getAll();
     return NextResponse.json(roles);
   } catch (error) {
+    console.error('Failed to fetch roles:', error);
     return NextResponse.json(
       { error: 'Failed to fetch roles' },
       { status: 500 }

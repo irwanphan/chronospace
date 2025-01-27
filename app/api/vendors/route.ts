@@ -7,6 +7,7 @@ export async function POST(req: Request) {
     const vendor = await VendorService.create(data);
     return NextResponse.json(vendor, { status: 201 });
   } catch (error) {
+    console.error('Failed to create vendor:', error);
     return NextResponse.json(
       { error: 'Failed to create vendor' },
       { status: 500 }
@@ -19,6 +20,7 @@ export async function GET() {
     const vendors = await VendorService.getAll();
     return NextResponse.json(vendors);
   } catch (error) {
+    console.error('Failed to fetch vendors:', error);
     return NextResponse.json(
       { error: 'Failed to fetch vendors' },
       { status: 500 }

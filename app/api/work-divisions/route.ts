@@ -7,6 +7,7 @@ export async function POST(req: Request) {
     const division = await WorkDivisionService.create(data);
     return NextResponse.json(division, { status: 201 });
   } catch (error) {
+    console.error('Failed to create work division:', error);
     return NextResponse.json(
       { error: 'Failed to create work division' },
       { status: 500 }
@@ -19,6 +20,7 @@ export async function GET() {
     const divisions = await WorkDivisionService.getAll();
     return NextResponse.json(divisions);
   } catch (error) {
+    console.error('Failed to fetch work divisions:', error);
     return NextResponse.json(
       { error: 'Failed to fetch work divisions' },
       { status: 500 }
