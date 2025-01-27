@@ -1,12 +1,27 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+
+interface WorkDivision {
+  id: string;
+  divisionCode: string;
+  divisionName: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function NewWorkDivisionPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState({
     divisionCode: '',
     divisionName: '',
@@ -14,6 +29,38 @@ export default function NewWorkDivisionPage() {
     upperDivision: '',
     divisionHead: '',
   });
+
+  useEffect(() => {
+    const fetchWorkDivisions = async () => {
+      try {
+        const response = await fetch('/api/work-divisions');
+        if (response.ok) {
+          const data = await response.json();
+          setWorkDivisions(data);
+        }
+      } catch (error) {
+        console.error('Error fetching work divisions:', error);
+      }
+    };
+
+    fetchWorkDivisions();
+  }, []);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users');
+        if (response.ok) {
+          const data = await response.json();
+          setUsers(data);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +143,13 @@ export default function NewWorkDivisionPage() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               >
                 <option value="">-</option>
-                {/* Add options dynamically from parent divisions */}
+                {workDivisions
+                  .filter(division => division.divisionCode !== formData.divisionCode)
+                  .map((workDivision) => (
+                    <option key={workDivision.id} value={workDivision.id}>
+                      {workDivision.divisionName}
+                    </option>
+                  ))}
               </select>
             </div>
             <div>
@@ -106,10 +159,14 @@ export default function NewWorkDivisionPage() {
               <select
                 value={formData.divisionHead}
                 onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%3E%3Cpath%20d%3D%22M10.293%204.293L6%208.586%201.707%204.293%203.121%202.879%206%205.757%208.879%202.879z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[center_right_1rem]"
               >
                 <option value="">-</option>
-                {/* Add options dynamically from roles */}
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

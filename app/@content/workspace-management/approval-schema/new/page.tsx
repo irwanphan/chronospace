@@ -220,7 +220,6 @@ export default function NewApprovalSchemaPage() {
             <RichTextEditor
               value={formData.description}
               onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
-              className="min-h-[200px]"
             />
           </div>
 
