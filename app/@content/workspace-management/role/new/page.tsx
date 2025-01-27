@@ -94,13 +94,17 @@ export default function NewRolePage() {
                 theme="snow"
                 value={formData.description}
                 onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-                className={` 
+                className="
                   [&_.ql-toolbar.ql-snow]:border-0
                   [&_.ql-toolbar.ql-snow]:bg-blue-50 
                   [&_.ql-toolbar.ql-snow]:border-b
                   [&_.ql-toolbar.ql-snow]:border-gray-200
                   [&_.ql-container.ql-snow]:border-0
-                `}
+                  [&_.ql-editor]:text-base
+                  [&_.ql-editor]:leading-relaxed
+                  [&_.ql-editor]:text-gray-500
+                  [&_.ql-editor]:h-20
+                "
                 modules={{
                   toolbar: [
                     ['bold', 'italic', 'underline'],
