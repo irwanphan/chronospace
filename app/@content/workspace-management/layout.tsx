@@ -36,7 +36,7 @@ export default function WorkspaceManagementLayout({
 
   return (
     <div className="flex gap-6">
-      <div className="w-64 shrink-0">
+      <div className="w-64 shrink-0 fixed">
         <nav className="space-y-1">
           {subNavigation.map((item) => {
             const isActive = pathname === item.href;
@@ -62,7 +62,7 @@ export default function WorkspaceManagementLayout({
           })}
         </nav>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 ml-64">
         {children}
       </div>
     </div>
