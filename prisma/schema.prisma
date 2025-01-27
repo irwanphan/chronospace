@@ -49,6 +49,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  userRoles     UserRole[]
 }
 
 model VerificationToken {
@@ -82,8 +83,7 @@ model Role {
   approvalLimit Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
-  @@map("roles")
+  userRoles     UserRole[]
 }
 
 model WorkDivision {
@@ -128,4 +128,17 @@ model ApprovalStep {
   schema         ApprovalSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
 
   @@map("approval_steps")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
 }

@@ -2,40 +2,54 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Role } from '@/types/role';
+import { User } from '@/types/user';
 
 interface AddStepModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (stepData: StepFormData) => void;
   roles: Role[];
+  users: User[];
   documentType: string;
 }
 
 interface StepFormData {
   roleId: string;
+  specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'REJECT';
+  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
 }
 
-export default function AddStepModal({ isOpen, onClose, onSubmit, roles, documentType }: AddStepModalProps) {
+export default function AddStepModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  roles, 
+  users,
+  documentType 
+}: AddStepModalProps) {
   const [formData, setFormData] = useState<StepFormData>({
     roleId: '',
+    specificUserId: undefined,
     budgetLimit: undefined,
-    duration: 48, // Default 2 days
+    duration: 48,
     overtimeAction: 'NOTIFY',
   });
 
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+
+  // Filter users based on selected role
   useEffect(() => {
-    if (!isOpen) {
-      setFormData({
-        roleId: '',
-        budgetLimit: undefined,
-        duration: 48,
-        overtimeAction: 'NOTIFY',
-      });
+    if (formData.roleId) {
+      const usersWithRole = users.filter(user => 
+        user.roles?.includes(formData.roleId)
+      );
+      setFilteredUsers(usersWithRole);
+    } else {
+      setFilteredUsers([]);
     }
-  }, [isOpen]);
+  }, [formData.roleId, users]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +80,13 @@ export default function AddStepModal({ isOpen, onClose, onSubmit, roles, documen
             </label>
             <select
               value={formData.roleId}
-              onChange={(e) => setFormData(prev => ({ ...prev, roleId: e.target.value }))}
+              onChange={(e) => {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  roleId: e.target.value,
+                  specificUserId: undefined // Reset specific user when role changes
+                }));
+              }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
@@ -78,6 +98,32 @@ export default function AddStepModal({ isOpen, onClose, onSubmit, roles, documen
               ))}
             </select>
           </div>
+
+          {formData.roleId && (
+            <div>
+              <label className="block mb-1.5">
+                Specific User
+                <span className="text-sm text-gray-500 ml-1">
+                  (Optional - Leave empty to allow any user with the selected role)
+                </span>
+              </label>
+              <select
+                value={formData.specificUserId || ''}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  specificUserId: e.target.value || undefined 
+                }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              >
+                <option value="">Any user with this role</option>
+                {filteredUsers.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {documentType === 'Purchase Request' && (
             <div>
@@ -123,13 +169,13 @@ export default function AddStepModal({ isOpen, onClose, onSubmit, roles, documen
               value={formData.overtimeAction}
               onChange={(e) => setFormData(prev => ({ 
                 ...prev, 
-                overtimeAction: e.target.value as 'NOTIFY' | 'REJECT' 
+                overtimeAction: e.target.value as 'NOTIFY' | 'AUTO_REJECT' 
               }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
               <option value="NOTIFY">Notify and Wait</option>
-              <option value="REJECT">Auto Reject</option>
+              <option value="AUTO_REJECT">Auto Reject</option>
             </select>
           </div>
 

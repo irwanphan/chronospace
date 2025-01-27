@@ -7,6 +7,7 @@ import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
+import { User } from '@/types/user';
 
 interface ApprovalStepForm {
   roleId: string;
@@ -21,6 +22,7 @@ export default function NewApprovalSchemaPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -33,9 +35,18 @@ export default function NewApprovalSchemaPage() {
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
 
+  const [stepFormData, setStepFormData] = useState<ApprovalStepForm>({
+    roleId: '',
+    specificUserId: undefined,
+    budgetLimit: undefined,
+    duration: 48,
+    overtimeAction: 'NOTIFY',
+  });
+
   useEffect(() => {
     fetchDivisions();
     fetchRoles();
+    fetchUsers();
   }, []);
 
   const fetchDivisions = async () => {
@@ -59,6 +70,18 @@ export default function NewApprovalSchemaPage() {
       }
     } catch (error) {
       console.error('Failed to fetch roles:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
     }
   };
 
@@ -88,6 +111,18 @@ export default function NewApprovalSchemaPage() {
         i === index ? { ...step, [field]: value } : step
       ),
     }));
+  };
+
+  const handleAddStep = (stepData: ApprovalStepForm) => {
+    addStep(stepData);
+    setStepFormData({  // Reset form modal setelah submit
+      roleId: '',
+      specificUserId: undefined,
+      budgetLimit: undefined,
+      duration: 48,
+      overtimeAction: 'NOTIFY',
+    });
+    setIsAddStepModalOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -208,6 +243,7 @@ export default function NewApprovalSchemaPage() {
                   <tr className="border-b">
                     <th className="text-left py-3 px-4">#</th>
                     <th className="text-left py-3 px-4">Role</th>
+                    <th className="text-left py-3 px-4">Specific User</th>
                     {formData.documentType === 'Purchase Request' && (
                       <th className="text-left py-3 px-4">Limit</th>
                     )}
@@ -229,6 +265,11 @@ export default function NewApprovalSchemaPage() {
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">
                           {roles.find(r => r.id === step.roleId)?.roleName}
+                        </td>
+                        <td className="py-3 px-4">
+                          {step.specificUserId 
+                            ? users.find(u => u.id === step.specificUserId)?.name 
+                            : 'Any user with role'}
                         </td>
                         {formData.documentType === 'Purchase Request' && (
                           <td className="py-3 px-4">
@@ -262,9 +303,12 @@ export default function NewApprovalSchemaPage() {
             <AddStepModal
               isOpen={isAddStepModalOpen}
               onClose={() => setIsAddStepModalOpen(false)}
-              onSubmit={addStep}
+              onSubmit={handleAddStep}
               roles={roles}
+              users={users}
               documentType={formData.documentType}
+              formData={stepFormData}
+              setFormData={setStepFormData}
             />
           </div>
         </div>
