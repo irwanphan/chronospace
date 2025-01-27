@@ -1,15 +1,19 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { IconChevronDown } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
+interface Role {
+  id: string;
+  roleName: string;
+}
+
 export default function NewRolePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [roles, setRoles] = useState([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [formData, setFormData] = useState({
     roleCode: '',
     roleName: '',
