@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
+import MultiSelect from '@/components/MultiSelect';
 
 interface ApprovalStepForm {
   roleId: string;
@@ -152,48 +153,26 @@ export default function NewApprovalSchemaPage() {
 
           <div>
             <label className="block mb-1.5">
-              Applicable Work Divisions <span className="text-red-500">*</span>
+              Apply to Work Division <span className="text-red-500">*</span>
             </label>
-            <select
-              multiple
+            <MultiSelect
+              options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
               value={formData.workDivisions}
-              onChange={(e) => {
-                const values = Array.from(e.target.selectedOptions, option => option.value);
-                setFormData(prev => ({ ...prev, workDivisions: values }));
-              }}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            >
-              {divisions.map((division) => (
-                <option key={division.id} value={division.id}>
-                  {division.divisionName}
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple divisions</p>
+              onChange={(value) => setFormData(prev => ({ ...prev, workDivisions: value }))}
+              placeholder="Select work divisions..."
+            />
           </div>
 
           <div>
             <label className="block mb-1.5">
-              Applicable Roles <span className="text-red-500">*</span>
+              Apply to Roles <span className="text-red-500">*</span>
             </label>
-            <select
-              multiple
+            <MultiSelect
+              options={roles.map(role => ({ id: role.id!, name: role.roleName }))}
               value={formData.roles}
-              onChange={(e) => {
-                const values = Array.from(e.target.selectedOptions, option => option.value);
-                setFormData(prev => ({ ...prev, roles: values }));
-              }}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            >
-              {roles.map((role) => (
-                <option key={role.id} value={role.id}>
-                  {role.roleName}
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple roles</p>
+              onChange={(value) => setFormData(prev => ({ ...prev, roles: value }))}
+              placeholder="Select roles..."
+            />
           </div>
 
           <div>
