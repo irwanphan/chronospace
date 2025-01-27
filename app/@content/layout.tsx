@@ -11,7 +11,12 @@ export default function ContentLayout({
 
   return (
     <main className={cn(
-      "flex-1 mt-16 min-h-screen p-6 bg-gray-50 transition-all duration-300",
+      `
+        flex-1 
+        min-h-screen 
+        p-6 pt-24
+        bg-gray-50 
+        transition-all duration-300`,
       isCollapsed ? "ml-16" : "ml-64"
     )}>
       {children}
