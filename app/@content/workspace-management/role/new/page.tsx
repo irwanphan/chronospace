@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { IconChevronDown } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
@@ -8,6 +9,7 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 export default function NewRolePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState({
     roleCode: '',
     roleName: '',
@@ -15,6 +17,22 @@ export default function NewRolePage() {
     upperLevel: '',
     approvalLimit: '',
   });
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch('/api/roles');
+        if (response.ok) {
+          const data = await response.json();
+          setRoles(data);
+        }
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,12 +116,17 @@ export default function NewRolePage() {
               <select
                 value={formData.upperLevel}
                 onChange={(e) => setFormData(prev => ({ ...prev, upperLevel: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               >
                 <option value="">-</option>
-                {/* Add options dynamically from parent roles */}
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.roleName}
+                  </option>
+                ))}
               </select>
             </div>
+            
             <div>
               <label className="block mb-1.5">
                 Approval Limit <span className="text-red-500">*</span>
