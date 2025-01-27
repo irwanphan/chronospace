@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import MultiSelect from '@/components/MultiSelect';
+import AddStepModal from '@/components/AddStepModal';
 
 interface ApprovalStepForm {
   roleId: string;
@@ -29,6 +30,8 @@ export default function NewApprovalSchemaPage() {
     roles: [] as string[],
     steps: [] as ApprovalStepForm[],
   });
+
+  const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
 
   useEffect(() => {
     fetchDivisions();
@@ -59,14 +62,15 @@ export default function NewApprovalSchemaPage() {
     }
   };
 
-  const addStep = () => {
+  const addStep = (stepData: ApprovalStepForm) => {
     setFormData(prev => ({
       ...prev,
-      steps: [...prev.steps, {
-        roleId: '',
-        duration: 48, // Default 48 jam
-        overtimeAction: 'NOTIFY',
-      }],
+      steps: [...prev.steps, stepData].sort((a, b) => {
+        // Sort by budget limit, undefined limits go last
+        if (a.budgetLimit === undefined) return 1;
+        if (b.budgetLimit === undefined) return -1;
+        return a.budgetLimit - b.budgetLimit;
+      }),
     }));
   };
 
@@ -185,12 +189,12 @@ export default function NewApprovalSchemaPage() {
             />
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-lg font-medium">Approval Steps</label>
+          <div className="bg-white rounded-lg p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium">Approval Steps</h2>
               <button
                 type="button"
-                onClick={addStep}
+                onClick={() => setIsAddStepModalOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4" />
@@ -198,94 +202,70 @@ export default function NewApprovalSchemaPage() {
               </button>
             </div>
 
-            {formData.steps.map((step, index) => (
-              <div key={index} className="border rounded-lg p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium">Step {index + 1}</h3>
-                  <button
-                    type="button"
-                    onClick={() => removeStep(index)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block mb-1.5">
-                      Approver Role <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={step.roleId}
-                      onChange={(e) => updateStep(index, 'roleId', e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      required
-                    >
-                      <option value="">Select Role</option>
-                      {roles.map((role) => (
-                        <option key={role.id} value={role.id}>
-                          {role.roleName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block mb-1.5">Specific User</label>
-                    <input
-                      type="text"
-                      value={step.specificUserId || ''}
-                      onChange={(e) => updateStep(index, 'specificUserId', e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      placeholder="Optional"
-                    />
-                  </div>
-
-                  {formData.documentType === 'Purchase Request' && (
-                    <div>
-                      <label className="block mb-1.5">Budget Limit</label>
-                      <input
-                        type="number"
-                        value={step.budgetLimit || ''}
-                        onChange={(e) => updateStep(index, 'budgetLimit', Number(e.target.value))}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                        placeholder="Optional"
-                      />
-                    </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">#</th>
+                    <th className="text-left py-3 px-4">Role</th>
+                    {formData.documentType === 'Purchase Request' && (
+                      <th className="text-left py-3 px-4">Limit</th>
+                    )}
+                    <th className="text-left py-3 px-4">Duration</th>
+                    <th className="text-left py-3 px-4">Overtime</th>
+                    <th className="text-left py-3 px-4 w-16"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.steps.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-4 text-gray-500">
+                        No steps added yet
+                      </td>
+                    </tr>
+                  ) : (
+                    formData.steps.map((step, index) => (
+                      <tr key={index} className="border-b">
+                        <td className="py-3 px-4">{index + 1}</td>
+                        <td className="py-3 px-4">
+                          {roles.find(r => r.id === step.roleId)?.roleName}
+                        </td>
+                        {formData.documentType === 'Purchase Request' && (
+                          <td className="py-3 px-4">
+                            {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
+                              style: 'currency',
+                              currency: 'IDR',
+                              minimumFractionDigits: 0,
+                            }).format(step.budgetLimit) : '-'}
+                          </td>
+                        )}
+                        <td className="py-3 px-4">{step.duration / 24} days</td>
+                        <td className="py-3 px-4">
+                          {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <button
+                            type="button"
+                            onClick={() => removeStep(index)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
                   )}
+                </tbody>
+              </table>
+            </div>
 
-                  <div>
-                    <label className="block mb-1.5">
-                      Duration (hours) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={step.duration}
-                      onChange={(e) => updateStep(index, 'duration', Number(e.target.value))}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      required
-                      min={1}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1.5">
-                      Overtime Action <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={step.overtimeAction}
-                      onChange={(e) => updateStep(index, 'overtimeAction', e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      required
-                    >
-                      <option value="NOTIFY">Notify Only</option>
-                      <option value="AUTO_REJECT">Auto Reject</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <AddStepModal
+              isOpen={isAddStepModalOpen}
+              onClose={() => setIsAddStepModalOpen(false)}
+              onSubmit={addStep}
+              roles={roles}
+              documentType={formData.documentType}
+            />
           </div>
         </div>
 
