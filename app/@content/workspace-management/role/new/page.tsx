@@ -3,6 +3,13 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
+
+const ReactQuill = dynamic(() => import('react-quill'), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>
+});
 
 export default function NewRolePage() {
   const router = useRouter();
@@ -78,33 +85,29 @@ export default function NewRolePage() {
             />
           </div>
 
-          <div>
+          <div className="mb-20">
             <label className="block mb-1.5">
               Role Description
             </label>
             <div className="border rounded-lg overflow-hidden">
-              <div className="bg-gray-50 border-b px-3 py-2 flex gap-2">
-                <select className="bg-transparent text-sm px-2 py-1 rounded border">
-                  <option>Normal</option>
-                  <option>Sailec Light</option>
-                </select>
-                <div className="flex items-center gap-1 border-l pl-2">
-                  <button type="button" className="p-1.5 hover:bg-gray-100 rounded">
-                    <strong className="text-sm">B</strong>
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-gray-100 rounded italic">
-                    <strong className="text-sm">I</strong>
-                  </button>
-                  <button type="button" className="p-1.5 hover:bg-gray-100 rounded underline">
-                    <strong className="text-sm">U</strong>
-                  </button>
-                </div>
-              </div>
-              <textarea
+              <ReactQuill
+                theme="snow"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                rows={4}
+                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                className={` 
+                  [&_.ql-toolbar.ql-snow]:border-0
+                  [&_.ql-toolbar.ql-snow]:bg-blue-50 
+                  [&_.ql-toolbar.ql-snow]:border-b
+                  [&_.ql-toolbar.ql-snow]:border-gray-200
+                  [&_.ql-container.ql-snow]:border-0
+                `}
+                modules={{
+                  toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['clean']
+                  ]
+                }}
                 placeholder="Enter description..."
               />
             </div>
