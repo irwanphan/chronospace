@@ -34,9 +34,9 @@ export default function ProjectPlanningPage() {
           // Calculate stats
           setStats({
             total: data.length,
-            budgetAllocated: data.filter(p => p.status === 'Allocated').length,
-            active: data.filter(p => p.status === 'Active').length,
-            delayed: data.filter(p => p.status === 'Delayed').length,
+            budgetAllocated: data.filter((p: Project) => p.status === 'Allocated').length,
+            active: data.filter((p: Project) => p.status === 'Active').length,
+            delayed: data.filter((p: Project) => p.status === 'Delayed').length,
           });
         }
       } catch (error) {
