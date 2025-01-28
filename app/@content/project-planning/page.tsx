@@ -4,13 +4,15 @@ import { Plus, Filter, Search } from 'lucide-react';
 import Link from 'next/link';
 
 interface Project {
-  id: number;
-  title: string;
-  year: number;
+  id: string;
+  projectId: string;
+  projectCode: string;
+  projectTitle: string;
   division: string;
   status: string;
   startDate: string;
   finishDate: string;
+  year: number;
 }
 
 export default function ProjectPlanningPage() {
@@ -23,7 +25,6 @@ export default function ProjectPlanningPage() {
   });
 
   useEffect(() => {
-    // Fetch projects data
     const fetchProjects = async () => {
       try {
         const response = await fetch('/api/projects');
@@ -45,6 +46,14 @@ export default function ProjectPlanningPage() {
 
     fetchProjects();
   }, []);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -113,13 +122,13 @@ export default function ProjectPlanningPage() {
           <tbody className="divide-y divide-gray-200">
             {projects.map((project) => (
               <tr key={project.id}>
-                <td className="px-6 py-4 text-sm">{project.id}</td>
-                <td className="px-6 py-4 text-sm">{project.title}</td>
+                <td className="px-6 py-4 text-sm">{project.projectId}</td>
+                <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
                 <td className="px-6 py-4 text-sm">{project.year}</td>
                 <td className="px-6 py-4 text-sm">{project.division}</td>
                 <td className="px-6 py-4 text-sm">{project.status}</td>
-                <td className="px-6 py-4 text-sm">{project.startDate}</td>
-                <td className="px-6 py-4 text-sm">{project.finishDate}</td>
+                <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
+                <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
                 <td className="px-6 py-4 text-sm text-right">
                   <button className="text-gray-400 hover:text-gray-600">•••</button>
                 </td>
