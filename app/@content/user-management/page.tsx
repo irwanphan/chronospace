@@ -33,8 +33,6 @@ export default function UserManagementPage() {
     fetchUsers();
   }, []);
 
-  console.log(users);
-
   const formatDate = (date: string | null) => {
     if (!date) return '-';
     return new Date(date).toLocaleDateString('en-US', {
