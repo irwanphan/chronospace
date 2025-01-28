@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,11 +10,23 @@ interface Division {
   divisionName: string;
 }
 
+interface FormData {
+  projectCode: string;
+  projectTitle: string;
+  description: string;
+  division: string;
+  year: string;
+  startDate: string;
+  finishDate: string;
+}
+
 export default function NewProjectPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projectId, setProjectId] = useState<string>('');
+  const [requestDate, setRequestDate] = useState<string>('');
   const [divisions, setDivisions] = useState<Division[]>([]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     projectCode: '',
     projectTitle: '',
     description: '',
@@ -23,6 +35,26 @@ export default function NewProjectPage() {
     startDate: '',
     finishDate: '',
   });
+
+  useEffect(() => {
+    // Generate ID dan request date hanya di client side
+    const generateId = () => {
+      const year = new Date().getFullYear();
+      const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      return `${year}0109${randomNum}`;
+    };
+
+    const formatDate = () => {
+      return new Date().toLocaleDateString('en-US', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    };
+
+    setProjectId(generateId());
+    setRequestDate(formatDate());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +89,10 @@ export default function NewProjectPage() {
       <div className="bg-white rounded-lg p-6 mb-6">
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>
-            ID: {new Date().getFullYear()}0109{Math.floor(Math.random() * 10000).toString().padStart(4, '0')}
+            ID: {projectId}
           </div>
           <div>
-            Request Date: {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+            Request Date: {requestDate}
           </div>
         </div>
       </div>
