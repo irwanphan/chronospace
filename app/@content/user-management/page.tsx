@@ -9,8 +9,8 @@ interface User {
   name: string;
   email: string;
   role: string;
-  lastActive: string;
-  dateAdded: string;
+  lastLogin: string | null;
+  createdAt: string;
   avatar?: string;
 }
 
@@ -32,6 +32,15 @@ export default function UserManagementPage() {
 
     fetchUsers();
   }, []);
+
+  const formatDate = (date: string | null) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -97,8 +106,8 @@ export default function UserManagementPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm">{user.role}</td>
-                <td className="px-6 py-4 text-sm">{user.lastActive}</td>
-                <td className="px-6 py-4 text-sm">{user.dateAdded}</td>
+                <td className="px-6 py-4 text-sm">{formatDate(user.lastLogin)}</td>
+                <td className="px-6 py-4 text-sm">{formatDate(user.createdAt)}</td>
                 <td className="px-6 py-4 text-sm text-right">
                   <button className="text-gray-400 hover:text-gray-600">•••</button>
                 </td>
