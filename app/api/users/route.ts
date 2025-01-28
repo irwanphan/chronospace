@@ -1,12 +1,17 @@
+import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
 
 export async function GET() {
   try {
-    const users = await db.user.findMany({
+    const users = await prisma.user.findMany({
       select: {
         id: true,
         name: true,
+        email: true,
+        role: true,
+        lastLogin: true,
+        createdAt: true,
+        image: true,
         userRoles: {
           select: {
             roleId: true,
@@ -21,6 +26,11 @@ export async function GET() {
       id: user.id,
       name: user.name,
       roles: user.userRoles.map(ur => ur.roleId),
+      image: user.image,
+      email: user.email,
+      role: user.role,
+      lastLogin: user.lastLogin,
+      createdAt: user.createdAt,
     })));
   } catch (error) {
     console.error('Failed to fetch users:', error);

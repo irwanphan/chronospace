@@ -11,7 +11,7 @@ interface User {
   role: string;
   lastLogin: string | null;
   createdAt: string;
-  avatar?: string;
+  image?: string;
 }
 
 export default function UserManagementPage() {
@@ -32,6 +32,8 @@ export default function UserManagementPage() {
 
     fetchUsers();
   }, []);
+
+  console.log(users);
 
   const formatDate = (date: string | null) => {
     if (!date) return '-';
@@ -85,9 +87,9 @@ export default function UserManagementPage() {
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                      {user.avatar ? (
+                      {user.image ? (
                         <Image
-                          src={user.avatar}
+                          src={user.image}
                           alt={user.name}
                           width={32}
                           height={32}
