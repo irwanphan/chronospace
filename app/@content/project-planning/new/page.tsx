@@ -78,22 +78,33 @@ export default function NewProjectPage() {
     setIsSubmitting(true);
 
     try {
+      console.log('Submitting data:', formData); // Debug log
+
       const response = await fetch('/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          projectId, // ID yang di-generate
+          requestDate, // Tanggal request yang di-generate
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create project');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create project');
       }
+
+      const result = await response.json();
+      console.log('Success:', result); // Debug log
 
       router.push('/project-planning');
       router.refresh();
     } catch (error) {
       console.error('Error creating project:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create project');
     } finally {
       setIsSubmitting(false);
     }
@@ -244,7 +255,7 @@ export default function NewProjectPage() {
             disabled={isSubmitting}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
           >
-            Submit
+            {isSubmitting ? 'Submitting...' : 'Submit'}
           </button>
         </div>
       </form>
