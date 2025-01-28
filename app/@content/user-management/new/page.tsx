@@ -42,7 +42,16 @@ export default function NewUserPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validasi password match
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
+      console.log('Submitting data:', formData); // Debug log
+
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
@@ -52,13 +61,18 @@ export default function NewUserPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create user');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create user');
       }
+
+      const result = await response.json();
+      console.log('Success:', result); // Debug log
 
       router.push('/user-management');
       router.refresh();
     } catch (error) {
       console.error('Error creating user:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create user');
     } finally {
       setIsSubmitting(false);
     }
@@ -266,7 +280,7 @@ export default function NewUserPage() {
             disabled={isSubmitting}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
           >
-            Submit
+            {isSubmitting ? 'Submitting...' : 'Submit'}
           </button>
         </div>
       </form>
