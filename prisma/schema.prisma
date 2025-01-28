@@ -152,3 +152,19 @@ model UserRole {
   @@unique([userId, roleId])
   @@map("user_roles")
 }
+
+model Project {
+  id          String   @id @default(cuid())
+  projectId   String   @unique
+  projectCode String
+  projectTitle String
+  description String?
+  division    String
+  year        Int
+  startDate   DateTime
+  finishDate  DateTime
+  requestDate DateTime
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
