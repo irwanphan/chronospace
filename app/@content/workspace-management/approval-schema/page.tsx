@@ -7,6 +7,12 @@ import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import { useRouter } from 'next/navigation';
 
+interface Division {
+  id: string;
+  divisionName: string;
+  divisionCode: string;
+}
+
 export default function ApprovalSchemaPage() {
   const router = useRouter();
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -60,18 +66,23 @@ export default function ApprovalSchemaPage() {
     }
   };
 
-  const getDivisionNames = (divisionIds: string[]) => {
+  const getDivisionNames = (schema: ApprovalSchema) => {
+    if (!schema.divisions) return [];
+    
+    const divisionList = schema.divisions.split(',');
     return divisions
-      .filter(div => divisionIds.includes(div.id!))
+      .filter(div => divisionList.includes(div.divisionCode))
       .map(div => div.divisionName)
       .join(', ');
   };
 
-  const getRoleNames = (roleIds: string[]) => {
-    return roles
-      .filter(role => roleIds.includes(role.id!))
-      .map(role => role.roleName)
-      .join(', ');
+  const getRoleNames = (schema: ApprovalSchema) => {
+    if (!schema.steps) return '';
+    
+    return schema.steps.map(step => {
+      const role = roles.find(r => r.id === step.roleId);
+      return role?.roleName || '';
+    }).filter(Boolean).join(', ');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,23 +90,34 @@ export default function ApprovalSchemaPage() {
     setIsSubmitting(true);
 
     try {
-      console.log('Submitting data:', formData); // Debug log
+      // Format data sebelum submit
+      const formattedData = {
+        name: formData.name,
+        documentType: formData.documentType,
+        workDivisions: formData.workDivisions,
+        description: formData.description,
+        steps: formData.steps.map(step => ({
+          roleId: step.role, // Pastikan ini sesuai dengan field yang diharapkan
+          budgetLimit: step.limit,
+          duration: step.duration,
+          overtimeAction: step.overtime
+        }))
+      };
+
+      console.log('Submitting data:', formattedData);
 
       const response = await fetch('/api/approval-schemas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formattedData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to create schema');
       }
-
-      const result = await response.json();
-      console.log('Success:', result);
 
       router.push('/workspace-management/approval-schema');
       router.refresh();
@@ -171,13 +193,13 @@ export default function ApprovalSchemaPage() {
                 <div>
                   <span className="font-medium">Applicable Work Divisions:</span>
                   <p className="text-gray-600">
-                    {getDivisionNames(schema.workDivisions)}
+                    {getDivisionNames(schema)}
                   </p>
                 </div>
                 <div>
                   <span className="font-medium">Applicable Roles:</span>
                   <p className="text-gray-600">
-                    {getRoleNames(schema.roles)}
+                    {getRoleNames(schema)}
                   </p>
                 </div>
                 {schema.description && (
