@@ -6,6 +6,7 @@ import { ApprovalSchema } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import { useRouter } from 'next/navigation';
+import SchemaActions from './components/SchemaActions';
 
 interface Division {
   id: string;
@@ -177,15 +178,7 @@ export default function ApprovalSchemaPage() {
                   <span className="text-sm text-gray-500">{schema.documentType}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Link
-                    href={`/workspace-management/approval-schema/${schema.id}`}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <Eye className="w-4 h-4 text-gray-500" />
-                  </Link>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg">
-                    <MoreVertical className="w-4 h-4 text-gray-500" />
-                  </button>
+                  <SchemaActions schemaId={schema.id} />
                 </div>
               </div>
 
