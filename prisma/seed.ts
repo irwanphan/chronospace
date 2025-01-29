@@ -9,7 +9,7 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.workDivision.deleteMany();
   await prisma.vendor.deleteMany();
-  await prisma.approvalSchema.deleteMany();
+  // await prisma.approvalSchema.deleteMany();
   await prisma.user.deleteMany();
 
   // Create work divisions
@@ -57,39 +57,39 @@ async function main() {
   });
 
   // Create approval schemas
-  const approvalSchemas = await prisma.approvalSchema.createMany({
-    data: [
-      {
-        name: 'Standard Approval',
-        step1: 'Department Head',
-        step2: 'Finance Manager',
-        step3: 'General Manager',
-        step4: 'CFO'
-      },
-      {
-        name: 'High Value Approval',
-        step1: 'Department Head',
-        step2: 'Finance Manager',
-        step3: 'General Manager',
-        step4: 'CFO',
-        step5: 'CEO'
-      },
-      {
-        name: 'IT Project Approval',
-        step1: 'Department Head',
-        step2: 'CTO',
-        step3: 'Finance Manager',
-        step4: 'CFO'
-      }
-    ]
-  });
+  // const approvalSchemas = await prisma.approvalSchema.createMany({
+  //   data: [
+  //     {
+  //       name: 'Standard Approval',
+  //       step1: 'Department Head',
+  //       step2: 'Finance Manager',
+  //       step3: 'General Manager',
+  //       step4: 'CFO'
+  //     },
+  //     {
+  //       name: 'High Value Approval',
+  //       step1: 'Department Head',
+  //       step2: 'Finance Manager',
+  //       step3: 'General Manager',
+  //       step4: 'CFO',
+  //       step5: 'CEO'
+  //     },
+  //     {
+  //       name: 'IT Project Approval',
+  //       step1: 'Department Head',
+  //       step2: 'CTO',
+  //       step3: 'Finance Manager',
+  //       step4: 'CFO'
+  //     }
+  //   ]
+  // });
 
   console.log({
     divisions,
     users,
     vendors,
     projects,
-    approvalSchemas
+    // approvalSchemas
   });
 }
 
