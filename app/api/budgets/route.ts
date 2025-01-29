@@ -29,24 +29,43 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Received budget data:', body); // Debug log
 
+    // Pastikan projectId ada
+    if (!body.projectId) {
+      return NextResponse.json(
+        { error: 'Project ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Ambil division dari project
+    const project = await prisma.project.findUnique({
+      where: { id: body.projectId }
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
+
     const budget = await prisma.budget.create({
       data: {
         projectId: body.projectId,
         title: body.title,
         year: parseInt(body.year),
-        division: body.division,
-        totalBudget: body.totalBudget,
+        division: project.division,
+        totalBudget: parseFloat(body.totalBudget.toString().replace(/[,.]/g, '')),
         startDate: new Date(body.startDate),
         finishDate: new Date(body.finishDate),
-        status: 'In Progress', // Default status
-        purchaseRequestStatus: 'Not Submitted', // Default status
-        description: body.description || '',
+        status: 'In Progress',
+        purchaseRequestStatus: 'Not Submitted',
       },
     });
 
     return NextResponse.json(budget);
   } catch (error) {
-    console.error('Error creating budget:', error);
+    console.error('Detailed error:', error); // Tambahkan log detail error
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create budget' },
       { status: 500 }
