@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
-    "@prisma/client": "^6.2.1",
+    "@prisma/client": "^6.3.0",
     "@tabler/icons-react": "^3.29.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",

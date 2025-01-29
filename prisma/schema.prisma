@@ -110,34 +110,31 @@ model WorkDivision {
 }
 
 model ApprovalSchema {
-  id            String         @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  documentType  String
+  documentType  String   // 'Purchase Request' atau 'Memo'
+  divisions     String   // Array of division codes
+  title         String
   description   String?
-  workDivisions Json          // Stored as JSON string
-  roles         Json          // Stored as JSON string
-  isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
   steps         ApprovalStep[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("approval_schemas")
 }
 
 model ApprovalStep {
-  id             String        @id @default(cuid())
-  schemaId       String
-  stepNumber     Int
-  roleId         String
-  specificUserId String?
-  budgetLimit    Float?
-  duration       Int          // dalam jam
-  overtimeAction String       // NOTIFY atau AUTO_REJECT
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  schema         ApprovalSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  schemaId      String
+  role          String
+  limit         Float?   // Optional untuk Memo
+  duration      Int
+  overtime      String   // 'Notify and Wait', 'Auto Approve', 'Auto Reject', 'Escalate'
+  order         Int
+  schema        ApprovalSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
 
   @@map("approval_steps")
+  @@index([schemaId])
 }
 
 model UserRole {

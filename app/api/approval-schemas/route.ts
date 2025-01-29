@@ -1,61 +1,81 @@
+import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
 
-interface ApprovalStep {
-  name: string;
-  description?: string;
-  approverRoleId: string;
-}
-
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const schemas = await db.approvalSchema.findMany({
+    const body = await request.json();
+    console.log('Received data:', body);
+
+    // Validasi data yang diterima
+    if (!body.name || !body.documentType || !body.workDivisions || !body.steps) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Parse workDivisions jika dalam bentuk string
+    const workDivisions = typeof body.workDivisions === 'string' 
+      ? JSON.parse(body.workDivisions) 
+      : body.workDivisions;
+
+    // Format data sebelum create
+    const formattedData = {
+      name: body.name,
+      documentType: body.documentType,
+      divisions: Array.isArray(workDivisions) ? workDivisions.join(',') : workDivisions,
+      title: body.name,
+      description: body.description || '',
+      steps: {
+        create: body.steps.map((step: any, index: number) => ({
+          role: step.roleId, // Menggunakan roleId
+          limit: body.documentType === 'Purchase Request' ? parseFloat(step.budgetLimit) || null : null,
+          duration: parseInt(step.duration),
+          overtime: step.overtimeAction,
+          order: index + 1
+        }))
+      }
+    };
+
+    console.log('Formatted data:', formattedData);
+
+    const schema = await prisma.approvalSchema.create({
+      data: formattedData,
       include: {
-        steps: {
-          orderBy: {
-            stepNumber: 'asc',
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+        steps: true
+      }
     });
-    return NextResponse.json(schemas);
+
+    return NextResponse.json(schema);
   } catch (error) {
-    console.error('Failed to fetch approval schemas:', error);
+    // Log error detail
+    console.error('Detailed error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : '');
+    
     return NextResponse.json(
-      { error: 'Failed to fetch approval schemas' },
+      { error: error instanceof Error ? error.message : 'Failed to create schema' },
       { status: 500 }
     );
   }
 }
 
-export async function POST(req: Request) {
+// GET endpoint jika diperlukan
+export async function GET() {
   try {
-    const data = await req.json();
-    const { steps, ...schemaData } = data;
-
-    const schema = await db.approvalSchema.create({
-      data: {
-        ...schemaData,
-        steps: {
-          create: steps.map((step: ApprovalStep, index: number) => ({
-            ...step,
-            stepNumber: index + 1,
-          })),
-        },
-      },
+    const schemas = await prisma.approvalSchema.findMany({
       include: {
-        steps: true,
-      },
+        steps: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
     });
-
-    return NextResponse.json(schema, { status: 201 });
+    return NextResponse.json(schemas);
   } catch (error) {
-    console.error('Failed to create approval schema:', error);
+    console.error('Error fetching schemas:', error);
     return NextResponse.json(
-      { error: 'Failed to create approval schema' },
+      { error: 'Failed to fetch schemas' },
       { status: 500 }
     );
   }

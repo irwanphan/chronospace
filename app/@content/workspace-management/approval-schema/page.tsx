@@ -5,13 +5,16 @@ import Link from 'next/link';
 import { ApprovalSchema } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
+import { useRouter } from 'next/navigation';
 
 export default function ApprovalSchemaPage() {
+  const router = useRouter();
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -69,6 +72,39 @@ export default function ApprovalSchemaPage() {
       .filter(role => roleIds.includes(role.id!))
       .map(role => role.roleName)
       .join(', ');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      console.log('Submitting data:', formData); // Debug log
+
+      const response = await fetch('/api/approval-schemas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create schema');
+      }
+
+      const result = await response.json();
+      console.log('Success:', result);
+
+      router.push('/workspace-management/approval-schema');
+      router.refresh();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create schema');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -180,6 +216,17 @@ export default function ApprovalSchemaPage() {
           ))
         )}
       </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* ... existing form fields ... */}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit'}
+        </button>
+      </form>
     </div>
   );
 } 
