@@ -45,72 +45,73 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   });
 
   useEffect(() => {
-    fetchDivisions();
-    fetchRoles();
-    fetchUsers();
-    fetchSchema();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [divisionsRes, rolesRes, usersRes, schemaRes] = await Promise.all([
+          fetch('/api/work-divisions'),
+          fetch('/api/roles'),
+          fetch('/api/users'),
+          fetch(`/api/approval-schemas/${params.id}`)
+        ]);
 
-  const fetchSchema = async () => {
-    try {
-      const response = await fetch(`/api/approval-schemas/${params.id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setFormData({
-          name: data.name,
-          documentType: data.documentType,
-          description: data.description || '',
-          workDivisions: data.divisions.split(','),
-          roles: data.roles.split(','),
-          steps: data.steps.map((step: any) => ({
-            roleId: step.role,
-            specificUserId: step.specificUserId,
-            budgetLimit: step.limit,
-            duration: step.duration,
-            overtimeAction: step.overtime
-          }))
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching schema:', error);
-    }
-  };
+        if (divisionsRes.ok) {
+          const data = await divisionsRes.json();
+          console.log('Divisions:', data);
+          setDivisions(Array.isArray(data) ? data : []);
+        }
 
-  const fetchDivisions = async () => {
-    try {
-      const response = await fetch('/api/work-divisions');
-      if (response.ok) {
-        const data = await response.json();
-        setDivisions(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch divisions:', error);
-    }
-  };
+        if (rolesRes.ok) {
+          const data = await rolesRes.json();
+          console.log('Roles:', data);
+          setRoles(Array.isArray(data) ? data : []);
+        }
 
-  const fetchRoles = async () => {
-    try {
-      const response = await fetch('/api/roles');
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch roles:', error);
-    }
-  };
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          console.log('Users:', data);
+          setUsers(Array.isArray(data) ? data : []);
+        }
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(Array.isArray(data) ? data : []);
+        if (schemaRes.ok) {
+          const schema = await schemaRes.json();
+          console.log('Schema Data:', schema);
+          
+          // Pastikan data yang diterima sesuai dengan yang diharapkan
+          const formattedData = {
+            name: schema.name || '',
+            documentType: schema.documentType || '',
+            description: schema.description || '',
+            workDivisions: Array.isArray(schema.workDivisions) 
+              ? schema.workDivisions 
+              : typeof schema.workDivisions === 'string'
+                ? JSON.parse(schema.workDivisions)
+                : [],
+            roles: Array.isArray(schema.roles)
+              ? schema.roles
+              : typeof schema.roles === 'string'
+                ? JSON.parse(schema.roles)
+                : [],
+            steps: Array.isArray(schema.steps)
+              ? schema.steps.map((step: any) => ({
+                  roleId: step.roleId || step.role_id || '',
+                  specificUserId: step.specificUserId || step.specific_user_id,
+                  budgetLimit: step.budgetLimit || step.budget_limit,
+                  duration: step.duration || 48,
+                  overtimeAction: step.overtimeAction || step.overtime_action || 'NOTIFY'
+                }))
+              : []
+          };
+
+          console.log('Formatted Data:', formattedData);
+          setFormData(formattedData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    }
-  };
+    };
+
+    fetchData();
+  }, [params.id]);
 
   const addStep = () => {
     setFormData(prev => ({
