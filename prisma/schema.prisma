@@ -128,7 +128,8 @@ model ApprovalStep {
   id            String   @id @default(cuid())
   schemaId      String
   role          String
-  limit         Float?   // Optional untuk Memo
+  specificUserId String?
+  limit         Float?
   duration      Int
   overtime      String   // 'Notify and Wait', 'Auto Approve', 'Auto Reject', 'Escalate'
   order         Int
