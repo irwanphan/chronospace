@@ -56,9 +56,6 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
           fetch(`/api/approval-schemas/${params.id}`)
         ]);
 
-        const schema = await schemaRes.json();
-        console.log('Raw API Response:', schema);
-
         if (divisionsRes.ok) {
           const divisionsData = await divisionsRes.json();
           console.log('Divisions API Response:', divisionsData);
@@ -78,19 +75,35 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
         }
 
         if (schemaRes.ok) {
+          const schema = await schemaRes.json();
+          console.log('Raw Schema:', schema);
+
+          // Parse divisions dan roles dari string menjadi array
+          const parsedDivisions = schema.divisions 
+            ? schema.divisions.startsWith('[') 
+              ? JSON.parse(schema.divisions)
+              : schema.divisions.split(',')
+            : [];
+
+          const parsedRoles = schema.roles
+            ? schema.roles.startsWith('[') 
+              ? JSON.parse(schema.roles)
+              : schema.roles.split(',')
+            : [];
+
           const formattedData = {
             name: schema.name || '',
             documentType: schema.documentType || '',
             description: schema.description || '',
-            workDivisions: schema.divisions ? [schema.divisions] : [],
-            roles: schema.roles ? [schema.roles] : [],
+            workDivisions: parsedDivisions,
+            roles: parsedRoles,
             steps: Array.isArray(schema.steps)
               ? schema.steps.map((step: any) => ({
-                  roleId: step.role || step.roleId || '',
+                  roleId: step.role || '',
                   specificUserId: step.specificUserId,
-                  budgetLimit: step.budgetLimit,
+                  budgetLimit: step.limit,
                   duration: step.duration,
-                  overtimeAction: step.overtimeAction || 'NOTIFY'
+                  overtimeAction: step.overtime
                 }))
               : []
           };
@@ -99,7 +112,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
           setFormData(formattedData);
         }
       } catch (error) {
-        console.error('Error in fetchData:', error);
+        console.error('Error:', error);
       }
     };
 
