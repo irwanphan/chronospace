@@ -47,6 +47,8 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching schema with ID:', params.id);
+
         const [divisionsRes, rolesRes, usersRes, schemaRes] = await Promise.all([
           fetch('/api/work-divisions'),
           fetch('/api/roles'),
@@ -54,39 +56,33 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
           fetch(`/api/approval-schemas/${params.id}`)
         ]);
 
+        const schema = await schemaRes.json();
+        console.log('Raw API Response:', schema);
+
         if (divisionsRes.ok) {
-          const data = await divisionsRes.json();
-          setDivisions(Array.isArray(data) ? data : []);
+          const divisionsData = await divisionsRes.json();
+          console.log('Divisions API Response:', divisionsData);
+          setDivisions(Array.isArray(divisionsData) ? divisionsData : []);
         }
 
         if (rolesRes.ok) {
-          const data = await rolesRes.json();
-          setRoles(Array.isArray(data) ? data : []);
+          const rolesData = await rolesRes.json();
+          console.log('Roles API Response:', rolesData);
+          setRoles(Array.isArray(rolesData) ? rolesData : []);
         }
 
         if (usersRes.ok) {
-          const data = await usersRes.json();
-          setUsers(Array.isArray(data) ? data : []);
+          const usersData = await usersRes.json();
+          console.log('Users Data:', usersData);
+          setUsers(Array.isArray(usersData) ? usersData : []);
         }
 
         if (schemaRes.ok) {
-          const schema = await schemaRes.json();
-          console.log('Schema Data:', schema);
-          
-          // Parse divisions dan roles dari string menjadi array
-          const workDivisions = schema.workDivisions 
-            ? typeof schema.workDivisions === 'string'
-              ? schema.workDivisions.split(',')
-              : schema.workDivisions
-            : [];
+          // Parse divisions dan roles
+          const workDivisions = schema.divisions ? [schema.divisions] : [];
+          const roles = schema.roles ? [schema.roles] : [];
 
-          const roles = schema.roles
-            ? typeof schema.roles === 'string'
-              ? schema.roles.split(',')
-              : schema.roles
-            : [];
-
-          setFormData({
+          const formattedData = {
             name: schema.name || '',
             documentType: schema.documentType || '',
             description: schema.description || '',
@@ -94,22 +90,30 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
             roles: roles,
             steps: Array.isArray(schema.steps)
               ? schema.steps.map((step: any) => ({
-                  roleId: step.roleId || step.role_id || '',
-                  specificUserId: step.specificUserId || step.specific_user_id,
-                  budgetLimit: step.budgetLimit || step.budget_limit,
+                  roleId: step.role_id || step.roleId || '',
+                  specificUserId: step.specific_user_id || step.specificUserId,
+                  budgetLimit: step.budget_limit || step.budgetLimit,
                   duration: step.duration || 48,
-                  overtimeAction: step.overtimeAction || step.overtime_action || 'NOTIFY'
+                  overtimeAction: step.overtime_action || step.overtimeAction || 'NOTIFY'
                 }))
               : []
-          });
+          };
+
+          console.log('Formatted Data:', formattedData);
+          setFormData(formattedData);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error in fetchData:', error);
       }
     };
 
     fetchData();
   }, [params.id]);
+
+  // Tambahkan useEffect untuk monitoring perubahan formData
+  useEffect(() => {
+    console.log('Current formData:', formData);
+  }, [formData]);
 
   const addStep = () => {
     setFormData(prev => ({

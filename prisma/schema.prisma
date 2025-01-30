@@ -114,6 +114,7 @@ model ApprovalSchema {
   name          String
   documentType  String   // 'Purchase Request' atau 'Memo'
   divisions     String   // Array of division codes
+  roles         String? 
   title         String
   description   String?
   steps         ApprovalStep[]

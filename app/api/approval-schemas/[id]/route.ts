@@ -51,8 +51,7 @@ export async function PUT(
         name: body.name,
         documentType: body.documentType,
         description: body.description,
-        divisions: body.divisions,
-        roles: body.roles,
+        divisions: body.workDivisions,
         steps: {
           deleteMany: {},
           create: body.steps.map((step: any, index: number) => ({
