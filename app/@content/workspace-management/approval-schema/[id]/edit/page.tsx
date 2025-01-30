@@ -56,19 +56,16 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
 
         if (divisionsRes.ok) {
           const data = await divisionsRes.json();
-          console.log('Divisions:', data);
           setDivisions(Array.isArray(data) ? data : []);
         }
 
         if (rolesRes.ok) {
           const data = await rolesRes.json();
-          console.log('Roles:', data);
           setRoles(Array.isArray(data) ? data : []);
         }
 
         if (usersRes.ok) {
           const data = await usersRes.json();
-          console.log('Users:', data);
           setUsers(Array.isArray(data) ? data : []);
         }
 
@@ -76,21 +73,25 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
           const schema = await schemaRes.json();
           console.log('Schema Data:', schema);
           
-          // Pastikan data yang diterima sesuai dengan yang diharapkan
-          const formattedData = {
+          // Parse divisions dan roles dari string menjadi array
+          const workDivisions = schema.workDivisions 
+            ? typeof schema.workDivisions === 'string'
+              ? schema.workDivisions.split(',')
+              : schema.workDivisions
+            : [];
+
+          const roles = schema.roles
+            ? typeof schema.roles === 'string'
+              ? schema.roles.split(',')
+              : schema.roles
+            : [];
+
+          setFormData({
             name: schema.name || '',
             documentType: schema.documentType || '',
             description: schema.description || '',
-            workDivisions: Array.isArray(schema.workDivisions) 
-              ? schema.workDivisions 
-              : typeof schema.workDivisions === 'string'
-                ? JSON.parse(schema.workDivisions)
-                : [],
-            roles: Array.isArray(schema.roles)
-              ? schema.roles
-              : typeof schema.roles === 'string'
-                ? JSON.parse(schema.roles)
-                : [],
+            workDivisions: workDivisions,
+            roles: roles,
             steps: Array.isArray(schema.steps)
               ? schema.steps.map((step: any) => ({
                   roleId: step.roleId || step.role_id || '',
@@ -100,10 +101,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                   overtimeAction: step.overtimeAction || step.overtime_action || 'NOTIFY'
                 }))
               : []
-          };
-
-          console.log('Formatted Data:', formattedData);
-          setFormData(formattedData);
+          });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
