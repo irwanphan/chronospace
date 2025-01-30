@@ -14,16 +14,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Parse workDivisions jika dalam bentuk string
+    // Parse workDivisions dan roles jika dalam bentuk string
     const workDivisions = typeof body.workDivisions === 'string' 
       ? JSON.parse(body.workDivisions) 
       : body.workDivisions;
+
+    const roles = typeof body.roles === 'string'
+      ? JSON.parse(body.roles)
+      : body.roles;
 
     // Format data sebelum create
     const formattedData = {
       name: body.name,
       documentType: body.documentType,
       divisions: Array.isArray(workDivisions) ? workDivisions.join(',') : workDivisions,
+      roles: Array.isArray(roles) ? roles.join(',') : roles,
       title: body.name,
       description: body.description || '',
       steps: {
