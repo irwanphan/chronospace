@@ -28,7 +28,8 @@ export async function POST(request: Request) {
       description: body.description || '',
       steps: {
         create: body.steps.map((step: any, index: number) => ({
-          role: step.roleId, // Menggunakan roleId
+          role: step.roleId,
+          specificUserId: step.specificUserId || null,
           limit: body.documentType === 'Purchase Request' ? parseFloat(step.budgetLimit) || null : null,
           duration: parseInt(step.duration),
           overtime: step.overtimeAction,
@@ -39,21 +40,25 @@ export async function POST(request: Request) {
 
     console.log('Formatted data:', formattedData);
 
-    const schema = await prisma.approvalSchema.create({
-      data: formattedData,
-      include: {
-        steps: true
-      }
-    });
-
-    return NextResponse.json(schema);
+    try {
+      const schema = await prisma.approvalSchema.create({
+        data: formattedData,
+        include: {
+          steps: true
+        }
+      });
+      return NextResponse.json(schema);
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return NextResponse.json(
+        { error: 'Database error', details: dbError },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    // Log error detail
-    console.error('Detailed error:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : '');
-    
+    console.error('Error creating schema:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create schema' },
+      { error: 'Failed to create schema', details: error },
       { status: 500 }
     );
   }
