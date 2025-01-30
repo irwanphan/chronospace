@@ -78,23 +78,19 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
         }
 
         if (schemaRes.ok) {
-          // Parse divisions dan roles
-          const workDivisions = schema.divisions ? [schema.divisions] : [];
-          const roles = schema.roles ? [schema.roles] : [];
-
           const formattedData = {
             name: schema.name || '',
             documentType: schema.documentType || '',
             description: schema.description || '',
-            workDivisions: workDivisions,
-            roles: roles,
+            workDivisions: schema.divisions ? [schema.divisions] : [],
+            roles: schema.roles ? [schema.roles] : [],
             steps: Array.isArray(schema.steps)
               ? schema.steps.map((step: any) => ({
-                  roleId: step.role_id || step.roleId || '',
-                  specificUserId: step.specific_user_id || step.specificUserId,
-                  budgetLimit: step.budget_limit || step.budgetLimit,
-                  duration: step.duration || 48,
-                  overtimeAction: step.overtime_action || step.overtimeAction || 'NOTIFY'
+                  roleId: step.role || step.roleId || '',
+                  specificUserId: step.specificUserId,
+                  budgetLimit: step.budgetLimit,
+                  duration: step.duration,
+                  overtimeAction: step.overtimeAction || 'NOTIFY'
                 }))
               : []
           };
