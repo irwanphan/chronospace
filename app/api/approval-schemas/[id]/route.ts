@@ -42,16 +42,14 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-
     const schema = await prisma.approvalSchema.update({
-      where: {
-        id: params.id
-      },
+      where: { id: params.id },
       data: {
         name: body.name,
         documentType: body.documentType,
         description: body.description,
         divisions: body.workDivisions,
+        roles: body.roles,
         steps: {
           deleteMany: {},
           create: body.steps.map((step: any, index: number) => ({
