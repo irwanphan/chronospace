@@ -18,6 +18,14 @@ interface ApprovalStepForm {
   overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
 }
 
+interface ApiStep {
+  role: string;
+  specificUserId?: string;
+  limit?: number;
+  duration: number;
+  overtime: 'NOTIFY' | 'AUTO_REJECT';
+}
+
 export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,14 +44,6 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
-
-  const [stepFormData, setStepFormData] = useState<ApprovalStepForm>({
-    roleId: '',
-    specificUserId: undefined,
-    budgetLimit: undefined,
-    duration: 48,
-    overtimeAction: 'NOTIFY',
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +99,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
             workDivisions: parsedDivisions,
             roles: parsedRoles,
             steps: Array.isArray(schema.steps)
-              ? schema.steps.map((step: any) => ({
+              ? schema.steps.map((step: ApiStep) => ({
                   roleId: step.role || '',
                   specificUserId: step.specificUserId,
                   budgetLimit: step.limit,
@@ -125,33 +125,10 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     console.log('Current formData:', formData);
   }, [formData]);
 
-  const addStep = () => {
-    setFormData(prev => ({
-      ...prev,
-      steps: [...prev.steps, {
-        roleId: '',
-        duration: 1,
-        overtimeAction: 'NOTIFY',
-      }]
-    }));
-  };
-
   const removeStep = (index: number) => {
     setFormData(prev => ({
       ...prev,
       steps: prev.steps.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateStep = (index: number, field: keyof ApprovalStepForm, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      steps: prev.steps.map((step, i) => {
-        if (i === index) {
-          return { ...step, [field]: value };
-        }
-        return step;
-      })
     }));
   };
 
