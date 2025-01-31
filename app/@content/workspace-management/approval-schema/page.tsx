@@ -59,27 +59,28 @@ export default function ApprovalSchemaPage() {
   };
 
   const getDivisionNames = (schema: ApprovalSchema) => {
-    if (!schema.workDivisions) return '';
+    if (!schema.divisions) return '';
     
     let divisionList: string[];
     try {
-      // Coba parse jika dalam format JSON string
-      divisionList = typeof schema.workDivisions === 'string' 
-        ? (schema.workDivisions as string).startsWith('[') 
-          ? JSON.parse(schema.workDivisions as string)
-          : [schema.workDivisions]
-        : schema.workDivisions;
-    } catch {
-      // Fallback jika parsing gagal
-      divisionList = typeof schema.workDivisions === 'string' 
-        ? [schema.workDivisions] 
-        : schema.workDivisions;
-    }
+      // Handle berbagai format data
+      if (typeof schema.divisions === 'string') {
+        // Jika string dimulai dengan '[', berarti array dalam string
+        divisionList = schema.divisions.startsWith('[') 
+          ? JSON.parse(schema.divisions)
+          : [schema.divisions];
+      } else {
+        divisionList = schema.divisions;
+      }
 
-    return divisions
-      .filter(div => divisionList.includes(div.divisionCode))
-      .map(div => div.divisionName)
-      .join(', ');
+      return divisions
+        .filter(div => divisionList.includes(div.id || ''))
+        .map(div => div.divisionName)
+        .join(', ');
+    } catch (error) {
+      console.error('Error parsing divisions:', error);
+      return schema.divisions.toString();  // Fallback: tampilkan data mentah
+    }
   };
 
   const getRoleNames = (schema: ApprovalSchema) => {

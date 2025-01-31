@@ -14,10 +14,11 @@ export interface ApprovalStep {
 export interface ApprovalSchema {
   id?: string;
   name: string;
-  documentType: 'Purchase Request' | 'Memo';
+  documentType: string;
+  divisions: string | string[];  // Menyimpan division codes
+  roles: string | string[];
+  title: string;
   description?: string;
-  workDivisions: string[]; // array of division IDs
-  roles: string[]; // array of role IDs yang bisa menggunakan schema ini
   steps: ApprovalStep[];
   isActive: boolean;
   createdAt?: Date;
