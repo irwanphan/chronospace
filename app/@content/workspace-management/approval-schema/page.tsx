@@ -107,6 +107,11 @@ export default function ApprovalSchemaPage() {
       .join(', ');
   };
 
+  const stripHtmlTags = (html: string) => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, '');
+  };
+
   return (
     <div className="bg-white rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
@@ -175,7 +180,7 @@ export default function ApprovalSchemaPage() {
                 {schema.description && (
                   <div className="col-span-2">
                     <span className="font-medium">Description:</span>
-                    <p className="text-gray-600">{schema.description}</p>
+                    <p className="text-gray-600">{stripHtmlTags(schema.description)}</p>
                   </div>
                 )}
               </div>
