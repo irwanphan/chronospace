@@ -1,6 +1,14 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+interface RequestStep {
+  roleId: string;
+  specificUserId?: string;
+  budgetLimit?: number;
+  duration: number;
+  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -32,13 +40,12 @@ export async function POST(request: Request) {
       title: body.name,
       description: body.description || '',
       steps: {
-        create: body.steps.map((step: any, index: number) => ({
+        create: body.steps.map((step: RequestStep) => ({
           role: step.roleId,
           specificUserId: step.specificUserId || null,
-          limit: body.documentType === 'Purchase Request' ? parseFloat(step.budgetLimit) || null : null,
-          duration: parseInt(step.duration),
-          overtime: step.overtimeAction,
-          order: index + 1
+          limit: step.budgetLimit || null,
+          duration: step.duration,
+          overtime: step.overtimeAction
         }))
       }
     };
