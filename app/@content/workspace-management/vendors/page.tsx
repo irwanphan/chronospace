@@ -1,13 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus } from 'lucide-react';
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { Vendor } from '@/types/vendor';
+import { useRouter } from 'next/navigation';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchVendors();
@@ -29,6 +32,21 @@ export default function VendorsPage() {
       setVendors([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this vendor?')) {
+      try {
+        const response = await fetch(`/api/vendors/${id}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          router.refresh();
+        }
+      } catch (error) {
+        console.error('Failed to delete vendor:', error);
+      }
     }
   };
 
@@ -91,8 +109,31 @@ export default function VendorsPage() {
                 <td className="py-3 px-4">{vendor.vendorName}</td>
                 <td className="py-3 px-4">{vendor.email}</td>
                 <td className="py-3 px-4">
-                  <button className="p-1 hover:bg-gray-100 rounded">
+                  <button 
+                    className="p-1 hover:bg-gray-100 rounded relative"
+                    onClick={() => setActiveMenu(activeMenu === vendor.id ? null : vendor.id)}
+                  >
                     <MoreVertical className="w-4 h-4 text-gray-500" />
+                    
+                    {/* Popup Menu */}
+                    {activeMenu === vendor.id && (
+                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                        <button
+                          onClick={() => router.push(`/workspace-management/vendors/${vendor.id}/edit`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(vendor.id)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                        >
+                          <Trash className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </button>
                 </td>
               </tr>
