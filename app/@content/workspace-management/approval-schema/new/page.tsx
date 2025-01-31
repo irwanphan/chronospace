@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash } from 'lucide-react';
+import { X, Plus, Trash, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkDivision } from '@/types/workDivision';
@@ -43,6 +43,8 @@ export default function NewApprovalSchemaPage() {
     duration: 48,
     overtimeAction: 'NOTIFY',
   });
+
+  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
 
   useEffect(() => {
     fetchDivisions();
@@ -123,6 +125,43 @@ export default function NewApprovalSchemaPage() {
       duration: 48,
       overtimeAction: 'NOTIFY',
     });
+    setIsAddStepModalOpen(false);
+  };
+
+  const handleEditStep = (index: number) => {
+    const step = formData.steps[index];
+    setEditingStep({
+      data: {
+        roleId: step.roleId,
+        specificUserId: step.specificUserId,
+        budgetLimit: step.budgetLimit,
+        duration: step.duration,
+        overtimeAction: step.overtimeAction,
+      },
+      index
+    });
+    setIsAddStepModalOpen(true);
+  };
+
+  const handleStepSubmit = (stepData: ApprovalStepForm) => {
+    if (editingStep !== null) {
+      // Edit existing step
+      setFormData(prev => ({
+        ...prev,
+        steps: prev.steps.map((step, i) => 
+          i === editingStep.index ? stepData : step
+        ).sort((a, b) => {
+          // Sort by budget limit, undefined limits go last
+          if (a.budgetLimit === undefined) return 1;
+          if (b.budgetLimit === undefined) return -1;
+          return a.budgetLimit - b.budgetLimit;
+        })
+      }));
+      setEditingStep(null);
+    } else {
+      // Add new step
+      addStep(stepData);
+    }
     setIsAddStepModalOpen(false);
   };
 
@@ -284,13 +323,22 @@ export default function NewApprovalSchemaPage() {
                           {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
                         </td>
                         <td className="py-3 px-4">
-                          <button
-                            type="button"
-                            onClick={() => removeStep(index)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          >
-                            <Trash className="w-4 h-4" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEditStep(index)}
+                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeStep(index)}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -301,13 +349,16 @@ export default function NewApprovalSchemaPage() {
 
             <AddStepModal
               isOpen={isAddStepModalOpen}
-              onClose={() => setIsAddStepModalOpen(false)}
-              onSubmit={handleAddStep}
+              onClose={() => {
+                setIsAddStepModalOpen(false);
+                setEditingStep(null);
+              }}
+              onSubmit={handleStepSubmit}
               roles={roles}
               users={users}
               documentType={formData.documentType}
-              formData={stepFormData}
-              setFormData={setStepFormData}
+              editData={editingStep?.data}
+              isEdit={editingStep !== null}
             />
           </div>
         </div>
