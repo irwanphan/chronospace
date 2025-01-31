@@ -33,6 +33,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
+    
     const vendor = await prisma.vendor.update({
       where: { id: params.id },
       data: {
@@ -41,7 +42,6 @@ export async function PUT(
         email: body.email,
         phone: body.phone,
         address: body.address,
-        documents: body.documents,
       },
     });
     return NextResponse.json(vendor);

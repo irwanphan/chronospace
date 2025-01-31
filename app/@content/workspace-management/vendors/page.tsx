@@ -109,8 +109,8 @@ export default function VendorsPage() {
                 <td className="py-3 px-4">{vendor.vendorName}</td>
                 <td className="py-3 px-4">{vendor.email}</td>
                 <td className="py-3 px-4">
-                  <button 
-                    className="p-1 hover:bg-gray-100 rounded relative"
+                  <div 
+                    className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full relative"
                     onClick={() => setActiveMenu(activeMenu === vendor.id ? null : vendor.id)}
                   >
                     <MoreVertical className="w-4 h-4 text-gray-500" />
@@ -134,7 +134,7 @@ export default function VendorsPage() {
                         </button>
                       </div>
                     )}
-                  </button>
+                  </div>
                 </td>
               </tr>
             ))
