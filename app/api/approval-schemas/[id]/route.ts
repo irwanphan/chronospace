@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+interface RequestStep {
+  roleId: string;
+  specificUserId?: string;
+  budgetLimit?: number;
+  duration: number;
+  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -52,7 +60,7 @@ export async function PUT(
       roles: typeof body.roles === 'string' ? body.roles : body.roles[0],
       steps: {
         deleteMany: {},
-        create: body.steps.map((step: any, index: number) => ({
+        create: body.steps.map((step: RequestStep, index: number) => ({
           role: step.roleId || '',
           specificUserId: step.specificUserId || null,
           limit: step.budgetLimit || null,
@@ -72,7 +80,7 @@ export async function PUT(
     });
 
     return NextResponse.json(schema);
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('Detailed error:', error);
     return NextResponse.json(
       { error: 'Failed to update approval schema', details: error },
