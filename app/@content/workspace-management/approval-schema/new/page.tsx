@@ -35,15 +35,6 @@ export default function NewApprovalSchemaPage() {
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
-
-  const [stepFormData, setStepFormData] = useState<ApprovalStepForm>({
-    roleId: '',
-    specificUserId: undefined,
-    budgetLimit: undefined,
-    duration: 48,
-    overtimeAction: 'NOTIFY',
-  });
-
   const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
 
   useEffect(() => {
@@ -105,27 +96,6 @@ export default function NewApprovalSchemaPage() {
       ...prev,
       steps: prev.steps.filter((_, i) => i !== index),
     }));
-  };
-
-  const updateStep = (index: number, field: keyof ApprovalStepForm, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      steps: prev.steps.map((step, i) => 
-        i === index ? { ...step, [field]: value } : step
-      ),
-    }));
-  };
-
-  const handleAddStep = (stepData: ApprovalStepForm) => {
-    addStep(stepData);
-    setStepFormData({  // Reset form modal setelah submit
-      roleId: '',
-      specificUserId: undefined,
-      budgetLimit: undefined,
-      duration: 48,
-      overtimeAction: 'NOTIFY',
-    });
-    setIsAddStepModalOpen(false);
   };
 
   const handleEditStep = (index: number) => {
