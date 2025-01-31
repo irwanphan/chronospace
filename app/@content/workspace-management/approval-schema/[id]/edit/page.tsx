@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash } from 'lucide-react';
+import { X, Plus, Trash, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkDivision } from '@/types/workDivision';
@@ -35,6 +35,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
+  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
 
   const [stepFormData, setStepFormData] = useState<ApprovalStepForm>({
     roleId: '',
@@ -184,12 +185,42 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     }
   };
 
-  const handleAddStep = (step: ApprovalStepForm) => {
+  const handleAddStep = (stepData: ApprovalStepForm) => {
     setFormData(prev => ({
       ...prev,
-      steps: [...prev.steps, step]
+      steps: [...prev.steps, stepData]
     }));
-    setIsAddStepModalOpen(false);
+  };
+
+  const handleEditStep = (index: number) => {
+    const step = formData.steps[index];
+    setEditingStep({
+      data: {
+        roleId: step.roleId,
+        specificUserId: step.specificUserId,
+        budgetLimit: step.budgetLimit,
+        duration: step.duration,
+        overtimeAction: step.overtimeAction,
+      },
+      index
+    });
+    setIsAddStepModalOpen(true);
+  };
+
+  const handleStepSubmit = (stepData: ApprovalStepForm) => {
+    if (editingStep !== null) {
+      // Edit existing step
+      setFormData(prev => ({
+        ...prev,
+        steps: prev.steps.map((step, i) => 
+          i === editingStep.index ? stepData : step
+        )
+      }));
+      setEditingStep(null);
+    } else {
+      // Add new step
+      handleAddStep(stepData);
+    }
   };
 
   return (
@@ -264,8 +295,11 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
               <h2 className="text-lg font-medium">Approval Steps</h2>
               <button
                 type="button"
-                onClick={() => setIsAddStepModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                onClick={() => {
+                  setEditingStep(null);  // Reset editing state
+                  setIsAddStepModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4" />
                 Add Step
@@ -320,13 +354,22 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                           {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
                         </td>
                         <td className="py-3 px-4">
-                          <button
-                            type="button"
-                            onClick={() => removeStep(index)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          >
-                            <Trash className="w-4 h-4" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEditStep(index)}
+                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeStep(index)}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -337,13 +380,16 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
 
             <AddStepModal
               isOpen={isAddStepModalOpen}
-              onClose={() => setIsAddStepModalOpen(false)}
-              onSubmit={handleAddStep}
+              onClose={() => {
+                setIsAddStepModalOpen(false);
+                setEditingStep(null);
+              }}
+              onSubmit={handleStepSubmit}
               roles={roles}
               users={users}
               documentType={formData.documentType}
-              formData={stepFormData}
-              setFormData={setStepFormData}
+              editData={editingStep?.data}
+              isEdit={editingStep !== null}
             />
           </div>
         </div>

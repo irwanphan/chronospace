@@ -11,6 +11,8 @@ interface AddStepModalProps {
   roles: Role[];
   users: User[];
   documentType: string;
+  editData?: StepFormData;
+  isEdit?: boolean;
 }
 
 interface StepFormData {
@@ -27,7 +29,9 @@ export default function AddStepModal({
   onSubmit, 
   roles, 
   users,
-  documentType 
+  documentType,
+  editData,
+  isEdit = false
 }: AddStepModalProps) {
   const [formData, setFormData] = useState<StepFormData>({
     roleId: '',
@@ -39,11 +43,24 @@ export default function AddStepModal({
 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
-  // Filter users based on selected role
+  useEffect(() => {
+    if (isEdit && editData) {
+      setFormData(editData);
+    } else {
+      setFormData({
+        roleId: '',
+        specificUserId: undefined,
+        budgetLimit: undefined,
+        duration: 48,
+        overtimeAction: 'NOTIFY',
+      });
+    }
+  }, [isEdit, editData]);
+
   useEffect(() => {
     if (formData.roleId) {
       const usersWithRole = users.filter(user => 
-        user.roles?.includes(formData.roleId)
+        user.role?.includes(formData.roleId)
       );
       setFilteredUsers(usersWithRole);
     } else {
@@ -63,7 +80,9 @@ export default function AddStepModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium">Add Approval Step</h2>
+          <h2 className="text-lg font-medium">
+            {isEdit ? 'Edit Approval Step' : 'Add Approval Step'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -192,7 +211,7 @@ export default function AddStepModal({
               onClick={handleSubmit}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Add Step
+              {isEdit ? 'Save Changes' : 'Add Step'}
             </button>
           </div>
         </form>
