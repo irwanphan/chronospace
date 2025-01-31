@@ -1,27 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus, Eye } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { ApprovalSchema } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
-import { useRouter } from 'next/navigation';
 import SchemaActions from './components/SchemaActions';
 
-interface Division {
-  id: string;
-  divisionName: string;
-  divisionCode: string;
-}
-
 export default function ApprovalSchemaPage() {
-  const router = useRouter();
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -68,9 +59,23 @@ export default function ApprovalSchemaPage() {
   };
 
   const getDivisionNames = (schema: ApprovalSchema) => {
-    if (!schema.divisions) return [];
+    if (!schema.workDivisions) return '';
     
-    const divisionList = schema.divisions.split(',');
+    let divisionList: string[];
+    try {
+      // Coba parse jika dalam format JSON string
+      divisionList = typeof schema.workDivisions === 'string' 
+        ? (schema.workDivisions as string).startsWith('[') 
+          ? JSON.parse(schema.workDivisions as string)
+          : [schema.workDivisions]
+        : schema.workDivisions;
+    } catch {
+      // Fallback jika parsing gagal
+      divisionList = typeof schema.workDivisions === 'string' 
+        ? [schema.workDivisions] 
+        : schema.workDivisions;
+    }
+
     return divisions
       .filter(div => divisionList.includes(div.divisionCode))
       .map(div => div.divisionName)
@@ -78,56 +83,27 @@ export default function ApprovalSchemaPage() {
   };
 
   const getRoleNames = (schema: ApprovalSchema) => {
-    if (!schema.steps) return '';
+    if (!schema.roles) return '';
     
-    return schema.steps.map(step => {
-      const role = roles.find(r => r.id === step.roleId);
-      return role?.roleName || '';
-    }).filter(Boolean).join(', ');
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+    let roleList: string[];
     try {
-      // Format data sebelum submit
-      const formattedData = {
-        name: formData.name,
-        documentType: formData.documentType,
-        workDivisions: formData.workDivisions,
-        description: formData.description,
-        steps: formData.steps.map(step => ({
-          roleId: step.role, // Pastikan ini sesuai dengan field yang diharapkan
-          budgetLimit: step.limit,
-          duration: step.duration,
-          overtimeAction: step.overtime
-        }))
-      };
-
-      console.log('Submitting data:', formattedData);
-
-      const response = await fetch('/api/approval-schemas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formattedData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create schema');
-      }
-
-      router.push('/workspace-management/approval-schema');
-      router.refresh();
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create schema');
-    } finally {
-      setIsSubmitting(false);
+      // Coba parse jika dalam format JSON string
+      roleList = typeof schema.roles === 'string'
+        ? (schema.roles as string).startsWith('[')
+          ? JSON.parse(schema.roles as string)
+          : [schema.roles]
+        : schema.roles;
+    } catch {
+      // Fallback jika parsing gagal
+      roleList = typeof schema.roles === 'string' 
+        ? [schema.roles] 
+        : schema.roles;
     }
+
+    return roles
+      .filter(role => roleList.includes(role.id || ''))
+      .map(role => role.roleName)
+      .join(', ');
   };
 
   return (
@@ -178,7 +154,7 @@ export default function ApprovalSchemaPage() {
                   <span className="text-sm text-gray-500">{schema.documentType}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <SchemaActions schemaId={schema.id} />
+                  <SchemaActions schemaId={schema.id || ''} />
                 </div>
               </div>
 
@@ -232,16 +208,6 @@ export default function ApprovalSchemaPage() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* ... existing form fields ... */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit'}
-        </button>
-      </form>
     </div>
   );
 } 

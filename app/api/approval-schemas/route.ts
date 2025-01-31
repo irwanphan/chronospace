@@ -81,16 +81,19 @@ export async function GET() {
   try {
     const schemas = await prisma.approvalSchema.findMany({
       include: {
-        steps: {
-          orderBy: {
-            order: 'asc'
-          }
-        }
-      }
+        steps: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
+
+    // Log response untuk debugging
+    console.log('API Response:', schemas);
+
     return NextResponse.json(schemas);
   } catch (error) {
-    console.error('Error fetching schemas:', error);
+    console.error('Failed to fetch schemas:', error);
     return NextResponse.json(
       { error: 'Failed to fetch schemas' },
       { status: 500 }
