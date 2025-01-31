@@ -9,8 +9,8 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    code: '',
-    name: '',
+    vendorCode: '',
+    vendorName: '',
     email: '',
     phone: '',
     address: '',
@@ -37,8 +37,8 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
         ]);
 
         setFormData({
-          code: vendorData.code,
-          name: vendorData.name,
+          vendorCode: vendorData.vendorCode,
+          vendorName: vendorData.vendorName,
           email: vendorData.email,
           phone: vendorData.phone,
           address: vendorData.address || '',
@@ -95,7 +95,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
           </label>
           <input
             type="text"
-            value={formData.code}
+            value={formData.vendorCode}
             onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="Store ITR"
@@ -109,7 +109,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
           </label>
           <input
             type="text"
-            value={formData.name}
+            value={formData.vendorName}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="Store ITR"

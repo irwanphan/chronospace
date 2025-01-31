@@ -36,15 +36,17 @@ export async function PUT(
     const vendor = await prisma.vendor.update({
       where: { id: params.id },
       data: {
-        name: body.name,
+        vendorCode: body.vendorCode,
+        vendorName: body.vendorName,
         email: body.email,
         phone: body.phone,
         address: body.address,
-        divisions: Array.isArray(body.divisions) ? body.divisions.join(',') : body.divisions,
+        documents: body.documents,
       },
     });
     return NextResponse.json(vendor);
   } catch (error) {
+    console.error('Error updating vendor:', error);
     return NextResponse.json(
       { error: 'Failed to update vendor' },
       { status: 500 }
@@ -62,6 +64,7 @@ export async function DELETE(
     });
     return NextResponse.json({ message: 'Vendor deleted successfully' });
   } catch (error) {
+    console.error('Error deleting vendor:', error);
     return NextResponse.json(
       { error: 'Failed to delete vendor' },
       { status: 500 }
