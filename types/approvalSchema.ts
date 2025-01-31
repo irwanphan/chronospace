@@ -4,7 +4,7 @@ export interface ApprovalStep {
   stepNumber: number;
   roleId: string;
   specificUserId?: string;
-  budgetLimit?: number;
+  limit?: number;
   duration: number; // dalam jam
   overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
   createdAt?: Date;

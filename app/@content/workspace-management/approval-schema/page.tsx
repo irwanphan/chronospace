@@ -191,16 +191,16 @@ export default function ApprovalSchemaPage() {
                   {schema.steps.map((step, index) => (
                     <div key={step.id} className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">Step {index + 1}:</span>
-                      <span>{roles.find(r => r.id === step.roleId)?.roleName}</span>
-                      {step.budgetLimit && (
-                        <span>
-                          (Up to{' '}
+                      <span>
+                        {roles.find(r => r.id === step.roleId)?.roleName}
+                      </span>
+                      {step.limit && (
+                        <span className="text-gray-500">
                           {new Intl.NumberFormat('id-ID', {
                             style: 'currency',
                             currency: 'IDR',
                             minimumFractionDigits: 0,
-                          }).format(step.budgetLimit)}
-                          )
+                          }).format(step.limit)}
                         </span>
                       )}
                       <span>{step.duration}h</span>
