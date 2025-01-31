@@ -192,7 +192,7 @@ export default function ApprovalSchemaPage() {
                     <div key={step.id} className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">Step {index + 1}:</span>
                       <span>
-                        {roles.find(r => r.id === step.roleId)?.roleName}
+                        {roles.find(r => r.id === step.role)?.roleName}
                       </span>
                       {step.limit && (
                         <span className="text-gray-500">

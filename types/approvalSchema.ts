@@ -2,7 +2,7 @@ export interface ApprovalStep {
   id?: string;
   schemaId: string;
   stepNumber: number;
-  roleId: string;
+  role: string;
   specificUserId?: string;
   limit?: number;
   duration: number; // dalam jam
