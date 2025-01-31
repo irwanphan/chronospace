@@ -96,7 +96,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
           <input
             type="text"
             value={formData.vendorCode}
-            onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, vendorCode: e.target.value }))}
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="Store ITR"
             required
@@ -110,7 +110,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
           <input
             type="text"
             value={formData.vendorName}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, vendorName: e.target.value }))}
             className="w-full px-4 py-2 border rounded-lg"
             placeholder="Store ITR"
             required
