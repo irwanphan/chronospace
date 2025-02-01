@@ -87,4 +87,23 @@ export async function PUT(
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.approvalSchema.delete({
+      where: { id: params.id },
+    });
+    
+    return NextResponse.json({ message: 'Approval schema deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting approval schema:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete approval schema' },
+      { status: 500 }
+    );
+  }
 } 
