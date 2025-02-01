@@ -112,6 +112,12 @@ export default function ApprovalSchemaPage() {
     return html.replace(/<[^>]*>/g, '');
   };
 
+  const refreshData = async () => {
+    const schemasRes = await fetch('/api/approval-schemas');
+    const schemasData = await schemasRes.json();
+    setSchemas(schemasData);
+  };
+
   return (
     <div className="bg-white rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
@@ -160,7 +166,10 @@ export default function ApprovalSchemaPage() {
                   <span className="text-sm text-gray-500">{schema.documentType}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <SchemaActions schemaId={schema.id || ''} />
+                  <SchemaActions 
+                    schemaId={schema.id || ''}
+                    onDelete={refreshData}
+                  />
                 </div>
               </div>
 

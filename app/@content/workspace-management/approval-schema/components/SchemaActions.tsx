@@ -2,17 +2,16 @@
 import { useState, useRef } from 'react';
 import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 interface SchemaActionsProps {
   schemaId: string;
+  onDelete: () => void;
 }
 
-export default function SchemaActions({ schemaId }: SchemaActionsProps) {
+export default function SchemaActions({ schemaId, onDelete }: SchemaActionsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   useOnClickOutside(dropdownRef, () => setShowDropdown(false));
 
@@ -26,7 +25,8 @@ export default function SchemaActions({ schemaId }: SchemaActionsProps) {
 
       if (!response.ok) throw new Error('Failed to delete schema');
 
-      router.refresh();
+      onDelete();
+      setShowDropdown(false);
     } catch (error) {
       console.error('Error deleting schema:', error);
       alert('Failed to delete schema');
