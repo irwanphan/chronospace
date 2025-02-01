@@ -144,22 +144,6 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Division Head</label>
-            <select
-              value={formData.divisionHead}
-              onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-            >
-              <option value="">-</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium mb-1">Upper Division</label>
             <select
               value={formData.upperDivision}
@@ -170,6 +154,22 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
               {divisions.map(div => (
                 <option key={div.id} value={div.id}>
                   {div.divisionName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Division Head</label>
+            <select
+              value={formData.divisionHead}
+              onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+            >
+              <option value="">-</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
                 </option>
               ))}
             </select>

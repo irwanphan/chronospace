@@ -24,6 +24,7 @@ export async function POST(request: Request) {
         divisionName: body.divisionName,
         description: body.description,
         divisionHead: body.divisionHead,
+        upperDivision: body.upperDivision,
       }
     });
 
