@@ -41,8 +41,13 @@ export default function VendorsPage() {
         const response = await fetch(`/api/vendors/${id}`, {
           method: 'DELETE',
         });
+        
         if (response.ok) {
-          router.refresh();
+          // Refresh data setelah delete
+          const vendorsRes = await fetch('/api/vendors');
+          const vendorsData = await vendorsRes.json();
+          setVendors(vendorsData);
+          setActiveMenu(null); // Tutup popup menu
         }
       } catch (error) {
         console.error('Failed to delete vendor:', error);
