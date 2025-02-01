@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import { User } from '@/types/user';
+import { WorkDivision } from '@/types/workDivision';
 
 export default function EditWorkDivisionPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -11,34 +13,50 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
     divisionCode?: string;
     general?: string;
   }>({});
+  const [users, setUsers] = useState<User[]>([]);
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState({
     divisionCode: '',
     divisionName: '',
     description: '',
     divisionHead: '',
+    upperDivision: '',
   });
 
   useEffect(() => {
-    const fetchDivision = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/work-divisions/${params.id}`);
-        const data = await response.json();
-        
+        setIsLoading(true);
+        const [usersRes, divisionsRes, divisionRes] = await Promise.all([
+          fetch('/api/users'),
+          fetch('/api/work-divisions'),
+          fetch(`/api/work-divisions/${params.id}`)
+        ]);
+
+        const [usersData, divisionsData, divisionData] = await Promise.all([
+          usersRes.json(),
+          divisionsRes.json(),
+          divisionRes.json()
+        ]);
+
+        setUsers(usersData);
+        setDivisions(divisionsData.filter((div: WorkDivision) => div.id !== params.id)); // Exclude current division
         setFormData({
-          divisionCode: data.divisionCode,
-          divisionName: data.divisionName,
-          description: data.description || '',
-          divisionHead: data.divisionHead || '',
+          divisionCode: divisionData.divisionCode,
+          divisionName: divisionData.divisionName,
+          description: divisionData.description || '',
+          divisionHead: divisionData.divisionHead || '',
+          upperDivision: divisionData.upperDivision || '',
         });
-        setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching work division:', error);
-        setErrors({ general: 'Failed to load division data' });
+        console.error('Error fetching data:', error);
+        setErrors({ general: 'Failed to load data' });
+      } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDivision();
+    fetchData();
   }, [params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,7 +95,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
   }
 
   return (
-    <div className="p-6">
+    <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">Edit Work Division</h1>
 
       {errors.general && (
@@ -86,7 +104,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-white p-6 rounded-lg">
         <div>
           <label className="block text-sm font-medium mb-1">
             Division Code <span className="text-red-500">*</span>
@@ -126,12 +144,34 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
 
         <div>
           <label className="block text-sm font-medium mb-1">Division Head</label>
-          <input
-            type="text"
+          <select
             value={formData.divisionHead}
             onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg"
-          />
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+          >
+            <option value="">-</option>
+            {users.map(user => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Upper Division</label>
+          <select
+            value={formData.upperDivision}
+            onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+          >
+            <option value="">-</option>
+            {divisions.map(div => (
+              <option key={div.id} value={div.id}>
+                {div.divisionName}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex justify-end gap-3">
