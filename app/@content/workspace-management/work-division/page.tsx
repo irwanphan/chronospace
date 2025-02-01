@@ -40,8 +40,13 @@ export default function WorkDivisionPage() {
         const response = await fetch(`/api/work-divisions/${id}`, {
           method: 'DELETE',
         });
+        
         if (response.ok) {
-          router.refresh();
+          // Refresh data setelah delete
+          const divisionsRes = await fetch('/api/work-divisions');
+          const divisionsData = await divisionsRes.json();
+          setDivisions(divisionsData);
+          setActiveMenu(null); // Tutup popup menu
         }
       } catch (error) {
         console.error('Failed to delete work division:', error);
