@@ -1,13 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus } from 'lucide-react';
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { WorkDivision } from '@/types/workDivision';
+import { useRouter } from 'next/navigation';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchDivisions();
@@ -28,6 +31,21 @@ export default function WorkDivisionPage() {
       setDivisions([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this work division?')) {
+      try {
+        const response = await fetch(`/api/work-divisions/${id}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          router.refresh();
+        }
+      } catch (error) {
+        console.error('Failed to delete work division:', error);
+      }
     }
   };
 
@@ -98,9 +116,34 @@ export default function WorkDivisionPage() {
                   {division.divisionHead || '-'}
                 </td>
                 <td className="py-3 px-4">
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <MoreVertical className="w-4 h-4 text-gray-500" />
-                  </button>
+                  <div className="relative">
+                    <button 
+                      className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                      onClick={() => setActiveMenu(activeMenu === division.id ? null : division.id)}
+                    >
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    </button>
+                    
+                    {/* Popup Menu */}
+                    {activeMenu === division.id && (
+                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                        <button
+                          onClick={() => router.push(`/workspace-management/work-division/${division.id}/edit`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(division.id)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                        >
+                          <Trash className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))

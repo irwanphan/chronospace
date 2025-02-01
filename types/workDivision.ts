@@ -1,5 +1,5 @@
 export interface WorkDivision {
-  id?: string;
+  id: string;
   divisionCode: string;
   divisionName: string;
   description: string;
