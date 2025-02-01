@@ -1,13 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus } from 'lucide-react';
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { Role } from '@/types/role';
+import { useRouter } from 'next/navigation';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchRoles();
@@ -28,6 +31,21 @@ export default function RolePage() {
       setRoles([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this role?')) {
+      try {
+        const response = await fetch(`/api/roles/${id}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          router.refresh();
+        }
+      } catch (error) {
+        console.error('Failed to delete role:', error);
+      }
     }
   };
 
@@ -101,8 +119,33 @@ export default function RolePage() {
                   }).format(role.approvalLimit)}
                 </td>
                 <td className="py-3 px-4">
-                  <div className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full">
-                    <MoreVertical className="w-4 h-4 text-gray-500" />
+                  <div className="relative">
+                    <button 
+                      className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                      onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
+                    >
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    </button>
+                    
+                    {/* Popup Menu */}
+                    {activeMenu === role.id && (
+                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                        <button
+                          onClick={() => router.push(`/workspace-management/role/${role.id}/edit`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(role.id)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                        >
+                          <Trash className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>
