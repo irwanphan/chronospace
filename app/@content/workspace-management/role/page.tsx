@@ -40,8 +40,13 @@ export default function RolePage() {
         const response = await fetch(`/api/roles/${id}`, {
           method: 'DELETE',
         });
+        
         if (response.ok) {
-          router.refresh();
+          // Refresh data setelah delete
+          const rolesRes = await fetch('/api/roles');
+          const rolesData = await rolesRes.json();
+          setRoles(rolesData);
+          setActiveMenu(null); // Tutup popup menu
         }
       } catch (error) {
         console.error('Failed to delete role:', error);
