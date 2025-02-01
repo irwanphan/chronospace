@@ -1,6 +1,32 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const role = await prisma.role.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!role) {
+      return NextResponse.json(
+        { error: 'Role not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(role);
+  } catch (error) {
+    console.error('Error fetching role:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch role' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
