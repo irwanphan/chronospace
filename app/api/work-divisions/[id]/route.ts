@@ -56,6 +56,7 @@ export async function PUT(
         divisionName: body.divisionName,
         description: body.description,
         divisionHead: body.divisionHead,
+        upperDivision: body.upperDivision,
       },
     });
     return NextResponse.json(division);
