@@ -33,7 +33,37 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    
+
+    // Cek apakah email atau vendor code sudah digunakan vendor lain
+    const [existingEmail, existingCode] = await Promise.all([
+      prisma.vendor.findFirst({
+        where: {
+          email: body.email,
+          id: { not: params.id }  // Exclude current vendor
+        }
+      }),
+      prisma.vendor.findFirst({
+        where: {
+          vendorCode: body.vendorCode,
+          id: { not: params.id }  // Exclude current vendor
+        }
+      })
+    ]);
+
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: 'Email already registered to another vendor' },
+        { status: 400 }
+      );
+    }
+
+    if (existingCode) {
+      return NextResponse.json(
+        { error: 'Vendor code already exists' },
+        { status: 400 }
+      );
+    }
+
     const vendor = await prisma.vendor.update({
       where: { id: params.id },
       data: {

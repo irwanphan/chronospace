@@ -16,6 +16,11 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
     address: '',
     documents: [] as File[],
   });
+  const [errors, setErrors] = useState<{
+    email?: string;
+    vendorCode?: string;
+    general?: string;
+  }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +69,8 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});  // Reset errors
+    
     try {
       const response = await fetch(`/api/vendors/${params.id}`, {
         method: 'PUT',
@@ -73,11 +80,23 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        router.push('/workspace-management/vendors');
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.error.includes('Email')) {
+          setErrors(prev => ({ ...prev, email: data.error }));
+        } else if (data.error.includes('Vendor code')) {
+          setErrors(prev => ({ ...prev, vendorCode: data.error }));
+        } else {
+          setErrors(prev => ({ ...prev, general: data.error }));
+        }
+        return;
       }
+
+      router.push('/workspace-management/vendors');
     } catch (error) {
-      console.error('Failed to update vendor:', error);
+      console.error('Error updating vendor:', error);
+      setErrors({ general: 'Failed to update vendor' });
     }
   };
 
@@ -85,10 +104,16 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
   if (isLoading) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="max-w-4xl">
+    <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">Edit Vendor</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
+      {errors.general && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+          {errors.general}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
         <div>
           <label className="block text-sm font-medium mb-1">
             Vendor Code <span className="text-red-500">*</span>
@@ -97,10 +122,13 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
             type="text"
             value={formData.vendorCode}
             onChange={(e) => setFormData(prev => ({ ...prev, vendorCode: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg"
+            className={`w-full px-4 py-2 border rounded-lg ${errors.vendorCode ? 'border-red-500' : ''}`}
             placeholder="Store ITR"
             required
           />
+          {errors.vendorCode && (
+            <p className="mt-1 text-sm text-red-600">{errors.vendorCode}</p>
+          )}
         </div>
 
         <div>
@@ -150,10 +178,13 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
+              className={`w-full px-4 py-2 border rounded-lg ${errors.email ? 'border-red-500' : ''}`}
               placeholder="store.itr@example.com"
               required
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+            )}
           </div>
         </div>
 
