@@ -44,27 +44,41 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
+    // Cek unique fields
+    const [existingEmail, existingEmployeeId, existingResidentId] = await Promise.all([
+      prisma.user.findUnique({ where: { email: body.email } }),
+      prisma.user.findUnique({ where: { employeeId: body.employeeId } }),
+      prisma.user.findUnique({ where: { residentId: body.residentId } })
+    ]);
+
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: 'Email already registered' },
+        { status: 400 }
+      );
+    }
+
+    if (existingEmployeeId) {
+      return NextResponse.json(
+        { error: 'Employee ID already exists' },
+        { status: 400 }
+      );
+    }
+
+    if (existingResidentId) {
+      return NextResponse.json(
+        { error: 'Resident ID already exists' },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.create({
-      data: {
-        name: body.fullName,
-        email: body.email,
-        password: body.password, // Idealnya password harus di-hash dulu
-        role: body.role,
-        phone: body.phone,
-        workDivision: body.workDivision,
-        employeeId: body.employeeId,
-        address: body.address,
-        residentId: body.residentId,
-        nationality: body.nationality,
-        birthday: new Date(body.birthday),
-        createdAt: new Date(),
-      },
+      data: body
     });
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error('Error creating user:', error);
     return NextResponse.json(
       { error: 'Failed to create user' },
       { status: 500 }
