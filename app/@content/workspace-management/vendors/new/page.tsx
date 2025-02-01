@@ -16,10 +16,12 @@ export default function NewVendorPage() {
     email: '',
     documents: '',
   });
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null); // Reset error state
 
     try {
       const response = await fetch('/api/vendors', {
@@ -30,15 +32,17 @@ export default function NewVendorPage() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create vendor');
+        setError(data.error);
+        return;
       }
 
       router.push('/workspace-management/vendors');
-      router.refresh();
     } catch (error) {
       console.error('Error creating vendor:', error);
-      // Handle error (show error message to user)
+      setError('Failed to create vendor');
     } finally {
       setIsSubmitting(false);
     }
@@ -48,6 +52,12 @@ export default function NewVendorPage() {
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">New Vendor</h1>
       
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
         <div className="space-y-4">
           <div>
