@@ -101,9 +101,9 @@ export default function RolePage() {
                   }).format(role.approvalLimit)}
                 </td>
                 <td className="py-3 px-4">
-                  <button className="p-1 hover:bg-gray-100 rounded">
+                  <div className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full">
                     <MoreVertical className="w-4 h-4 text-gray-500" />
-                  </button>
+                  </div>
                 </td>
               </tr>
             ))

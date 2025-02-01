@@ -1,13 +1,39 @@
+import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { VendorService } from '@/services/vendor.service';
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const data = await req.json();
-    const vendor = await VendorService.create(data);
-    return NextResponse.json(vendor, { status: 201 });
+    const body = await request.json();
+    
+    // Log untuk debugging
+    console.log('Request body:', body);
+
+    // Cek apakah email sudah ada
+    const existingVendor = await prisma.vendor.findUnique({
+      where: { email: body.email }
+    });
+
+    if (existingVendor) {
+      return NextResponse.json(
+        { error: 'Email already registered to another vendor' },
+        { status: 400 }
+      );
+    }
+
+    const vendor = await prisma.vendor.create({
+      data: {
+        vendorCode: body.vendorCode,
+        vendorName: body.vendorName,
+        email: body.email,
+        phone: body.phone,
+        address: body.address,
+      }
+    });
+
+    return NextResponse.json(vendor);
   } catch (error) {
-    console.error('Failed to create vendor:', error);
+    console.error('Error creating vendor:', error);
     return NextResponse.json(
       { error: 'Failed to create vendor' },
       { status: 500 }

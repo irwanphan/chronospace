@@ -2,14 +2,17 @@ import { db } from '@/lib/db';
 import { Vendor } from '@/types/vendor';
 
 export const VendorService = {
-  async create(data: Omit<Vendor, 'id' | 'createdAt' | 'updatedAt'>) {
+  async create(data: Vendor) {
     try {
+      const { ...vendorData } = data;
+    
       const vendor = await db.vendor.create({
         data: {
-          ...data,
-          documents: data.documents?.join(',') || null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          vendorCode: vendorData.vendorCode,
+          vendorName: vendorData.vendorName,
+          email: vendorData.email,
+          phone: vendorData.phone,
+          address: vendorData.address,
         },
       });
       return vendor;
