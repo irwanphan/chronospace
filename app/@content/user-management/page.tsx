@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: number;
@@ -15,21 +16,17 @@ interface User {
 }
 
 export default function UserManagementPage() {
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const router = useRouter();
+
+  const fetchUsers = async () => {
+    const response = await fetch('/api/users');
+    const data = await response.json();
+    setUsers(data);
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch('/api/users');
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data);
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -40,6 +37,23 @@ export default function UserManagementPage() {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this user?')) {
+      try {
+        const response = await fetch(`/api/users/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          fetchUsers(); // Refresh list
+          setActiveMenu(null); // Close popup
+        }
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+      }
+    }
   };
 
   return (
@@ -109,7 +123,33 @@ export default function UserManagementPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(user.lastLogin)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(user.createdAt)}</td>
                 <td className="px-6 py-4 text-sm text-right">
-                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                  <div className="relative">
+                    <button 
+                      className="p-1 hover:bg-gray-100 rounded"
+                      onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
+                    >
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    </button>
+                    
+                    {activeMenu === user.id.toString() && (
+                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                        <button
+                          onClick={() => router.push(`/user-management/${user.id}/edit`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user.id.toString())}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                        >
+                          <Trash className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
