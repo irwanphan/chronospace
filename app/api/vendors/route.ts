@@ -9,14 +9,22 @@ export async function POST(request: Request) {
     // Log untuk debugging
     console.log('Request body:', body);
 
-    // Cek apakah email sudah ada
-    const existingVendor = await prisma.vendor.findUnique({
-      where: { email: body.email }
-    });
+    // Cek apakah email atau vendor code sudah ada
+    const [existingEmail, existingCode] = await Promise.all([
+      prisma.vendor.findUnique({ where: { email: body.email } }),
+      prisma.vendor.findUnique({ where: { vendorCode: body.vendorCode } })
+    ]);
 
-    if (existingVendor) {
+    if (existingEmail) {
       return NextResponse.json(
         { error: 'Email already registered to another vendor' },
+        { status: 400 }
+      );
+    }
+
+    if (existingCode) {
+      return NextResponse.json(
+        { error: 'Vendor code already exists' },
         { status: 400 }
       );
     }

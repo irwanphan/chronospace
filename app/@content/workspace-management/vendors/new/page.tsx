@@ -16,12 +16,16 @@ export default function NewVendorPage() {
     email: '',
     documents: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{
+    email?: string;
+    vendorCode?: string;
+    general?: string;
+  }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null); // Reset error state
+    setErrors({}); // Reset errors state
 
     try {
       const response = await fetch('/api/vendors', {
@@ -35,14 +39,20 @@ export default function NewVendorPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error);
+        if (data.error.includes('Email')) {
+          setErrors(prev => ({ ...prev, email: data.error }));
+        } else if (data.error.includes('Vendor code')) {
+          setErrors(prev => ({ ...prev, vendorCode: data.error }));
+        } else {
+          setErrors(prev => ({ ...prev, general: data.error }));
+        }
         return;
       }
 
       router.push('/workspace-management/vendors');
     } catch (error) {
       console.error('Error creating vendor:', error);
-      setError('Failed to create vendor');
+      setErrors({ general: 'Failed to create vendor' });
     } finally {
       setIsSubmitting(false);
     }
@@ -52,9 +62,9 @@ export default function NewVendorPage() {
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">New Vendor</h1>
       
-      {error && (
+      {errors.general && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
-          {error}
+          {errors.general}
         </div>
       )}
 
@@ -68,10 +78,13 @@ export default function NewVendorPage() {
               type="text"
               value={formData.vendorCode}
               onChange={(e) => setFormData(prev => ({ ...prev, vendorCode: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-2 border rounded-lg ${errors.vendorCode ? 'border-red-500' : ''}`}
               placeholder="Store ITR"
               required
             />
+            {errors.vendorCode && (
+              <p className="mt-1 text-sm text-red-600">{errors.vendorCode}</p>
+            )}
           </div>
 
           <div>
@@ -120,10 +133,13 @@ export default function NewVendorPage() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-2 border rounded-lg ${errors.email ? 'border-red-500' : ''}`}
                 placeholder="store.itr@example.com"
                 required
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
           </div>
 
