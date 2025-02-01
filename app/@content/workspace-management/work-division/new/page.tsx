@@ -29,6 +29,10 @@ export default function NewWorkDivisionPage() {
     upperDivision: '',
     divisionHead: '',
   });
+  const [errors, setErrors] = useState<{
+    divisionCode?: string;
+    general?: string;
+  }>({});
 
   useEffect(() => {
     const fetchWorkDivisions = async () => {
@@ -64,6 +68,7 @@ export default function NewWorkDivisionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     setIsSubmitting(true);
 
     try {
@@ -75,14 +80,21 @@ export default function NewWorkDivisionPage() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create work division');
+        if (data.error.includes('Division code')) {
+          setErrors(prev => ({ ...prev, divisionCode: data.error }));
+        } else {
+          setErrors(prev => ({ ...prev, general: data.error }));
+        }
+        return;
       }
 
       router.push('/workspace-management/work-division');
-      router.refresh();
     } catch (error) {
       console.error('Error creating work division:', error);
+      setErrors({ general: 'Failed to create work division' });
     } finally {
       setIsSubmitting(false);
     }
@@ -102,10 +114,13 @@ export default function NewWorkDivisionPage() {
               type="text"
               value={formData.divisionCode}
               onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.divisionCode ? 'border-red-500' : ''}`}
               placeholder="HR"
               required
             />
+            {errors.divisionCode && (
+              <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
+            )}
           </div>
 
           <div>
