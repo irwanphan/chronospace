@@ -7,17 +7,20 @@ export async function GET(
 ) {
   try {
     const project = await prisma.project.findUnique({
-      where: { id: params.id },
-      include: {
-        division: true,
+      where: { 
+        id: params.id 
       },
     });
+
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }
       );
     }
+
+    // Log untuk debugging
+    console.log('Project from DB:', project);
 
     return NextResponse.json(project);
   } catch (error) {
