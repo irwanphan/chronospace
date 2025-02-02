@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { formatDate } from '@/lib/utils';
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
     projectCode: '',
     projectTitle: '',
     description: '',
+    requestDate: '',
     year: new Date().getFullYear(),
     startDate: '',
     finishDate: '',
@@ -47,10 +49,11 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         setDivisions(divisionsData);
         setFormData({
           workDivisionId: projectData.workDivision, 
-          projectId: projectData.id,
-          projectCode: projectData.id,              
+          projectId: projectData.projectId,
+          projectCode: projectData.projectCode,              
           projectTitle: projectData.projectTitle,
           description: projectData.description,
+          requestDate: projectData.requestDate,
           year: parseInt(projectData.year),
           startDate: formatDate(projectData.startDate),
           finishDate: formatDate(projectData.finishDate),
@@ -95,7 +98,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
       <div className="bg-white rounded-lg p-6 mb-6">
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>ID: {formData.projectId}</div>
-          <div>Request Date: {new Date().toLocaleDateString()}</div>
+          <div>Request Date: {formatDate(formData.requestDate)}</div>
         </div>
       </div>
 
