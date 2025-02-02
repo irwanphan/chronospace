@@ -34,57 +34,14 @@ export async function PUT(
   try {
     const body = await request.json();
 
-    // Cek unique fields
-    const [existingEmail, existingEmployeeId, existingResidentId] = await Promise.all([
-      prisma.user.findFirst({
-        where: {
-          email: body.email,
-          id: { not: params.id }
-        }
-      }),
-      prisma.user.findFirst({
-        where: {
-          employeeId: body.employeeId,
-          id: { not: params.id }
-        }
-      }),
-      prisma.user.findFirst({
-        where: {
-          residentId: body.residentId,
-          id: { not: params.id }
-        }
-      })
-    ]);
-
-    if (existingEmail) {
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 400 }
-      );
-    }
-
-    if (existingEmployeeId) {
-      return NextResponse.json(
-        { error: 'Employee ID already exists' },
-        { status: 400 }
-      );
-    }
-
-    if (existingResidentId) {
-      return NextResponse.json(
-        { error: 'Resident ID already exists' },
-        { status: 400 }
-      );
-    }
-
     const user = await prisma.user.update({
       where: { id: params.id },
       data: {
         name: body.name,
         email: body.email,
         phone: body.phone,
-        role: body.role,
-        workDivision: body.workDivision,
+        role: body.roleId,             // ganti roleId menjadi role
+        workDivision: body.workDivisionId,  // ganti workDivisionId menjadi workDivision
         employeeId: body.employeeId,
         address: body.address,
         residentId: body.residentId,
@@ -92,6 +49,7 @@ export async function PUT(
         birthday: body.birthday,
       },
     });
+
     return NextResponse.json(user);
   } catch (error) {
     console.error('Error updating user:', error);

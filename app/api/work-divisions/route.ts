@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { WorkDivisionService } from '@/services/workDivision.service';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
@@ -40,12 +39,21 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const divisions = await WorkDivisionService.getAll();
+    const divisions = await prisma.workDivision.findMany({
+      select: {
+        id: true,
+        divisionName: true,
+      },
+      orderBy: {
+        divisionName: 'asc',
+      },
+    });
+    
     return NextResponse.json(divisions);
   } catch (error) {
-    console.error('Failed to fetch work divisions:', error);
+    console.error('Failed to fetch divisions:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch work divisions' },
+      { error: 'Failed to fetch divisions' },
       { status: 500 }
     );
   }

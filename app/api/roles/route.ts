@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { RoleService } from '@/services/role.service';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
@@ -17,7 +18,16 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    const roles = await RoleService.getAll();
+    const roles = await prisma.role.findMany({
+      select: {
+        id: true,
+        roleName: true,
+      },
+      orderBy: {
+        roleName: 'asc',
+      },
+    });
+    
     return NextResponse.json(roles);
   } catch (error) {
     console.error('Failed to fetch roles:', error);

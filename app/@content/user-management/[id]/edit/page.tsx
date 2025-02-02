@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 
 interface Role {
   id: string;
-  name: string;
+  roleName: string;
 }
 
 interface Division {
   id: string;
-  name: string;
+  divisionName: string;
 }
 
 export default function EditUserPage({ params }: { params: { id: string } }) {
@@ -179,12 +179,12 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
             <select
               value={formData.roleId}
               onChange={(e) => setFormData(prev => ({ ...prev, roleId: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border rounded-lg bg-white"
               required
             >
               <option value="">Select Role</option>
               {roles.map(role => (
-                <option key={role.id} value={role.id}>{role.name}</option>
+                <option key={role.id} value={role.id}>{role.roleName}</option>
               ))}
             </select>
           </div>
@@ -196,12 +196,12 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
             <select
               value={formData.workDivisionId}
               onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border rounded-lg bg-white"
               required
             >
               <option value="">Select Division</option>
               {divisions.map(division => (
-                <option key={division.id} value={division.id}>{division.name}</option>
+                <option key={division.id} value={division.id}>{division.divisionName}</option>
               ))}
             </select>
           </div>
