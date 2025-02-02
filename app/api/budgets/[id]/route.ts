@@ -21,8 +21,11 @@ export async function GET(
       );
     }
 
+    console.log('Budget from DB:', budget);
+
     return NextResponse.json(budget);
   } catch (error) {
+    console.error('Error fetching budget:', error);
     return NextResponse.json(
       { error: 'Failed to fetch budget' },
       { status: 500 }

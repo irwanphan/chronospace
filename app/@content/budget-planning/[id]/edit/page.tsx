@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface FormData {
   projectId: string;
@@ -12,12 +13,12 @@ interface FormData {
   totalBudget: string;
   startDate: string;
   finishDate: string;
-  description?: string;
+  description: string;
 }
 
 interface Project {
   id: string;
-  projectTitle: string;
+  title: string;  // Sesuaikan dengan field yang benar dari database
 }
 
 export default function EditBudgetPage({ params }: { params: { id: string } }) {
@@ -28,7 +29,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
     title: '',
-    year: new Date().getFullYear().toString(),
+    year: '',
     division: '',
     totalBudget: '',
     startDate: '',
@@ -39,7 +40,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch budget data dan projects secara parallel
+        // Fetch budget dan projects data
         const [budgetRes, projectsRes] = await Promise.all([
           fetch(`/api/budgets/${params.id}`),
           fetch('/api/projects')
@@ -54,14 +55,17 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
           projectsRes.json()
         ]);
 
-        // Format tanggal ke YYYY-MM-DD
+        console.log('Budget Data:', budgetData); // Untuk debugging
+
+        // Format tanggal
         const formatDate = (date: string) => {
           if (!date) return '';
           return new Date(date).toISOString().split('T')[0];
         };
 
-        // Format angka untuk total budget
+        // Format number
         const formatNumber = (num: number) => {
+          if (!num) return '';
           return new Intl.NumberFormat('id-ID').format(num);
         };
 
@@ -69,11 +73,11 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         setFormData({
           projectId: budgetData.projectId || '',
           title: budgetData.title || '',
-          year: budgetData.year?.toString() || new Date().getFullYear().toString(),
+          year: budgetData.year?.toString() || '',
           division: budgetData.division || '',
-          totalBudget: formatNumber(budgetData.totalBudget || 0),
-          startDate: formatDate(budgetData.startDate),
-          finishDate: formatDate(budgetData.finishDate),
+          totalBudget: formatNumber(budgetData.totalBudget) || '',
+          startDate: formatDate(budgetData.startDate) || '',
+          finishDate: formatDate(budgetData.finishDate) || '',
           description: budgetData.description || '',
         });
 
@@ -138,7 +142,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
               <option value="">Select Project</option>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
-                  {project.projectTitle}
+                  {project.title}
                 </option>
               ))}
             </select>
@@ -221,11 +225,9 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
 
         <div>
           <label className="block mb-1.5">Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            rows={4}
+          <RichTextEditor
+            value={formData.description || ''}
+            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
           />
         </div>
 
