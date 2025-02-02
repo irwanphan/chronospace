@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface Role {
   id: string;
@@ -225,11 +226,10 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
 
         <div>
           <label className="block text-sm font-medium mb-1">Address</label>
-          <textarea
-            value={formData.address}
-            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg"
-            rows={4}
+          <RichTextEditor
+            value={formData.address || ''}
+            onChange={(value: string) => setFormData(prev => ({ ...prev, address: value }))}
+            placeholder="Enter description..."
           />
         </div>
 
