@@ -4,10 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 
+interface Division {
+  id: string;
+  divisionName: string;
+}
+
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [divisions, setDivisions] = useState([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
   const [formData, setFormData] = useState({
     workDivisionId: '',
     projectId: '',
@@ -39,6 +44,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         ]);
 
         console.log('Project Data:', projectData); // Untuk debugging
+        console.log('Divisions Data:', divisionsData); // Untuk debugging
 
         // Format tanggal ke YYYY-MM-DD
         const formatDate = (date: string) => {
@@ -48,7 +54,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
 
         setDivisions(divisionsData);
         setFormData({
-          workDivisionId: projectData.workDivision, 
+          workDivisionId: projectData.division || '',
           projectId: projectData.projectId,
           projectCode: projectData.projectCode,              
           projectTitle: projectData.projectTitle,
@@ -119,7 +125,13 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
               >
                 <option value="">Select Division</option>
                 {divisions.map(division => (
-                  <option key={division.id} value={division.id}>{division.divisionName}</option>
+                  <option 
+                    key={division.id} 
+                    value={division.id}
+                    selected={division.id === formData.workDivisionId}
+                  >
+                    {division.divisionName}
+                  </option>
                 ))}
               </select>
             </div>
