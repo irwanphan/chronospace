@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { X, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface FormData {
   fullName: string;
@@ -187,11 +188,10 @@ export default function NewUserPage() {
 
         <div>
           <label className="block mb-1.5">Address</label>
-          <textarea
-            value={formData.address}
-            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            rows={3}
+          <RichTextEditor
+            value={formData.address || ''}
+            onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+            placeholder="Enter description..."
           />
         </div>
 
