@@ -48,8 +48,8 @@ export async function POST(request: Request) {
     // Cek unique fields
     const [existingEmail, existingEmployeeId, existingResidentId] = await Promise.all([
       prisma.user.findUnique({ where: { email: body.email } }),
-      prisma.user.findUnique({ where: { employeeId: body.employeeId } }),
-      prisma.user.findUnique({ where: { residentId: body.residentId } })
+      prisma.user.findFirst({ where: { employeeId: body.employeeId } }),
+      prisma.user.findFirst({ where: { residentId: body.residentId } })
     ]);
 
     if (existingEmail) {

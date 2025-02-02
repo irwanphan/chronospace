@@ -53,9 +53,9 @@ model User {
   role          String
   phone         String
   workDivision  String
-  employeeId    String
+  employeeId    String @unique
   address       String?
-  residentId    String
+  residentId    String @unique
   nationality   String
   birthday      DateTime
   lastLogin     DateTime?
