@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface Division {
   id: string;
@@ -166,11 +167,9 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
               <label className="block text-sm font-medium mb-1">
                 Project Full Description
               </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg"
-                rows={4}
+              <RichTextEditor
+                value={formData.description || ''}
+                onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
               />
             </div>
 
