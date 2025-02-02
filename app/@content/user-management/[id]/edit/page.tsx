@@ -12,8 +12,8 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     residentId?: string;
     general?: string;
   }>({});
-  // const [roles, setRoles] = useState([]);
-  // const [divisions, setDivisions] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [divisions, setDivisions] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,6 +25,8 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     residentId: '',
     nationality: '',
     birthday: '',
+    password: '',
+    confirmPassword: '',
   });
 
   useEffect(() => {
@@ -105,7 +107,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   if (isLoading) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="p-6">
+    <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-6">Edit User</h1>
 
       {errors.general && (
@@ -114,8 +116,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-        {/* Similar form fields as create new, with error handling */}
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -145,9 +146,124 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
               <p className="mt-1 text-sm text-red-600">{errors.email}</p>
             )}
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Phone Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Role <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.roleId}
+              onChange={(e) => setFormData(prev => ({ ...prev, roleId: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            >
+              <option value="">Select Role</option>
+              {roles.map(role => (
+                <option key={role.id} value={role.id}>{role.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Work Division <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.workDivisionId}
+              onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            >
+              <option value="">Select Division</option>
+              {divisions.map(division => (
+                <option key={division.id} value={division.id}>{division.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Employee ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.employeeId}
+              onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
+              className={`w-full px-4 py-2 border rounded-lg ${errors.employeeId ? 'border-red-500' : ''}`}
+              required
+            />
+            {errors.employeeId && (
+              <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>
+            )}
+          </div>
         </div>
 
-        {/* Add other form fields with similar pattern */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Address</label>
+          <textarea
+            value={formData.address}
+            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+            className="w-full px-4 py-2 border rounded-lg"
+            rows={4}
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Resident ID / Passport ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.residentId}
+              onChange={(e) => setFormData(prev => ({ ...prev, residentId: e.target.value }))}
+              className={`w-full px-4 py-2 border rounded-lg ${errors.residentId ? 'border-red-500' : ''}`}
+              required
+            />
+            {errors.residentId && (
+              <p className="mt-1 text-sm text-red-600">{errors.residentId}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Nationality <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.nationality}
+              onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Birthday <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={formData.birthday}
+              onChange={(e) => setFormData(prev => ({ ...prev, birthday: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            />
+          </div>
+        </div>
 
         <div className="flex justify-end gap-3">
           <button
