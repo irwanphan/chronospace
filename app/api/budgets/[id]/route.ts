@@ -21,9 +21,14 @@ export async function GET(
       );
     }
 
-    console.log('Budget from DB:', budget);
+    // Log untuk debugging
+    console.log('Raw Budget Data:', budget);
 
-    return NextResponse.json(budget);
+    return NextResponse.json({
+      ...budget,
+      startDate: budget.startDate?.toISOString(),
+      finishDate: budget.finishDate?.toISOString(),
+    });
   } catch (error) {
     console.error('Error fetching budget:', error);
     return NextResponse.json(

@@ -18,7 +18,7 @@ interface FormData {
 
 interface Project {
   id: string;
-  title: string;  // Sesuaikan dengan field yang benar dari database
+  projectTitle: string;
 }
 
 export default function EditBudgetPage({ params }: { params: { id: string } }) {
@@ -36,6 +36,8 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     finishDate: '',
     description: '',
   });
+
+  console.log(projects);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +73,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
 
         setProjects(projectsData);
         setFormData({
-          projectId: budgetData.projectId || '',
+          projectId: budgetData.projectId.toString() || '',
           title: budgetData.title || '',
           year: budgetData.year?.toString() || '',
           division: budgetData.division || '',
@@ -142,7 +144,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
               <option value="">Select Project</option>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
-                  {project.title}
+                  {project.projectTitle}
                 </option>
               ))}
             </select>
