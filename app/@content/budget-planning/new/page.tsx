@@ -184,11 +184,11 @@ export default function NewBudgetPage() {
 
         <div className="mb-20">
           <label className="block mb-1.5">Description</label>
-            <RichTextEditor
-              value={formData.description || ''}
-              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-              placeholder="Enter description..."
-            />
+          <RichTextEditor
+            value={formData.description || ''}
+            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+            placeholder="Enter description..."
+          />
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t">
