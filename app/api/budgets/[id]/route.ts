@@ -8,12 +8,10 @@ export async function GET(
 ) {
   try {
     const budget = await prisma.budget.findUnique({
-      where: {
-        id: params.id
-      },
+      where: { id: params.id },
       include: {
-        project: true
-      }
+        project: true,
+      },
     });
 
     if (!budget) {
@@ -25,7 +23,6 @@ export async function GET(
 
     return NextResponse.json(budget);
   } catch (error) {
-    console.error('Error fetching budget:', error);
     return NextResponse.json(
       { error: 'Failed to fetch budget' },
       { status: 500 }
@@ -75,12 +72,10 @@ export async function DELETE(
 ) {
   try {
     await prisma.budget.delete({
-      where: {
-        id: params.id
-      }
+      where: { id: params.id },
     });
-
-    return new NextResponse(null, { status: 204 });
+    
+    return NextResponse.json({ message: 'Budget deleted successfully' });
   } catch (error) {
     console.error('Error deleting budget:', error);
     return NextResponse.json(

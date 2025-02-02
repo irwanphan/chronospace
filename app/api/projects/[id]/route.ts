@@ -19,9 +19,6 @@ export async function GET(
       );
     }
 
-    // Log untuk debugging
-    console.log('Project from DB:', project);
-
     return NextResponse.json(project);
   } catch (error) {
     console.error('Error fetching project:', error);

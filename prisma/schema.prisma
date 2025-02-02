@@ -173,6 +173,7 @@ model Budget {
   id            String   @id @default(cuid())
   projectId     String   @unique
   title         String
+  description   String?
   year          Int
   division      String
   totalBudget   Float

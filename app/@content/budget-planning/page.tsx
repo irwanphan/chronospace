@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Budget {
   id: string;
@@ -25,6 +26,8 @@ export default function BudgetPlanningPage() {
     inProgress: 0,
     delayed: 0
   });
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBudgets = async () => {
@@ -73,6 +76,25 @@ export default function BudgetPlanningPage() {
   const largestBudgets = [...budgets]
     .sort((a, b) => b.totalBudget - a.totalBudget)
     .slice(0, 3);
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this budget?')) {
+      try {
+        const response = await fetch(`/api/budgets/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          router.refresh();
+        } else {
+          throw new Error('Failed to delete budget');
+        }
+      } catch (error) {
+        console.error('Error deleting budget:', error);
+        alert('Failed to delete budget');
+      }
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -146,7 +168,7 @@ export default function BudgetPlanningPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -170,8 +192,34 @@ export default function BudgetPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatCurrency(budget.totalBudget)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
-                <td className="px-6 py-4 text-sm text-right">
-                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                <td className="px-6 py-4 text-right">
+                  <div className="relative">
+                    <button 
+                      onClick={() => setActiveMenu(activeMenu === budget.id ? null : budget.id)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    </button>
+
+                    {activeMenu === budget.id && (
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
+                        <button
+                          onClick={() => router.push(`/budget-planning/${budget.id}/edit`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(budget.id)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                        >
+                          <Trash className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
