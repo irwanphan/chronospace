@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Project {
   id: string;
@@ -23,6 +24,8 @@ export default function ProjectPlanningPage() {
     active: 0,
     delayed: 0
   });
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -53,6 +56,23 @@ export default function ProjectPlanningPage() {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this project?')) {
+      try {
+        const response = await fetch(`/api/projects/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          // Refresh data
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Failed to delete project:', error);
+      }
+    }
   };
 
   return (
@@ -105,7 +125,7 @@ export default function ProjectPlanningPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -121,7 +141,7 @@ export default function ProjectPlanningPage() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {projects.map((project) => (
-              <tr key={project.id}>
+              <tr key={project.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 text-sm">{project.projectId}</td>
                 <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
                 <td className="px-6 py-4 text-sm">{project.year}</td>
@@ -129,8 +149,34 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{project.status}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
-                <td className="px-6 py-4 text-sm text-right">
-                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                <td className="px-6 py-4 text-right">
+                  <div className="relative overflow-visible">
+                    <button 
+                      onClick={() => setActiveMenu(activeMenu === project.id ? null : project.id)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    </button>
+
+                    {activeMenu === project.id && (
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
+                        <button
+                          onClick={() => router.push(`/project-planning/${project.id}/edit`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(project.id)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                        >
+                          <Trash className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
