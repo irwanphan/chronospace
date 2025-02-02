@@ -66,7 +66,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
           address: userData.address || '',
           residentId: userData.residentId,
           nationality: userData.nationality,
-          birthday: userData.birthday,
+          birthday: new Date(userData.birthday).toISOString().split('T')[0],
           password: '',
           confirmPassword: '',
         });
