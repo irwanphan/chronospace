@@ -8,6 +8,19 @@ export async function GET(
   try {
     const user = await prisma.user.findUnique({
       where: { id: params.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,          // Ambil role
+        workDivision: true,  // Ambil workDivision
+        employeeId: true,
+        address: true,
+        residentId: true,
+        nationality: true,
+        birthday: true,
+      },
     });
 
     if (!user) {
@@ -17,7 +30,11 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json({
+      ...user,
+      roleId: user.role,             // Map ke roleId
+      workDivisionId: user.workDivision  // Map ke workDivisionId
+    });
   } catch (error) {
     console.error('Error fetching user:', error);
     return NextResponse.json(
@@ -46,7 +63,7 @@ export async function PUT(
         address: body.address,
         residentId: body.residentId,
         nationality: body.nationality,
-        birthday: body.birthday,
+        birthday: new Date(body.birthday).toISOString(),
       },
     });
 
