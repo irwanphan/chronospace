@@ -3,6 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface Role {
+  id: string;
+  name: string;
+}
+
+interface Division {
+  id: string;
+  name: string;
+}
+
 export default function EditUserPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -12,8 +22,8 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     residentId?: string;
     general?: string;
   }>({});
-  const [roles, setRoles] = useState([]);
-  const [divisions, setDivisions] = useState([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,20 +42,20 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userRes] = await Promise.all([
+        const [userRes, rolesRes, divisionsRes] = await Promise.all([
           fetch(`/api/users/${params.id}`),
-          // fetch('/api/roles'),
-          // fetch('/api/work-divisions')
+          fetch('/api/roles'),
+          fetch('/api/work-divisions')
         ]);
 
-        const [userData] = await Promise.all([
+        const [userData, rolesData, divisionsData] = await Promise.all([
           userRes.json(),
-          // rolesRes.json(),
-          // divisionsRes.json()
+          rolesRes.json(),
+          divisionsRes.json()
         ]);
 
-        // setRoles(rolesData);
-        // setDivisions(divisionsData);
+        setRoles(rolesData);
+        setDivisions(divisionsData);
         setFormData({
           name: userData.name,
           email: userData.email,
@@ -57,6 +67,8 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
           residentId: userData.residentId,
           nationality: userData.nationality,
           birthday: userData.birthday,
+          password: '',
+          confirmPassword: '',
         });
         setIsLoading(false);
       } catch (error) {
