@@ -80,7 +80,7 @@ export default function UserManagementPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -94,7 +94,7 @@ export default function UserManagementPage() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user.id}>
+              <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 text-sm">{user.id}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -122,17 +122,17 @@ export default function UserManagementPage() {
                 <td className="px-6 py-4 text-sm">{user.role}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(user.lastLogin)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(user.createdAt)}</td>
-                <td className="px-6 py-4 text-sm text-right">
-                  <div className="relative">
+                <td className="px-6 py-4 text-right">
+                  <div className="relative overflow-visible">
                     <button 
-                      className="p-1 hover:bg-gray-100 rounded"
                       onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
+                      className="p-2 hover:bg-gray-100 rounded-full"
                     >
                       <MoreVertical className="w-4 h-4 text-gray-500" />
                     </button>
-                    
+
                     {activeMenu === user.id.toString() && (
-                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
                         <button
                           onClick={() => router.push(`/user-management/${user.id}/edit`)}
                           className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
