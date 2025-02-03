@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -39,10 +39,9 @@ export default function CreateRequestFAB() {
       {/* FAB Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-colors"
+        className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition transition-all duration-300"
       >
-        {/* change to chevron-down when opened */}
-        {isOpen ? <ChevronDown className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+        {isOpen ? <ChevronUp className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
       </button>
     </div>
   );
