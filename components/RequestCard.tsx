@@ -45,25 +45,30 @@ export default function RequestCard({
         </div>
       </div>
 
+      <hr className="my-4" />
+
       <div className="grid grid-cols-2 gap-8 mb-4">
         <div>
-          <div className="text-xs text-gray-500 mb-1">Requestor</div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gray-200 rounded-full">
+            <div className="w-8 min-w-8 h-8 min-h-8 bg-gray-200 rounded-full">
               {requestor.avatar && (
                 <img 
-                  src={requestor.avatar} 
-                  alt={requestor.name}
-                  className="w-full h-full rounded-full object-cover"
+                src={requestor.avatar} 
+                alt={requestor.name}
+                className="w-full h-full rounded-full object-cover"
                 />
               )}
             </div>
-            <span className="font-medium">{requestor.name}</span>
+            <div>
+              <div className="text-xs text-gray-500 mb-1">Requestor</div>
+              <span className="font-medium">{requestor.name}</span>
+            </div>
           </div>
         </div>
 
         <div>
-          <span className="text-xs text-gray-500">Submitted At {submittedAt}</span>
+          <div className="text-xs text-gray-500 mb-1">Submitted At</div>
+          <div className="font-medium">{submittedAt}</div>
         </div>
 
         <div>
