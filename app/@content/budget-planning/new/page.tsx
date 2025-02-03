@@ -19,6 +19,7 @@ interface FormData {
 interface Project {
   id: string;
   projectTitle: string;
+  status: string;
 }
 
 export default function NewBudgetPage() {
@@ -99,12 +100,19 @@ export default function NewBudgetPage() {
               required
             >
               <option value="">Select Project</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.projectTitle}
-                </option>
-              ))}
+              {projects
+                .filter(project => project.status !== 'ALLOCATED')
+                .map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.projectTitle}
+                  </option>
+                ))}
             </select>
+            {projects.length > 0 && projects.filter(p => p.status !== 'ALLOCATED').length === 0 && (
+              <p className="mt-1 text-sm text-yellow-600">
+                All projects have been allocated with budgets
+              </p>
+            )}
           </div>
 
           <div>
