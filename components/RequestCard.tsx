@@ -38,7 +38,7 @@ export default function RequestCard({
     <div className="bg-white rounded-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">#{id}</span>
+          <span className="text-xs font-medium">#{id}</span>
           <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
             {type}
           </span>
@@ -47,7 +47,7 @@ export default function RequestCard({
 
       <div className="grid grid-cols-2 gap-8 mb-4">
         <div>
-          <div className="text-sm text-gray-500 mb-1">Requestor</div>
+          <div className="text-xs text-gray-500 mb-1">Requestor</div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gray-200 rounded-full">
               {requestor.avatar && (
@@ -63,16 +63,16 @@ export default function RequestCard({
         </div>
 
         <div>
-          <span className="text-sm text-gray-500">Submitted At {submittedAt}</span>
+          <span className="text-xs text-gray-500">Submitted At {submittedAt}</span>
         </div>
 
         <div>
-          <div className="text-sm text-gray-500 mb-1">Work Division</div>
+          <div className="text-xs text-gray-500 mb-1">Work Division</div>
           <div className="font-medium">{workDivision}</div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-500 mb-1">Status</div>
+          <div className="text-xs text-gray-500 mb-1">Status</div>
           <div className="font-medium text-yellow-600">{status}</div>
         </div>
       </div>
@@ -80,27 +80,27 @@ export default function RequestCard({
       <hr className="my-4" />
 
       <div className="mb-4">
-        <div className="text-sm text-gray-500 mb-1">Overview</div>
+        <div className="text-xs text-gray-500 mb-1">Overview</div>
         <h4 className="font-medium mb-2">{title}</h4>
         <p className="text-sm text-gray-600 line-clamp-2">
           {description}
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-8 mb-6">
+      <div className="grid grid-cols-3 gap-1 mb-6">
         <div>
-          <div className="text-sm text-gray-500 mb-1">Proposed Value</div>
-          <div className="font-medium">{proposedValue}</div>
+          <div className="text-xs text-gray-500 mb-1">Proposed Value</div>
+          <div className="text-sm font-medium">{proposedValue}</div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-500 mb-1">Deadline</div>
-          <div className="font-medium">{deadline}</div>
+          <div className="text-xs text-gray-500 mb-1">Deadline</div>
+          <div className="text-sm font-medium">{deadline}</div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-500 mb-1">Attachments</div>
-          <div className="font-medium">{attachments}</div>
+          <div className="text-xs text-gray-500 mb-1">Attachments</div>
+          <div className="text-sm font-medium">{attachments}</div>
         </div>
       </div>
 
