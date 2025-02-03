@@ -13,11 +13,11 @@ export default function CreateRequestFAB() {
       {isOpen && (
         <div className="absolute bottom-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 w-48 py-2 mb-2">
           <Link 
-            href="/purchase-request/new"
+            href="/request/new"
             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-sm"
             onClick={() => setIsOpen(false)}
           >
-            Purchase Request
+            Purchase Request / Memo
           </Link>
           <Link 
             href="/purchase-order/new"
@@ -26,13 +26,13 @@ export default function CreateRequestFAB() {
           >
             Purchase Order
           </Link>
-          <Link 
+          {/* <Link 
             href="/memo/new"
             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-sm"
             onClick={() => setIsOpen(false)}
           >
             Memo
-          </Link>
+          </Link> */}
         </div>
       )}
 
