@@ -26,48 +26,59 @@ export async function GET() {
 // POST: Create new budget
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    console.log('Received budget data:', body); // Debug log
+    const data = await request.json();
 
-    // Pastikan projectId ada
-    if (!body.projectId) {
+    // Cek apakah project sudah memiliki budget
+    const existingProject = await prisma.project.findUnique({
+      where: { id: data.projectId },
+      include: { budget: true }
+    });
+
+    if (existingProject?.budget) {
       return NextResponse.json(
-        { error: 'Project ID is required' },
+        { error: 'This project already has a budget allocated' },
         { status: 400 }
       );
     }
 
-    // Ambil division dari project
-    const project = await prisma.project.findUnique({
-      where: { id: body.projectId }
+    // Mulai transaksi
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Buat budget baru
+      const budget = await tx.budget.create({
+        data: {
+          projectId: data.projectId,
+          title: data.title,
+          year: parseInt(data.year),
+          division: data.division,
+          totalBudget: parseFloat(data.totalBudget.replace(/[,.]/g, '')),
+          startDate: new Date(data.startDate),
+          finishDate: new Date(data.finishDate),
+          description: data.description,
+          status: 'OPEN',
+          project: {
+            connect: {
+              id: data.projectId
+            }
+          }
+        },
+      });
+
+      // 2. Update status project menjadi ALLOCATED
+      await tx.project.update({
+        where: { id: data.projectId },
+        data: {
+          status: 'ALLOCATED'
+        }
+      });
+
+      return budget;
     });
 
-    if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
-      );
-    }
-
-    const budget = await prisma.budget.create({
-      data: {
-        projectId: body.projectId,
-        title: body.title,
-        year: parseInt(body.year),
-        division: project.division,
-        totalBudget: parseFloat(body.totalBudget.toString().replace(/[,.]/g, '')),
-        startDate: new Date(body.startDate),
-        finishDate: new Date(body.finishDate),
-        status: 'In Progress',
-        purchaseRequestStatus: 'Not Submitted',
-      },
-    });
-
-    return NextResponse.json(budget);
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('Detailed error:', error); // Tambahkan log detail error
+    console.error('Error creating budget:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create budget' },
+      { error: 'Failed to create budget' },
       { status: 500 }
     );
   }
