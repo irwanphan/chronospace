@@ -92,7 +92,7 @@ export default function WorkspacePage() {
       </div>
 
       {/* Request List */}
-      <div className="space-y-4">
+      <div className="space-y-4 grid grid-cols-3 gap-4">
         <RequestCard
           id="PR2025010001"
           type="Purchase Request"
