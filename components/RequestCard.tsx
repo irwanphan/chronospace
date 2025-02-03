@@ -113,7 +113,7 @@ export default function RequestCard({
         </button>
         <button 
           onClick={onDecline}
-          className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 flex items-center gap-2"
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
         >
           Decline
         </button>
