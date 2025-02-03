@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
+import StatCard from '@/components/StatCard';
 
 export default function WorkspacePage() {
   const [currentMonth, setCurrentMonth] = useState('Jan 2025');
@@ -58,39 +59,32 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">All Requests Queue</h3>
-            <div className="text-3xl font-bold mb-2">40 Requests</div>
-            <div className="text-sm text-green-600">
-              <span className="font-medium">+8</span> In this Month
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">New Requests</h3>
-            <div className="text-3xl font-bold mb-2">28 Requests</div>
-            <div className="text-sm text-green-600">
-              <span className="font-medium">+8</span> In this Month
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Stale Requests</h3>
-            <div className="text-3xl font-bold mb-2">12 Requests</div>
-            <div className="text-sm text-red-600">
-              <span className="font-medium">+2</span> In this Month
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Completed Requests</h3>
-            <div className="text-3xl font-bold mb-2">30 Requests</div>
-            <div className="text-sm text-green-600">
-              <span className="font-medium">+9</span> In this Month
-            </div>
-          </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatCard
+            title="All Requests Queue"
+            count={40}
+            change={8}
+            type="increase"
+          />
+          <StatCard
+            title="New Requests"
+            count={28}
+            change={8}
+            type="increase"
+          />
+          <StatCard
+            title="Stale Requests"
+            count={12}
+            change={2}
+            type="decrease"
+          />
+          <StatCard
+            title="Completed Requests"
+            count={30}
+            change={9}
+            type="increase"
+          />
         </div>
 
         {/* Request List */}
