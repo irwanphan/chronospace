@@ -44,26 +44,79 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json();
+    const data = await request.json();
 
-    const budget = await prisma.budget.update({
-      where: {
-        id: params.id
-      },
-      data: {
-        title: body.title,
-        year: parseInt(body.year),
-        division: body.division,
-        totalBudget: body.totalBudget,
-        startDate: new Date(body.startDate),
-        finishDate: new Date(body.finishDate),
-        status: body.status,
-        purchaseRequestStatus: body.purchaseRequestStatus,
-        description: body.description,
-      },
+    // Ambil data budget lama untuk mengetahui project sebelumnya
+    const existingBudget = await prisma.budget.findUnique({
+      where: { id: params.id },
+      include: { project: true }
     });
 
-    return NextResponse.json(budget);
+    if (!existingBudget) {
+      return NextResponse.json(
+        { error: 'Budget not found' },
+        { status: 404 }
+      );
+    }
+
+    // Jika project berubah, cek apakah project baru sudah memiliki budget
+    if (data.projectId !== existingBudget.projectId) {
+      const newProject = await prisma.project.findUnique({
+        where: { id: data.projectId },
+        include: { budget: true }
+      });
+
+      if (newProject?.budget) {
+        return NextResponse.json(
+          { error: 'The selected project already has a budget allocated' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Mulai transaksi
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Update budget
+      const updatedBudget = await tx.budget.update({
+        where: { id: params.id },
+        data: {
+          title: data.title,
+          year: parseInt(data.year),
+          division: data.division,
+          totalBudget: typeof data.totalBudget === 'string' 
+            ? parseFloat(data.totalBudget.replace(/[,.]/g, ''))
+            : data.totalBudget,
+          startDate: new Date(data.startDate),
+          finishDate: new Date(data.finishDate),
+          description: data.description,
+          status: data.status,
+          project: {
+            connect: {
+              id: data.projectId
+            }
+          }
+        },
+      });
+
+      // 2. Jika project berubah, update status kedua project
+      if (data.projectId !== existingBudget.projectId) {
+        // Reset status project lama
+        await tx.project.update({
+          where: { id: existingBudget.projectId },
+          data: { status: 'DRAFT' }
+        });
+      }
+
+      // Selalu update status project baru
+      await tx.project.update({
+        where: { id: data.projectId },
+        data: { status: 'ALLOCATED' }
+      });
+
+      return updatedBudget;
+    });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error updating budget:', error);
     return NextResponse.json(
