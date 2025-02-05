@@ -1,11 +1,15 @@
 'use client';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
+import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <header className={cn(
@@ -38,18 +42,47 @@ const Header = () => {
           </span>
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="font-medium">Irwan Phan</p>
-            <p className="text-sm text-gray-500">Administrator</p>
-          </div>
-          <Image
-            src=""
-            alt="User avatar"
-            width={40}
-            height={40}
-            className="rounded-full"
-          />
+        <div className="relative">
+          <button 
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 transition-colors"
+          >
+            <div className="text-right">
+              <p className="font-medium">Irwan Phan</p>
+              <p className="text-sm text-gray-500">Administrator</p>
+            </div>
+            <Image
+              src=""
+              alt="User avatar"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          </button>
+
+          {/* User Menu Popup */}
+          {showUserMenu && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+              <Link 
+                href="/profile"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-gray-700"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <User className="w-4 h-4" />
+                Profile
+              </Link>
+              <button 
+                onClick={() => {
+                  signOut({ callbackUrl: '/login' });
+                  setShowUserMenu(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-red-600 w-full text-left"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
