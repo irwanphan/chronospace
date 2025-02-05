@@ -47,17 +47,17 @@ const Header = () => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 transition-colors"
           >
-            <div className="text-right">
-              <p className="font-medium">Irwan Phan</p>
-              <p className="text-sm text-gray-500">Administrator</p>
-            </div>
             <Image
               src=""
               alt="User avatar"
               width={40}
               height={40}
-              className="rounded-full"
+              className="rounded-full overflow-hidden bg-gray-200"
             />
+            <div className="text-right">
+              <p className="font-medium">Irwan Phan</p>
+              <p className="text-sm text-gray-500">Administrator</p>
+            </div>
           </button>
 
           {/* User Menu Popup */}
