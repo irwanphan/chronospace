@@ -7,9 +7,18 @@ import Link from 'next/link';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 
+const getInitials = (name: string) => {
+  const words = name.split(' ');
+  return words.length > 1 
+    ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+    : words[0][0].toUpperCase();
+};
+
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userImage = ""; // ganti dengan data user image yang sebenarnya
+  const userName = "Irwan Phan";
 
   return (
     <header className={cn(
@@ -47,13 +56,19 @@ const Header = () => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 transition-colors"
           >
-            <Image
-              src=""
-              alt="User avatar"
-              width={40}
-              height={40}
-              className="rounded-full overflow-hidden bg-gray-200"
-            />
+            {userImage ? (
+              <Image
+                src={userImage}
+                alt="User avatar"
+                width={40}
+                height={40}
+                className="rounded-full overflow-hidden bg-gray-200"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">
+                {getInitials(userName)}
+              </div>
+            )}
             <div className="text-right">
               <p className="font-medium">Irwan Phan</p>
               <p className="text-sm text-gray-500">Administrator</p>
