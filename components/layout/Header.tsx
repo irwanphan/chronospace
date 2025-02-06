@@ -2,7 +2,7 @@
 import { Bell, Search, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
@@ -17,8 +17,10 @@ const getInitials = (name: string) => {
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const userImage = ""; // ganti dengan data user image yang sebenarnya
-  const userName = "Irwan Phan";
+  const { data: session } = useSession();
+  const userImage = session?.user?.image || "";
+  const userName = session?.user?.name || "Guest";
+  const userRole = session?.user?.role || "User";
 
   return (
     <header className={cn(
@@ -70,8 +72,8 @@ const Header = () => {
               </div>
             )}
             <div className="text-right">
-              <p className="font-medium">Irwan Phan</p>
-              <p className="text-sm text-gray-500">Administrator</p>
+              <p className="font-medium">{userName}</p>
+              <p className="text-sm text-gray-500">{userRole}</p>
             </div>
           </button>
 
