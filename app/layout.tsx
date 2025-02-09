@@ -11,6 +11,9 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Chronospace",
   description: "Administrative Workspace",
+  icons: {
+    icon: '/cing.png',
+  },
 };
 
 export default function RootLayout({
@@ -20,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${montserrat.variable}`}>
-      <body className="font-montserrat">
+      <body className={`font-montserrat`}>
         <AuthProvider>
           {children}
         </AuthProvider>
