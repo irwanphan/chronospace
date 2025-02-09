@@ -119,9 +119,10 @@ export default function UserAccessControlPage({ params }: { params: { id: string
                       [key]: e.target.checked
                     }
                   })}
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                  id={key}
                 />
-                <label className="ml-2 capitalize">
+                <label className="ml-2 capitalize cursor-pointer" htmlFor={key}>
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </label>
               </div>
@@ -144,9 +145,10 @@ export default function UserAccessControlPage({ params }: { params: { id: string
                       [key]: e.target.checked
                     }
                   })}
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                  id={key}
                 />
-                <label className="ml-2 capitalize">
+                <label className="ml-2 capitalize cursor-pointer" htmlFor={key}>
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </label>
               </div>
@@ -169,9 +171,10 @@ export default function UserAccessControlPage({ params }: { params: { id: string
                       [key]: e.target.checked
                     }
                   })}
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                  id={key}
                 />
-                <label className="ml-2 capitalize">
+                <label className="ml-2 capitalize cursor-pointer" htmlFor={key}>
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </label>
               </div>
