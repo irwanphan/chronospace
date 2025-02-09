@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -132,13 +132,20 @@ export default function UserManagementPage() {
                     </button>
 
                     {activeMenu === user.id.toString() && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-48 z-50">
                         <button
                           onClick={() => router.push(`/user-management/${user.id}/edit`)}
                           className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
                         >
                           <Pencil className="w-4 h-4" />
                           Edit
+                        </button>
+                        <button
+                          onClick={() => router.push(`/user-management/${user.id}/access-control`)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Lock className="w-4 h-4" />
+                          Access Control
                         </button>
                         <button
                           onClick={() => handleDelete(user.id.toString())}
