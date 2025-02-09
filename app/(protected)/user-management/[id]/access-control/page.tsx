@@ -106,7 +106,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
       <div className="space-y-8">
         <section>
           <h2 className="text-xl font-medium mb-4">Menu Access</h2>
-          <div className="space-y-3">
+          <div className="grid gap-2">
             {Object.entries(access.menuAccess).map(([key, value]) => (
               <div key={key} className="flex items-center">
                 <input
@@ -132,7 +132,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
 
         <section>
           <h2 className="text-xl font-medium mb-4">Activity Access</h2>
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 gap-2">
             {Object.entries(access.activityAccess).map(([key, value]) => (
               <div key={key} className="flex items-center">
                 <input
@@ -158,7 +158,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
 
         <section>
           <h2 className="text-xl font-medium mb-4">Workspace Access</h2>
-          <div className="space-y-3">
+          <div className="grid gap-2">
             {Object.entries(access.workspaceAccess).map(([key, value]) => (
               <div key={key} className="flex items-center">
                 <input
@@ -182,6 +182,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
           </div>
         </section>
 
+        <hr className="my-4" />
         <div className="flex justify-end gap-4">
           <button
             onClick={() => router.push('/user-management')}
