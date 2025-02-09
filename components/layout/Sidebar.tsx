@@ -1,5 +1,5 @@
 'use client';
-import { Calendar, Users, BarChart2, Settings, Layout, Clock } from 'lucide-react';
+import { Calendar, Users, BarChart2, Settings, Clock, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -15,7 +15,7 @@ const navigation = [
   {
     name: 'Workspace',
     href: '/workspace',
-    icon: Layout
+    icon: LayoutDashboard
   },
   {
     name: 'Project Planning',

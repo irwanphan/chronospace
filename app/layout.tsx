@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import { headers } from 'next/headers';
 import { montserrat } from './fonts';
+import AuthProvider from '@/components/providers/SessionProvider';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,35 +13,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  content,
 }: {
   children: React.ReactNode;
-  content: React.ReactNode;
 }) {
-  const headersList = headers();
-  const useLayout = headersList.get('x-use-layout') === 'true';
-
-  if (!useLayout) {
-    return (
-      <html lang="en" className={montserrat.variable}>
-        <body className="font-montserrat">{children}</body>
-      </html>
-    );
-  }
-
   return (
-    <html lang="en" className={montserrat.variable}>
-      <body className="font-montserrat">
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <div className="flex flex-1">
-            <Sidebar />
-            {/* <main className="flex-1 ml-64 mt-16 p-6">
-              {children}
-            </main> */}
-          </div>
-          {content}
-        </div>
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
