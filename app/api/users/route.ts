@@ -9,6 +9,8 @@ export async function GET() {
         name: true,
         email: true,
         role: true,
+        workDivision: true,
+        employeeId: true,
         lastLogin: true,
         createdAt: true,
         image: true,
@@ -19,21 +21,13 @@ export async function GET() {
         },
       },
       orderBy: {
-        name: 'asc',
+        createdAt: 'desc',
       },
     });
-    return NextResponse.json(users.map(user => ({
-      id: user.id,
-      name: user.name,
-      roles: user.userRoles.map(ur => ur.roleId),
-      image: user.image,
-      email: user.email,
-      role: user.role,
-      lastLogin: user.lastLogin,
-      createdAt: user.createdAt,
-    })));
+
+    return NextResponse.json(users);
   } catch (error) {
-    console.error('Failed to fetch users:', error);
+    console.error('Error fetching users:', error);
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }
