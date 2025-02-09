@@ -7,7 +7,6 @@ import { IconBrandGoogle, IconBrandFacebook } from "@tabler/icons-react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -92,6 +91,16 @@ export default function LoginPage() {
                 <IconBrandFacebook size={20} />
               </button>
             </div>
+
+            <p className="text-center text-sm text-gray-600">
+              Don&apos;t have an account?{' '}
+              <a
+                href="/register"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Sign up
+              </a>
+            </p>
           </form>
         </div>
       </div>
