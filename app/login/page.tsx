@@ -69,7 +69,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#14161A] hover:bg-[#14161A]/90"
+              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
             >
               Login
             </button>
@@ -84,10 +84,10 @@ export default function LoginPage() {
             </div>
 
             <div className="flex justify-center gap-3">
-              <button type="button" className="w-12 p-2 border border-gray-300 rounded-md flex justify-center">
+              <button type="button" className="w-12 p-2 border border-gray-300 rounded-md flex justify-center hover:bg-gray-50">
                 <IconBrandGoogle size={20} />
               </button>
-              <button type="button" className="w-12 p-2 border border-gray-300 rounded-md flex justify-center">
+              <button type="button" className="w-12 p-2 border border-gray-300 rounded-md flex justify-center hover:bg-gray-50">
                 <IconBrandFacebook size={20} />
               </button>
             </div>
