@@ -86,16 +86,16 @@ const Sidebar = () => {
           onClick={toggleSidebar}
           className="w-full h-full flex items-center px-4"
         >
-          <div className="w-8 h-8 flex-shrink-0">
+          <div className="w-6 h-6 flex-shrink-0">
             <Image
-              src="/time.svg"
+              src="/cing.svg"
               alt="ChronoSpace Logo"
               width={32}
               height={32}
             />
           </div>
           <span className={cn(
-            "ml-3 font-semibold text-xl transition-all duration-300 flex-shrink-0",
+            "ml-3 font-semibold text-xl transition-all duration-300 flex-shrink-0 text-blue-600",
             isCollapsed ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
           )}>
             ChronoSpace

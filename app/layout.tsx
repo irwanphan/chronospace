@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthProvider from '@/components/providers/SessionProvider';
+import { Montserrat } from 'next/font/google';
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+});
 
 export const metadata: Metadata = {
   title: "Chronospace",
@@ -13,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${montserrat.variable}`}>
+      <body className="font-montserrat">
         <AuthProvider>
           {children}
         </AuthProvider>
