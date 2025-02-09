@@ -17,7 +17,7 @@ const getInitials = (name: string) => {
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const userImage = session?.user?.image || "";
   const userName = session?.user?.name || "Guest";
   const userRole = session?.user?.role || "User";
@@ -71,9 +71,18 @@ const Header = () => {
                 {getInitials(userName)}
               </div>
             )}
-            <div className="text-right">
-              <p className="font-medium">{userName}</p>
-              <p className="text-sm text-gray-500">{userRole}</p>
+            <div className="text-left">
+              {status === "loading" ? (
+                <>
+                  <div className="h-5 w-24 bg-gray-300 rounded animate-pulse mb-1"></div>
+                  <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium">{userName}</p>
+                  <p className="text-sm text-gray-500">{userRole}</p>
+                </>
+              )}
             </div>
           </button>
 
