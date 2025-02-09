@@ -5,43 +5,76 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
-
-const navigation = [
-  {
-    name: 'Timeline',
-    href: '/timeline',
-    icon: Clock
-  },
-  {
-    name: 'Workspace',
-    href: '/workspace',
-    icon: LayoutDashboard
-  },
-  {
-    name: 'Project Planning',
-    href: '/project-planning',
-    icon: Calendar
-  },
-  {
-    name: 'Budget Planning',
-    href: '/budget-planning',
-    icon: BarChart2
-  },
-  {
-    name: 'User Management',
-    href: '/user-management',
-    icon: Users
-  },
-  {
-    name: 'Workspace Management',
-    href: '/workspace-management',
-    icon: Settings
-  }
-];
+import { useSession } from 'next-auth/react';
 
 const Sidebar = () => {
   const pathname = usePathname();
   const { isCollapsed, toggleSidebar } = useSidebarStore();
+  const { data: session, status } = useSession();
+  const defaultAccess = {
+    timeline: true,
+    workspace: true,
+    projectPlanning: true,
+    budgetPlanning: true,
+    userManagement: true,
+    workspaceManagement: true
+  };
+
+  const userAccess = session?.user?.access?.menuAccess || defaultAccess;
+
+  if (status === "loading") {
+    return (
+      <aside className={cn(
+        "fixed left-0 top-0 h-screen bg-white border-r",
+        isCollapsed ? "w-16" : "w-64"
+      )}>
+        <div className="py-4 space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-11 mx-4 bg-gray-200 rounded animate-pulse" />
+          ))}
+        </div>
+      </aside>
+    );
+  }
+
+  const navigation = [
+    {
+      name: 'Timeline',
+      href: '/timeline',
+      icon: Clock,
+      show: userAccess.timeline
+    },
+    {
+      name: 'Workspace',
+      href: '/workspace',
+      icon: LayoutDashboard,
+      show: userAccess.workspace
+    },
+    {
+      name: 'Project Planning',
+      href: '/project-planning',
+      icon: Calendar,
+      show: userAccess.projectPlanning
+    },
+    {
+      name: 'Budget Planning',
+      href: '/budget-planning',
+      icon: BarChart2,
+      show: userAccess.budgetPlanning
+    },
+    {
+      name: 'User Management',
+      href: '/user-management',
+      icon: Users,
+      show: userAccess.userManagement
+    },
+    {
+      name: 'Workspace Management',
+      href: '/workspace-management',
+      icon: Settings,
+      show: userAccess.workspaceManagement
+    }
+  ].filter(item => item.show);
 
   return (
     <aside className={cn(

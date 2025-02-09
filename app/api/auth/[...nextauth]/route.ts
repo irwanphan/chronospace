@@ -1,21 +1,23 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import NextAuth, { User } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { JWT } from "next-auth/jwt";
-import { 
-  Session, 
-  // Account, 
-  // Profile 
-} from "next-auth";
-import { AuthOptions } from "next-auth";
-import { DefaultUser } from "next-auth";
+import NextAuth, { User, AuthOptions, DefaultUser } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { AdapterUser } from "next-auth/adapters";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
+import bcrypt from "bcryptjs";
 
 interface CustomUser extends DefaultUser {
   role: string;
   emailVerified: Date | null;
+}
+
+interface MenuAccess {
+  timeline: boolean;
+  workspace: boolean;
+  projectPlanning: boolean;
+  budgetPlanning: boolean;
+  userManagement: boolean;
+  workspaceManagement: boolean;
 }
 
 export const authOptions: AuthOptions = {
@@ -60,22 +62,33 @@ export const authOptions: AuthOptions = {
     async jwt({ 
       token, 
       user, 
-      // account, 
-      // profile 
     }: { 
       token: JWT; 
       user: User | AdapterUser | null;
-      // account: Account | null;
-      // profile?: Profile;
     }) {
       if (user) {
         token.role = (user as CustomUser).role;
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
-      if (session?.user) {
+    async session({ session, token }) {
+      if (session?.user && token.sub) {
+        const userAccess = await prisma.userAccess.findUnique({
+          where: { userId: token.sub }
+        });
+
+        session.user.id = token.sub;
         session.user.role = token.role as string;
+        session.user.access = {
+          menuAccess: (userAccess?.menuAccess as unknown as MenuAccess) || {
+            timeline: false,
+            workspace: false,
+            projectPlanning: false,
+            budgetPlanning: false,
+            userManagement: false,
+            workspaceManagement: false
+          }
+        };
       }
       return session;
     },
