@@ -31,32 +31,51 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Missing credentials");
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: credentials.email },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            password: true
+          }
         });
 
-        if (!user) return null;
+        console.log("Found user:", user); // Debug log
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        if (!user) {
+          console.log("No user found for email:", credentials.email); // Debug log
+          throw new Error("No user found");
+        }
 
-        if (!isPasswordValid) return null;
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+
+        console.log("Password valid:", isPasswordValid); // Debug log
+
+        if (!isPasswordValid) {
+          throw new Error("Invalid password");
+        }
 
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role,
-          emailVerified: user.emailVerified
+          role: user.role
         };
       }
     })
   ],
   pages: {
     signIn: '/login',
-    error: '/login',
+    signOut: '/login',
+    error: '/login'
   },
   callbacks: {
     async jwt({ 
@@ -100,7 +119,8 @@ export const authOptions: AuthOptions = {
   },
   session: {
     strategy: "jwt" as const,
-  }
+  },
+  debug: true, // Enable debug mode
 };
 
 const handler = NextAuth(authOptions);
