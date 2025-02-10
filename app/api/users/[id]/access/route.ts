@@ -40,30 +40,33 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const access = await prisma.userAccess.findUnique({
-      where: {
-        userId: params.id,
-      },
+    const userAccess = await prisma.userAccess.findUnique({
+      where: { userId: params.id }
     });
 
-    return NextResponse.json(access || {
-      menuAccess: {
-        timeline: true,
-        workspace: true,
-        projectPlanning: true,
-        budgetPlanning: true,
-        userManagement: true,
-        workspaceManagement: true
-      },
-      activityAccess: {
-        // ... default values ...
-      },
-      workspaceAccess: {
-        // ... default values ...
-      }
-    });
+    // Jika tidak ada access, kembalikan default values
+    if (!userAccess) {
+      return NextResponse.json({
+        menuAccess: {
+          timeline: false,
+          workspace: false,
+          projectPlanning: false,
+          budgetPlanning: false,
+          userManagement: false,
+          workspaceManagement: false
+        },
+        activityAccess: {
+          // ... default values
+        },
+        workspaceAccess: {
+          // ... default values
+        }
+      });
+    }
+
+    return NextResponse.json(userAccess);
   } catch (error) {
-    console.error('Error fetching access:', error);
+    console.error('Error fetching access control:', error);
     return NextResponse.json(
       { error: 'Failed to fetch access control' },
       { status: 500 }
