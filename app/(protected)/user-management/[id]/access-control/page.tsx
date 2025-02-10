@@ -208,7 +208,10 @@ export default function UserAccessControlPage({ params }: { params: { id: string
   };
 
   const formatLabel = (key: string) => {
-    return key.replace(/([A-Z])/g, ' $1').trim();
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .replace(/^[a-z]/, (str) => str.toUpperCase());
   };
 
   return (
@@ -220,12 +223,12 @@ export default function UserAccessControlPage({ params }: { params: { id: string
         <h2 className="text-xl font-semibold">Menu Access</h2>
         <div className="grid grid-cols-1 gap-3">
           {MENU_ACCESS_ORDER.map((key) => (
-            <label key={key} className="flex items-center space-x-2">
+            <label key={key} className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={access.menuAccess[key]}
                 onChange={(e) => handleMenuAccessChange(key, e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4 cursor-pointer"
               />
               <span className="text-sm">{formatLabel(key)}</span>
             </label>
@@ -238,12 +241,12 @@ export default function UserAccessControlPage({ params }: { params: { id: string
         <h2 className="text-xl font-semibold">Activity Access</h2>
         <div className="grid grid-cols-3 gap-3">
           {ACTIVITY_ACCESS_ORDER.map((key) => (
-            <label key={key} className="flex items-center space-x-2">
+            <label key={key} className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={access.activityAccess[key]}
                 onChange={(e) => handleActivityAccessChange(key, e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4 cursor-pointer"
               />
               <span className="text-sm">{formatLabel(key)}</span>
             </label>
@@ -256,12 +259,12 @@ export default function UserAccessControlPage({ params }: { params: { id: string
         <h2 className="text-xl font-semibold">Workspace Access</h2>
         <div className="grid grid-cols-1 gap-3">
           {WORKSPACE_ACCESS_ORDER.map((key) => (
-            <label key={key} className="flex items-center space-x-2">
+            <label key={key} className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={access.workspaceAccess[key]}
                 onChange={(e) => handleWorkspaceAccessChange(key, e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4 cursor-pointer"
               />
               <span className="text-sm">{formatLabel(key)}</span>
             </label>
