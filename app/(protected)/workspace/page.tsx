@@ -6,8 +6,11 @@ import Link from 'next/link';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
 import StatCard from '@/components/StatCard';
+import { useSession } from "next-auth/react";
 
 export default function WorkspacePage() {
+  const { data: session } = useSession();
+  const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest;
   const [currentMonth, setCurrentMonth] = useState('Jan 2025');
 
   return (
@@ -132,7 +135,8 @@ export default function WorkspacePage() {
           </button>
         </div>
       </div>
-      <CreateRequestFAB />
+      
+      {canCreateRequest && <CreateRequestFAB />}
     </>
   );
 }
