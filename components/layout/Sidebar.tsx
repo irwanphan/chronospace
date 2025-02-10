@@ -88,7 +88,7 @@ const Sidebar = () => {
         >
           <div className="w-6 h-6 flex-shrink-0">
             <Image
-              src="/cing.svg"
+              src="/logo.svg"
               alt="ChronoSpace Logo"
               width={32}
               height={32}

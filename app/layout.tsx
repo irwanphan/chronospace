@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "Chronospace",
   description: "Administrative Workspace",
   icons: {
-    icon: '/cing.png',
+    icon: '/logo.svg',
   },
 };
 
