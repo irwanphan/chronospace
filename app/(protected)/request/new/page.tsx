@@ -12,8 +12,8 @@ interface BudgetPlan {
   title: string;
   projectId: string;
   project: {
-    id: string;
-    title: string;
+    projectCode: string;
+    projectTitle: string;
   };
   items: BudgetItem[];
 }
@@ -33,7 +33,7 @@ export default function NewRequestPage() {
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
-  
+  console.log(budgetPlans)
   const [formData, setFormData] = useState({
     requestCategory: 'Purchase Request',
     budgetId: '',
@@ -200,7 +200,7 @@ export default function NewRequestPage() {
               <select
                 value={formData.requestCategory}
                 onChange={(e) => setFormData(prev => ({ ...prev, requestCategory: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg bg-white"
                 required
               >
                 <option value="Purchase Request">Purchase Request</option>
@@ -218,7 +218,7 @@ export default function NewRequestPage() {
               <select
                 value={formData.budgetId}
                 onChange={(e) => handleBudgetChange(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg bg-white"
                 required
               >
                 <option value="">Select Budget</option>
@@ -236,8 +236,8 @@ export default function NewRequestPage() {
               </label>
               <input
                 type="text"
-                value={budgetPlans.find(b => b.id === formData.budgetId)?.project?.title || ''}
-                className="w-full px-4 py-2 border rounded-lg bg-gray-50"
+                value={budgetPlans.find(b => b.id === formData.budgetId)?.project?.projectTitle || ''}
+                className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                 disabled
               />
             </div>
