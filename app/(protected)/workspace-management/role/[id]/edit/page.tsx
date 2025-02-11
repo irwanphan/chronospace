@@ -86,7 +86,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
         <div>
           <label className="block text-sm font-medium mb-1">
             Role Code <span className="text-red-500">*</span>

@@ -55,21 +55,25 @@ export default function RolePage() {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6">
+    <div className="space-y-8">
+      <h1 className="text-2xl font-semibold mb-6">Role</h1>
+      
       <div className="flex items-center justify-between mb-6">
-        <div className="relative w-80">
-          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="search"
-            placeholder="Search..."
-            className="pl-10 pr-4 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
         <div className="flex items-center gap-3">
+          <div className="relative w-80">
+            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="search"
+              placeholder="Search..."
+              className="pl-10 pr-4 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+          </div>
           <button className="flex items-center gap-2 px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-50">
             <Filter className="w-4 h-4" />
             Filter
           </button>
+        </div>
+        <div className="flex items-center gap-3">
           <Link
             href="/workspace-management/role/new"
             className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
@@ -86,78 +90,80 @@ export default function RolePage() {
         </div>
       )}
 
-      <table className="w-full">
-        <thead>
-          <tr className="border-b">
-            <th className="text-left py-3 px-4">#</th>
-            <th className="text-left py-3 px-4">Name</th>
-            <th className="text-left py-3 px-4">Description</th>
-            <th className="text-left py-3 px-4">Approval Limit</th>
-            <th className="text-left py-3 px-4 w-16"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading ? (
-            <tr>
-              <td colSpan={5} className="text-center py-4">Loading...</td>
+      <div className="bg-white rounded-lg shadow border border-gray-200">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="text-left py-3 px-4">#</th>
+              <th className="text-left py-3 px-4">Name</th>
+              <th className="text-left py-3 px-4">Description</th>
+              <th className="text-left py-3 px-4">Approval Limit</th>
+              <th className="text-left py-3 px-4 w-16"></th>
             </tr>
-          ) : roles.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="text-center py-4 text-gray-500">
-                No roles found
-              </td>
-            </tr>
-          ) : (
-            roles.map((role, index) => (
-              <tr key={role.id} className="border-b">
-                <td className="py-3 px-4">{index + 1}</td>
-                <td className="py-3 px-4">{role.roleName}</td>
-                <td className="py-3 px-4">
-                  {role.description || '-'}
-                </td>
-                <td className="py-3 px-4">
-                  {new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  }).format(role.approvalLimit)}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="relative">
-                    <button 
-                      className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                      onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-500" />
-                    </button>
-                    
-                    {/* Popup Menu */}
-                    {activeMenu === role.id && (
-                      <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
-                        <button
-                          onClick={() => router.push(`/workspace-management/role/${role.id}/edit`)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(role.id)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                        >
-                          <Trash className="w-4 h-4" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <tr>
+                <td colSpan={5} className="text-center py-4">Loading...</td>
+              </tr>
+            ) : roles.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-4 text-gray-500">
+                  No roles found
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              roles.map((role, index) => (
+                <tr key={role.id} className="border-b">
+                  <td className="py-3 px-4">{index + 1}</td>
+                  <td className="py-3 px-4">{role.roleName}</td>
+                  <td className="py-3 px-4">
+                    {role.description || '-'}
+                  </td>
+                  <td className="py-3 px-4">
+                    {new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
+                      currency: 'IDR',
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(role.approvalLimit)}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="relative">
+                      <button 
+                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                        onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
+                      >
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </button>
+                      
+                      {/* Popup Menu */}
+                      {activeMenu === role.id && (
+                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                          <button
+                            onClick={() => router.push(`/workspace-management/role/${role.id}/edit`)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Pencil className="w-4 h-4" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(role.id)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                          >
+                            <Trash className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 } 
