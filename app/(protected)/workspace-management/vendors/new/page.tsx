@@ -68,7 +68,7 @@ export default function NewVendorPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <div className="space-y-4">
           <div>
             <label className="block mb-1.5">

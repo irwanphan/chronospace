@@ -113,7 +113,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      <form onSubmit={handleSubmit} className="space-y-6 border border-gray-200 rounded-lg p-6">
         <div>
           <label className="block text-sm font-medium mb-1">
             Vendor Code <span className="text-red-500">*</span>
