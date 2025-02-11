@@ -163,7 +163,7 @@ export default function NewRequestPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="space-y-8 max-w-4xl">
       <h1 className="text-2xl font-semibold mb-4">New Request</h1>
       
       {/* Request Info Card */}
@@ -188,7 +188,7 @@ export default function NewRequestPage() {
         </div>
       </div>
 
-      <div className="font-semibold text-gray-900 text-lg mb-4">Request Information</div>
+      <div className="font-semibold text-gray-900 text-lg">Request Information</div>
 
       <form onSubmit={handleSubmit}>
         <div className="bg-white rounded-lg p-6 border border-gray-200 mb-6">
@@ -265,22 +265,9 @@ export default function NewRequestPage() {
               onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
             />
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg p-6 border border-gray-200 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Item List</h2>
-            <button
-              type="button"
-              onClick={handleAddItem}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add Item
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
+          <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
+          <div className="overflow-x-auto mb-4">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
@@ -339,24 +326,42 @@ export default function NewRequestPage() {
                 ))}
               </tbody>
             </table>
+
+            {selectedItems.length === 0 && (
+              <div className="text-gray-500 text-sm mt-4">
+                No items selected
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddItem}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Item
+          </button>
+
+          <hr className="my-6" />
+
+          <div className="flex justify-end gap-3">
+            <Link
+              href="/workspace"
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Link
-            href="/workspace"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-        </div>
       </form>
     </div>
   );
