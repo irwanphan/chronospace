@@ -99,10 +99,10 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   if (isLoading) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">Edit Project</h1>
 
-      <div className="bg-white rounded-lg p-6 mb-6">
+      <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>ID: {formData.projectId}</div>
           <div>Request Date: {formatDate(formData.requestDate)}</div>
@@ -110,7 +110,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-lg p-6 space-y-6">
+        <div className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
           <h2 className="text-lg font-semibold">Request Information</h2>
 
           <div className="space-y-4">

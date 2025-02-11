@@ -111,10 +111,10 @@ export default function NewProjectPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">New Project</h1>
       
-      <div className="bg-white rounded-lg p-6 mb-6">
+      <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>
             ID: {projectId}
@@ -125,7 +125,7 @@ export default function NewProjectPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
         <div className="space-y-4">
