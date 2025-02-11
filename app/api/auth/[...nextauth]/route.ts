@@ -41,7 +41,8 @@ interface ActivityAccess {
   deleteApprovalSchema: boolean;
   createUser: boolean;
   editUser: boolean;
-  deleteUser: boolean;  
+  deleteUser: boolean;
+  manageUserAccess: boolean;
 }
 
 interface WorkspaceAccess {
@@ -157,7 +158,8 @@ export const authOptions: AuthOptions = {
             deleteApprovalSchema: false,
             createUser: false,
             editUser: false,
-            deleteUser: false
+            deleteUser: false,
+            manageUserAccess: false
           },
           workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
             createPurchaseRequest: false,

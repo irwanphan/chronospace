@@ -39,6 +39,7 @@ declare module "next-auth" {
           createUser: boolean;
           editUser: boolean;
           deleteUser: boolean;
+          manageUserAccess: boolean;
         },
         workspaceAccess: {
           createPurchaseRequest: boolean;

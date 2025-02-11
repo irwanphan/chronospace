@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
 
 interface User {
   id: number;
@@ -19,6 +20,11 @@ export default function UserManagementPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
+  const { data: session } = useSession();
+  const canCreateUser = session?.user?.access?.activityAccess?.createUser;
+  const canEditUser = session?.user?.access?.activityAccess?.editUser;
+  const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
+  const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
 
   const fetchUsers = async () => {
     const response = await fetch('/api/users');
@@ -71,13 +77,15 @@ export default function UserManagementPage() {
           <Filter className="w-4 h-4" />
           Filter
         </button>
-        <Link
-          href="/user-management/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4" />
-          Add User
-        </Link>
+        {canCreateUser && (
+          <Link
+            href="/user-management/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            Add User
+          </Link>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow border border-gray-200">
@@ -133,27 +141,41 @@ export default function UserManagementPage() {
 
                     {activeMenu === user.id.toString() && (
                       <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-48 z-50">
-                        <button
-                          onClick={() => router.push(`/user-management/${user.id}/edit`)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => router.push(`/user-management/${user.id}/access-control`)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Lock className="w-4 h-4" />
-                          Access Control
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.id.toString())}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                        >
-                          <Trash className="w-4 h-4" />
-                          Delete
-                        </button>
+                        {canEditUser && (
+                          <button
+                            onClick={() => router.push(`/user-management/${user.id}/edit`)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Pencil className="w-4 h-4" />
+                            Edit
+                          </button>
+                        )}
+                        {canManageUserAccess && (
+                          <button
+                            onClick={() => router.push(`/user-management/${user.id}/access-control`)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Key className="w-4 h-4" />
+                            Access Control
+                          </button>
+                        )}
+                        {canDeleteUser && (
+                          <button
+                            onClick={() => handleDelete(user.id.toString())}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                          >
+                            <Trash className="w-4 h-4" />
+                            Delete
+                          </button>
+                        )}
+                        {
+                          !canCreateUser && !canEditUser && !canDeleteUser && !canManageUserAccess && (
+                            <div className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
+                              <Lock className="w-4 h-4" />
+                              No Access
+                            </div>
+                          )
+                        }
                       </div>
                     )}
                   </div>
