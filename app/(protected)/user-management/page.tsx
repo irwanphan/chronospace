@@ -64,28 +64,34 @@ export default function UserManagementPage() {
 
   return (
     <div className="max-w-7xl">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
-          />
+      <h1 className="text-2xl font-semibold mb-6">User Management</h1>
+
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            />
+          </div>
+          <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
+            <Filter className="w-4 h-4" />
+            Filter
+          </button>
         </div>
-        <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
-          <Filter className="w-4 h-4" />
-          Filter
-        </button>
+        <div className="flex items-center gap-3">
         {canCreateUser && (
-          <Link
-            href="/user-management/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-            Add User
-          </Link>
-        )}
+            <Link
+              href="/user-management/new"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add User
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow border border-gray-200">
