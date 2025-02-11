@@ -9,9 +9,17 @@ import StatCard from '@/components/StatCard';
 import { useSession } from "next-auth/react";
 
 export default function WorkspacePage() {
-  const { data: session } = useSession();
-  const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest;
+  const { data: session, status } = useSession();
+  const defaultAccess = {
+    createPurchaseRequest: false,
+    reviewApprovePurchaseRequest: false
+  };
+  const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   const [currentMonth, setCurrentMonth] = useState('Jan 2025');
+
+  console.log('Session:', session); // Debug session
+  console.log('Access:', session?.user?.access); // Debug access
+  console.log('Can Create:', canCreateRequest); // Debug permission
 
   return (
     <>
@@ -136,7 +144,7 @@ export default function WorkspacePage() {
         </div>
       </div>
       
-      {canCreateRequest && <CreateRequestFAB />}
+      {status === 'authenticated' && canCreateRequest && <CreateRequestFAB />}
     </>
   );
 }

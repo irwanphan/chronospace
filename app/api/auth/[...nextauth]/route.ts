@@ -20,6 +20,17 @@ interface MenuAccess {
   workspaceManagement: boolean;
 }
 
+interface ActivityAccess {
+  createProject: boolean;
+  editProject: boolean;
+  deleteProject: boolean;
+}
+
+interface WorkspaceAccess {
+  createPurchaseRequest: boolean;
+  reviewApprovePurchaseRequest: boolean;
+}
+
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -106,6 +117,15 @@ export const authOptions: AuthOptions = {
             budgetPlanning: false,
             userManagement: false,
             workspaceManagement: false
+          },
+          activityAccess: (userAccess?.activityAccess as unknown as ActivityAccess) || {
+            createProject: false,
+            editProject: false,
+            deleteProject: false
+          },
+          workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
+            createPurchaseRequest: false,
+            reviewApprovePurchaseRequest: false
           }
         };
       }
