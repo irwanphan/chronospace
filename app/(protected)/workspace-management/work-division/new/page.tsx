@@ -103,8 +103,14 @@ export default function NewWorkDivisionPage() {
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">New Work Division</h1>
+
+      {errors.general && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+          {errors.general}
+        </div>
+      )}
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <div className="space-y-4">
           <div>
             <label className="block mb-1.5">

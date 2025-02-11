@@ -104,7 +104,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-white p-6 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-gray-200 p-6 rounded-lg">
         <div>
           <label className="block text-sm font-medium mb-1">
             Division Code <span className="text-red-500">*</span>

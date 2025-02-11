@@ -56,7 +56,7 @@ export default function WorkDivisionPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-semibold mb-6">Work Division</h1>
+      <h1 className="text-2xl font-semibold mb-6">Work Division</h1>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="relative w-80">
