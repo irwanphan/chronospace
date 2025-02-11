@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+// import { useState } from 'react';
+// import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
@@ -15,7 +15,7 @@ export default function WorkspacePage() {
     reviewApprovePurchaseRequest: false
   };
   const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
-  const [currentMonth, setCurrentMonth] = useState('Jan 2025');
+  // const [currentMonth, setCurrentMonth] = useState('Jan 2025');
 
   console.log('Session:', session); // Debug session
   console.log('Access:', session?.user?.access); // Debug access
@@ -26,7 +26,7 @@ export default function WorkspacePage() {
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Overview</h1>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <button className="p-2">
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -34,7 +34,7 @@ export default function WorkspacePage() {
             <button className="p-2">
               <ChevronRight className="w-5 h-5" />
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Filter Tabs */}
