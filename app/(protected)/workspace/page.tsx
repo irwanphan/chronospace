@@ -1,14 +1,17 @@
 'use client';
 
 // import { useState } from 'react';
+import { useEffect } from 'react';
 // import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { useSession } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
 import StatCard from '@/components/StatCard';
-import { useSession } from "next-auth/react";
 
 export default function WorkspacePage() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const defaultAccess = {
     createPurchaseRequest: false,
@@ -16,6 +19,21 @@ export default function WorkspacePage() {
   };
   const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   // const [currentMonth, setCurrentMonth] = useState('Jan 2025');
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Shortcut: Ctrl/Cmd + Shift + N
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'N') {
+        event.preventDefault();
+        if (canCreateRequest) {
+          router.push('/request/new');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [canCreateRequest, router]);
 
   console.log('Session:', session); // Debug session
   console.log('Access:', session?.user?.access); // Debug access
@@ -144,7 +162,14 @@ export default function WorkspacePage() {
         </div>
       </div>
       
-      {status === 'authenticated' && canCreateRequest && <CreateRequestFAB />}
+      {status === 'authenticated' && canCreateRequest && (
+        <div className="relative">
+          <CreateRequestFAB />
+          {/* <div className="fixed bottom-16 right-4 text-sm text-gray-500">
+            Press Ctrl+Shift+N
+          </div> */}
+        </div>
+      )}
     </>
   );
 }
