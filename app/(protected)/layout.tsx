@@ -21,7 +21,7 @@ export default function ProtectedLayout({
             flex-1 
             min-h-screen 
             p-6 pt-24
-            bg-gray-50 
+            bg-white
             transition-all duration-300`,
           isCollapsed ? "ml-16" : "ml-64"
         )}>
