@@ -9,18 +9,18 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.workDivision.deleteMany();
   await prisma.vendor.deleteMany();
-  // await prisma.approvalSchema.deleteMany();
+  await prisma.approvalSchema.deleteMany();
   await prisma.user.deleteMany();
 
   // Create work divisions
   const divisions = await prisma.workDivision.createMany({
     data: [
-      { divisionName: 'Research & Development', divisionCode: 'RND' },
-      { divisionName: 'Finance', divisionCode: 'FIN' },
-      { divisionName: 'Human Resources', divisionCode: 'HRD' },
-      { divisionName: 'Information Technology', divisionCode: 'ITE' },
-      { divisionName: 'Operations', divisionCode: 'OPS' },
-      { divisionName: 'Marketing', divisionCode: 'MKT' },
+      { id: 'RND', divisionName: 'Research & Development', divisionCode: 'RND' },
+      { id: 'FIN', divisionName: 'Finance', divisionCode: 'FIN' },
+      { id: 'HRD', divisionName: 'Human Resources', divisionCode: 'HRD' },
+      { id: 'ITE', divisionName: 'Information Technology', divisionCode: 'ITE' },
+      { id: 'OPS', divisionName: 'Operations', divisionCode: 'OPS' },
+      { id: 'MKT', divisionName: 'Marketing', divisionCode: 'MKT' },
     ]
   });
 
@@ -56,40 +56,85 @@ async function main() {
     ]
   });
 
-  // Create approval schemas
-  // const approvalSchemas = await prisma.approvalSchema.createMany({
-  //   data: [
-  //     {
-  //       name: 'Standard Approval',
-  //       step1: 'Department Head',
-  //       step2: 'Finance Manager',
-  //       step3: 'General Manager',
-  //       step4: 'CFO'
-  //     },
-  //     {
-  //       name: 'High Value Approval',
-  //       step1: 'Department Head',
-  //       step2: 'Finance Manager',
-  //       step3: 'General Manager',
-  //       step4: 'CFO',
-  //       step5: 'CEO'
-  //     },
-  //     {
-  //       name: 'IT Project Approval',
-  //       step1: 'Department Head',
-  //       step2: 'CTO',
-  //       step3: 'Finance Manager',
-  //       step4: 'CFO'
-  //     }
-  //   ]
-  // });
+  // Create approval schema
+  const schema = await prisma.approvalSchema.create({
+    data: {
+      name: 'Standard Approval',
+      documentType: 'Purchase Request',
+      title: 'Standard Approval',
+      description: 'Standard Approval Description',
+      roles: JSON.stringify(['Department Head']),
+      divisions: JSON.stringify(['RND', 'FIN', 'ITE', 'OPS', 'MKT']),
+      steps: {
+        create: [
+          {
+            duration: 10,
+            role: 'CFO',
+            limit: 10000000,
+            overtime: 'Notify and Wait',
+            order: 1
+          },
+          {
+            duration: 12,
+            role: 'General Manager',
+            limit: 10000000,
+            overtime: 'Notify and Wait',
+            order: 2
+          }
+        ]
+      }
+    }
+  });
+
+  // Create budget plans
+  const budgets = await prisma.budget.createMany({
+    data: [
+      {
+        projectId: 'PRJ001',
+        title: 'IT Infrastructure Budget 2024',
+        description: 'Annual budget for IT infrastructure upgrades',
+        year: 2024,
+        division: 'Information Technology',
+        totalBudget: 500000000,
+        startDate: new Date('2024-01-01'),
+        finishDate: new Date('2024-12-31'),
+        status: 'In Progress',
+        purchaseRequestStatus: 'Not Submitted'
+      },
+      {
+        projectId: 'PRJ002',
+        title: 'Financial System Migration Budget',
+        description: 'Budget for financial system upgrade project',
+        year: 2024,
+        division: 'Finance',
+        totalBudget: 750000000,
+        startDate: new Date('2024-01-10'),
+        finishDate: new Date('2024-06-30'),
+        status: 'In Progress',
+        purchaseRequestStatus: 'Not Submitted'
+      },
+      {
+        projectId: 'PRJ003',
+        title: 'Research Equipment Budget',
+        description: 'Budget for new research lab equipment',
+        year: 2024,
+        division: 'Research & Development',
+        totalBudget: 1000000000,
+        startDate: new Date('2024-01-15'),
+        finishDate: new Date('2024-12-31'),
+        status: 'In Progress',
+        purchaseRequestStatus: 'Not Submitted'
+      }
+    ]
+  });
 
   console.log({
     divisions,
     users,
     vendors,
     projects,
-    // approvalSchemas
+    schema,
+    budgets
   });
 }
 
