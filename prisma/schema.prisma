@@ -30,6 +30,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Session {
@@ -38,6 +39,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model User {
@@ -61,6 +64,8 @@ model User {
   lastLogin     DateTime?
   createdAt     DateTime  @default(now())
   access        UserAccess?
+
+  @@map("users")
 }
 
 model VerificationToken {
@@ -69,6 +74,8 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+
+  @@map("verification_tokens")
 }
 
 model Vendor {
@@ -95,6 +102,8 @@ model Role {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   userRoles     UserRole[]
+
+  @@map("roles")
 }
 
 model WorkDivision {
@@ -168,6 +177,8 @@ model Project {
   budget      Budget?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("projects")
 }
 
 model Budget {
@@ -185,6 +196,8 @@ model Budget {
   project       Project  @relation(fields: [projectId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@map("budgets")
 }
 
 model UserAccess {
@@ -203,4 +216,6 @@ model UserAccess {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("user_accesses")
 }
