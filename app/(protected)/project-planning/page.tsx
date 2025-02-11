@@ -76,7 +76,7 @@ export default function ProjectPlanningPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Project Plans Overview</h1>
         <div className="flex items-center gap-2">
@@ -85,19 +85,19 @@ export default function ProjectPlanningPage() {
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="text-sm text-gray-600">Total Planned Projects</div>
           <div className="text-2xl font-semibold mt-1">{stats.total} Projects</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="text-sm text-gray-600">Budget Allocated Projects</div>
           <div className="text-2xl font-semibold mt-1">{stats.budgetAllocated} Projects</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="text-sm text-gray-600">Active Projects</div>
           <div className="text-2xl font-semibold mt-1">{stats.active} Projects</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
           <div className="text-sm text-gray-600">Delayed Projects</div>
           <div className="text-2xl font-semibold mt-1">{stats.delayed} Projects</div>
         </div>
@@ -110,7 +110,7 @@ export default function ProjectPlanningPage() {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg"
             />
           </div>
           <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
@@ -129,7 +129,7 @@ export default function ProjectPlanningPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
