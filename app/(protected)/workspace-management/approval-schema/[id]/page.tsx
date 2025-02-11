@@ -120,10 +120,10 @@ export default function EditSchemaPage({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">Edit Schema</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 border border-gray-200 rounded-lg p-6">
         <div className="bg-white rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Schema Information</h2>
           

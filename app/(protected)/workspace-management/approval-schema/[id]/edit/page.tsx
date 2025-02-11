@@ -204,7 +204,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">Edit Approval Schema</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <div className="space-y-4">
           <div>
             <label className="block mb-1.5">
