@@ -57,9 +57,9 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl">
       <div className="flex items-center gap-4 mb-6">
-        <div className="relative flex-1">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
@@ -80,23 +80,23 @@ export default function UserManagementPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">User Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Role</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Last Active</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Date Added</th>
-              <th className="px-6 py-3"></th>
+              <th className="px-3 py-3 text-left text-sm font-semibold text-gray-600">#</th>
+              <th className="px-3 py-3 text-left text-sm font-semibold text-gray-600">User Name</th>
+              <th className="px-3 py-3 text-left text-sm font-semibold text-gray-600">Role</th>
+              <th className="px-3 py-3 text-left text-sm font-semibold text-gray-600">Last Active</th>
+              <th className="px-3 py-3 text-left text-sm font-semibold text-gray-600">Date Added</th>
+              <th className="px-3 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {users.map((user) => (
+            {users.map((user, index:number) => (
               <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm">{user.id}</td>
-                <td className="px-6 py-4">
+                <td className="px-3 py-2 text-sm">{index + 1}</td>
+                <td className="px-3 py-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
                       {user.image ? (
@@ -119,10 +119,10 @@ export default function UserManagementPage() {
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm">{user.role}</td>
-                <td className="px-6 py-4 text-sm">{formatDate(user.lastLogin)}</td>
-                <td className="px-6 py-4 text-sm">{formatDate(user.createdAt)}</td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-3 py-2 text-sm">{user.role}</td>
+                <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
+                <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
+                <td className="px-3 py-2 text-right">
                   <div className="relative overflow-visible">
                     <button 
                       onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
