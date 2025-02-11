@@ -24,6 +24,24 @@ interface ActivityAccess {
   createProject: boolean;
   editProject: boolean;
   deleteProject: boolean;
+  createBudget: boolean;
+  editBudget: boolean;
+  deleteBudget: boolean;
+  createWorkDivision: boolean;
+  editWorkDivision: boolean;
+  deleteWorkDivision: boolean;
+  createRole: boolean;
+  editRole: boolean;
+  deleteRole: boolean;
+  createVendor: boolean;
+  editVendor: boolean;
+  deleteVendor: boolean;
+  createApprovalSchema: boolean;
+  editApprovalSchema: boolean;
+  deleteApprovalSchema: boolean;
+  createUser: boolean;
+  editUser: boolean;
+  deleteUser: boolean;  
 }
 
 interface WorkspaceAccess {
@@ -121,7 +139,25 @@ export const authOptions: AuthOptions = {
           activityAccess: (userAccess?.activityAccess as unknown as ActivityAccess) || {
             createProject: false,
             editProject: false,
-            deleteProject: false
+            deleteProject: false,
+            createBudget: false,
+            editBudget: false,
+            deleteBudget: false,
+            createWorkDivision: false,
+            editWorkDivision: false,
+            deleteWorkDivision: false,
+            createRole: false,
+            editRole: false,
+            deleteRole: false,
+            createVendor: false,
+            editVendor: false,
+            deleteVendor: false,
+            createApprovalSchema: false,
+            editApprovalSchema: false,
+            deleteApprovalSchema: false,
+            createUser: false,
+            editUser: false,
+            deleteUser: false
           },
           workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
             createPurchaseRequest: false,
