@@ -82,7 +82,7 @@ export default function UserManagementPage() {
           </button>
         </div>
         <div className="flex items-center gap-3">
-        {canCreateUser && (
+          {canCreateUser && (
             <Link
               href="/user-management/new"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
