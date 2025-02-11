@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -25,6 +25,7 @@ export default function UserManagementPage() {
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const fetchUsers = async () => {
     const response = await fetch('/api/users');
@@ -34,6 +35,17 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const formatDate = (date: string | null) => {
@@ -131,7 +143,7 @@ export default function UserManagementPage() {
                 <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                 <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                 <td className="px-3 py-2 text-right">
-                  <div className="relative overflow-visible">
+                  <div className="relative overflow-visible" ref={menuRef}>
                     <button 
                       onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
                       className="p-2 hover:bg-gray-100 rounded-full"
@@ -140,7 +152,7 @@ export default function UserManagementPage() {
                     </button>
 
                     {activeMenu === user.id.toString() && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-48 z-50">
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg border border-gray-200 rounded-lg py-2 w-48 z-50">
                         {canEditUser && (
                           <button
                             onClick={() => router.push(`/user-management/${user.id}/edit`)}
