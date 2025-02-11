@@ -80,7 +80,7 @@ export default function NewUserPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="space-y-8 max-w-3xl">
       <h1 className="text-2xl font-semibold mb-6">New User</h1>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">

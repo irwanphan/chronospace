@@ -120,7 +120,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   if (isLoading) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="space-y-8 max-w-3xl">
       <h1 className="text-2xl font-semibold mb-6">Edit User</h1>
 
       {errors.general && (
