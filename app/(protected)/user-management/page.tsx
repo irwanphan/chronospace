@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -25,7 +25,6 @@ export default function UserManagementPage() {
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const fetchUsers = async () => {
     const response = await fetch('/api/users');
@@ -35,17 +34,6 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setActiveMenu(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const formatDate = (date: string | null) => {
@@ -143,7 +131,7 @@ export default function UserManagementPage() {
                 <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                 <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                 <td className="px-3 py-2 text-right">
-                  <div className="relative overflow-visible" ref={menuRef}>
+                  <div className="relative overflow-visible">
                     <button 
                       onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
                       className="p-2 hover:bg-gray-100 rounded-full"
