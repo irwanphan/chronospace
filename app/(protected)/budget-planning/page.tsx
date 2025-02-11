@@ -97,7 +97,7 @@ export default function BudgetPlanningPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Budget Plans Overview</h1>
         <div className="flex items-center gap-2">
@@ -105,70 +105,76 @@ export default function BudgetPlanningPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-sm text-gray-600">Total Planned Budget</div>
-          <div className="text-2xl font-semibold mt-1">{formatCurrency(stats.totalBudget)}</div>
+      <div className="space-y-4">
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+            <div className="text-sm text-gray-600">Total Planned Budget</div>
+            <div className="text-2xl font-semibold mt-1">{formatCurrency(stats.totalBudget)}</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+            <div className="text-sm text-gray-600">Number of Plans</div>
+            <div className="text-2xl font-semibold mt-1">{stats.totalPlans} Plans</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+            <div className="text-sm text-gray-600">Completed Plans Percentage</div>
+            <div className="text-2xl font-semibold mt-1">{stats.completedPercentage}%</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+            <div className="text-sm text-gray-600">Upcoming Deadlines</div>
+            <div className="text-2xl font-semibold mt-1">{stats.upcomingDeadlines} Plans</div>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-sm text-gray-600">Number of Plans</div>
-          <div className="text-2xl font-semibold mt-1">{stats.totalPlans} Plans</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-sm text-gray-600">Completed Plans Percentage</div>
-          <div className="text-2xl font-semibold mt-1">{stats.completedPercentage}%</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-sm text-gray-600">Upcoming Deadlines</div>
-          <div className="text-2xl font-semibold mt-1">{stats.upcomingDeadlines} Plans</div>
+
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-6 bg-white p-4 rounded-lg shadow border border-gray-200">
+            <h2 className="font-semibold mb-4">Largest Budget Plans</h2>
+            {largestBudgets.map((budget) => (
+              <div key={budget.id} className="flex justify-between items-center mb-2">
+                <div>{budget.title}</div>
+                <div className="font-semibold">{formatCurrency(budget.totalBudget)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="col-span-3 bg-white p-4 rounded-lg shadow border border-gray-200">
+            <h2 className="font-semibold mb-4">Plans in Progress</h2>
+            <div className="text-2xl font-semibold">{stats.inProgress} Plans</div>
+            <p className="text-sm text-gray-600 mt-2">Purchase Requests has been submitted</p>
+          </div>
+          <div className="col-span-3 bg-white p-4 rounded-lg shadow border border-gray-200">
+            <h2 className="font-semibold mb-4">Delayed Plans</h2>
+            <div className="text-2xl font-semibold">{stats.delayed} Plans</div>
+            <p className="text-sm text-gray-600 mt-2">Purchase Requests has not been submitted despite past Start Date</p>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-4 mb-6">
-        <div className="col-span-6 bg-white p-4 rounded-lg shadow">
-          <h2 className="font-semibold mb-4">Largest Budget Plans</h2>
-          {largestBudgets.map((budget) => (
-            <div key={budget.id} className="flex justify-between items-center mb-2">
-              <div>{budget.title}</div>
-              <div className="font-semibold">{formatCurrency(budget.totalBudget)}</div>
-            </div>
-          ))}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 border border-gray-200 rounded-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            />
+          </div>
+          <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
+            <Filter className="w-4 h-4" />
+            Filter
+          </button>
         </div>
-        <div className="col-span-3 bg-white p-4 rounded-lg shadow">
-          <h2 className="font-semibold mb-4">Plans in Progress</h2>
-          <div className="text-2xl font-semibold">{stats.inProgress} Plans</div>
-          <p className="text-sm text-gray-600 mt-2">Purchase Requests has been submitted</p>
-        </div>
-        <div className="col-span-3 bg-white p-4 rounded-lg shadow">
-          <h2 className="font-semibold mb-4">Delayed Plans</h2>
-          <div className="text-2xl font-semibold">{stats.delayed} Plans</div>
-          <p className="text-sm text-gray-600 mt-2">Purchase Requests has not been submitted despite past Start Date</p>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/budget-planning/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            Add Plan
+          </Link>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
-          />
-        </div>
-        <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
-          <Filter className="w-4 h-4" />
-          Filter
-        </button>
-        <Link
-          href="/budget-planning/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4" />
-          Add Plan
-        </Link>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
