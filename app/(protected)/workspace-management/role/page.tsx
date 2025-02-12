@@ -113,53 +113,56 @@ export default function RolePage() {
                 </td>
               </tr>
             ) : (
-              roles.map((role, index) => (
-                <tr key={role.id} className="border-b">
-                  <td className="py-3 px-4">{index + 1}</td>
-                  <td className="py-3 px-4">{role.roleName}</td>
-                  <td className="py-3 px-4">
-                    {role.description || '-'}
-                  </td>
-                  <td className="py-3 px-4">
-                    {new Intl.NumberFormat('id-ID', {
-                      style: 'currency',
-                      currency: 'IDR',
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(role.approvalLimit)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="relative">
-                      <button 
-                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                        onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
-                      >
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
-                      </button>
-                      
-                      {/* Popup Menu */}
-                      {activeMenu === role.id && (
-                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
-                          <button
-                            onClick={() => router.push(`/workspace-management/role/${role.id}/edit`)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <Pencil className="w-4 h-4" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(role.id)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                          >
-                            <Trash className="w-4 h-4" />
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+              roles.map((role, index) => {
+                // console.log(role);
+                return (
+                  <tr key={role.id} className="border-b">
+                    <td className="py-3 px-4">{index + 1}</td>
+                    <td className="py-3 px-4">{role.roleName}</td>
+                    <td className="py-3 px-4">
+                      {role.description || '-'}
+                    </td>
+                    <td className="py-3 px-4">
+                      {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      }).format(role.approvalLimit)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="relative">
+                        <button 
+                          className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                          onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
+                        >
+                          <MoreVertical className="w-4 h-4 text-gray-500" />
+                        </button>
+                        
+                        {/* Popup Menu */}
+                        {activeMenu === role.id && (
+                          <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                            <button
+                              onClick={() => router.push(`/workspace-management/role/${role.id}/edit`)}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                            >
+                              <Pencil className="w-4 h-4" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(role.id)}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                            >
+                              <Trash className="w-4 h-4" />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>

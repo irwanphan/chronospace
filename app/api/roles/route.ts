@@ -22,6 +22,8 @@ export async function GET() {
       select: {
         id: true,
         roleName: true,
+        description: true,
+        approvalLimit: true,
       },
       orderBy: {
         roleName: 'asc',
