@@ -97,6 +97,7 @@ export default function NewBudgetPage() {
         body: JSON.stringify({
           ...formData,
           totalBudget: parseFloat(formData.totalBudget.replace(/[,.]/g, '')),
+          items: selectedItems
         }),
       });
 
