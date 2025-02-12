@@ -169,7 +169,7 @@ export default function AddStepModal({
             </label>
             <input
               type="number"
-              value={formData.duration / 24} // Convert hours to days for better UX
+              value={formData.duration}
               onChange={(e) => setFormData(prev => ({ 
                 ...prev, 
                 duration: Number(e.target.value) * 24 
