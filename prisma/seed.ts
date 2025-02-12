@@ -4,23 +4,25 @@ import { roleSeeder } from './seeders/role-seeder';
 import { workDivisionSeeder } from './seeders/work-division-seeder';
 import { userAccessSeeder } from './seeders/user-access-seeder';
 import { vendorSeeder } from './seeders/vendor-seeder';
+import { approvalSchemaSeeder } from './seeders/approval-schema-seeder';
 const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
-  // await prisma.budget.deleteMany();
-  // await prisma.approvalSchema.deleteMany();
   await prisma.workDivision.deleteMany();
   await prisma.role.deleteMany();
   await prisma.userAccess.deleteMany();
   await prisma.userRole.deleteMany();
   await prisma.user.deleteMany();
   await prisma.vendor.deleteMany();
+
+  // Seeders
   await workDivisionSeeder();
   await roleSeeder();
   await userSeeder();
   await userAccessSeeder();
   await vendorSeeder();
+  await approvalSchemaSeeder();
 
   // // Create projects
   // const projects = await prisma.project.createMany({
@@ -29,36 +31,6 @@ async function main() {
   //     { projectTitle: 'Financial System Migration', projectId: 'PRJ002', projectCode: 'FIN001', division: 'Finance', status: 'Planning', year: 2024, startDate: new Date('2024-02-01'), finishDate: new Date('2024-11-30'), requestDate: new Date() },
   //     { projectTitle: 'Research Lab Equipment', projectId: 'PRJ003', projectCode: 'RND001', division: 'Research & Development', status: 'Active', year: 2024, startDate: new Date('2024-03-01'), finishDate: new Date('2024-10-31'), requestDate: new Date() },
   //   ]
-  // });
-
-  // // Create approval schema
-  // const schema = await prisma.approvalSchema.create({
-  //   data: {
-  //     name: 'Standard Approval',
-  //     documentType: 'Purchase Request',
-  //     title: 'Standard Approval',
-  //     description: 'Standard Approval Description',
-  //     roles: JSON.stringify(['Department Head']),
-  //     divisions: JSON.stringify(['RND', 'FIN', 'ITE', 'OPS', 'MKT']),
-  //     steps: {
-  //       create: [
-  //         {
-  //           duration: 10,
-  //           role: 'CFO',
-  //           limit: 10000000,
-  //           overtime: 'Notify and Wait',
-  //           order: 1
-  //         },
-  //         {
-  //           duration: 12,
-  //           role: 'General Manager',
-  //           limit: 10000000,
-  //           overtime: 'Notify and Wait',
-  //           order: 2
-  //         }
-  //       ]
-  //     }
-  //   }
   // });
 
   // // Create budget plans
