@@ -11,12 +11,12 @@ async function main() {
   // await prisma.workDivision.deleteMany();
   // await prisma.vendor.deleteMany();
   // await prisma.approvalSchema.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.role.deleteMany();
   await prisma.workDivision.deleteMany();
-  await userSeeder();
-  await roleSeeder();
+  await prisma.role.deleteMany();
+  await prisma.user.deleteMany();
   await workDivisionSeeder();
+  await roleSeeder();
+  await userSeeder();
   // // Create vendors
   // const vendors = await prisma.vendor.createMany({
   //   data: [
