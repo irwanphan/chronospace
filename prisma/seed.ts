@@ -3,30 +3,24 @@ import { userSeeder } from './seeders/user-seeder';
 import { roleSeeder } from './seeders/role-seeder';
 import { workDivisionSeeder } from './seeders/work-division-seeder';
 import { userAccessSeeder } from './seeders/user-access-seeder';
+import { vendorSeeder } from './seeders/vendor-seeder';
 const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
   // await prisma.budget.deleteMany();
-  // await prisma.project.deleteMany();
-  // await prisma.workDivision.deleteMany();
-  // await prisma.vendor.deleteMany();
   // await prisma.approvalSchema.deleteMany();
   await prisma.workDivision.deleteMany();
   await prisma.role.deleteMany();
+  await prisma.userAccess.deleteMany();
+  await prisma.userRole.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.vendor.deleteMany();
   await workDivisionSeeder();
   await roleSeeder();
   await userSeeder();
   await userAccessSeeder();
-  // // Create vendors
-  // const vendors = await prisma.vendor.createMany({
-  //   data: [
-  //     { vendorName: 'Tech Solutions Inc', vendorCode: 'TSI', email: 'tech@vendor.com', phone: '1234567890', address: 'Tech Street 1' },
-  //     { vendorName: 'Office Supplies Co', vendorCode: 'OSC', email: 'office@vendor.com', phone: '0987654321', address: 'Supply Road 2' },
-  //     { vendorName: 'Research Equipment Ltd', vendorCode: 'REL', email: 'research@vendor.com', phone: '5555555555', address: 'Lab Avenue 3' },
-  //   ]
-  // });
+  await vendorSeeder();
 
   // // Create projects
   // const projects = await prisma.project.createMany({
