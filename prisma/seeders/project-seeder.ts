@@ -5,7 +5,7 @@ export async function projectSeeder() {
     data: [
       {
         projectId: 'PRJ-2025-001',
-        projectCode: 'RND-24-001',
+        projectCode: 'RND-25-001',
         projectTitle: 'System Development 2025',
         description: 'Development of new enterprise system',
         division: 'ITE',
@@ -17,7 +17,7 @@ export async function projectSeeder() {
       },
       {
         projectId: 'PRJ-2025-002',
-        projectCode: 'FIN-24-001',
+        projectCode: 'FIN-25-001',
         projectTitle: 'Financial System Integration',
         description: 'Integration of financial systems across divisions',
         division: 'FIN',
@@ -29,7 +29,7 @@ export async function projectSeeder() {
       },
       {
         projectId: 'PRJ-2025-003',
-        projectCode: 'OPS-24-001',
+        projectCode: 'OPS-25-001',
         projectTitle: 'Operations Improvement',
         description: 'Operational efficiency improvement project',
         division: 'OPS',
