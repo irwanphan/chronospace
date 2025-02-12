@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { userSeeder } from './seeders/user-seeder';
 import { roleSeeder } from './seeders/role-seeder';
 import { workDivisionSeeder } from './seeders/work-division-seeder';
+import { userAccessSeeder } from './seeders/user-access-seeder';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -17,6 +18,7 @@ async function main() {
   await workDivisionSeeder();
   await roleSeeder();
   await userSeeder();
+  await userAccessSeeder();
   // // Create vendors
   // const vendors = await prisma.vendor.createMany({
   //   data: [
