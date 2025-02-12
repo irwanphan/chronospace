@@ -42,7 +42,11 @@ export async function GET() {
     const divisions = await prisma.workDivision.findMany({
       select: {
         id: true,
+        divisionCode: true,
         divisionName: true,
+        description: true,
+        divisionHead: true,
+        upperDivision: true,
       },
       orderBy: {
         divisionName: 'asc',
