@@ -5,12 +5,13 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
-  await prisma.budget.deleteMany();
-  await prisma.project.deleteMany();
-  await prisma.workDivision.deleteMany();
-  await prisma.vendor.deleteMany();
-  await prisma.approvalSchema.deleteMany();
-  await prisma.user.deleteMany();
+  // await prisma.budget.deleteMany();
+  // await prisma.project.deleteMany();
+  // await prisma.workDivision.deleteMany();
+  // await prisma.vendor.deleteMany();
+  // await prisma.approvalSchema.deleteMany();
+  // await prisma.user.deleteMany();
+  await prisma.role.deleteMany();
 
   // Create work divisions
   const divisions = await prisma.workDivision.createMany({
@@ -128,13 +129,55 @@ async function main() {
     ]
   });
 
+  // Create roles
+  const roles = await prisma.role.createMany({
+    data: [
+      { 
+        roleCode: 'CEO',
+        roleName: 'Chief Executive Officer',
+        description: 'Highest level executive position',
+        upperLevel: null,
+        approvalLimit: 1000000000 // 1 Miliar
+      },
+      { 
+        roleCode: 'CFO',
+        roleName: 'Chief Financial Officer',
+        description: 'Head of financial operations',
+        upperLevel: 'CEO',
+        approvalLimit: 500000000 // 500 Juta
+      },
+      { 
+        roleCode: 'GM',
+        roleName: 'General Manager',
+        description: 'General management position',
+        upperLevel: 'CEO',
+        approvalLimit: 250000000 // 250 Juta
+      },
+      { 
+        roleCode: 'DH',
+        roleName: 'Department Head',
+        description: 'Department management position',
+        upperLevel: 'GM',
+        approvalLimit: 100000000 // 100 Juta
+      },
+      { 
+        roleCode: 'FM',
+        roleName: 'Finance Manager',
+        description: 'Financial management position',
+        upperLevel: 'CFO',
+        approvalLimit: 50000000 // 50 Juta
+      }
+    ]
+  });
+
   console.log({
     divisions,
     users,
     vendors,
     projects,
     schema,
-    budgets
+    budgets,
+    roles
   });
 }
 
