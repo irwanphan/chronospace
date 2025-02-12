@@ -5,6 +5,7 @@ import { workDivisionSeeder } from './seeders/work-division-seeder';
 import { userAccessSeeder } from './seeders/user-access-seeder';
 import { vendorSeeder } from './seeders/vendor-seeder';
 import { approvalSchemaSeeder } from './seeders/approval-schema-seeder';
+import { projectSeeder } from './seeders/project-seeder';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -16,6 +17,7 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.vendor.deleteMany();
   await prisma.approvalSchema.deleteMany();
+  await prisma.project.deleteMany();
   // Seeders
   await workDivisionSeeder();
   await roleSeeder();
@@ -23,15 +25,7 @@ async function main() {
   await userAccessSeeder();
   await vendorSeeder();
   await approvalSchemaSeeder();
-
-  // // Create projects
-  // const projects = await prisma.project.createMany({
-  //   data: [
-  //     { projectTitle: 'IT Infrastructure Upgrade', projectId: 'PRJ001', projectCode: 'ITE001', division: 'Information Technology', status: 'Active', year: 2024, startDate: new Date('2024-01-01'), finishDate: new Date('2024-12-31'), requestDate: new Date() },
-  //     { projectTitle: 'Financial System Migration', projectId: 'PRJ002', projectCode: 'FIN001', division: 'Finance', status: 'Planning', year: 2024, startDate: new Date('2024-02-01'), finishDate: new Date('2024-11-30'), requestDate: new Date() },
-  //     { projectTitle: 'Research Lab Equipment', projectId: 'PRJ003', projectCode: 'RND001', division: 'Research & Development', status: 'Active', year: 2024, startDate: new Date('2024-03-01'), finishDate: new Date('2024-10-31'), requestDate: new Date() },
-  //   ]
-  // });
+  await projectSeeder();
 
   // // Create budget plans
   // const budgets = await prisma.budget.createMany({
