@@ -12,7 +12,7 @@ interface RequestStep {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log('Received data:', body);
+    // console.log('Received data:', body);
 
     // Validasi data yang diterima
     if (!body.name || !body.documentType || !body.workDivisions || !body.steps) {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       }
     };
 
-    console.log('Formatted data:', formattedData);
+    // console.log('Formatted data:', formattedData);
 
     try {
       const schema = await prisma.approvalSchema.create({
@@ -89,7 +89,7 @@ export async function GET() {
     });
 
     // Log response untuk debugging
-    console.log('API Response:', schemas);
+    // console.log('API Response:', schemas);
 
     return NextResponse.json(schemas);
   } catch (error) {
