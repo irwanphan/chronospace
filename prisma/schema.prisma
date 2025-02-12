@@ -181,6 +181,7 @@ model Project {
   @@map("projects")
 }
 
+
 model Budget {
   id            String   @id @default(cuid())
   projectId     String   @unique
@@ -194,10 +195,27 @@ model Budget {
   status        String   // e.g., "In Progress", "Completed", "Delayed"
   purchaseRequestStatus String? // e.g., "Submitted", "Not Submitted"
   project       Project  @relation(fields: [projectId], references: [id])
+  items         BudgetedItem[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@map("budgets")
+}
+
+model BudgetedItem {
+  id          String   @id @default(cuid())
+  budgetId    String
+  description String
+  qty         Int
+  unit        String
+  unitPrice   Float
+  vendor      String
+  budget      Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("budgeted_items")
+  @@index([budgetId])
 }
 
 model UserAccess {
