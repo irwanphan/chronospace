@@ -24,7 +24,7 @@ interface Project {
 }
 
 interface BudgetItem {
-  id: string;
+  id?: string;
   description: string;
   qty: number;
   unit: string;
@@ -35,7 +35,6 @@ interface BudgetItem {
 export default function NewBudgetPage() {
   const router = useRouter();
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
-  const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [formData, setFormData] = useState<FormData>({
