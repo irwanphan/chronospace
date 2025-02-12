@@ -6,6 +6,7 @@ import { userAccessSeeder } from './seeders/user-access-seeder';
 import { vendorSeeder } from './seeders/vendor-seeder';
 import { approvalSchemaSeeder } from './seeders/approval-schema-seeder';
 import { projectSeeder } from './seeders/project-seeder';
+import { budgetSeeder } from './seeders/budget-seeder';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -18,6 +19,8 @@ async function main() {
   await prisma.vendor.deleteMany();
   await prisma.approvalSchema.deleteMany();
   await prisma.project.deleteMany();
+  await prisma.budgetedItem.deleteMany();
+  await prisma.budget.deleteMany();
   // Seeders
   await workDivisionSeeder();
   await roleSeeder();
@@ -26,49 +29,7 @@ async function main() {
   await vendorSeeder();
   await approvalSchemaSeeder();
   await projectSeeder();
-
-  // // Create budget plans
-  // const budgets = await prisma.budget.createMany({
-  //   data: [
-  //     {
-  //       projectId: 'PRJ001',
-  //       title: 'IT Infrastructure Budget 2024',
-  //       description: 'Annual budget for IT infrastructure upgrades',
-  //       year: 2024,
-  //       division: 'Information Technology',
-  //       totalBudget: 500000000,
-  //       startDate: new Date('2024-01-01'),
-  //       finishDate: new Date('2024-12-31'),
-  //       status: 'In Progress',
-  //       purchaseRequestStatus: 'Not Submitted'
-  //     },
-  //     {
-  //       projectId: 'PRJ002',
-  //       title: 'Financial System Migration Budget',
-  //       description: 'Budget for financial system upgrade project',
-  //       year: 2024,
-  //       division: 'Finance',
-  //       totalBudget: 750000000,
-  //       startDate: new Date('2024-01-10'),
-  //       finishDate: new Date('2024-06-30'),
-  //       status: 'In Progress',
-  //       purchaseRequestStatus: 'Not Submitted'
-  //     },
-  //     {
-  //       projectId: 'PRJ003',
-  //       title: 'Research Equipment Budget',
-  //       description: 'Budget for new research lab equipment',
-  //       year: 2024,
-  //       division: 'Research & Development',
-  //       totalBudget: 1000000000,
-  //       startDate: new Date('2024-01-15'),
-  //       finishDate: new Date('2024-12-31'),
-  //       status: 'In Progress',
-  //       purchaseRequestStatus: 'Not Submitted'
-  //     }
-  //   ]
-  // });
-
+  await budgetSeeder();
 }
   
 main()
