@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 export async function roleSeeder() {
   const roles = [
     { 
+      id: 'cm71xui670000sgpr8ygg9z6u',
       roleCode: 'CEO',
       roleName: 'Chief Executive Officer',
       description: 'Highest level executive position',
