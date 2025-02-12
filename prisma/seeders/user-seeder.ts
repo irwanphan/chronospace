@@ -23,7 +23,7 @@ export async function userSeeder() {
   await prisma.userRole.create({
     data: {
       userId: 'cm71xui7r000asgprkai2jfkb',
-      roleId: 'cm71xui670000sgpr8ygg9z6u',
+      roleId: 'role-ceo',
     }
   });
 

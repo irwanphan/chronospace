@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 export async function roleSeeder() {
   const roles = [
     { 
-      id: 'cm71xui670000sgpr8ygg9z6u',
+      id: 'role-ceo',
       roleCode: 'CEO',
       roleName: 'Chief Executive Officer',
       description: 'Highest level executive position',
@@ -11,6 +11,7 @@ export async function roleSeeder() {
       approvalLimit: 1000000000 // 1 Miliar
     },
     { 
+      id: 'role-cfo',
       roleCode: 'CFO',
       roleName: 'Chief Financial Officer',
       description: 'Head of financial operations',
@@ -18,6 +19,7 @@ export async function roleSeeder() {
       approvalLimit: 500000000 // 500 Juta
     },
     { 
+      id: 'role-gm',
       roleCode: 'GM',
       roleName: 'General Manager',
       description: 'General management position',
@@ -25,6 +27,7 @@ export async function roleSeeder() {
       approvalLimit: 250000000 // 250 Juta
     },
     { 
+      id: 'role-dh',
       roleCode: 'DH',
       roleName: 'Department Head',
       description: 'Department management position',
@@ -32,6 +35,7 @@ export async function roleSeeder() {
       approvalLimit: 100000000 // 100 Juta
     },
     { 
+      id: 'role-fm',
       roleCode: 'FM',
       roleName: 'Finance Manager',
       description: 'Financial management position',

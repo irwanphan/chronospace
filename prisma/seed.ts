@@ -15,7 +15,7 @@ async function main() {
   await prisma.userRole.deleteMany();
   await prisma.user.deleteMany();
   await prisma.vendor.deleteMany();
-
+  await prisma.approvalSchema.deleteMany();
   // Seeders
   await workDivisionSeeder();
   await roleSeeder();

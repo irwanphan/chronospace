@@ -83,6 +83,30 @@ export default function ApprovalSchemaPage() {
     }
   };
 
+  const getRoleNames = (schema: ApprovalSchema) => {
+    if (!schema.roles) return '';
+    
+    let roleList: string[];
+    try {
+      // Coba parse jika dalam format JSON string
+      roleList = typeof schema.roles === 'string'
+        ? (schema.roles as string).startsWith('[')
+          ? JSON.parse(schema.roles as string)
+          : [schema.roles]
+        : schema.roles;
+    } catch {
+      // Fallback jika parsing gagal
+      roleList = typeof schema.roles === 'string' 
+        ? [schema.roles] 
+        : schema.roles;
+    }
+
+    return roles
+      .filter(role => roleList.includes(role.id || ''))
+      .map(role => role.roleName)
+      .join(', ');
+  };
+
   const stripHtmlTags = (html: string) => {
     if (!html) return '';
     return html.replace(/<[^>]*>/g, '');
@@ -162,11 +186,8 @@ export default function ApprovalSchemaPage() {
                 </div>
                 <div>
                   <span className="font-medium">Applicable Roles:</span>
-                  <p className="text-sm text-gray-600">
-                    { typeof schema.roles === 'string' ? 
-                      JSON.parse(schema.roles).join(', ') : 
-                      schema.roles?.join(', ') || ''
-                    }
+                  <p className="text-gray-600">
+                    {getRoleNames(schema)}
                   </p>
                 </div>
                 {schema.description && (
