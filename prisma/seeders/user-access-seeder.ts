@@ -33,7 +33,8 @@ export async function userAccessSeeder() {
         deleteApprovalSchema: true,
         createUser: true,
         editUser: true,
-        deleteUser: true
+        deleteUser: true,
+        manageUserAccess: true
       },
       workspaceAccess: {
         createPurchaseRequest: true,

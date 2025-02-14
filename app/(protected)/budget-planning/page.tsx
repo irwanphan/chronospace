@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface Budget {
   id: string;
@@ -28,7 +29,10 @@ export default function BudgetPlanningPage() {
   });
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
-
+  const { data: session, status } = useSession();
+  const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
+  const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
+  const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
   useEffect(() => {
     const fetchBudgets = async () => {
       try {
@@ -164,13 +168,15 @@ export default function BudgetPlanningPage() {
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href="/budget-planning/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-            Add Plan
-          </Link>
+          {status === 'authenticated' && canCreateBudget && (
+            <Link
+              href="/budget-planning/new"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Plan
+            </Link>
+          )}
         </div>
       </div>
 
@@ -209,20 +215,24 @@ export default function BudgetPlanningPage() {
 
                     {activeMenu === budget.id && (
                       <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
-                        <button
-                          onClick={() => router.push(`/budget-planning/${budget.id}/edit`)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(budget.id)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                        >
-                          <Trash className="w-4 h-4" />
-                          Delete
-                        </button>
+                        {status === 'authenticated' && canEditBudget && (
+                          <button
+                            onClick={() => router.push(`/budget-planning/${budget.id}/edit`)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Pencil className="w-4 h-4" />
+                            Edit
+                          </button>
+                        )}
+                        {status === 'authenticated' && canDeleteBudget && (
+                          <button
+                            onClick={() => handleDelete(budget.id)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                          >
+                            <Trash className="w-4 h-4" />
+                            Delete
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
