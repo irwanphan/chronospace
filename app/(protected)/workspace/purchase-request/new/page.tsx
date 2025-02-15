@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Pencil, Trash } from 'lucide-react';
+import { X, Plus, Pencil, Trash, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
@@ -428,7 +428,7 @@ export default function NewRequestPage() {
         <hr className="my-6" />
 
         <h2 className="text-lg font-medium">Approval Steps</h2>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-start gap-2">
             <button
               type="button"
               onClick={() => setIsAddStepModalOpen(true)}
@@ -436,6 +436,14 @@ export default function NewRequestPage() {
             >
               <Plus className="w-4 h-4" />
               Add Step
+            </button>
+            <button
+              type="button"
+              onClick={() => {}}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <ListChecks className="w-4 h-4" />
+              Choose Approval Schema
             </button>
           </div>
 
