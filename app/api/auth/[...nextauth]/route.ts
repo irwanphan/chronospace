@@ -76,10 +76,10 @@ export const authOptions: AuthOptions = {
           }
         });
 
-        console.log("Found user:", user); // Debug log
+        // console.log("Found user:", user); // Debug log
 
         if (!user) {
-          console.log("No user found for email:", credentials.email); // Debug log
+          // console.log("No user found for email:", credentials.email); // Debug log
           throw new Error("No user found");
         }
 
@@ -88,7 +88,7 @@ export const authOptions: AuthOptions = {
           user.password
         );
 
-        console.log("Password valid:", isPasswordValid); // Debug log
+        // console.log("Password valid:", isPasswordValid); // Debug log
 
         if (!isPasswordValid) {
           throw new Error("Invalid password");

@@ -24,8 +24,6 @@ export default withAuth(
     const access = await accessResponse.json();
     const { activityAccess } = access;
 
-    console.log(activityAccess);
-
     // Cek akses specific route
     if (req.nextUrl.pathname.startsWith('/workspace-management')) {
       if (req.nextUrl.pathname.includes('/work-division')) {
