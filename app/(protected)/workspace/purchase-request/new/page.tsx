@@ -461,110 +461,108 @@ export default function NewRequestPage() {
           <hr className="my-6" />
 
           <h2 className="text-lg font-medium">Approval Steps</h2>
-            <div className="flex items-center justify-start gap-2">
-              <button
-                type="button"
-                onClick={() => setIsAddStepModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4" />
-                Add Approver
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsSchemaModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-              >
-                <ListChecks className="w-4 h-4" />
-                Choose Approval Schema
-              </button>
-            </div>
+          <div className="flex items-center justify-start gap-2">
+            <button
+              type="button"
+              onClick={() => setIsAddStepModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Approver
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSchemaModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <ListChecks className="w-4 h-4" />
+              Choose Approval Schema
+            </button>
+          </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4">#</th>
-                    <th className="text-left py-3 px-4">Role</th>
-                    <th className="text-left py-3 px-4">Specific User</th>
-                    <th className="text-left py-3 px-4">Limit</th>
-                    <th className="text-left py-3 px-4">Duration</th>
-                    <th className="text-left py-3 px-4">Overtime</th>
-                    <th className="text-left py-3 px-4 w-16"></th>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4">#</th>
+                  <th className="text-left py-3 px-4">Role</th>
+                  <th className="text-left py-3 px-4">Specific User</th>
+                  <th className="text-left py-3 px-4">Limit</th>
+                  <th className="text-left py-3 px-4">Duration</th>
+                  <th className="text-left py-3 px-4">Overtime</th>
+                  <th className="text-left py-3 px-4 w-16"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {formData.steps.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-4 text-gray-500">
+                      No steps added yet
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {formData.steps.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-4 text-gray-500">
-                        No steps added yet
+                ) : (
+                  formData.steps.map((step, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-3 px-4">{index + 1}</td>
+                      <td className="py-3 px-4">
+                        {roles.find(r => r.id === step.roleId)?.roleName}
+                      </td>
+                      <td className="py-3 px-4">
+                        {step.specificUserId 
+                          ? users.find(u => u.id === step.specificUserId)?.name 
+                          : 'Any user with role'}
+                      </td>
+                      <td className="py-3 px-4">
+                        {step.limit ? new Intl.NumberFormat('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                          minimumFractionDigits: 0,
+                        }).format(step.limit) : '-'}
+                      </td>
+                      <td className="py-3 px-4">{step.duration} days</td>
+                      <td className="py-3 px-4">
+                        {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditStep(index)}
+                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeStep(index)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ) : (
-                    formData.steps.map((step, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-3 px-4">{index + 1}</td>
-                        <td className="py-3 px-4">
-                          {roles.find(r => r.id === step.roleId)?.roleName}
-                        </td>
-                        <td className="py-3 px-4">
-                          {step.specificUserId 
-                            ? users.find(u => u.id === step.specificUserId)?.name 
-                            : 'Any user with role'}
-                        </td>
-                        <td className="py-3 px-4">
-                          {step.limit ? new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(step.limit) : '-'}
-                        </td>
-                        <td className="py-3 px-4">{step.duration} days</td>
-                        <td className="py-3 px-4">
-                          {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleEditStep(index)}
-                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeStep(index)}
-                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                            >
-                              <Trash className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <AddStepModal
-              isOpen={isAddStepModalOpen}
-              onClose={() => {
-                setIsAddStepModalOpen(false);
-                setEditingStep(null);
-              }}
-              onSubmit={handleStepSubmit}
-              roles={roles}
-              users={users}
-              documentType={'Purchase Request'}
-              editData={editingStep?.data}
-              isEdit={editingStep !== null}
-            />
-
-          <hr className="my-6" />
-
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        <AddStepModal
+          isOpen={isAddStepModalOpen}
+          onClose={() => {
+            setIsAddStepModalOpen(false);
+            setEditingStep(null);
+          }}
+          onSubmit={handleStepSubmit}
+          roles={roles}
+          users={users}
+          documentType={'Purchase Request'}
+          editData={editingStep?.data}
+          isEdit={editingStep !== null}
+        />
+
         {isSchemaModalOpen && (
           <div className="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl m-0">
@@ -613,6 +611,8 @@ export default function NewRequestPage() {
             </div>
           </div>
         )}
+
+        <hr className="my-6" />
 
         <div className="flex justify-end gap-3">
           <Link
