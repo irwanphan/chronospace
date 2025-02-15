@@ -53,7 +53,7 @@ export default function NewRequestPage() {
   const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
-  console.log(budgetPlans)
+  console.log(schemas)
   const [formData, setFormData] = useState({
     budgetId: '',
     projectId: '',
@@ -317,263 +317,265 @@ export default function NewRequestPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4">Request Information</h2>
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-gray-200">
+        <div className="space-y-6">
+          <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
-        <input type="hidden" name="requestCategory" value="Purchase Request" readOnly />
+          <input type="hidden" name="requestCategory" value="Purchase Request" readOnly />
 
-        <div className="grid grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Related Budget <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.budgetId}
-              onChange={(e) => handleBudgetChange(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg bg-white"
-              required
-            >
-              <option value="">Select Budget</option>
-              {budgetPlans.map(budget => (
-                <option key={budget.id} value={budget.id}>
-                  {budget.title}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Related Budget <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.budgetId}
+                onChange={(e) => handleBudgetChange(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg bg-white"
+                required
+              >
+                <option value="">Select Budget</option>
+                {budgetPlans.map(budget => (
+                  <option key={budget.id} value={budget.id}>
+                    {budget.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Related Project
+              </label>
+              <input
+                type="text"
+                value={budgetPlans.find(b => b.id === formData.budgetId)?.project?.projectTitle || ''}
+                className="w-full px-4 py-2 border rounded-lg bg-gray-100"
+                disabled
+              />
+            </div>
           </div>
 
-          <div>
+          <div className="mb-6">
             <label className="block text-sm font-medium mb-1">
-              Related Project
+              Request Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={budgetPlans.find(b => b.id === formData.budgetId)?.project?.projectTitle || ''}
-              className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-              disabled
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
             />
           </div>
-        </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-1">
-            Request Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Description <span className="text-red-500">*</span>
-          </label>
-          <RichTextEditor
-            value={formData.description}
-            onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
-          />
-        </div>
-
-        <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">#</th>
-                <th className="text-left py-2">Description</th>
-                <th className="text-left py-2">Qty</th>
-                <th className="text-left py-2">Unit</th>
-                <th className="text-right py-2">Unit Price</th>
-                <th className="text-right py-2">Total Price</th>
-                <th className="text-left py-2">Vendor</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedItems.map((item, index) => (
-                <tr key={index} className="border-b">
-                  <td className="py-2">{index + 1}</td>
-                  <td className="py-2">{item.description}</td>
-                  <td className="py-2">
-                    <input
-                      type="number"
-                      value={item.qty}
-                      onChange={(e) => handleItemChange(index, 'qty', parseInt(e.target.value))}
-                      className="w-20 px-2 py-1 border rounded"
-                      min="1"
-                      max={item.qty}
-                    />
-                  </td>
-                  <td className="py-2">{item.unit}</td>
-                  <td className="py-2 text-right">
-                    <input
-                      type="number"
-                      value={item.unitPrice}
-                      onChange={(e) => handleItemChange(index, 'unitPrice', parseInt(e.target.value))}
-                      className="w-32 px-2 py-1 border rounded text-right"
-                    />
-                  </td>
-                  <td className="py-2 text-right">
-                    {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
-                  </td>
-                  <td className="py-2">{item.vendor}</td>
-                  <td className="py-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newItems = [...selectedItems];
-                        newItems.splice(index, 1);
-                        setSelectedItems(newItems);
-                      }}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {selectedItems.length === 0 && (
-            <div className="text-gray-500 text-sm mt-4">
-              No items selected
-            </div>
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={handleAddItem}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Add Item
-        </button>
-
-        <hr className="my-6" />
-
-        <h2 className="text-lg font-medium">Approval Steps</h2>
-          <div className="flex items-center justify-start gap-2">
-            <button
-              type="button"
-              onClick={() => setIsAddStepModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" />
-              Add Step
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSchemaModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-            >
-              <ListChecks className="w-4 h-4" />
-              Choose Approval Schema
-            </button>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Description <span className="text-red-500">*</span>
+            </label>
+            <RichTextEditor
+              value={formData.description}
+              onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
+            />
           </div>
 
-          <div className="overflow-x-auto">
+          <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
+          <div className="overflow-x-auto mb-4">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4">#</th>
-                  <th className="text-left py-3 px-4">Role</th>
-                  <th className="text-left py-3 px-4">Specific User</th>
-                  <th className="text-left py-3 px-4">Limit</th>
-                  <th className="text-left py-3 px-4">Duration</th>
-                  <th className="text-left py-3 px-4">Overtime</th>
-                  <th className="text-left py-3 px-4 w-16"></th>
+                  <th className="text-left py-2">#</th>
+                  <th className="text-left py-2">Description</th>
+                  <th className="text-left py-2">Qty</th>
+                  <th className="text-left py-2">Unit</th>
+                  <th className="text-right py-2">Unit Price</th>
+                  <th className="text-right py-2">Total Price</th>
+                  <th className="text-left py-2">Vendor</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                {formData.steps.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-4 text-gray-500">
-                      No steps added yet
+                {selectedItems.map((item, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="py-2">{index + 1}</td>
+                    <td className="py-2">{item.description}</td>
+                    <td className="py-2">
+                      <input
+                        type="number"
+                        value={item.qty}
+                        onChange={(e) => handleItemChange(index, 'qty', parseInt(e.target.value))}
+                        className="w-20 px-2 py-1 border rounded"
+                        min="1"
+                        max={item.qty}
+                      />
+                    </td>
+                    <td className="py-2">{item.unit}</td>
+                    <td className="py-2 text-right">
+                      <input
+                        type="number"
+                        value={item.unitPrice}
+                        onChange={(e) => handleItemChange(index, 'unitPrice', parseInt(e.target.value))}
+                        className="w-32 px-2 py-1 border rounded text-right"
+                      />
+                    </td>
+                    <td className="py-2 text-right">
+                      {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
+                    </td>
+                    <td className="py-2">{item.vendor}</td>
+                    <td className="py-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newItems = [...selectedItems];
+                          newItems.splice(index, 1);
+                          setSelectedItems(newItems);
+                        }}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  formData.steps.map((step, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="py-3 px-4">{index + 1}</td>
-                      <td className="py-3 px-4">
-                        {roles.find(r => r.id === step.roleId)?.roleName}
-                      </td>
-                      <td className="py-3 px-4">
-                        {step.specificUserId 
-                          ? users.find(u => u.id === step.specificUserId)?.name 
-                          : 'Any user with role'}
-                      </td>
-                      <td className="py-3 px-4">
-                        {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
-                          style: 'currency',
-                          currency: 'IDR',
-                          minimumFractionDigits: 0,
-                        }).format(step.budgetLimit) : '-'}
-                      </td>
-                      <td className="py-3 px-4">{step.duration} days</td>
-                      <td className="py-3 px-4">
-                        {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEditStep(index)}
-                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeStep(index)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          >
-                            <Trash className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
+
+            {selectedItems.length === 0 && (
+              <div className="text-gray-500 text-sm mt-4">
+                No items selected
+              </div>
+            )}
           </div>
 
-          <AddStepModal
-            isOpen={isAddStepModalOpen}
-            onClose={() => {
-              setIsAddStepModalOpen(false);
-              setEditingStep(null);
-            }}
-            onSubmit={handleStepSubmit}
-            roles={roles}
-            users={users}
-            documentType={'Purchase Request'}
-            editData={editingStep?.data}
-            isEdit={editingStep !== null}
-          />
+          <button
+            type="button"
+            onClick={handleAddItem}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Item
+          </button>
 
-        <hr className="my-6" />
+          <hr className="my-6" />
 
+          <h2 className="text-lg font-medium">Approval Steps</h2>
+            <div className="flex items-center justify-start gap-2">
+              <button
+                type="button"
+                onClick={() => setIsAddStepModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4" />
+                Add Step
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSchemaModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                <ListChecks className="w-4 h-4" />
+                Choose Approval Schema
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">#</th>
+                    <th className="text-left py-3 px-4">Role</th>
+                    <th className="text-left py-3 px-4">Specific User</th>
+                    <th className="text-left py-3 px-4">Limit</th>
+                    <th className="text-left py-3 px-4">Duration</th>
+                    <th className="text-left py-3 px-4">Overtime</th>
+                    <th className="text-left py-3 px-4 w-16"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.steps.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-4 text-gray-500">
+                        No steps added yet
+                      </td>
+                    </tr>
+                  ) : (
+                    formData.steps.map((step, index) => (
+                      <tr key={index} className="border-b">
+                        <td className="py-3 px-4">{index + 1}</td>
+                        <td className="py-3 px-4">
+                          {roles.find(r => r.id === step.roleId)?.roleName}
+                        </td>
+                        <td className="py-3 px-4">
+                          {step.specificUserId 
+                            ? users.find(u => u.id === step.specificUserId)?.name 
+                            : 'Any user with role'}
+                        </td>
+                        <td className="py-3 px-4">
+                          {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                          }).format(step.budgetLimit) : '-'}
+                        </td>
+                        <td className="py-3 px-4">{step.duration} days</td>
+                        <td className="py-3 px-4">
+                          {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEditStep(index)}
+                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeStep(index)}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <AddStepModal
+              isOpen={isAddStepModalOpen}
+              onClose={() => {
+                setIsAddStepModalOpen(false);
+                setEditingStep(null);
+              }}
+              onSubmit={handleStepSubmit}
+              roles={roles}
+              users={users}
+              documentType={'Purchase Request'}
+              editData={editingStep?.data}
+              isEdit={editingStep !== null}
+            />
+
+          <hr className="my-6" />
+
+        </div>
         {isSchemaModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+          <div className="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl m-0">
               <h2 className="text-lg font-medium mb-4">Select Approval Schema</h2>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
                 {schemas.map(schema => (
                   <div 
                     key={schema.id}
                     onClick={() => handleSelectSchema(schema)}
-                    className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+                    className="p-4 border rounded-lg cursor-pointer group hover:bg-blue-600 hover:text-white hover:border-blue-700 transition-all duration-300"
                   >
                     <h3 className="font-medium">{schema.name}</h3>
-                    <p className="text-sm text-gray-600">{schema.description}</p>
+                    <p className="text-sm text-gray-600 group-hover:text-white transition-all duration-300">{schema.description}</p>
                   </div>
                 ))}
               </div>
