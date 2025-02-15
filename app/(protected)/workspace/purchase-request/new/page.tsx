@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { formatDate } from '@/lib/utils';
-
+import AddStepModal from '@/components/AddStepModal';
+import { Role } from '@/types/role';
+import { User } from '@/types/user';
 interface BudgetPlan {
   id: string;
   title: string;
@@ -27,20 +29,32 @@ interface BudgetItem {
   vendor: string;
 }
 
+interface ApprovalStepForm {
+  roleId: string;
+  specificUserId?: string;
+  budgetLimit?: number;
+  duration: number;
+  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+}
+
 export default function NewRequestPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
+  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
   console.log(budgetPlans)
   const [formData, setFormData] = useState({
-    requestCategory: 'Purchase Request',
     budgetId: '',
     projectId: '',
     title: '',
     description: '',
     items: [],
+    steps: [] as ApprovalStepForm[],
   });
 
   const [requestInfo, setRequestInfo] = useState({
@@ -86,6 +100,35 @@ export default function NewRequestPage() {
     });
   }, []);
 
+  useEffect(() => {
+    fetchRoles();
+    fetchUsers();
+  }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch('/api/roles');
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch roles:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
+
   // Update project and items when budget is selected
   const handleBudgetChange = (budgetId: string) => {
     const selectedBudget = budgetPlans.find(budget => budget.id === budgetId);
@@ -130,6 +173,62 @@ export default function NewRequestPage() {
     };
 
     setSelectedItems(updatedItems);
+  };
+
+  const addStep = (stepData: ApprovalStepForm) => {
+    setFormData(prev => ({
+      ...prev,
+      steps: [...prev.steps, stepData].sort((a, b) => {
+        // Sort by budget limit, undefined limits go last
+        if (a.budgetLimit === undefined) return 1;
+        if (b.budgetLimit === undefined) return -1;
+        return a.budgetLimit - b.budgetLimit;
+      }),
+    }));
+  };
+
+  const removeStep = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      steps: prev.steps.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleEditStep = (index: number) => {
+    const step = formData.steps[index];
+    setEditingStep({
+      data: {
+        roleId: step.roleId,
+        specificUserId: step.specificUserId,
+        budgetLimit: step.budgetLimit,
+        duration: step.duration,
+        overtimeAction: step.overtimeAction,
+      },
+      index
+    });
+    setIsAddStepModalOpen(true);
+  };
+
+  const handleStepSubmit = (stepData: ApprovalStepForm) => {
+    if (editingStep !== null) {
+      // Edit existing step
+      setFormData(prev => ({
+        ...prev,
+        steps: prev.steps.map((step, i) => 
+          i === editingStep.index ? stepData : step
+        ).sort((a, b) => {
+          // Sort by budget limit, undefined limits go last
+          if (a.budgetLimit === undefined) return 1;
+          if (b.budgetLimit === undefined) return -1;
+          return a.budgetLimit - b.budgetLimit;
+        })
+      }));
+      setEditingStep(null);
+    } else {
+      // Add new step
+      addStep(stepData);
+    }
+    setIsAddStepModalOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,23 +290,6 @@ export default function NewRequestPage() {
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
-        {/* <div className="grid grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Request Category <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.requestCategory}
-              onChange={(e) => setFormData(prev => ({ ...prev, requestCategory: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg bg-white"
-              required
-            >
-              <option value="Purchase Request" selected>Purchase Request</option>
-              <option value="Purchase Order">Purchase Order</option>
-              <option value="Memo">Memo</option>
-            </select>
-          </div>
-        </div> */}
         <input type="hidden" name="requestCategory" value="Purchase Request" readOnly />
 
         <div className="grid grid-cols-2 gap-6 mb-6">
@@ -342,6 +424,102 @@ export default function NewRequestPage() {
           <Plus className="w-4 h-4" />
           Add Item
         </button>
+
+        <hr className="my-6" />
+
+        <h2 className="text-lg font-medium">Approval Steps</h2>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              type="button"
+              onClick={() => setIsAddStepModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Step
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4">#</th>
+                  <th className="text-left py-3 px-4">Role</th>
+                  <th className="text-left py-3 px-4">Specific User</th>
+                  <th className="text-left py-3 px-4">Limit</th>
+                  <th className="text-left py-3 px-4">Duration</th>
+                  <th className="text-left py-3 px-4">Overtime</th>
+                  <th className="text-left py-3 px-4 w-16"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {formData.steps.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-4 text-gray-500">
+                      No steps added yet
+                    </td>
+                  </tr>
+                ) : (
+                  formData.steps.map((step, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-3 px-4">{index + 1}</td>
+                      <td className="py-3 px-4">
+                        {roles.find(r => r.id === step.roleId)?.roleName}
+                      </td>
+                      <td className="py-3 px-4">
+                        {step.specificUserId 
+                          ? users.find(u => u.id === step.specificUserId)?.name 
+                          : 'Any user with role'}
+                      </td>
+                      <td className="py-3 px-4">
+                        {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                          minimumFractionDigits: 0,
+                        }).format(step.budgetLimit) : '-'}
+                      </td>
+                      <td className="py-3 px-4">{step.duration / 24} days</td>
+                      <td className="py-3 px-4">
+                        {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditStep(index)}
+                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeStep(index)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <AddStepModal
+            isOpen={isAddStepModalOpen}
+            onClose={() => {
+              setIsAddStepModalOpen(false);
+              setEditingStep(null);
+            }}
+            onSubmit={handleStepSubmit}
+            roles={roles}
+            users={users}
+            documentType={'Purchase Request'}
+            editData={editingStep?.data}
+            isEdit={editingStep !== null}
+          />
 
         <hr className="my-6" />
 
