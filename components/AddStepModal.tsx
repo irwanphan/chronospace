@@ -42,6 +42,7 @@ export default function AddStepModal({
   });
 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [selectedRoleLimit, setSelectedRoleLimit] = useState<number | null>(null);
 
   useEffect(() => {
     if (isEdit && editData) {
@@ -74,6 +75,16 @@ export default function AddStepModal({
     onClose();
   };
 
+  const handleRoleChange = (roleId: string) => {
+    const role = roles.find(r => r.id === roleId);
+    setSelectedRoleLimit(role?.approvalLimit || null);
+    setFormData(prev => ({ 
+      ...prev, 
+      roleId,
+      budgetLimit: role?.approvalLimit || undefined
+    }));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -98,22 +109,14 @@ export default function AddStepModal({
               Role <span className="text-red-500">*</span>
             </label>
             <select
-              value={formData.roleId}
-              onChange={(e) => {
-                setFormData(prev => ({ 
-                  ...prev, 
-                  roleId: e.target.value,
-                  specificUserId: undefined // Reset specific user when role changes
-                }));
-              }}
+              value={formData.roleId || ''}
+              onChange={(e) => handleRoleChange(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
               <option value="">Select Role</option>
               {roles.map(role => (
-                <option key={role.id} value={role.id}>
-                  {role.roleName}
-                </option>
+                <option key={role.id} value={role.id}>{role.roleName}</option>
               ))}
             </select>
           </div>
@@ -147,18 +150,19 @@ export default function AddStepModal({
           {documentType === 'Purchase Request' && (
             <div>
               <label className="block mb-1.5">
-                Budget Limit <span className="text-red-500">*</span>
+                Budget Limit
               </label>
               <input
-                type="number"
-                value={formData.budgetLimit || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  budgetLimit: e.target.value ? Number(e.target.value) : undefined 
-                }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                placeholder="e.g., 50000000"
-                required={documentType === 'Purchase Request'}
+                type="text"
+                value={selectedRoleLimit 
+                  ? new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
+                      currency: 'IDR',
+                      minimumFractionDigits: 0,
+                    }).format(selectedRoleLimit)
+                  : ''}
+                disabled
+                className="w-full px-4 py-2 border rounded-lg bg-gray-50"
               />
             </div>
           )}
