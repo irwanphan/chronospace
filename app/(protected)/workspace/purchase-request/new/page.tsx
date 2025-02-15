@@ -478,7 +478,7 @@ export default function NewRequestPage() {
                           minimumFractionDigits: 0,
                         }).format(step.budgetLimit) : '-'}
                       </td>
-                      <td className="py-3 px-4">{step.duration / 24} days</td>
+                      <td className="py-3 px-4">{step.duration} days</td>
                       <td className="py-3 px-4">
                         {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
                       </td>
