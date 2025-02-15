@@ -4,16 +4,21 @@ import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react'
 import Link from 'next/link';
 import { WorkDivision } from '@/types/workDivision';
 import { useRouter } from 'next/navigation';
+import { User } from '@/types/user';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    fetchDivisions();
+    Promise.all([
+      fetchDivisions(),
+      fetchUsers()
+    ]);
   }, []);
 
   const fetchDivisions = async () => {
@@ -31,6 +36,17 @@ export default function WorkDivisionPage() {
       setDivisions([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
     }
   };
 
@@ -122,7 +138,7 @@ export default function WorkDivisionPage() {
                     {division.description || '-'}
                   </td>
                   <td className="py-3 px-4">
-                    {division.divisionHead || '-'}
+                    {users.find(user => user.id === division.divisionHead)?.name || '-'}
                   </td>
                   <td className="py-3 px-4">
                     <div className="relative">
