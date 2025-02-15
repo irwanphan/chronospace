@@ -35,7 +35,7 @@ interface BudgetItem {
 interface ApprovalStepForm {
   roleId: string;
   specificUserId?: string;
-  budgetLimit?: number;
+  limit?: number;
   duration: number;
   overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
 }
@@ -198,9 +198,9 @@ export default function NewRequestPage() {
       ...prev,
       steps: [...prev.steps, stepData].sort((a, b) => {
         // Sort by budget limit, undefined limits go last
-        if (a.budgetLimit === undefined) return 1;
-        if (b.budgetLimit === undefined) return -1;
-        return a.budgetLimit - b.budgetLimit;
+        if (a.limit === undefined) return 1;
+        if (b.limit === undefined) return -1;
+        return a.limit - b.limit;
       }),
     }));
   };
@@ -218,7 +218,7 @@ export default function NewRequestPage() {
       data: {
         roleId: step.roleId,
         specificUserId: step.specificUserId,
-        budgetLimit: step.budgetLimit,
+        limit: step.limit,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
       },
@@ -236,9 +236,9 @@ export default function NewRequestPage() {
           i === editingStep.index ? stepData : step
         ).sort((a, b) => {
           // Sort by budget limit, undefined limits go last
-          if (a.budgetLimit === undefined) return 1;
-          if (b.budgetLimit === undefined) return -1;
-          return a.budgetLimit - b.budgetLimit;
+          if (a.limit === undefined) return 1;
+          if (b.limit === undefined) return -1;
+          return a.limit - b.limit;
         })
       }));
       setEditingStep(null);
@@ -254,8 +254,10 @@ export default function NewRequestPage() {
       ...prev,
       steps: schema.steps.map(step => ({
         roleId: step.role,
+        specificUserId: step.specificUserId,
         duration: step.duration,
-        overtimeAction: step.overtime
+        overtimeAction: step.overtimeAction,
+        limit: step.limit
       }))
     }));
     setIsSchemaModalOpen(false);
@@ -511,11 +513,11 @@ export default function NewRequestPage() {
                             : 'Any user with role'}
                         </td>
                         <td className="py-3 px-4">
-                          {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
+                          {step.limit ? new Intl.NumberFormat('id-ID', {
                             style: 'currency',
                             currency: 'IDR',
                             minimumFractionDigits: 0,
-                          }).format(step.budgetLimit) : '-'}
+                          }).format(step.limit) : '-'}
                         </td>
                         <td className="py-3 px-4">{step.duration} days</td>
                         <td className="py-3 px-4">
@@ -576,6 +578,27 @@ export default function NewRequestPage() {
                   >
                     <h3 className="font-medium">{schema.name}</h3>
                     <p className="text-sm text-gray-600 group-hover:text-white transition-all duration-300">{schema.description}</p>
+                    <div className="flex flex-col items-start pt-2">
+                      {schema.steps.map((step, index) => (
+                        <div key={index} className="flex items-center gap-4 text-xs text-gray-600 group-hover:text-white transition-all duration-300">
+                          <span className="font-medium">Step {index + 1}:</span>
+                          <span className="font-medium">
+                            {roles.find(r => r.id === step.role)?.roleName}
+                          </span>
+                          {step.limit && (
+                            <span>
+                              {new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                              }).format(step.limit)}
+                            </span>
+                          )}
+                          <span>{step.duration}d</span>
+                          <span>{step.overtimeAction === 'NOTIFY' ? 'Notify Only' : 'Auto Reject'}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>

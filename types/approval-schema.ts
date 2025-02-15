@@ -5,7 +5,9 @@ export interface ApprovalSchema {
   documentType: string;
   steps: {
     role: string;
+    specificUserId?: string;
     duration: number;
-    overtime: 'NOTIFY' | 'AUTO_REJECT';
+    overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+    limit?: number;
   }[];
 } 
