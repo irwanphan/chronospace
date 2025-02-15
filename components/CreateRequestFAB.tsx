@@ -13,14 +13,14 @@ export default function CreateRequestFAB() {
       {isOpen && (
         <div className="absolute bottom-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 w-48 py-2 mb-2">
           <Link 
-            href="/request/new"
+            href="/workspace/purchase-request/new"
             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-sm"
             onClick={() => setIsOpen(false)}
           >
             Purchase Request / Memo
           </Link>
           <Link 
-            href="/purchase-order/new"
+            href="/workspace/purchase-order/new"
             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-sm"
             onClick={() => setIsOpen(false)}
           >
