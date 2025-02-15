@@ -10,6 +10,7 @@ import AddStepModal from '@/components/AddStepModal';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema } from '@/types/approval-schema';
+import { useSession } from 'next-auth/react';
 
 interface BudgetPlan {
   id: string;
@@ -41,6 +42,7 @@ interface ApprovalStepForm {
 
 export default function NewRequestPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
@@ -65,7 +67,7 @@ export default function NewRequestPage() {
     id: '',
     requestDate: new Date(),
     requestor: '',
-    workDivision: ''
+    role: ''
   });
 
   // Fetch budget plans
@@ -99,10 +101,10 @@ export default function NewRequestPage() {
     setRequestInfo({
       id: generateRequestId(),
       requestDate: new Date(),
-      requestor: 'Nam Do San', // Ganti dengan data user aktif
-      workDivision: 'Engineering' // Ganti dengan data user aktif
+      requestor: session?.user?.name || '',
+      role: session?.user?.role || ''
     });
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     fetchRoles();
@@ -309,7 +311,7 @@ export default function NewRequestPage() {
               Request Date: <span className="font-semibold text-gray-900">{formatDate(requestInfo.requestDate)}</span>
             </div>
             <div className="text-sm text-gray-500">
-              Work Division: <span className="font-semibold text-gray-900">{requestInfo.workDivision}</span>
+              Requestor Role: <span className="font-semibold text-gray-900">{requestInfo.role}</span>
             </div>
           </div>
         </div>
