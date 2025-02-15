@@ -37,7 +37,7 @@ export default function AddStepModal({
     roleId: '',
     specificUserId: undefined,
     budgetLimit: undefined,
-    duration: 48,
+    duration: 7,
     overtimeAction: 'NOTIFY',
   });
 
@@ -52,7 +52,7 @@ export default function AddStepModal({
         roleId: '',
         specificUserId: undefined,
         budgetLimit: undefined,
-        duration: 48,
+        duration: 7,
         overtimeAction: 'NOTIFY',
       });
     }
@@ -176,7 +176,7 @@ export default function AddStepModal({
               value={formData.duration}
               onChange={(e) => setFormData(prev => ({ 
                 ...prev, 
-                duration: Number(e.target.value) * 24 
+                duration: Number(e.target.value)
               }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               min="1"
