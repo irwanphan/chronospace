@@ -164,7 +164,7 @@ export default function NewRequestPage() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-4">New Request</h1>
+      <h1 className="text-2xl font-semibold mb-4">New Purchase Request</h1>
       
       {/* Request Info Card */}
       <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200 bg-white">
@@ -191,7 +191,7 @@ export default function NewRequestPage() {
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium mb-1">
               Request Category <span className="text-red-500">*</span>
@@ -202,12 +202,13 @@ export default function NewRequestPage() {
               className="w-full px-4 py-2 border rounded-lg bg-white"
               required
             >
-              <option value="Purchase Request">Purchase Request</option>
+              <option value="Purchase Request" selected>Purchase Request</option>
               <option value="Purchase Order">Purchase Order</option>
               <option value="Memo">Memo</option>
             </select>
           </div>
-        </div>
+        </div> */}
+        <input type="hidden" name="requestCategory" value="Purchase Request" readOnly />
 
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
