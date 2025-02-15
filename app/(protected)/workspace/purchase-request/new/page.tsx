@@ -9,6 +9,8 @@ import { formatDate } from '@/lib/utils';
 import AddStepModal from '@/components/AddStepModal';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
+import { ApprovalSchema } from '@/types/approval-schema';
+
 interface BudgetPlan {
   id: string;
   title: string;
@@ -47,6 +49,8 @@ export default function NewRequestPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
+  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
+  const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
   console.log(budgetPlans)
   const [formData, setFormData] = useState({
     budgetId: '',
@@ -103,6 +107,7 @@ export default function NewRequestPage() {
   useEffect(() => {
     fetchRoles();
     fetchUsers();
+    fetchSchemas();
   }, []);
 
   const fetchRoles = async () => {
@@ -126,6 +131,17 @@ export default function NewRequestPage() {
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
+    }
+  };
+
+  const fetchSchemas = async () => {
+    try {
+      const response = await fetch('/api/approval-schemas');
+      if (!response.ok) throw new Error('Failed to fetch schemas');
+      const data = await response.json();
+      setSchemas(data);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -229,6 +245,18 @@ export default function NewRequestPage() {
       addStep(stepData);
     }
     setIsAddStepModalOpen(false);
+  };
+
+  const handleSelectSchema = (schema: ApprovalSchema) => {
+    setFormData(prev => ({
+      ...prev,
+      steps: schema.steps.map(step => ({
+        roleId: step.role,
+        duration: step.duration,
+        overtimeAction: step.overtime
+      }))
+    }));
+    setIsSchemaModalOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -439,7 +467,7 @@ export default function NewRequestPage() {
             </button>
             <button
               type="button"
-              onClick={() => {}}
+              onClick={() => setIsSchemaModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               <ListChecks className="w-4 h-4" />
@@ -530,6 +558,34 @@ export default function NewRequestPage() {
           />
 
         <hr className="my-6" />
+
+        {isSchemaModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+              <h2 className="text-lg font-medium mb-4">Select Approval Schema</h2>
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                {schemas.map(schema => (
+                  <div 
+                    key={schema.id}
+                    onClick={() => handleSelectSchema(schema)}
+                    className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
+                  >
+                    <h3 className="font-medium">{schema.name}</h3>
+                    <p className="text-sm text-gray-600">{schema.description}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => setIsSchemaModalOpen(false)}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end gap-3">
           <Link
