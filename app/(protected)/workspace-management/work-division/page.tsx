@@ -70,6 +70,11 @@ export default function WorkDivisionPage() {
     }
   };
 
+  const stripHtmlTags = (html: string | null) => {
+    if (!html) return '-';
+    return html.replace(/<[^>]*>/g, '');
+  };
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">Work Division</h1>
@@ -135,7 +140,7 @@ export default function WorkDivisionPage() {
                   <td className="py-3 px-4">{division.divisionCode}</td>
                   <td className="py-3 px-4">{division.divisionName}</td>
                   <td className="py-3 px-4">
-                    {division.description || '-'}
+                    {stripHtmlTags(division.description)}
                   </td>
                   <td className="py-3 px-4">
                     {users.find(user => user.id === division.divisionHead)?.name || '-'}
