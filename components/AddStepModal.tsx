@@ -45,18 +45,12 @@ export default function AddStepModal({
   const [selectedRoleLimit, setSelectedRoleLimit] = useState<number | null>(null);
 
   useEffect(() => {
-    if (isEdit && editData) {
+    if (editData) {
+      const role = roles.find(r => r.id === editData.roleId);
+      setSelectedRoleLimit(role?.approvalLimit || null);
       setFormData(editData);
-    } else {
-      setFormData({
-        roleId: '',
-        specificUserId: undefined,
-        budgetLimit: undefined,
-        duration: 7,
-        overtimeAction: 'NOTIFY',
-      });
     }
-  }, [isEdit, editData]);
+  }, [editData, roles]);
 
   useEffect(() => {
     if (formData.roleId) {
@@ -111,7 +105,7 @@ export default function AddStepModal({
             <select
               value={formData.roleId || ''}
               onChange={(e) => handleRoleChange(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               required
             >
               <option value="">Select Role</option>
@@ -135,7 +129,7 @@ export default function AddStepModal({
                   ...prev, 
                   specificUserId: e.target.value || undefined 
                 }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               >
                 <option value="">Any user with this role</option>
                 {filteredUsers.map(user => (
@@ -161,7 +155,7 @@ export default function AddStepModal({
                       minimumFractionDigits: 0,
                     }).format(selectedRoleLimit)
                   : ''}
-                disabled
+                readOnly
                 className="w-full px-4 py-2 border rounded-lg bg-gray-50"
               />
             </div>
@@ -194,7 +188,7 @@ export default function AddStepModal({
                 ...prev, 
                 overtimeAction: e.target.value as 'NOTIFY' | 'AUTO_REJECT' 
               }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               required
             >
               <option value="NOTIFY">Notify and Wait</option>
