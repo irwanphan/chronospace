@@ -71,7 +71,8 @@ export const authOptions: AuthOptions = {
               include: {
                 role: true
               }
-            }
+            },
+            access: true
           }
         });
 
@@ -93,11 +94,61 @@ export const authOptions: AuthOptions = {
           throw new Error("Invalid password");
         }
 
+        const menuAccess = user.access?.menuAccess 
+          ? JSON.parse(user.access.menuAccess as string)
+          : {
+              timeline: false,
+              workspace: false,
+              projectPlanning: false,
+              budgetPlanning: false,
+              userManagement: false,
+              workspaceManagement: false
+            };
+
+        const activityAccess = user.access?.activityAccess 
+          ? JSON.parse(user.access.activityAccess as string)
+          : {
+              createProject: false,
+              editProject: false,
+              deleteProject: false,
+              createBudget: false,
+              editBudget: false,
+              deleteBudget: false,
+              createWorkDivision: false,
+              editWorkDivision: false,
+              deleteWorkDivision: false,
+              createRole: false,
+              editRole: false,
+              deleteRole: false,
+              createVendor: false,
+              editVendor: false,
+              deleteVendor: false,
+              createApprovalSchema: false,
+              editApprovalSchema: false,
+              deleteApprovalSchema: false,
+              createUser: false,
+              editUser: false,
+              deleteUser: false,
+              manageUserAccess: false
+            };
+
+        const workspaceAccess = user.access?.workspaceAccess 
+          ? JSON.parse(user.access.workspaceAccess as string)
+          : {
+              createPurchaseRequest: false,
+              reviewApprovePurchaseRequest: false
+            };
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.userRoles[0].role.roleName
+          role: user.userRoles[0].role.roleName,
+          access: {
+            menuAccess,
+            activityAccess,
+            workspaceAccess
+          }
         };
       }
     })
