@@ -216,7 +216,7 @@ export default function ApprovalSchemaPage() {
                           }).format(step.limit)}
                         </span>
                       )}
-                      <span>{step.duration}h</span>
+                      <span>{step.duration}d</span>
                       <span>{step.overtimeAction === 'NOTIFY' ? 'Notify Only' : 'Auto Reject'}</span>
                     </div>
                   ))}
