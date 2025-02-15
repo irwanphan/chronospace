@@ -16,7 +16,7 @@ export async function approvalSchemaSeeder() {
           duration: 24,
           overtime: 'Notify and Wait',
           order: 1,
-          limit: 100000000 // 100 Juta
+          limit: 250000000 // 250 Juta
         },
         {
           role: 'role-cfo',
@@ -26,7 +26,7 @@ export async function approvalSchemaSeeder() {
           limit: 500000000 // 500 Juta
         },
         {
-          role: 'role-cfo',
+          role: 'role-ceo',
           duration: 72,
           overtime: 'Notify and Wait',
           order: 3,
@@ -55,21 +55,21 @@ export async function approvalSchemaSeeder() {
           duration: 4,
           overtime: 'Auto Approve',
           order: 1,
-          limit: 100000000 // 100 Juta
+          limit: 250000000 // 250 Juta
         },
         {
           role: 'role-cfo',
           duration: 8,
           overtime: 'Auto Approve',
           order: 2,
-          limit: 1000000000 // 1 Miliar
+          limit: 500000000 // 500 Juta
         },
         {
           role: 'role-ceo',
           duration: 12,
           overtime: 'Notify and Wait',
           order: 3,
-          limit: null // Unlimited
+          limit: 1000000000 // 1 Miliar
         }
       ]
     }
