@@ -6,7 +6,7 @@ export async function approvalSchemaSeeder() {
     name: 'Standard Purchase Request',
     documentType: 'Purchase Request',
     divisions: JSON.stringify(['RND', 'FIN', 'ITE', 'OPS', 'MKT']),
-    roles: JSON.stringify(['role-dh', 'role-fm']),
+    roles: JSON.stringify(['role-dh', 'role-fm', 'role-st']),
     title: 'Standard PR Approval Flow',
     description: 'Standard approval flow for purchase requests',
     steps: {
@@ -45,7 +45,7 @@ export async function approvalSchemaSeeder() {
     name: 'Urgent Purchase Request',
     documentType: 'Purchase Request',
     divisions: JSON.stringify(['RND', 'FIN', 'ITE', 'OPS', 'MKT']),
-    roles: JSON.stringify(['role-dh', 'role-fm']),
+    roles: JSON.stringify(['role-dh', 'role-fm', 'role-st']),
     title: 'Urgent PR Approval Flow',
     description: 'Expedited approval flow for urgent purchase requests',
     steps: {
