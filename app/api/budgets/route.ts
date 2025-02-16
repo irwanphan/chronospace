@@ -6,7 +6,8 @@ export async function GET() {
   try {
     const budgets = await prisma.budget.findMany({
       include: {
-        project: true
+        project: true,
+        items: true
       },
       orderBy: {
         createdAt: 'desc'

@@ -11,6 +11,8 @@ import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema } from '@/types/approval-schema';
 import { useSession } from 'next-auth/react';
+import { Dialog } from '@/components/ui/dialog';
+import { toast } from 'react-hot-toast';
 
 interface BudgetPlan {
   id: string;
@@ -25,6 +27,7 @@ interface BudgetPlan {
 
 interface BudgetItem {
   id: string;
+  budgetId: string;
   description: string;
   qty: number;
   unit: string;
@@ -45,6 +48,7 @@ export default function NewRequestPage() {
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
+  console.log('budgetPlans ', budgetPlans)
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -59,7 +63,7 @@ export default function NewRequestPage() {
     projectId: '',
     title: '',
     description: '',
-    items: [],
+    items: [] as BudgetItem[],
     steps: [] as ApprovalStepForm[],
   });
 
@@ -69,6 +73,12 @@ export default function NewRequestPage() {
     requestor: '',
     role: ''
   });
+
+  // Tambah state untuk modal dan budget items
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [selectedBudgetItems, setSelectedBudgetItems] = useState<BudgetItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch budget plans
   useEffect(() => {
@@ -156,6 +166,7 @@ export default function NewRequestPage() {
         budgetId,
         projectId: selectedBudget.projectId,
         title: selectedBudget.title,
+        items: selectedBudget.items
       }));
       setAvailableItems(selectedBudget.items);
     }
@@ -291,6 +302,47 @@ export default function NewRequestPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Fungsi fetch budget items yang diperbaiki
+  const fetchBudgetItems = async (budgetId: string) => {
+    setIsLoading(true);
+    try {
+      console.log('Fetching budget:', budgetId); // Debug log
+      const response = await fetch(`/api/budgets/${budgetId}`);
+      if (!response.ok) throw new Error('Failed to fetch budget items');
+      
+      const data = await response.json();
+      console.log('Response data:', data); // Debug log
+
+      // Ambil items dari response budget
+      const items = data.items || [];
+      console.log('Budget items:', items); // Debug log
+      setBudgetItems(items);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      toast.error('Failed to fetch budget items');
+      setBudgetItems([]); // Reset items jika error
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handler untuk membuka modal dan fetch items
+  const handleOpenItemModal = () => {
+    setIsItemModalOpen(true);
+    if (formData.budgetId) {
+      fetchBudgetItems(formData.budgetId);
+    }
+  };
+
+  // Handler untuk memilih item
+  const handleSelectItem = (item: BudgetItem) => {
+    setSelectedBudgetItems(prev => {
+      const exists = prev.find(i => i.id === item.id);
+      if (exists) return prev;
+      return [...prev, item];
+    });
   };
 
   return (
@@ -451,7 +503,7 @@ export default function NewRequestPage() {
 
           <button
             type="button"
-            onClick={handleAddItem}
+            onClick={handleOpenItemModal}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
@@ -631,6 +683,66 @@ export default function NewRequestPage() {
         </div>
 
       </form>
+
+      <Dialog open={isItemModalOpen} onOpenChange={setIsItemModalOpen}>
+        <div className="p-6 space-y-6">
+          <h3 className="text-lg font-medium">Select Budget Items</h3>
+          
+          {isLoading ? (
+            <div className="text-center py-4">Loading items...</div>
+          ) : budgetItems.length === 0 ? (
+            <div className="text-center py-4">No items found</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Description</th>
+                    <th className="text-left p-2">Qty</th>
+                    <th className="text-left p-2">Unit</th>
+                    <th className="text-right p-2">Unit Price</th>
+                    <th className="text-left p-2">Vendor</th>
+                    <th className="text-center p-2">Select</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {budgetItems.map((item) => (
+                    <tr key={item.id} className="border-b">
+                      <td className="p-2">{item.description}</td>
+                      <td className="p-2">{item.qty}</td>
+                      <td className="p-2">{item.unit}</td>
+                      <td className="p-2 text-right">
+                        {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
+                      </td>
+                      <td className="p-2">{item.vendor}</td>
+                      <td className="p-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleSelectItem(item)}
+                          className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          disabled={selectedBudgetItems.some(i => i.id === item.id)}
+                        >
+                          {selectedBudgetItems.some(i => i.id === item.id) ? 'Selected' : 'Select'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsItemModalOpen(false)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 } 
