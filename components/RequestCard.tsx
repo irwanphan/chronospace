@@ -1,3 +1,7 @@
+import { getInitials } from "@/lib/utils";
+import Image from "next/image";
+import Avatar from "./ui/Avatar";
+
 interface RequestCardProps {
   id: string;
   type: string;
@@ -50,13 +54,19 @@ export default function RequestCard({
       <div className="grid grid-cols-2 gap-8 mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 min-w-8 h-8 min-h-8 bg-gray-200 rounded-full">
-              {requestor.avatar && (
-                <img 
-                src={requestor.avatar} 
-                alt={requestor.name}
-                className="w-full h-full rounded-full object-cover"
+            <div className="w-10 h-10 bg-gray-200 rounded-full">
+              {requestor.avatar ? (
+                <Image
+                  src={requestor.avatar} 
+                  alt={requestor.name}
+                  width={40}
+                  height={40}
+                  className="rounded-full overflow-hidden bg-gray-200"
                 />
+              ) : (
+                <Avatar>
+                  {getInitials(requestor.name)}
+                </Avatar>
               )}
             </div>
             <div>
