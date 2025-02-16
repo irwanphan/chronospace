@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 export async function budgetSeeder() {
   // Get project IDs first
   const projects = await prisma.project.findMany({
-    select: { id: true, division: true, year: true }
+    select: { id: true, projectTitle: true, division: true, year: true }
   });
 
   for (const project of projects) {
@@ -11,7 +11,7 @@ export async function budgetSeeder() {
     await prisma.budget.create({
       data: {
         projectId: project.id,
-        title: `Budget Plan ${project.year}`,
+        title: `Budget Plan for ${project.projectTitle}`,
         description: `Annual budget plan for ${project.division} division`,
         year: project.year,
         division: project.division,
