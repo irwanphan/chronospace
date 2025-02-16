@@ -1,6 +1,23 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+interface ApprovalStep {
+  role: string;
+  specificUser?: string;
+  stepOrder: number;
+  limit?: number;
+  duration?: number;
+  overtime?: number;
+}
+
+interface RequestItem {
+  description: string;
+  qty: number;
+  unit: string;
+  unitPrice: number;
+  vendor: string;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -31,7 +48,7 @@ export async function POST(request: Request) {
         description,
         status: 'DRAFT',
         items: {
-          create: items.map((item: any) => ({
+          create: items.map((item: RequestItem) => ({
             description: item.description,
             qty: item.qty,
             unit: item.unit,
@@ -40,7 +57,7 @@ export async function POST(request: Request) {
           }))
         },
         approvalSteps: {
-          create: approvalSteps.map((step: any) => ({
+          create: approvalSteps.map((step: ApprovalStep) => ({
             role: step.role,
             specificUser: step.specificUser,
             stepOrder: step.stepOrder,
