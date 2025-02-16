@@ -4,6 +4,7 @@ import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react'
 import Link from 'next/link';
 import { Role } from '@/types/role';
 import { useRouter } from 'next/navigation';
+import { stripHtmlTags } from '@/lib/utils';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -120,7 +121,7 @@ export default function RolePage() {
                     <td className="py-3 px-4">{index + 1}</td>
                     <td className="py-3 px-4">{role.roleName}</td>
                     <td className="py-3 px-4">
-                      {role.description || '-'}
+                      {stripHtmlTags(role.description) || '-'}
                     </td>
                     <td className="py-3 px-4">
                       {new Intl.NumberFormat('id-ID', {

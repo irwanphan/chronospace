@@ -10,6 +10,7 @@ import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
 import StatCard from '@/components/StatCard';
 import { toast } from 'react-hot-toast';
+import { stripHtmlTags } from '@/lib/utils';
 
 interface PurchaseRequest {
   id: string;
@@ -170,7 +171,7 @@ export default function WorkspacePage() {
               workDivision={request.budget.division}
               status={request.status}
               title={request.title}
-              description={request.description || ''}
+              description={stripHtmlTags(request.description) || ''}
               proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
                 request.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0)
               )}`}

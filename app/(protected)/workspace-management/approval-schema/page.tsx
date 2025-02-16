@@ -6,6 +6,7 @@ import { ApprovalSchema } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import SchemaActions from './components/SchemaActions';
+import { stripHtmlTags } from '@/lib/utils';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -105,11 +106,6 @@ export default function ApprovalSchemaPage() {
       .filter(role => roleList.includes(role.id || ''))
       .map(role => role.roleName)
       .join(', ');
-  };
-
-  const stripHtmlTags = (html: string) => {
-    if (!html) return '';
-    return html.replace(/<[^>]*>/g, '');
   };
 
   const refreshData = async () => {
