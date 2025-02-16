@@ -1,5 +1,12 @@
 import { prisma } from "@/lib/prisma";
 
+// project status:
+// Not Allocated: Project is not allocated in any budget plan
+// Allocated: Project is allocated in a budget plan
+// In Progress: Project is in progress with purchase request being processed
+// Completed: Project is completed
+// Cancelled: Project is cancelled
+
 export async function projectSeeder() {
   await prisma.project.createMany({
     data: [
@@ -13,7 +20,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-01-01'),
         finishDate: new Date('2025-12-31'),
         requestDate: new Date('2023-12-01'),
-        status: 'In Progress'
+        status: 'Allocated'
       },
       {
         projectId: 'PRJ-2025-002',
@@ -25,7 +32,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-02-01'),
         finishDate: new Date('2025-06-30'),
         requestDate: new Date('2025-01-15'),
-        status: 'Planning'
+        status: 'Allocated'
       },
       {
         projectId: 'PRJ-2025-003',
@@ -37,7 +44,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-03-01'),
         finishDate: new Date('2025-08-31'),
         requestDate: new Date('2025-02-01'),
-        status: 'Approved'
+        status: 'Allocated'
       }
     ]
   });
