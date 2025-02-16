@@ -22,6 +22,7 @@ interface Project {
   id: string;
   projectTitle: string;
   status: string;
+  division: string;
 }
 
 interface BudgetItem {
@@ -202,6 +203,18 @@ export default function NewBudgetPage() {
     }
   };
 
+  const handleProjectChange = (projectId: string) => {
+    const selectedProject = projects.find(p => p.id === projectId);
+    if (selectedProject) {
+      setFormData(prev => ({
+        ...prev,
+        projectId,
+        division: selectedProject.division,
+        title: selectedProject.projectTitle
+      }));
+    }
+  };
+
   return (
     <>
       <div className="space-y-8">
@@ -215,18 +228,16 @@ export default function NewBudgetPage() {
               </label>
               <select
                 value={formData.projectId}
-                onChange={(e) => setFormData(prev => ({ ...prev, projectId: e.target.value }))}
+                onChange={(e) => handleProjectChange(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 required
               >
                 <option value="">Select Project</option>
-                {projects
-                  .filter(project => project.status !== 'ALLOCATED')
-                  .map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.projectTitle}
-                    </option>
-                  ))}
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.projectTitle}
+                  </option>
+                ))}
               </select>
               {projects.length > 0 && projects.filter(p => p.status !== 'ALLOCATED').length === 0 && (
                 <p className="mt-1 text-sm text-yellow-600">
@@ -313,7 +324,7 @@ export default function NewBudgetPage() {
               <label className="block mb-1.5">
                 Division <span className="text-red-500">*</span>
               </label>
-              <select
+              {/* <select
                 value={formData.division}
                 onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
@@ -325,7 +336,11 @@ export default function NewBudgetPage() {
                     {division.divisionName}
                   </option>
                 ))}
-              </select>
+              </select> */}
+              <input type="hidden" name="division" value={formData.division} />
+              <input type="text" name="division-show" disabled value={divisions.find(d => d.id === formData.division)?.divisionName} 
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+              />
             </div>
           </div>
 

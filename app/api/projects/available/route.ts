@@ -24,7 +24,8 @@ export async function GET() {
         id: true,
         projectTitle: true,
         projectCode: true,
-        status: true
+        status: true,
+        division: true
       }
     });
 
