@@ -41,6 +41,14 @@ export async function roleSeeder() {
       description: 'Financial management position',
       upperLevel: 'CFO',
       approvalLimit: 50000000 // 50 Juta
+    },
+    {
+      id: 'role-st',
+      roleCode: 'ST',
+      roleName: 'Staff',
+      description: 'Staff position',
+      upperLevel: 'DH',
+      approvalLimit: 0
     }
   ]
 

@@ -14,6 +14,8 @@ export async function userSeeder() {
     { name: 'Dave IT', email: 'it@example.com', password: hashedPassword, role: 'Department Head', phone: '1234567894', workDivision: 'ITE', employeeId: 'EMP005', residentId: 'RES005', nationality: 'ID', birthday: new Date('1984-05-05') },
     { name: 'Eve HR', email: 'hr@example.com', password: hashedPassword, role: 'Department Head', phone: '1234567895', workDivision: 'HRD', employeeId: 'EMP006', residentId: 'RES006', nationality: 'ID', birthday: new Date('1985-06-06') },
     { name: 'Frank GM', email: 'gm@example.com', password: hashedPassword, role: 'General Manager', phone: '1234567896', workDivision: 'OPS', employeeId: 'EMP007', residentId: 'RES007', nationality: 'ID', birthday: new Date('1986-07-07') },
+    { name: 'Grace Staff', email: 'staff@example.com', password: hashedPassword, role: 'Staff', phone: '1234567897', workDivision: 'ITE', employeeId: 'EMP008', residentId: 'RES008', nationality: 'ID', birthday: new Date('1987-08-08') },
+    { name: 'Hank Staff', email: 'staff2@example.com', password: hashedPassword, role: 'Staff', phone: '1234567898', workDivision: 'ITE', employeeId: 'EMP009', residentId: 'RES009', nationality: 'ID', birthday: new Date('1988-09-09') },
   ];
 
   await prisma.user.createMany({
