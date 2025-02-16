@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Dialog } from '@/components/ui/dialog';
+import { toast } from 'react-hot-toast';
 
 interface FormData {
   projectId: string;
@@ -32,6 +33,16 @@ interface BudgetItem {
   vendor: string;
 }
 
+interface Vendor {
+  id: string;
+  vendorName: string;
+}
+
+interface WorkDivision {
+  id: string;
+  divisionName: string;
+}
+
 export default function NewBudgetPage() {
   const router = useRouter();
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
@@ -41,7 +52,7 @@ export default function NewBudgetPage() {
     projectId: '',
     title: '',
     year: new Date().getFullYear().toString(),
-    division: '',
+    division: 'IT',
     totalBudget: '',
     startDate: '',
     finishDate: '',
@@ -55,24 +66,78 @@ export default function NewBudgetPage() {
     unitPrice: 0,
     vendor: ''
   });
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('/api/projects');
+        const response = await fetch('/api/projects/available');
         if (response.ok) {
           const data = await response.json();
           setProjects(data);
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
+        toast.error('Failed to fetch available projects');
       }
     };
 
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  useEffect(() => {
+    fetchDivisions();
+  }, []);
+
+  const fetchVendors = async () => {
+    try {
+      const response = await fetch('/api/vendors');
+      if (!response.ok) throw new Error('Failed to fetch vendors');
+      const data = await response.json();
+      setVendors(data);
+    } catch (error) {
+      console.error('Failed to fetch vendors:', error);
+    }
+  };
+
+  const fetchDivisions = async () => {
+    try {
+      const response = await fetch('/api/work-divisions');
+      if (!response.ok) throw new Error('Failed to fetch divisions');
+      const data = await response.json();
+      setDivisions(data);
+    } catch (error) {
+      console.error('Failed to fetch divisions:', error);
+    }
+  };
+
   const handleAddItem = () => {
+    if (!newItem.description) {
+      toast.error("Please enter item description");
+      return;
+    }
+    if (!newItem.qty || newItem.qty <= 0) {
+      toast.error("Please enter valid quantity");
+      return;
+    }
+    if (!newItem.unit) {
+      toast.error("Please enter unit");
+      return;
+    }
+    if (!newItem.unitPrice || newItem.unitPrice <= 0) {
+      toast.error("Please enter valid unit price");
+      return;
+    }
+    if (!newItem.vendor) {
+      toast.error("Please select vendor");
+      return;
+    }
+
     setSelectedItems([...selectedItems, newItem]);
     setNewItem({
       description: '',
@@ -88,28 +153,50 @@ export default function NewBudgetPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validasi form
+    if (!formData.division) {
+      toast.error("Division is required");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
+      const requestBody = {
+        projectId: formData.projectId,
+        title: formData.title,
+        description: formData.description || '',
+        year: parseInt(formData.year),
+        division: formData.division,
+        totalBudget: selectedItems.reduce((total, item) => total + (item.qty * item.unitPrice), 0),
+        startDate: new Date(formData.startDate).toISOString(),
+        finishDate: new Date(formData.finishDate).toISOString(),
+        status: "In Progress",
+        items: selectedItems.map(item => ({
+          description: item.description,
+          qty: item.qty,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          vendor: item.vendor
+        }))
+      };
+
       const response = await fetch('/api/budgets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          totalBudget: parseFloat(formData.totalBudget.replace(/[,.]/g, '')),
-          items: selectedItems
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create budget plan');
+        const errorData = await response.json();
+        throw new Error(errorData.message);
       }
 
+      toast.success('Budget created successfully');
       router.push('/budget-planning');
       router.refresh();
     } catch (error) {
-      console.error('Error creating budget:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create budget plan');
+      console.error('Error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create budget');
     } finally {
       setIsSubmitting(false);
     }
@@ -220,6 +307,25 @@ export default function NewBudgetPage() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Division <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.division}
+                onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                required
+              >
+                <option value="">Select Division</option>
+                {divisions.map(division => (
+                  <option key={division.id} value={division.id}>
+                    {division.divisionName}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -367,12 +473,14 @@ export default function NewBudgetPage() {
               <select
                 value={newItem.vendor}
                 onChange={(e) => setNewItem({ ...newItem, vendor: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg bg-white"
               >
                 <option value="">Select Vendor</option>
-                <option value="Store ITR">Store ITR</option>
-                <option value="Tech Store">Tech Store</option>
-                {/* Add more vendors */}
+                {vendors.map(vendor => (
+                  <option key={vendor.id} value={vendor.id}>
+                    {vendor.vendorName}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

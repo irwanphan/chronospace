@@ -24,61 +24,60 @@ export async function GET() {
 }
 
 // POST: Create new budget
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const data = await request.json();
+    const body = await req.json();
+    console.log('Received request body:', body); // Debug log
+
+    // Validasi input
+    if (!body.projectId) return NextResponse.json({ message: "Project ID is required" }, { status: 400 });
+    if (!body.title) return NextResponse.json({ message: "Title is required" }, { status: 400 });
+    if (!body.year) return NextResponse.json({ message: "Year is required" }, { status: 400 });
+    if (!body.division) return NextResponse.json({ message: "Division is required" }, { status: 400 });
+    if (!body.startDate) return NextResponse.json({ message: "Start date is required" }, { status: 400 });
+    if (!body.finishDate) return NextResponse.json({ message: "Finish date is required" }, { status: 400 });
+    if (!body.items || !body.items.length) return NextResponse.json({ message: "Items are required" }, { status: 400 });
 
     // Cek apakah project sudah memiliki budget
-    const existingProject = await prisma.project.findUnique({
-      where: { id: data.projectId },
-      include: { budget: true }
+    const existingBudget = await prisma.budget.findUnique({
+      where: { projectId: body.projectId }
     });
 
-    if (existingProject?.budget) {
+    if (existingBudget) {
       return NextResponse.json(
-        { error: 'This project already has a budget allocated' },
+        { message: "This project already has a budget plan" },
         { status: 400 }
       );
     }
 
-    // Mulai transaksi
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Buat budget baru
-      const budget = await tx.budget.create({
+    // Create budget dengan transaction
+    const budget = await prisma.$transaction(async (tx) => {
+      const newBudget = await tx.budget.create({
         data: {
-          projectId: data.projectId,
-          title: data.title,
-          year: parseInt(data.year),
-          division: data.division,
-          totalBudget: parseFloat(data.totalBudget.replace(/[,.]/g, '')),
-          startDate: new Date(data.startDate),
-          finishDate: new Date(data.finishDate),
-          description: data.description,
-          status: 'OPEN',
-          project: {
-            connect: {
-              id: data.projectId
-            }
+          projectId: body.projectId,
+          title: body.title,
+          description: body.description,
+          year: body.year,
+          division: body.division,
+          totalBudget: body.totalBudget,
+          startDate: new Date(body.startDate),
+          finishDate: new Date(body.finishDate),
+          status: "In Progress",
+          items: {
+            create: body.items
           }
         },
       });
-
-      // 2. Update status project menjadi ALLOCATED
-      await tx.project.update({
-        where: { id: data.projectId },
-        data: {
-          status: 'ALLOCATED'
-        }
-      });
-
-      return budget;
+      
+      console.log('Created budget:', newBudget); // Debug log
+      return newBudget;
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(budget);
   } catch (error) {
-    console.error('Error creating budget:', error);
+    console.error('Server error:', error); // Debug log
     return NextResponse.json(
-      { error: 'Failed to create budget' },
+      { message: error instanceof Error ? error.message : 'Failed to create budget' },
       { status: 500 }
     );
   }
