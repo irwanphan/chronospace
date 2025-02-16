@@ -15,7 +15,7 @@ export async function budgetSeeder() {
         description: `Annual budget plan for ${project.division} division`,
         year: project.year,
         division: project.division,
-        totalBudget: 1000000000, // 1 Miliar
+        totalBudget: 350000000, // 350 Juta
         startDate: new Date(`${project.year}-01-01`),
         finishDate: new Date(`${project.year}-12-31`),
         status: 'In Progress',
