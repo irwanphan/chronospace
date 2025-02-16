@@ -4,7 +4,7 @@ import { Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/Dialog';
 import { toast } from 'react-hot-toast';
 
 interface FormData {

@@ -18,3 +18,10 @@ export function formatDate(date: Date | string): string {
   
   return `${day}-${month}-${year}`;
 }
+
+export const getInitials = (name: string) => {
+  const words = name.split(' ');
+  return words.length > 1 
+    ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+    : words[0][0].toUpperCase();
+};

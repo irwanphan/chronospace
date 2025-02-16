@@ -5,14 +5,8 @@ import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useSidebarStore } from '@/store/useSidebarStore';
-import { cn } from '@/lib/utils';
-
-const getInitials = (name: string) => {
-  const words = name.split(' ');
-  return words.length > 1 
-    ? `${words[0][0]}${words[1][0]}`.toUpperCase()
-    : words[0][0].toUpperCase();
-};
+import { cn, getInitials } from '@/lib/utils';
+import Avatar from '@/components/ui/Avatar';
 
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
@@ -67,9 +61,9 @@ const Header = () => {
                 className="rounded-full overflow-hidden bg-gray-200"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">
+              <Avatar>
                 {getInitials(userName)}
-              </div>
+              </Avatar>
             )}
             <div className="text-left">
               {status === "loading" ? (

@@ -11,7 +11,7 @@ import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema } from '@/types/approval-schema';
 import { useSession } from 'next-auth/react';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/Dialog';
 import { toast } from 'react-hot-toast';
 
 interface BudgetPlan {
