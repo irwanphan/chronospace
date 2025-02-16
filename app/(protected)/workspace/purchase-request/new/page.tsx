@@ -163,7 +163,7 @@ export default function NewRequestPage() {
 
   // Handle item selection and quantity/price updates
   const handleAddItem = () => {
-    if (availableItems.length === 0) return;
+    if (!availableItems || availableItems.length === 0) return;
     
     const newItem = {
       ...availableItems[0],
