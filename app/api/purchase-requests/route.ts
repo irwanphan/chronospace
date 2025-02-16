@@ -91,3 +91,26 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const purchaseRequests = await prisma.purchaseRequest.findMany({
+      include: {
+        items: true,
+        budget: true,
+        approvalSteps: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return NextResponse.json(purchaseRequests);
+  } catch (error) {
+    console.error('Error fetching purchase requests:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch purchase requests' },
+      { status: 500 }
+    );
+  }
+}

@@ -48,7 +48,6 @@ export default function NewRequestPage() {
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
-  console.log('budgetPlans ', budgetPlans)
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -77,7 +76,6 @@ export default function NewRequestPage() {
   // Tambah state untuk modal dan budget items
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-  const [selectedBudgetItems, setSelectedBudgetItems] = useState<BudgetItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch budget plans
@@ -170,38 +168,6 @@ export default function NewRequestPage() {
       }));
       setAvailableItems(selectedBudget.items);
     }
-  };
-
-  // Handle item selection and quantity/price updates
-  const handleAddItem = () => {
-    if (!availableItems || availableItems.length === 0) return;
-    
-    const newItem = {
-      ...availableItems[0],
-      requestQty: 0,
-      requestPrice: availableItems[0].unitPrice,
-    };
-
-    setSelectedItems([...selectedItems, newItem]);
-  };
-
-  const handleItemChange = (index: number, field: string, value: number) => {
-    const updatedItems = [...selectedItems];
-    const originalItem = availableItems.find(
-      item => item.id === selectedItems[index].id
-    );
-
-    if (field === 'requestQty' && originalItem) {
-      // Validate quantity doesn't exceed budget
-      value = Math.min(value, originalItem.qty);
-    }
-
-    updatedItems[index] = {
-      ...updatedItems[index],
-      [field]: value,
-    };
-
-    setSelectedItems(updatedItems);
   };
 
   const addStep = (stepData: ApprovalStepForm) => {

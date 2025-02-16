@@ -1,7 +1,7 @@
 'use client';
 
 // import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useSession } from "next-auth/react";
@@ -9,6 +9,25 @@ import { useRouter } from 'next/navigation';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
 import StatCard from '@/components/StatCard';
+import { toast } from 'react-hot-toast';
+
+interface PurchaseRequest {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  createdAt: string;
+  items: Array<{
+    qty: number;
+    unitPrice: number;
+  }>;
+  budget: {
+    division: string;
+  };
+  approvalSteps: Array<{
+    limit?: number;
+  }>;
+}
 
 export default function WorkspacePage() {
   const router = useRouter();
@@ -18,7 +37,8 @@ export default function WorkspacePage() {
     reviewApprovePurchaseRequest: false
   };
   const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
-  // const [currentMonth, setCurrentMonth] = useState('Jan 2025');
+  const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([]);
+  console.log('purchaseRequests ', purchaseRequests)
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -34,6 +54,22 @@ export default function WorkspacePage() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [canCreateRequest, router]);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const response = await fetch('/api/purchase-requests');
+        if (!response.ok) throw new Error('Failed to fetch requests');
+        const data = await response.json();
+        setPurchaseRequests(data);
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Failed to load requests');
+      }
+    };
+
+    fetchRequests();
+  }, []);
 
   console.log('Session:', session); // Debug session
   console.log('Access:', session?.user?.access); // Debug access
@@ -118,25 +154,40 @@ export default function WorkspacePage() {
 
         {/* Request List */}
         <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <RequestCard
-            id="PR2025010001"
-            type="Purchase Request"
-            requestor={{
-              name: "Nam Do San",
-              // avatar: optional
-            }}
-            submittedAt="8 Jan 2025"
-            workDivision="Engineering"
-            status="Open"
-            title="Diving Equipment For Project X"
-            description="Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections."
-            proposedValue="Rp 108.000.000"
-            deadline="9 Jan 2025"
-            attachments={5}
-            onCheck={() => console.log('Check clicked')}
-            onDecline={() => console.log('Decline clicked')}
-            onApprove={() => console.log('Approve clicked')}
-          />
+          {purchaseRequests.map((request) => (
+            <RequestCard
+              key={request.id}
+              id={request.id}
+              type="Purchase Request"
+              requestor={{
+                name: session?.user?.name || 'Unknown User',
+              }}
+              submittedAt={new Date(request.createdAt).toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+              workDivision={request.budget.division}
+              status={request.status}
+              title={request.title}
+              description={request.description || ''}
+              proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
+                request.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0)
+              )}`}
+              deadline={request.approvalSteps[0]?.limit ? 
+                new Date(Date.now() + request.approvalSteps[0].limit * 60 * 60 * 1000).toLocaleDateString('en-US', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                }) : 
+                'No deadline'
+              }
+              attachments={0}
+              onCheck={() => console.log('Check clicked', request.id)}
+              onDecline={() => console.log('Decline clicked', request.id)}
+              onApprove={() => console.log('Approve clicked', request.id)}
+            />
+          ))}
         </div>
 
         {/* Pagination */}
