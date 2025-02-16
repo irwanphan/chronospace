@@ -160,6 +160,7 @@ model UserRole {
 
   @@unique([userId, roleId])
   @@map("user_roles")
+  @@index([userId, roleId])
 }
 
 model Project {
@@ -183,24 +184,25 @@ model Project {
 
 
 model Budget {
-  id            String   @id @default(cuid())
-  projectId     String   @unique
-  title         String
-  description   String?
-  year          Int
-  division      String
-  totalBudget   Float
-  startDate     DateTime
-  finishDate    DateTime
-  status        String   // e.g., "In Progress", "Completed", "Delayed"
-  purchaseRequestStatus String? // e.g., "Submitted", "Not Submitted"
-  project       Project  @relation(fields: [projectId], references: [id])
-  items         BudgetedItem[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                    String            @id @default(cuid())
+  projectId            String            @unique
+  title                String
+  description          String?
+  year                 Int
+  division             String
+  totalBudget          Float
+  startDate            DateTime
+  finishDate           DateTime
+  status               String            // e.g., "In Progress", "Completed", "Delayed"
+  purchaseRequestStatus String?          // e.g., "Submitted", "Not Submitted"
+  project              Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items                BudgetedItem[]
+  purchaseRequests     PurchaseRequest[]
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 
   @@map("budgets")
-  PurchaseRequest PurchaseRequest[]
+  @@index([projectId])
 }
 
 model BudgetedItem {
@@ -220,23 +222,17 @@ model BudgetedItem {
 }
 
 model UserAccess {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  
-  // Menu Access
-  menuAccess Json    @default("{}")
-  
-  // Activity Access
-  activityAccess Json @default("{}")
-  
-  // Workspace Access
-  workspaceAccess Json @default("{}")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menuAccess     Json     @default("{}")
+  activityAccess Json     @default("{}")
+  workspaceAccess Json    @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("user_accesses")
+  @@index([userId])
 }
 
 model PurchaseRequest {
@@ -244,14 +240,15 @@ model PurchaseRequest {
   budgetId        String
   title           String
   description     String?
-  status          String                    // e.g., "DRAFT", "SUBMITTED", "APPROVED", "REJECTED"
+  status          String                    
   items           PurchaseRequestItem[]
   approvalSteps   PurchaseRequestApproval[]
-  budget          Budget                    @relation(fields: [budgetId], references: [id])
+  budget          Budget                    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
 
   @@map("purchase_requests")
+  @@index([budgetId])
 }
 
 model PurchaseRequestItem {
