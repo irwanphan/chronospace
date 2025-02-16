@@ -171,7 +171,7 @@ export default function WorkspacePage() {
               workDivision={request.budget.division}
               status={request.status}
               title={request.title}
-              description={stripHtmlTags(request.description) || ''}
+              description={stripHtmlTags(request.description || '')}
               proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
                 request.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0)
               )}`}

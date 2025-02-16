@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { formatDate } from '@/lib/utils';
 
 interface Project {
   id: string;
@@ -50,13 +51,13 @@ export default function ProjectPlanningPage() {
     fetchProjects();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString('en-US', {
+  //     day: 'numeric',
+  //     month: 'short',
+  //     year: 'numeric'
+  //   });
+  // };
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this project?')) {

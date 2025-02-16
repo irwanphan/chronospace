@@ -1,11 +1,13 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-export function cn(...inputs: ClassValue[]) {
+export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
 } 
 
-export function formatDate(date: Date | string): string {
+export const formatDate = (date: Date | string): string => {
+  if (!date) return '-';
+
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -16,8 +18,12 @@ export function formatDate(date: Date | string): string {
   const month = months[d.getMonth()];
   const year = d.getFullYear();
   
-  return `${day}-${month}-${year}`;
+  return `${day} ${month} ${year}`;
 }
+
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('id-ID').format(amount);
+};
 
 export const getInitials = (name: string) => {
   const words = name.split(' ');

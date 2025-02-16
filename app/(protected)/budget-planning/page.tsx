@@ -4,6 +4,7 @@ import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { formatDate, formatCurrency } from '@/lib/utils';
 
 interface Budget {
   id: string;
@@ -63,18 +64,6 @@ export default function BudgetPlanningPage() {
 
     fetchBudgets();
   }, []);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID').format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
 
   // Get top 3 largest budgets
   const largestBudgets = [...budgets]
