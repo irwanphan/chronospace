@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { WorkDivision } from '@/types/workDivision';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types/user';
-
+import { stripHtmlTags } from '@/lib/utils';
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -68,11 +68,6 @@ export default function WorkDivisionPage() {
         console.error('Failed to delete work division:', error);
       }
     }
-  };
-
-  const stripHtmlTags = (html: string | null) => {
-    if (!html) return '-';
-    return html.replace(/<[^>]*>/g, '');
   };
 
   return (

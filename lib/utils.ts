@@ -25,3 +25,8 @@ export const getInitials = (name: string) => {
     ? `${words[0][0]}${words[1][0]}`.toUpperCase()
     : words[0][0].toUpperCase();
 };
+
+export const stripHtmlTags = (html: string | null) => {
+  if (!html) return '-';
+  return html.replace(/<[^>]*>/g, '');
+};
