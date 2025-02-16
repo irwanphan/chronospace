@@ -336,12 +336,17 @@ export default function NewRequestPage() {
     }
   };
 
-  // Handler untuk memilih item
-  const handleSelectItem = (item: BudgetItem) => {
-    setSelectedBudgetItems(prev => {
-      const exists = prev.find(i => i.id === item.id);
-      if (exists) return prev;
-      return [...prev, item];
+  // Handler untuk toggle select/unselect item
+  const handleToggleItem = (item: BudgetItem) => {
+    setSelectedItems(prev => {
+      const exists = prev.some(i => i.id === item.id);
+      if (exists) {
+        // Unselect: remove item
+        return prev.filter(i => i.id !== item.id);
+      } else {
+        // Select: add item
+        return [...prev, item];
+      }
     });
   };
 
@@ -438,67 +443,53 @@ export default function NewRequestPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2">#</th>
-                  <th className="text-left py-2">Description</th>
-                  <th className="text-left py-2">Qty</th>
-                  <th className="text-left py-2">Unit</th>
-                  <th className="text-right py-2">Unit Price</th>
-                  <th className="text-right py-2">Total Price</th>
-                  <th className="text-left py-2">Vendor</th>
+                  <th className="text-left p-2">#</th>
+                  <th className="text-left p-2">Description</th>
+                  <th className="text-left p-2">Qty</th>
+                  <th className="text-left p-2">Unit</th>
+                  <th className="text-right p-2">Unit Price</th>
+                  <th className="text-right p-2">Total Price</th>
+                  <th className="text-left p-2">Vendor</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {selectedItems.map((item, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="py-2">{index + 1}</td>
-                    <td className="py-2">{item.description}</td>
-                    <td className="py-2">
-                      <input
-                        type="number"
-                        value={item.qty}
-                        onChange={(e) => handleItemChange(index, 'qty', parseInt(e.target.value))}
-                        className="w-20 px-2 py-1 border rounded"
-                        min="1"
-                        max={item.qty}
-                      />
-                    </td>
-                    <td className="py-2">{item.unit}</td>
-                    <td className="py-2 text-right">
-                      <input
-                        type="number"
-                        value={item.unitPrice}
-                        onChange={(e) => handleItemChange(index, 'unitPrice', parseInt(e.target.value))}
-                        className="w-32 px-2 py-1 border rounded text-right"
-                      />
-                    </td>
-                    <td className="py-2 text-right">
-                      {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
-                    </td>
-                    <td className="py-2">{item.vendor}</td>
-                    <td className="py-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newItems = [...selectedItems];
-                          newItems.splice(index, 1);
-                          setSelectedItems(newItems);
-                        }}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                {selectedItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-4 text-gray-500">
+                      No items selected
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  selectedItems.map((item, index) => (
+                    <tr key={item.id} className="border-b">
+                      <td className="p-2">{index + 1}</td>
+                      <td className="p-2">{item.description}</td>
+                      <td className="p-2">{item.qty}</td>
+                      <td className="p-2">{item.unit}</td>
+                      <td className="p-2 text-right">
+                        {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
+                      </td>
+                      <td className="p-2 text-right">
+                        {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
+                      </td>
+                      <td className="p-2">{item.vendor}</td>
+                      <td className="p-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedItems(selectedItems.filter(i => i.id !== item.id));
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
-
-            {selectedItems.length === 0 && (
-              <div className="text-gray-500 text-sm mt-4">
-                No items selected
-              </div>
-            )}
           </div>
 
           <button
@@ -691,7 +682,7 @@ export default function NewRequestPage() {
           {isLoading ? (
             <div className="text-center py-4">Loading items...</div>
           ) : budgetItems.length === 0 ? (
-            <div className="text-center py-4">No items found</div>
+            <div className="text-center py-4">No items found in this budget</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -706,27 +697,33 @@ export default function NewRequestPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {budgetItems.map((item) => (
-                    <tr key={item.id} className="border-b">
-                      <td className="p-2">{item.description}</td>
-                      <td className="p-2">{item.qty}</td>
-                      <td className="p-2">{item.unit}</td>
-                      <td className="p-2 text-right">
-                        {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
-                      </td>
-                      <td className="p-2">{item.vendor}</td>
-                      <td className="p-2 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleSelectItem(item)}
-                          className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                          disabled={selectedBudgetItems.some(i => i.id === item.id)}
-                        >
-                          {selectedBudgetItems.some(i => i.id === item.id) ? 'Selected' : 'Select'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {budgetItems.map((item) => {
+                    const isSelected = selectedItems.some(i => i.id === item.id);
+                    return (
+                      <tr key={item.id} className="border-b">
+                        <td className="p-2">{item.description}</td>
+                        <td className="p-2">{item.qty}</td>
+                        <td className="p-2">{item.unit}</td>
+                        <td className="p-2 text-right">
+                          {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
+                        </td>
+                        <td className="p-2">{item.vendor}</td>
+                        <td className="p-2 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleItem(item)}
+                            className={`px-2 py-1 rounded ${
+                              isSelected 
+                                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            }`}
+                          >
+                            {isSelected ? 'Selected' : 'Select'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
