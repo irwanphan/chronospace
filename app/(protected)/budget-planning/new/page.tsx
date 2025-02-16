@@ -417,7 +417,7 @@ export default function NewBudgetPage() {
               <input
                 type="text"
                 value={new Intl.NumberFormat('id-ID').format(Number(formData.totalBudget))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
                 readOnly
               />
             </div>
