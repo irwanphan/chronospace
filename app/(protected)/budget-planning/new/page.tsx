@@ -70,38 +70,18 @@ export default function NewBudgetPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/projects/available');
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        toast.error('Failed to fetch available projects');
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('/api/projects/available');
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
       }
-    };
-
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  useEffect(() => {
-    fetchDivisions();
-  }, []);
-
-  useEffect(() => {
-    const total = selectedItems.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
-    setFormData(prev => ({
-      ...prev,
-      totalBudget: total.toString()
-    }));
-  }, [selectedItems]);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      toast.error('Failed to fetch available projects');
+    }
+  };
 
   const fetchVendors = async () => {
     try {
@@ -124,6 +104,20 @@ export default function NewBudgetPage() {
       console.error('Failed to fetch divisions:', error);
     }
   };
+  
+  useEffect(() => {
+    fetchProjects();
+    fetchVendors();
+    fetchDivisions();
+  }, []);
+
+  useEffect(() => {
+    const total = selectedItems.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
+    setFormData(prev => ({
+      ...prev,
+      totalBudget: total.toString()
+    }));
+  }, [selectedItems]);
 
   const handleAddItem = () => {
     if (!newItem.description) {
@@ -290,8 +284,6 @@ export default function NewBudgetPage() {
               />
             </div>
 
-            
-
             <div>
               <label className="block mb-1.5">
                 Year <span className="text-red-500">*</span>
@@ -333,7 +325,6 @@ export default function NewBudgetPage() {
                 required
               />
             </div>
-
             
           </div>
 

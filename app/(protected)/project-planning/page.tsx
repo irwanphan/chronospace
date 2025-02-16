@@ -51,14 +51,6 @@ export default function ProjectPlanningPage() {
     fetchProjects();
   }, []);
 
-  // const formatDate = (dateString: string) => {
-  //   return new Date(dateString).toLocaleDateString('en-US', {
-  //     day: 'numeric',
-  //     month: 'short',
-  //     year: 'numeric'
-  //   });
-  // };
-
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {

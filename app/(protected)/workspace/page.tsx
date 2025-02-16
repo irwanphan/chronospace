@@ -72,9 +72,9 @@ export default function WorkspacePage() {
     fetchRequests();
   }, []);
 
-  console.log('Session:', session); // Debug session
-  console.log('Access:', session?.user?.access); // Debug access
-  console.log('Can Create:', canCreateRequest); // Debug permission
+  // console.log('Session:', session); // Debug session
+  // console.log('Access:', session?.user?.access); // Debug access
+  // console.log('Can Create:', canCreateRequest); // Debug permission
 
   return (
     <>

@@ -57,7 +57,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     description: '',
   });
 
-  console.log(vendors);
+  // console.log(vendors);
 
   useEffect(() => {
     const fetchData = async () => {
