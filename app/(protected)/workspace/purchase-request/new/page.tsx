@@ -279,7 +279,7 @@ export default function NewRequestPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/requests', {
+      const response = await fetch('/api/purchase-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
