@@ -23,7 +23,7 @@ export async function GET(
     }
 
     // Log untuk debugging
-    console.log('Raw Budget Data:', budget);
+    // console.log('Raw Budget Data:', budget);
 
     return NextResponse.json({
       ...budget,
