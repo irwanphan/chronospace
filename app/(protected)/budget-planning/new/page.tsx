@@ -95,6 +95,14 @@ export default function NewBudgetPage() {
     fetchDivisions();
   }, []);
 
+  useEffect(() => {
+    const total = selectedItems.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
+    setFormData(prev => ({
+      ...prev,
+      totalBudget: total.toString()
+    }));
+  }, [selectedItems]);
+
   const fetchVendors = async () => {
     try {
       const response = await fetch('/api/vendors');
@@ -248,6 +256,29 @@ export default function NewBudgetPage() {
 
             <div>
               <label className="block mb-1.5">
+                Division <span className="text-red-500">*</span>
+              </label>
+              {/* <select
+                value={formData.division}
+                onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                required
+              >
+                <option value="">Select Division</option>
+                {divisions.map(division => (
+                  <option key={division.id} value={division.id}>
+                    {division.divisionName}
+                  </option>
+                ))}
+              </select> */}
+              <input type="hidden" name="division" value={formData.division} />
+              <input type="text" name="division-show" disabled value={divisions.find(d => d.id === formData.division)?.divisionName} 
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
                 Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -259,24 +290,7 @@ export default function NewBudgetPage() {
               />
             </div>
 
-            <div>
-              <label className="block mb-1.5">
-                Total Budget <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.totalBudget}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  setFormData(prev => ({
-                    ...prev,
-                    totalBudget: value ? new Intl.NumberFormat('id-ID').format(parseInt(value)) : ''
-                  }));
-                }}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                required
-              />
-            </div>
+            
 
             <div>
               <label className="block mb-1.5">
@@ -320,28 +334,7 @@ export default function NewBudgetPage() {
               />
             </div>
 
-            <div>
-              <label className="block mb-1.5">
-                Division <span className="text-red-500">*</span>
-              </label>
-              {/* <select
-                value={formData.division}
-                onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-                required
-              >
-                <option value="">Select Division</option>
-                {divisions.map(division => (
-                  <option key={division.id} value={division.id}>
-                    {division.divisionName}
-                  </option>
-                ))}
-              </select> */}
-              <input type="hidden" name="division" value={formData.division} />
-              <input type="text" name="division-show" disabled value={divisions.find(d => d.id === formData.division)?.divisionName} 
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-              />
-            </div>
+            
           </div>
 
           <div className="mb-20">
@@ -381,7 +374,7 @@ export default function NewBudgetPage() {
                     <td className="p-2 text-right">
                       {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
                     </td>
-                    <td className="p-2">{item.vendor}</td>
+                    <td className="p-2">{vendors.find(v => v.id === item.vendor)?.vendorName}</td>
                     <td className="p-2">
                       <button
                         type="button"
@@ -415,6 +408,20 @@ export default function NewBudgetPage() {
             <Plus className="w-4 h-4" />
             Add Item
           </button>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1.5">
+                Total Budget <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={new Intl.NumberFormat('id-ID').format(Number(formData.totalBudget))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                readOnly
+              />
+            </div>
+          </div>
 
           <hr className="my-6" />
 
