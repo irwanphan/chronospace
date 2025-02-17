@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
-import Link from 'next/link';
-import { Vendor } from '@/types/vendor';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { Vendor } from '@/types/vendor';
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -19,7 +20,7 @@ export default function VendorsPage() {
   const fetchVendors = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/vendors');
+      const response = await fetch('/api/workspace-management/vendors');
       if (!response.ok) {
         throw new Error('Failed to fetch vendors');
       }
@@ -38,13 +39,13 @@ export default function VendorsPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this vendor?')) {
       try {
-        const response = await fetch(`/api/vendors/${id}`, {
+        const response = await fetch(`/api/workspace-management/vendors/${id}`, {
           method: 'DELETE',
         });
         
         if (response.ok) {
           // Refresh data setelah delete
-          const vendorsRes = await fetch('/api/vendors');
+          const vendorsRes = await fetch('/api/workspace-management/vendors');
           const vendorsData = await vendorsRes.json();
           setVendors(vendorsData);
           setActiveMenu(null); // Tutup popup menu
@@ -119,11 +120,19 @@ export default function VendorsPage() {
                   <td className="py-3 px-4">{vendor.vendorName}</td>
                   <td className="py-3 px-4">{vendor.email}</td>
                   <td className="py-3 px-4">
-                    <div 
-                      className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full relative"
-                      onClick={() => setActiveMenu(activeMenu === vendor.id ? null : vendor.id)}
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                    <div className="relative flex items-center gap-2">
+                      <Link
+                        href={`/workspace-management/vendors/${vendor.id}`}
+                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                      >
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Link>
+                      <button 
+                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                        onClick={() => setActiveMenu(activeMenu === vendor.id ? null : vendor.id)}
+                      >
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </button>
                       
                       {/* Popup Menu */}
                       {activeMenu === vendor.id && (
