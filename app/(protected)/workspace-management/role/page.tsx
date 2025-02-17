@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
-import Link from 'next/link';
-import { Role } from '@/types/role';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
+import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
 
 export default function RolePage() {
@@ -20,7 +21,7 @@ export default function RolePage() {
   const fetchRoles = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/roles');
+      const response = await fetch('/api/workspace-management/roles');
       if (!response.ok) {
         throw new Error('Failed to fetch roles');
       }
@@ -38,13 +39,13 @@ export default function RolePage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this role?')) {
       try {
-        const response = await fetch(`/api/roles/${id}`, {
+        const response = await fetch(`/api/workspace-management/roles/${id}`, {
           method: 'DELETE',
         });
         
         if (response.ok) {
           // Refresh data setelah delete
-          const rolesRes = await fetch('/api/roles');
+          const rolesRes = await fetch('/api/workspace-management/roles');
           const rolesData = await rolesRes.json();
           setRoles(rolesData);
           setActiveMenu(null); // Tutup popup menu
@@ -132,7 +133,13 @@ export default function RolePage() {
                       }).format(role.approvalLimit)}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="relative">
+                      <div className="relative flex items-center gap-2">
+                        <Link
+                          href={`/workspace-management/role/${role.id}`}
+                          className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                        >
+                          <Eye className="w-4 h-4 text-gray-500" />
+                        </Link>
                         <button 
                           className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
                           onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
