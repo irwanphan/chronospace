@@ -17,7 +17,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(vendor);
+    return NextResponse.json({ vendor });
   } catch (error) {
     console.error('Error fetching vendor:', error);
     return NextResponse.json(

@@ -28,18 +28,10 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
         setIsLoading(true);
         setError(null);
 
-        const [divResponse, vendorResponse] = await Promise.all([
-          fetch('/api/work-divisions'),
-          fetch(`/api/vendors/${params.id}`)
-        ]);
+        const response = await fetch(`/api/workspace-management/vendors/${params.id}`)
 
-        if (!divResponse.ok || !vendorResponse.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [vendorData] = await Promise.all([
-          vendorResponse.json()
-        ]);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const vendorData = await response.json();
 
         setFormData({
           vendorCode: vendorData.vendorCode,
@@ -72,7 +64,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
     setErrors({});  // Reset errors
     
     try {
-      const response = await fetch(`/api/vendors/${params.id}`, {
+      const response = await fetch(`/api/workspace-management/vendors/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +210,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
         <div className="flex justify-end gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => router.push('/workspace-management/vendors')}
             className="px-4 py-2 border rounded-lg hover:bg-gray-50"
           >
             Cancel
