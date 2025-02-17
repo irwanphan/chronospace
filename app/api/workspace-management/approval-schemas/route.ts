@@ -79,19 +79,20 @@ export async function POST(request: Request) {
 // GET endpoint jika diperlukan
 export async function GET() {
   try {
-    const schemas = await prisma.approvalSchema.findMany({
-      include: {
-        steps: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const [ schemas, divisions, roles ] = await Promise.all([
+      prisma.approvalSchema.findMany({
+        include: {
+          steps: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.workDivision.findMany(),
+      prisma.role.findMany(),
+    ]);
 
-    // Log response untuk debugging
-    // console.log('API Response:', schemas);
-
-    return NextResponse.json(schemas);
+    return NextResponse.json({ schemas, divisions, roles });
   } catch (error) {
     console.error('Failed to fetch schemas:', error);
     return NextResponse.json(

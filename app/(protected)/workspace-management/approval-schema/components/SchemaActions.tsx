@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
-import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
 import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 interface SchemaActionsProps {
@@ -19,7 +19,7 @@ export default function SchemaActions({ schemaId, onDelete }: SchemaActionsProps
     if (!confirm('Are you sure you want to delete this schema?')) return;
 
     try {
-      const response = await fetch(`/api/approval-schemas/${schemaId}`, {
+      const response = await fetch(`/api/workspace-management/approval-schemas/${schemaId}`, {
         method: 'DELETE',
       });
 

@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, Plus } from 'lucide-react';
 import Link from 'next/link';
+
+import { Search, Filter, Plus } from 'lucide-react';
 import { ApprovalSchema } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
@@ -15,49 +16,25 @@ export default function ApprovalSchemaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetchSchemas(),
-      fetchDivisions(),
-      fetchRoles(),
-    ]);
-  }, []);
-
   const fetchSchemas = async () => {
     try {
-      const response = await fetch('/api/approval-schemas');
+      const response = await fetch('/api/workspace-management/approval-schemas');
       if (!response.ok) throw new Error('Failed to fetch schemas');
       const data = await response.json();
-      setSchemas(Array.isArray(data) ? data : []);
+
+      setSchemas(Array.isArray(data.schemas) ? data.schemas : []);
+      setDivisions(data.divisions);
+      setRoles(data.roles);
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to fetch schemas:', error);
       setError('Failed to load approval schemas');
     }
   };
 
-  const fetchDivisions = async () => {
-    try {
-      const response = await fetch('/api/work-divisions');
-      if (!response.ok) throw new Error('Failed to fetch divisions');
-      const data = await response.json();
-      setDivisions(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch divisions:', error);
-    }
-  };
-
-  const fetchRoles = async () => {
-    try {
-      const response = await fetch('/api/roles');
-      if (!response.ok) throw new Error('Failed to fetch roles');
-      const data = await response.json();
-      setRoles(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch roles:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchSchemas();
+  }, []);
 
   const getDivisionNames = (schema: ApprovalSchema) => {
     if (!schema.divisions) return '';
@@ -109,7 +86,7 @@ export default function ApprovalSchemaPage() {
   };
 
   const refreshData = async () => {
-    const schemasRes = await fetch('/api/approval-schemas');
+    const schemasRes = await fetch('/api/workspace-management/approval-schemas');
     const schemasData = await schemasRes.json();
     setSchemas(schemasData);
   };
