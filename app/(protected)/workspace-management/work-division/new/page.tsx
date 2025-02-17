@@ -72,7 +72,7 @@ export default function NewWorkDivisionPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/work-divisions', {
+      const response = await fetch('/api/workspace-management/work-division', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

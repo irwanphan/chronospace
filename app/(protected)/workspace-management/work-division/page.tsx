@@ -1,11 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
-import { WorkDivision } from '@/types/workDivision';
 import { useRouter } from 'next/navigation';
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
+
+import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
+
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -17,7 +19,7 @@ export default function WorkDivisionPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/workspace/work-division');
+      const response = await fetch('/api/workspace-management/work-division');
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -41,16 +43,13 @@ export default function WorkDivisionPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this work division?')) {
       try {
-        const response = await fetch(`/api/work-divisions/${id}`, {
+        const response = await fetch(`/api/workspace-management/work-division/${id}`, {
           method: 'DELETE',
         });
         
         if (response.ok) {
-          // Refresh data setelah delete
-          const divisionsRes = await fetch('/api/work-divisions');
-          const divisionsData = await divisionsRes.json();
-          setDivisions(divisionsData);
-          setActiveMenu(null); // Tutup popup menu
+          fetchData();
+          setActiveMenu(null);
         }
       } catch (error) {
         console.error('Failed to delete work division:', error);
