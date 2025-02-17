@@ -14,18 +14,23 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const schema = await prisma.approvalSchema.findUnique({
-      where: {
-        id: params.id
-      },
-      include: {
-        steps: {
-          orderBy: {
-            order: 'asc'
+    const [schema, divisions, roles, user] = await Promise.all([
+      prisma.approvalSchema.findUnique({
+        where: {
+          id: params.id
+        },
+        include: {
+          steps: {
+            orderBy: {
+              order: 'asc'
+            }
           }
         }
-      }
-    });
+      }),
+      prisma.workDivision.findMany(),
+      prisma.role.findMany(),
+      prisma.user.findMany()
+    ]);
 
     if (!schema) {
       return NextResponse.json(
@@ -34,7 +39,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(schema);
+    return NextResponse.json({ schema, divisions, roles, user });
   } catch (error) {
     console.error('Error fetching approval schema:', error);
     return NextResponse.json(

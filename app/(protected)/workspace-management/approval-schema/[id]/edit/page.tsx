@@ -1,13 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash, Pencil } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { X, Plus, Trash, Pencil } from 'lucide-react';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
+import { User } from '@/types/user';
 import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
-import { User } from '@/types/user';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface ApprovalStepForm {
@@ -15,7 +16,7 @@ interface ApprovalStepForm {
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Reject';
 }
 
 interface ApiStep {
@@ -23,7 +24,7 @@ interface ApiStep {
   specificUserId?: string;
   limit?: number;
   duration: number;
-  overtime: 'NOTIFY' | 'AUTO_REJECT';
+  overtime: 'Notify and Wait' | 'Auto Reject';
 }
 
 export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
@@ -48,37 +49,27 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Fetching schema with ID:', params.id);
-
-        const [divisionsRes, rolesRes, usersRes, schemaRes] = await Promise.all([
-          fetch('/api/work-divisions'),
-          fetch('/api/roles'),
-          fetch('/api/users'),
-          fetch(`/api/approval-schemas/${params.id}`)
-        ]);
-
-        if (divisionsRes.ok) {
-          const divisionsData = await divisionsRes.json();
-          console.log('Divisions API Response:', divisionsData);
-          setDivisions(Array.isArray(divisionsData) ? divisionsData : []);
+        // console.log('Fetching schema with ID:', params.id);
+        const response = await fetch(`/api/workspace-management/approval-schemas/${params.id}`);
+        // console.log('Response:', response);
+        if (!response.ok) {
+          throw new Error('Failed to fetch schema');
         }
+        const data = await response.json();
+        const { schema, divisions, roles, users } = data;
+        setDivisions(Array.isArray(divisions) ? divisions : []);
+        setRoles(Array.isArray(roles) ? roles : []);
+        setUsers(Array.isArray(users) ? users : []);
+        setFormData({
+          name: schema.name || '',
+          documentType: schema.documentType || '',
+          description: schema.description || '',
+          workDivisions: schema.workDivisions || [],
+          roles: schema.roles || [],
+          steps: schema.steps || []
+        });
 
-        if (rolesRes.ok) {
-          const rolesData = await rolesRes.json();
-          console.log('Roles API Response:', rolesData);
-          setRoles(Array.isArray(rolesData) ? rolesData : []);
-        }
-
-        if (usersRes.ok) {
-          const usersData = await usersRes.json();
-          console.log('Users Data:', usersData);
-          setUsers(Array.isArray(usersData) ? usersData : []);
-        }
-
-        if (schemaRes.ok) {
-          const schema = await schemaRes.json();
-          console.log('Raw Schema:', schema);
-
+        if (response.ok) {
           // Parse divisions dan roles dari string menjadi array
           const parsedDivisions = schema.divisions 
             ? schema.divisions.startsWith('[') 
@@ -92,8 +83,8 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
               : schema.roles.split(',')
             : [];
 
-          console.log('Parsed Roles:', parsedRoles);
-          console.log('Parsed Divisions:', parsedDivisions);
+          // console.log('Parsed Roles:', parsedRoles);
+          // console.log('Parsed Divisions:', parsedDivisions);
 
           const formattedData = {
             name: schema.name || '',
@@ -111,8 +102,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                 }))
               : []
           };
-
-          console.log('Formatted Data:', formattedData);
+          // console.log('Formatted Data:', formattedData);
           setFormData(formattedData);
         }
       } catch (error) {
@@ -123,10 +113,10 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     fetchData();
   }, [params.id]);
 
-  // Tambahkan useEffect untuk monitoring perubahan formData
-  useEffect(() => {
-    console.log('Current formData:', formData);
-  }, [formData]);
+  // Monitoring perubahan formData
+  // useEffect(() => {
+  //   console.log('Current formData:', formData);
+  // }, [formData]);
 
   const removeStep = (index: number) => {
     setFormData(prev => ({
@@ -140,7 +130,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/approval-schemas/${params.id}`, {
+      const response = await fetch(`/api/workspace-management/approval-schemas/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +145,6 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
       if (!response.ok) {
         throw new Error('Failed to update approval schema');
       }
-
       router.push('/workspace-management/approval-schema');
       router.refresh();
     } catch (error) {
@@ -331,7 +320,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                         )}
                         <td className="py-3 px-4">{step.duration} days</td>
                         <td className="py-3 px-4">
-                          {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                          {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Reject'}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
