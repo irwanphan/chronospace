@@ -14,41 +14,29 @@ export default function WorkDivisionPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    Promise.all([
-      fetchDivisions(),
-      fetchUsers()
-    ]);
-  }, []);
-
-  const fetchDivisions = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/work-divisions');
+      const response = await fetch('/api/workspace/work-division');
       if (!response.ok) {
-        throw new Error('Failed to fetch work divisions');
+        throw new Error('Failed to fetch data');
       }
       const data = await response.json();
-      setDivisions(Array.isArray(data) ? data : []);
+      setDivisions(data.divisions);
+      setUsers(data.users);
     } catch (error) {
-      console.error('Failed to fetch work divisions:', error);
-      setError('Failed to load work divisions');
+      console.error('Failed to fetch data:', error);
+      setError('Failed to load data');
       setDivisions([]);
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      if (!response.ok) throw new Error('Failed to fetch users');
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this work division?')) {
