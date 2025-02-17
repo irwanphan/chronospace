@@ -20,6 +20,9 @@ interface RequestCardProps {
   onCheck?: () => void;
   onDecline?: () => void;
   onApprove?: () => void;
+  canCheck?: boolean;
+  canDecline?: boolean;
+  canApprove?: boolean;
 }
 
 export default function RequestCard({
@@ -37,6 +40,9 @@ export default function RequestCard({
   onCheck,
   onDecline,
   onApprove,
+  canCheck,
+  canDecline,
+  canApprove,
 }: RequestCardProps) {
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -120,24 +126,30 @@ export default function RequestCard({
       </div>
 
       <div className="flex items-center gap-2 justify-end">
-        <button 
-          onClick={onCheck}
-          className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-        >
-          Check
-        </button>
-        <button 
-          onClick={onDecline}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
-        >
-          Decline
-        </button>
-        <button 
-          onClick={onApprove}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          Approve
-        </button>
+        {canCheck && (
+          <button 
+            onClick={onCheck}
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          >
+            Check
+          </button>
+        )}
+        {canDecline && (
+          <button 
+            onClick={onDecline}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+          >
+            Decline
+          </button>
+        )}
+        {canApprove && (
+          <button 
+            onClick={onApprove}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            Approve
+          </button>
+        )}
       </div>
     </div>
   );
