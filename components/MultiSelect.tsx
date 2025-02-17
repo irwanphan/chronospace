@@ -79,7 +79,7 @@ export default function MultiSelect({ options, value, onChange, placeholder = 'S
         />
       </div>
       
-      {isOpen && (
+      {isOpen && !readonly && (
         <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
           {availableOptions.length === 0 ? (
             <div className="px-4 py-2 text-gray-500">No options found</div>
