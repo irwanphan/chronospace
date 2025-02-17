@@ -12,9 +12,10 @@ interface MultiSelectProps {
   value: string[];
   onChange: (value: string[]) => void;
   placeholder?: string;
+  readonly?: boolean;
 }
 
-export default function MultiSelect({ options, value, onChange, placeholder = 'Select...' }: MultiSelectProps) {
+export default function MultiSelect({ options, value, onChange, placeholder = 'Select...', readonly = false }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -48,7 +49,7 @@ export default function MultiSelect({ options, value, onChange, placeholder = 'S
     <div className="relative" ref={wrapperRef}>
       <div
         className="min-h-[42px] px-3 py-2 border rounded-lg cursor-text flex flex-wrap gap-2 items-center"
-        onClick={() => setIsOpen(true)}
+        onClick={() => !readonly && setIsOpen(true)}
       >
         {selectedOptions.map(option => (
           <span

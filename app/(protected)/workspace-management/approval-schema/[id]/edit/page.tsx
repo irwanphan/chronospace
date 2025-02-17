@@ -11,7 +11,7 @@ import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
-interface StepFormData {
+interface ApprovalStepForm {
   roleId: string;
   specificUserId?: string;
   budgetLimit?: number;
@@ -24,7 +24,7 @@ interface ApiStep {
   specificUserId?: string;
   limit?: number;
   duration: number;
-  overtime: 'Notify and Wait' | 'Auto Reject';
+  overtime: 'Notify and Wait' | 'Auto Decline';
 }
 
 export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
@@ -40,11 +40,11 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     description: '',
     workDivisions: [] as string[],
     roles: [] as string[],
-    steps: [] as StepFormData[],
+    steps: [] as ApprovalStepForm[],
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
-  const [editingStep, setEditingStep] = useState<{ data: StepFormData; index: number } | null>(null);
+  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -154,7 +154,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     }
   };
 
-  const handleAddStep = (stepData: StepFormData) => {
+  const handleAddStep = (stepData: ApprovalStepForm) => {
     setFormData(prev => ({
       ...prev,
       steps: [...prev.steps, stepData]
@@ -176,7 +176,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     setIsAddStepModalOpen(true);
   };
 
-  const handleStepSubmit = (stepData: StepFormData) => {
+  const handleStepSubmit = (stepData: ApprovalStepForm) => {
     if (editingStep !== null) {
       // Edit existing step
       setFormData(prev => ({
@@ -320,7 +320,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                         )}
                         <td className="py-3 px-4">{step.duration} days</td>
                         <td className="py-3 px-4">
-                          {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Reject'}
+                          {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">

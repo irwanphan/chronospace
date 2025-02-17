@@ -1,312 +1,239 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Plus } from 'lucide-react';
 import Link from 'next/link';
 
-interface ApprovalStep {
-  id?: string;
-  roleId: string;
-  budgetLimit?: number;
+import { X } from 'lucide-react';
+import { WorkDivision } from '@/types/workDivision';
+import { Role } from '@/types/role';
+import { User } from '@/types/user';
+import MultiSelect from '@/components/MultiSelect';
+
+interface ApiStep {
+  role: string;
+  specificUserId?: string;
+  limit?: number;
   duration: number;
-  overtimeAction: string;
+  overtime: 'Notify and Wait' | 'Auto Decline';
 }
 
-interface FormData {
+interface FormattedSchema {
   name: string;
-  documentType: 'Purchase Request' | 'Memo';
-  workDivisions: string[];
+  documentType: string;
   description: string;
-  steps: ApprovalStep[];
+  workDivisions: string[];
+  roles: string[];
+  steps: Array<{
+    roleId: string;
+    specificUserId?: string;
+    budgetLimit?: number;
+    duration: number;
+    overtimeAction: 'Notify and Wait' | 'Auto Decline';
+  }>;
 }
 
-export default function EditSchemaPage({ params }: { params: { id: string } }) {
+export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    documentType: 'Purchase Request',
-    workDivisions: [],
-    description: '',
-    steps: []
-  });
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [schema, setSchema] = useState<FormattedSchema | null>(null);
 
   useEffect(() => {
-    const fetchSchema = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/approval-schemas/${params.id}`);
+        // console.log('Fetching schema with ID:', params.id);
+        const response = await fetch(`/api/workspace-management/approval-schemas/${params.id}`);
+        // console.log('Response:', response);
+        if (!response.ok) {
+          throw new Error('Failed to fetch schema');
+        }
+        const data = await response.json();
+        const { schema, divisions, roles, users } = data;
+        setDivisions(Array.isArray(divisions) ? divisions : []);
+        setRoles(Array.isArray(roles) ? roles : []);
+        setUsers(Array.isArray(users) ? users : []);
+        setSchema(schema);
+
         if (response.ok) {
-          const data = await response.json();
-          setFormData({
-            name: data.name,
-            documentType: data.documentType,
-            workDivisions: data.divisions.split(','),
-            description: data.description || '',
-            steps: data.steps.map((step: any) => ({
-              id: step.id,
-              roleId: step.role,
-              budgetLimit: step.limit,
-              duration: step.duration,
-              overtimeAction: step.overtime
-            }))
-          });
+          // Parse divisions dan roles dari string menjadi array
+          const parsedDivisions = schema.divisions 
+            ? schema.divisions.startsWith('[') 
+              ? JSON.parse(schema.divisions)
+              : schema.divisions.split(',')
+            : [];
+
+          const parsedRoles = schema.roles
+            ? schema.roles.startsWith('[') 
+              ? JSON.parse(schema.roles)
+              : schema.roles.split(',')
+            : [];
+
+          const formattedData = {
+            name: schema.name || '',
+            documentType: schema.documentType || '',
+            description: schema.description || '',
+            workDivisions: parsedDivisions,
+            roles: parsedRoles,
+            steps: Array.isArray(schema.steps)
+              ? schema.steps.map((step: ApiStep) => ({
+                  roleId: step.role || '',
+                  specificUserId: step.specificUserId,
+                  budgetLimit: step.limit,
+                  duration: step.duration,
+                  overtimeAction: step.overtime
+                }))
+              : []
+          };
+          // console.log('Formatted Data:', formattedData);
+          setSchema(formattedData);
         }
       } catch (error) {
-        console.error('Error fetching schema:', error);
+        console.error('Error:', error);
       }
     };
 
-    fetchSchema();
+    fetchData();
   }, [params.id]);
-
-  const addStep = () => {
-    setFormData(prev => ({
-      ...prev,
-      steps: [...prev.steps, {
-        roleId: '',
-        duration: 1,
-        overtimeAction: 'Notify and Wait'
-      }]
-    }));
-  };
-
-  const removeStep = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      steps: prev.steps.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateStep = (index: number, field: keyof ApprovalStep, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      steps: prev.steps.map((step, i) => {
-        if (i === index) {
-          return { ...step, [field]: value };
-        }
-        return step;
-      })
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/approval-schemas/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          divisions: formData.workDivisions.join(',')
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update schema');
-      }
-
-      router.push('/workspace-management/approval-schema');
-      router.refresh();
-    } catch (error) {
-      console.error('Error updating schema:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update schema');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-6">Edit Schema</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-6 border border-gray-200 rounded-lg p-6">
-        <div className="bg-white rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Schema Information</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-1.5">
-                Document Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.documentType}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  documentType: e.target.value as 'Purchase Request' | 'Memo',
-                  steps: prev.steps.map(step => ({
-                    ...step,
-                    budgetLimit: e.target.value === 'Memo' ? undefined : step.budgetLimit
-                  }))
-                }))}
-                className="w-full px-4 py-2 border rounded-lg"
-                required
-              >
-                <option value="Purchase Request">Purchase Request</option>
-                <option value="Memo">Memo</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-1.5">
-                Apply to Work Division <span className="text-red-500">*</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {['Research', 'Engineering'].map((division) => (
-                  <label key={division} className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.workDivisions.includes(division)}
-                      onChange={(e) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          workDivisions: e.target.checked
-                            ? [...prev.workDivisions, division]
-                            : prev.workDivisions.filter(d => d !== division)
-                        }));
-                      }}
-                      className="mr-2"
-                    />
-                    {division}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-1.5">
-                Schema Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1.5">Schema Full Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg"
-                rows={4}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Approval Steps</h2>
-            <button
-              type="button"
-              onClick={addStep}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add Step
-            </button>
+      <h1 className="text-2xl font-semibold mb-6">Edit Approval Schema</h1>
+      
+      <form className="bg-white rounded-lg p-6 space-y-6">
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1.5">
+              Schema Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={schema?.name || ''}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              readOnly
+            />
           </div>
 
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="text-left pb-2">#</th>
-                <th className="text-left pb-2">Role</th>
-                {formData.documentType === 'Purchase Request' && (
-                  <th className="text-left pb-2">Budget Limit</th>
-                )}
-                <th className="text-left pb-2">Duration</th>
-                <th className="text-left pb-2">Overtime Action</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {formData.steps.map((step, index) => (
-                <tr key={index} className="border-t">
-                  <td className="py-2">{index + 1}</td>
-                  <td className="py-2">
-                    <select
-                      value={step.roleId}
-                      onChange={(e) => updateStep(index, 'roleId', e.target.value)}
-                      className="w-full px-3 py-1 border rounded"
-                      required
-                    >
-                      <option value="">Select Role</option>
-                      <option value="dept_head">Dept. Head</option>
-                      <option value="finance_manager">Finance Manager</option>
-                      <option value="finance_director">Finance Director</option>
-                    </select>
-                  </td>
-                  {formData.documentType === 'Purchase Request' && (
-                    <td className="py-2">
-                      <input
-                        type="number"
-                        value={step.budgetLimit}
-                        onChange={(e) => updateStep(index, 'budgetLimit', parseFloat(e.target.value))}
-                        className="w-full px-3 py-1 border rounded"
-                        required
-                      />
-                    </td>
+          <div>
+            <label className="block mb-1.5">
+              Document Type <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={schema?.documentType || ''}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+              readOnly
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1.5">
+              Apply to Work Division <span className="text-red-500">*</span>
+            </label>
+            <MultiSelect
+              options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
+              value={schema?.workDivisions || []}
+              onChange={() => {}}
+              readonly
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1.5">
+              Apply to Roles <span className="text-red-500">*</span>
+            </label>
+            <MultiSelect
+              options={roles.map(role => ({ id: role.id!, name: role.roleName }))}
+              value={schema?.roles || []}
+              onChange={() => {}}
+              readonly
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1.5">Description</label>
+            <div 
+              className="w-full px-4 py-2 border rounded-lg"
+              dangerouslySetInnerHTML={{ __html: schema?.description || '' }}
+            />
+          </div>
+
+          <div className="bg-white rounded-lg p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium">Approval Steps</h2>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">#</th>
+                    <th className="text-left py-3 px-4">Role</th>
+                    <th className="text-left py-3 px-4">Specific User</th>
+                    {schema?.documentType === 'Purchase Request' && (
+                      <th className="text-left py-3 px-4">Limit</th>
+                    )}
+                    <th className="text-left py-3 px-4">Duration</th>
+                    <th className="text-left py-3 px-4">Overtime</th>
+                    <th className="text-left py-3 px-4 w-16"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {schema?.steps.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-4 text-gray-500">
+                        No steps added yet
+                      </td>
+                    </tr>
+                  ) : (
+                    schema?.steps.map((step, index) => (
+                      <tr key={index} className="border-b">
+                        <td className="py-3 px-4">{index + 1}</td>
+                        <td className="py-3 px-4">
+                          {roles.find(r => r.id === step.roleId)?.roleName}
+                        </td>
+                        <td className="py-3 px-4">
+                          {step.specificUserId 
+                            ? users.find(u => u.id === step.specificUserId)?.name 
+                            : 'Any user with role'}
+                        </td>
+                        {schema?.documentType === 'Purchase Request' && (
+                          <td className="py-3 px-4">
+                            {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
+                              style: 'currency',
+                              currency: 'IDR',
+                              minimumFractionDigits: 0,
+                            }).format(step.budgetLimit) : '-'}
+                          </td>
+                        )}
+                        <td className="py-3 px-4">{step.duration} days</td>
+                        <td className="py-3 px-4">
+                          {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
+                        </td>
+                        <td className="py-3 px-4"></td>
+                      </tr>
+                    ))
                   )}
-                  <td className="py-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        value={step.duration}
-                        onChange={(e) => updateStep(index, 'duration', parseInt(e.target.value))}
-                        className="w-20 px-3 py-1 border rounded"
-                        required
-                        min="1"
-                      />
-                      <span>days</span>
-                    </div>
-                  </td>
-                  <td className="py-2">
-                    <select
-                      value={step.overtimeAction}
-                      onChange={(e) => updateStep(index, 'overtimeAction', e.target.value)}
-                      className="w-full px-3 py-1 border rounded"
-                      required
-                    >
-                      <option value="Notify and Wait">Notify and Wait</option>
-                      <option value="Reject">Reject</option>
-                    </select>
-                  </td>
-                  <td className="py-2">
-                    <button
-                      type="button"
-                      onClick={() => removeStep(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t">
           <Link
             href="/workspace-management/approval-schema"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
           >
-            Cancel
+            <X className="w-4 h-4" />
+            Back
           </Link>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            onClick={() => router.push(`/workspace-management/approval-schema/${params.id}/edit`)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+            Edit
           </button>
         </div>
       </form>
