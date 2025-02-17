@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Filter, MoreVertical, Plus, Pencil, Trash } from 'lucide-react';
+import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
 
 import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
@@ -129,6 +129,12 @@ export default function WorkDivisionPage() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="relative">
+                      <Link
+                        href={`/workspace-management/work-division/${division.id}`}
+                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                      >
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Link>
                       <button 
                         className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
                         onClick={() => setActiveMenu(activeMenu === division.id ? null : division.id)}
