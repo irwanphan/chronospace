@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+
 import { User } from '@/types/user';
 import { WorkDivision } from '@/types/workDivision';
 
@@ -27,27 +28,13 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [usersRes, divisionsRes, divisionRes] = await Promise.all([
-          fetch('/api/users'),
-          fetch('/api/work-divisions'),
-          fetch(`/api/work-divisions/${params.id}`)
-        ]);
-
-        const [usersData, divisionsData, divisionData] = await Promise.all([
-          usersRes.json(),
-          divisionsRes.json(),
-          divisionRes.json()
-        ]);
-
-        setUsers(usersData);
-        setDivisions(divisionsData.filter((div: WorkDivision) => div.id !== params.id)); // Exclude current division
-        setFormData({
-          divisionCode: divisionData.divisionCode,
-          divisionName: divisionData.divisionName,
-          description: divisionData.description || '',
-          divisionHead: divisionData.divisionHead || '',
-          upperDivision: divisionData.upperDivision || '',
-        });
+        const response = await fetch(`/api/workspace-management/work-division/${params.id}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const data = await response.json();
+        setFormData(data.division);
+        setUsers(data.users);
+        setDivisions(data.divisions.filter((div: WorkDivision) => div.id !== params.id)); // Exclude current division
       } catch (error) {
         console.error('Error fetching data:', error);
         setErrors({ general: 'Failed to load data' });
@@ -64,7 +51,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
     setErrors({});
 
     try {
-      const response = await fetch(`/api/work-divisions/${params.id}`, {
+      const response = await fetch(`/api/workspace-management/work-division/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

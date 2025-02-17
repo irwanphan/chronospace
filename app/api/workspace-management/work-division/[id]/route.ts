@@ -6,9 +6,20 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const division = await prisma.workDivision.findUnique({
-      where: { id: params.id },
-    });
+    const [divisions, division, users] = await Promise.all([
+      prisma.workDivision.findMany({
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.workDivision.findUnique({
+        where: { id: params.id }
+      }),
+      prisma.user.findMany({
+        select: {
+          id: true,
+          name: true
+        }
+      })
+    ]);
 
     if (!division) {
       return NextResponse.json(
@@ -17,9 +28,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(division);
+    return NextResponse.json({
+      divisions,
+      division,
+      users
+    });
   } catch (error) {
-    console.error('Error fetching work division:', error);
+    console.error('Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch work division' },
       { status: 500 }
