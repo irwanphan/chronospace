@@ -132,6 +132,7 @@ model ApprovalSchema {
   updatedAt     DateTime @updatedAt
 
   @@map("approval_schemas")
+  @@index([name])
 }
 
 model ApprovalStep {
@@ -194,13 +195,14 @@ model Budget {
   finishDate    DateTime
   status        String   // e.g., "In Progress", "Completed", "Delayed"
   purchaseRequestStatus String? // e.g., "Submitted", "Not Submitted"
-  project       Project  @relation(fields: [projectId], references: [id])
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   items         BudgetedItem[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  PurchaseRequest PurchaseRequest[]
 
   @@map("budgets")
-  PurchaseRequest PurchaseRequest[]
+  @@index([projectId])
 }
 
 model BudgetedItem {
@@ -237,6 +239,7 @@ model UserAccess {
   updatedAt DateTime @updatedAt
 
   @@map("user_accesses")
+  @@index([userId])
 }
 
 model PurchaseRequest {
@@ -252,6 +255,7 @@ model PurchaseRequest {
   updatedAt       DateTime                  @updatedAt
 
   @@map("purchase_requests")
+  @@index([budgetId])
 }
 
 model PurchaseRequestItem {
