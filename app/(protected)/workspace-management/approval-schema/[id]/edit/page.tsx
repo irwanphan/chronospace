@@ -11,12 +11,12 @@ import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
-interface ApprovalStepForm {
+interface StepFormData {
   roleId: string;
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'Notify and Wait' | 'Auto Reject';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 interface ApiStep {
@@ -40,11 +40,11 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     description: '',
     workDivisions: [] as string[],
     roles: [] as string[],
-    steps: [] as ApprovalStepForm[],
+    steps: [] as StepFormData[],
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
-  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
+  const [editingStep, setEditingStep] = useState<{ data: StepFormData; index: number } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -154,7 +154,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     }
   };
 
-  const handleAddStep = (stepData: ApprovalStepForm) => {
+  const handleAddStep = (stepData: StepFormData) => {
     setFormData(prev => ({
       ...prev,
       steps: [...prev.steps, stepData]
@@ -176,7 +176,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     setIsAddStepModalOpen(true);
   };
 
-  const handleStepSubmit = (stepData: ApprovalStepForm) => {
+  const handleStepSubmit = (stepData: StepFormData) => {
     if (editingStep !== null) {
       // Edit existing step
       setFormData(prev => ({

@@ -20,7 +20,7 @@ interface StepFormData {
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 export default function AddStepModal({ 
@@ -38,7 +38,7 @@ export default function AddStepModal({
     specificUserId: undefined,
     budgetLimit: undefined,
     duration: 7,
-    overtimeAction: 'NOTIFY',
+    overtimeAction: 'Notify and Wait',
   });
 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -186,13 +186,13 @@ export default function AddStepModal({
               value={formData.overtimeAction}
               onChange={(e) => setFormData(prev => ({ 
                 ...prev, 
-                overtimeAction: e.target.value as 'NOTIFY' | 'AUTO_REJECT' 
+                overtimeAction: e.target.value as 'Notify and Wait' | 'Auto Decline' 
               }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               required
             >
-              <option value="NOTIFY">Notify and Wait</option>
-              <option value="AUTO_REJECT">Auto Reject</option>
+              <option value="Notify and Wait">Notify and Wait</option>
+              <option value="Auto Decline">Auto Decline</option>
             </select>
           </div>
 
