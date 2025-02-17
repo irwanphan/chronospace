@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface Role {
@@ -22,19 +23,19 @@ export default function NewRolePage() {
     approvalLimit: '',
   });
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await fetch('/api/roles');
-        if (response.ok) {
-          const data = await response.json();
-          setRoles(data);
-        }
-      } catch (error) {
-        console.error('Error fetching roles:', error);
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch('/api/workspace-management/roles');
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchRoles();
   }, []);
 
@@ -43,7 +44,7 @@ export default function NewRolePage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/roles', {
+      const response = await fetch('/api/workspace-management/roles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RichTextEditor } from '@/components/RichTextEditor';
+import { Role } from '@/types/role';
 
 export default function EditRolePage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -11,25 +11,14 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     roleCode?: string;
     general?: string;
   }>({});
-  const [formData, setFormData] = useState({
-    roleCode: '',
-    roleName: '',
-    description: '',
-    approvalLimit: 0,
-  });
+  const [role, setRole] = useState<Role>({} as Role);
 
   useEffect(() => {
     const fetchRole = async () => {
       try {
         const response = await fetch(`/api/workspace-management/roles/${params.id}`);
         const data = await response.json();
-        
-        setFormData({
-          roleCode: data.roleCode,
-          roleName: data.roleName,
-          description: data.description || '',
-          approvalLimit: data.approvalLimit || 0,
-        });
+        setRole(data);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching role:', error);
@@ -40,37 +29,6 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
 
     fetchRole();
   }, [params.id]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    try {
-      const response = await fetch(`/api/workspace-management/roles/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.error.includes('Role code')) {
-          setErrors(prev => ({ ...prev, roleCode: data.error }));
-        } else {
-          setErrors(prev => ({ ...prev, general: data.error }));
-        }
-        return;
-      }
-
-      router.push('/workspace-management/role');
-    } catch (error) {
-      console.error('Error updating role:', error);
-      setErrors({ general: 'Failed to update role' });
-    }
-  };
 
   if (isLoading) {
     return <div className="p-4">Loading...</div>;
@@ -86,17 +44,16 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
+      <form className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
         <div>
           <label className="block text-sm font-medium mb-1">
             Role Code <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
-            value={formData.roleCode}
-            onChange={(e) => setFormData(prev => ({ ...prev, roleCode: e.target.value }))}
-            className={`w-full px-4 py-2 border rounded-lg ${errors.roleCode ? 'border-red-500' : ''}`}
-            required
+            value={role.roleCode}
+            className={`w-full px-4 py-2 border rounded-lg`}
+            readOnly
           />
           {errors.roleCode && (
             <p className="mt-1 text-sm text-red-600">{errors.roleCode}</p>
@@ -109,18 +66,17 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
           </label>
           <input
             type="text"
-            value={formData.roleName}
-            onChange={(e) => setFormData(prev => ({ ...prev, roleName: e.target.value }))}
+            value={role.roleName}
             className="w-full px-4 py-2 border rounded-lg"
-            required
+            readOnly
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
-          <RichTextEditor
-            value={formData.description}
-            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+          <div 
+            className="w-full px-4 py-2 border rounded-lg"
+            dangerouslySetInnerHTML={{ __html: role.description || '' }}
           />
         </div>
 
@@ -129,12 +85,10 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
             Approval Limit <span className="text-red-500">*</span>
           </label>
           <input
-            type="number"
-            value={formData.approvalLimit}
-            onChange={(e) => setFormData(prev => ({ ...prev, approvalLimit: Number(e.target.value) }))}
+            type="text"
+            value={role.approvalLimit}
             className="w-full px-4 py-2 border rounded-lg"
-            min="0"
-            required
+            readOnly
           />
         </div>
 
@@ -144,13 +98,14 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
             onClick={() => router.push(`/workspace-management/role`)}
             className="px-4 py-2 border rounded-lg hover:bg-gray-50"
           >
-            Cancel
+            Back
           </button>
           <button
-            type="submit"
+            type="button"
+            onClick={() => router.push(`/workspace-management/role/${params.id}/edit`)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Save Changes
+            Edit
           </button>
         </div>
       </form>
