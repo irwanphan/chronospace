@@ -128,7 +128,7 @@ export default function WorkDivisionPage() {
                     {users.find(user => user.id === division.divisionHead)?.name || '-'}
                   </td>
                   <td className="py-3 px-4">
-                    <div className="relative">
+                    <div className="relative flex items-center gap-2">
                       <Link
                         href={`/workspace-management/work-division/${division.id}`}
                         className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
