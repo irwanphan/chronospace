@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const vendor = await prisma.vendor.findUnique({
-      where: { id: params.id },
+      where: { id: params.id }
     });
 
     if (!vendor) {
@@ -17,7 +17,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ vendor });
+    return NextResponse.json(vendor);
   } catch (error) {
     console.error('Error fetching vendor:', error);
     return NextResponse.json(

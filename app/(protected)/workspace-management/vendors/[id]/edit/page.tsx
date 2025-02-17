@@ -21,6 +21,11 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
     vendorCode?: string;
     general?: string;
   }>({});
+  // const [existingDocuments, setExistingDocuments] = useState<Array<{
+  //   id: string;
+  //   name: string;
+  //   url: string;
+  // }>>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,19 +33,20 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/workspace-management/vendors/${params.id}`)
-
+        const response = await fetch(`/api/workspace-management/vendors/${params.id}`);
         if (!response.ok) throw new Error('Failed to fetch data');
+        
         const vendorData = await response.json();
-
         setFormData({
           vendorCode: vendorData.vendorCode,
           vendorName: vendorData.vendorName,
           email: vendorData.email,
           phone: vendorData.phone,
           address: vendorData.address || '',
-          documents: [], // Existing documents will be shown separately
+          documents: [], // For new uploads
         });
+        
+        // setExistingDocuments(vendorData.documents || []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load vendor data');
