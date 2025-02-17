@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { User } from '@/types/user';
 import { WorkDivision } from '@/types/workDivision';
-import { RichTextEditor } from '@/components/RichTextEditor';
+import { User } from '@/types/user';
 
 export default function EditWorkDivisionPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -14,8 +13,8 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
     divisionCode?: string;
     general?: string;
   }>({});
-  const [users, setUsers] = useState<User[]>([]);
   const [division, setDivision] = useState<WorkDivision>();
+  const [divisionHeadUser, setDivisionHeadUser] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +25,8 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
         
         const data = await response.json();
         setDivision(data.division);
-        setUsers(data.users);
+        const headUser = data.users.find((user: User) => user.id === data.division.divisionHead);
+        setDivisionHeadUser(headUser?.name || 'Not assigned');
       } catch (error) {
         console.error('Error fetching data:', error);
         setErrors({ general: 'Failed to load data' });
@@ -103,7 +103,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
             <label className="block text-sm font-medium mb-1">Division Head</label>
             <input
               type="text"
-              value={division?.divisionHead || ''}
+              value={divisionHeadUser}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               readOnly
             />
