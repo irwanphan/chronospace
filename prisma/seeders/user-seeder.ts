@@ -22,11 +22,17 @@ export async function userSeeder() {
     data: userData
   });
 
-  await prisma.userRole.create({
-    data: {
-      userId: 'cm71xui7r000asgprkai2jfkb',
-      roleId: 'role-ceo',
-    }
+  await prisma.userRole.createMany({
+    data: [
+      {
+        userId: 'cm71xui7r000asgprkai2jfkb',
+        roleId: 'role-ceo',
+      },
+      {
+        userId: 'fg71xui7r000asgpgraji935t',
+        roleId: 'role-st',
+      },
+    ]
   });
 
   await Promise.all(

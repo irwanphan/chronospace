@@ -94,50 +94,17 @@ export const authOptions: AuthOptions = {
           throw new Error("Invalid password");
         }
 
-        const menuAccess = user.access?.menuAccess 
-          ? JSON.parse(user.access.menuAccess as string)
-          : {
-              timeline: false,
-              workspace: false,
-              projectPlanning: false,
-              budgetPlanning: false,
-              userManagement: false,
-              workspaceManagement: false
-            };
+        const menuAccess = typeof user.access?.menuAccess === 'string' 
+          ? JSON.parse(user.access.menuAccess)
+          : user.access?.menuAccess || {};
 
-        const activityAccess = user.access?.activityAccess 
-          ? JSON.parse(user.access.activityAccess as string)
-          : {
-              createProject: false,
-              editProject: false,
-              deleteProject: false,
-              createBudget: false,
-              editBudget: false,
-              deleteBudget: false,
-              createWorkDivision: false,
-              editWorkDivision: false,
-              deleteWorkDivision: false,
-              createRole: false,
-              editRole: false,
-              deleteRole: false,
-              createVendor: false,
-              editVendor: false,
-              deleteVendor: false,
-              createApprovalSchema: false,
-              editApprovalSchema: false,
-              deleteApprovalSchema: false,
-              createUser: false,
-              editUser: false,
-              deleteUser: false,
-              manageUserAccess: false
-            };
+        const activityAccess = typeof user.access?.activityAccess === 'string'
+          ? JSON.parse(user.access.activityAccess)
+          : user.access?.activityAccess || {};
 
-        const workspaceAccess = user.access?.workspaceAccess 
-          ? JSON.parse(user.access.workspaceAccess as string)
-          : {
-              createPurchaseRequest: false,
-              reviewApprovePurchaseRequest: false
-            };
+        const workspaceAccess = typeof user.access?.workspaceAccess === 'string'
+          ? JSON.parse(user.access.workspaceAccess)
+          : user.access?.workspaceAccess || {};
 
         return {
           id: user.id,
