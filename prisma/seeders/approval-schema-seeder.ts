@@ -53,21 +53,21 @@ export async function approvalSchemaSeeder() {
         {
           role: 'role-gm',
           duration: 4,
-          overtime: 'Auto Approve',
+          overtime: 'Auto Decline',
           order: 1,
           limit: 250000000 // 250 Juta
         },
         {
           role: 'role-cfo',
           duration: 8,
-          overtime: 'Auto Approve',
+          overtime: 'Auto Decline',
           order: 2,
           limit: 500000000 // 500 Juta
         },
         {
           role: 'role-ceo',
           duration: 12,
-          overtime: 'Notify and Wait',
+          overtime: 'Auto Decline',
           order: 3,
           limit: 1000000000 // 1 Miliar
         }

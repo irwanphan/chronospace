@@ -7,6 +7,7 @@ import { vendorSeeder } from './seeders/vendor-seeder';
 import { approvalSchemaSeeder } from './seeders/approval-schema-seeder';
 import { projectSeeder } from './seeders/project-seeder';
 import { budgetSeeder } from './seeders/budget-seeder';
+import { purchaseRequestSeeder } from './seeders/purchase-request-seeder';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -18,6 +19,7 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.vendor.deleteMany();
   await prisma.approvalSchema.deleteMany();
+  await prisma.purchaseRequest.deleteMany();
   await prisma.budgetedItem.deleteMany();
   await prisma.budget.deleteMany();
   await prisma.project.deleteMany();
@@ -30,6 +32,7 @@ async function main() {
   await approvalSchemaSeeder();
   await projectSeeder();
   await budgetSeeder();
+  await purchaseRequestSeeder();
 }
   
 main()

@@ -61,6 +61,7 @@ export default function NewRequestPage() {
     budgetId: '',
     projectId: '',
     title: '',
+    createdBy: '',
     description: '',
     items: [] as BudgetItem[],
     steps: [] as ApprovalStepForm[],
@@ -164,6 +165,7 @@ export default function NewRequestPage() {
         budgetId,
         projectId: selectedBudget.projectId,
         title: selectedBudget.title,
+        createdBy: session?.user?.id || '',
         items: selectedBudget.items
       }));
       setAvailableItems(selectedBudget.items);

@@ -247,7 +247,8 @@ model PurchaseRequest {
   budgetId        String
   title           String
   description     String?
-  status          String                    // e.g., "DRAFT", "SUBMITTED", "APPROVED", "REJECTED"
+  status          String                    // e.g., "Draft", "Submitted", "Approved", "Rejected"
+  createdBy       String
   items           PurchaseRequestItem[]
   approvalSteps   PurchaseRequestApproval[]
   budget          Budget                    @relation(fields: [budgetId], references: [id])
@@ -262,13 +263,13 @@ model PurchaseRequestItem {
   id                String          @id @default(cuid())
   purchaseRequestId String
   description       String
-  qty              Int
-  unit             String
-  unitPrice        Float
-  vendor           String
-  purchaseRequest  PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  qty               Int
+  unit              String
+  unitPrice         Float
+  vendor            String
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@map("purchase_request_items")
   @@index([purchaseRequestId])
@@ -280,10 +281,10 @@ model PurchaseRequestApproval {
   role             String
   specificUser     String?
   stepOrder        Int
-  status           String          // e.g., "PENDING", "APPROVED", "REJECTED"
-  limit            Int?            // in hours
-  duration         Int?            // actual duration in hours
-  overtime         Int?            // overtime duration in hours
+  status           String          // e.g., "Pending", "Approved", "Rejected"
+  limit            Int?            // budget limit that can be approved by the selected role
+  duration         Int             // actual duration in days
+  overtime         String          // overtime action
   comment          String?
   approvedAt       DateTime?       // waktu approval/reject
   approvedBy       String?         // user yang approve/reject

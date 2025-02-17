@@ -6,8 +6,8 @@ interface ApprovalStep {
   specificUser?: string;
   stepOrder: number;
   limit?: number;
-  duration?: number;
-  overtime?: number;
+  duration: number;
+  overtime: string;
 }
 
 interface RequestItem {
@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       budgetId,
       title,
       description,
+      createdBy,
       items = [],
       approvalSteps = []
     } = body;
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
         budgetId,
         title,
         description,
-        status: 'DRAFT',
+        status: 'Submitted',
+        createdBy,
         items: {
           create: items.map((item: RequestItem) => ({
             description: item.description,
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
             role: step.role,
             specificUser: step.specificUser,
             stepOrder: step.stepOrder,
-            status: 'PENDING',
+            status: 'Pending',
             limit: step.limit,
             duration: step.duration,
             overtime: step.overtime
