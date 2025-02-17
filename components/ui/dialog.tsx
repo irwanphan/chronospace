@@ -36,7 +36,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div 
         ref={dialogRef}
-        className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 relative"
+        className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 relative"
       >
         <button
           onClick={() => onOpenChange(false)}

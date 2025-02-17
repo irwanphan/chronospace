@@ -27,12 +27,13 @@ interface BudgetPlan {
 
 interface BudgetItem {
   id: string;
-  budgetId: string;
   description: string;
   qty: number;
   unit: string;
   unitPrice: number;
   vendor: string;
+  isSubmitted?: boolean;
+  purchaseRequestId?: string;
 }
 
 interface ApprovalStepForm {
@@ -49,14 +50,12 @@ export default function NewRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
-  const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
-  console.log(schemas)
   const [formData, setFormData] = useState({
     budgetId: '',
     projectId: '',
@@ -74,27 +73,28 @@ export default function NewRequestPage() {
     role: ''
   });
 
-  // Tambah state untuk modal dan budget items
+  // Hapus state yang tidak digunakan
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
-  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
 
   // Fetch budget plans
   useEffect(() => {
     const fetchBudgetPlans = async () => {
       try {
-        const response = await fetch('/api/budgets');
-        if (response.ok) {
-          const data = await response.json();
-          setBudgetPlans(data);
-        }
+        const response = await fetch('/api/budgets/available');
+        if (!response.ok) throw new Error('Failed to fetch budgets');
+        const data = await response.json();
+        setBudgetPlans(data);
       } catch (error) {
-        console.error('Error fetching budget plans:', error);
+        console.error('Error:', error);
+        toast.error('Failed to fetch budget plans');
       }
     };
 
     fetchBudgetPlans();
   }, []);
+
+  console.log('budgetPlans', budgetPlans)
 
   useEffect(() => {
     const generateRequestId = () => {
@@ -166,9 +166,7 @@ export default function NewRequestPage() {
         projectId: selectedBudget.projectId,
         title: selectedBudget.title,
         createdBy: session?.user?.id || '',
-        items: selectedBudget.items
       }));
-      setAvailableItems(selectedBudget.items);
     }
   };
 
@@ -272,50 +270,31 @@ export default function NewRequestPage() {
     }
   };
 
-  // Fungsi fetch budget items yang diperbaiki
-  const fetchBudgetItems = async (budgetId: string) => {
-    setIsLoading(true);
-    try {
-      console.log('Fetching budget:', budgetId); // Debug log
-      const response = await fetch(`/api/budgets/${budgetId}`);
-      if (!response.ok) throw new Error('Failed to fetch budget items');
-      
-      const data = await response.json();
-      console.log('Response data:', data); // Debug log
-
-      // Ambil items dari response budget
-      const items = data.items || [];
-      console.log('Budget items:', items); // Debug log
-      setBudgetItems(items);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-      toast.error('Failed to fetch budget items');
-      setBudgetItems([]); // Reset items jika error
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handler untuk membuka modal dan fetch items
+  // Handler untuk membuka modal (disederhanakan)
   const handleOpenItemModal = () => {
     setIsItemModalOpen(true);
-    if (formData.budgetId) {
-      fetchBudgetItems(formData.budgetId);
-    }
   };
 
   // Handler untuk toggle select/unselect item
   const handleToggleItem = (item: BudgetItem) => {
-    setSelectedItems(prev => {
-      const exists = prev.some(i => i.id === item.id);
-      if (exists) {
-        // Unselect: remove item
-        return prev.filter(i => i.id !== item.id);
-      } else {
-        // Select: add item
-        return [...prev, item];
+    if (item.isSubmitted) {
+      toast.error(`Item already submitted in PR ${item.purchaseRequestId}`);
+      return;
+    }
+
+    if (selectedItems.some(i => i.id === item.id)) {
+      setSelectedItems(prev => prev.filter(i => i.id !== item.id));
+      if (selectedItems.length === 1) {
+        setSelectedVendor(null);
       }
-    });
+    } else {
+      if (selectedVendor && item.vendor !== selectedVendor) {
+        toast.error('Cannot select items from different vendors in one request');
+        return;
+      }
+      setSelectedItems(prev => [...prev, item]);
+      setSelectedVendor(item.vendor);
+    }
   };
 
   return (
@@ -647,11 +626,7 @@ export default function NewRequestPage() {
         <div className="p-6 space-y-6">
           <h3 className="text-lg font-medium">Select Budget Items</h3>
           
-          {isLoading ? (
-            <div className="text-center py-4">Loading items...</div>
-          ) : budgetItems.length === 0 ? (
-            <div className="text-center py-4">No items found in this budget</div>
-          ) : (
+          {formData.budgetId && (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -665,8 +640,10 @@ export default function NewRequestPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {budgetItems.map((item) => {
+                  {budgetPlans.find(b => b.id === formData.budgetId)?.items.map((item) => {
                     const isSelected = selectedItems.some(i => i.id === item.id);
+                    const isDisabled: boolean = Boolean(selectedVendor && item.vendor !== selectedVendor);
+
                     return (
                       <tr key={item.id} className="border-b">
                         <td className="p-2">{item.description}</td>
@@ -680,10 +657,13 @@ export default function NewRequestPage() {
                           <button
                             type="button"
                             onClick={() => handleToggleItem(item)}
+                            disabled={isDisabled}
                             className={`px-2 py-1 rounded ${
                               isSelected 
                                 ? 'bg-green-600 hover:bg-green-700 text-white' 
-                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                : isDisabled
+                                  ? 'bg-gray-300 cursor-not-allowed'
+                                  : 'bg-blue-600 hover:bg-blue-700 text-white'
                             }`}
                           >
                             {isSelected ? 'Selected' : 'Select'}
@@ -697,7 +677,7 @@ export default function NewRequestPage() {
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsItemModalOpen(false)}

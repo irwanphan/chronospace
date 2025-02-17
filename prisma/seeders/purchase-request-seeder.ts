@@ -18,29 +18,23 @@ export async function purchaseRequestSeeder() {
     return;
   }
 
-  // Buat purchase request
+  // Buat purchase request pertama dengan item 1 dan 2
   await prisma.purchaseRequest.create({
     data: {
       budgetId: budget.id,
       title: "Hardware & Software Procurement",
       description: "Procurement for IT equipment and licenses",
-      status: "Submitted",
+      status: "SUBMITTED",
       createdBy: user.id,
       items: {
         create: [
           {
+            budgetItemId: budget.items[0].id, // Hardware Equipment
             description: budget.items[0].description,
-            qty: 5,
+            qty: 10,
             unit: budget.items[0].unit,
             unitPrice: budget.items[0].unitPrice,
             vendor: budget.items[0].vendor
-          },
-          {
-            description: budget.items[1].description, 
-            qty: 20,
-            unit: budget.items[1].unit,
-            unitPrice: budget.items[1].unitPrice,
-            vendor: budget.items[1].vendor
           }
         ]
       },
@@ -60,14 +54,6 @@ export async function purchaseRequestSeeder() {
             status: "PENDING",
             duration: 24,
             limit: 250000000,
-            overtime: "Notify and Wait"
-          },
-          {
-            role: "role-cfo",
-            stepOrder: 3, 
-            status: "PENDING",
-            duration: 48,
-            limit: 500000000,
             overtime: "Notify and Wait"
           }
         ]

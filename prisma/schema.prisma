@@ -214,6 +214,7 @@ model BudgetedItem {
   unitPrice   Float
   vendor      String
   budget      Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  purchaseRequestItems PurchaseRequestItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -262,17 +263,20 @@ model PurchaseRequest {
 model PurchaseRequestItem {
   id                String          @id @default(cuid())
   purchaseRequestId String
+  budgetItemId      String
   description       String
   qty               Int
   unit              String
   unitPrice         Float
   vendor            String
   purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id])
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   @@map("purchase_request_items")
   @@index([purchaseRequestId])
+  @@index([budgetItemId])
 }
 
 model PurchaseRequestApproval {
