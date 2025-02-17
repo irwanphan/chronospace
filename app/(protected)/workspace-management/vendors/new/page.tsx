@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { X, Upload } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { X, Upload } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
 export default function NewVendorPage() {
@@ -28,7 +28,7 @@ export default function NewVendorPage() {
     setErrors({}); // Reset errors state
 
     try {
-      const response = await fetch('/api/vendors', {
+      const response = await fetch('/api/workspace-management/vendors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
