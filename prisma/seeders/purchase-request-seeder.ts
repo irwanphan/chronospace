@@ -24,7 +24,7 @@ export async function purchaseRequestSeeder() {
       budgetId: budget.id,
       title: "Hardware & Software Procurement",
       description: "Procurement for IT equipment and licenses",
-      status: "SUBMITTED",
+      status: "Submitted",
       createdBy: user.id,
       items: {
         create: [

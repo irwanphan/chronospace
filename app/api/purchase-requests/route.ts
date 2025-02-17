@@ -11,6 +11,7 @@ interface ApprovalStep {
 }
 
 interface RequestItem {
+  id: string;
   description: string;
   qty: number;
   unit: string;
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
         createdBy,
         items: {
           create: items.map((item: RequestItem) => ({
+            budgetItemId: item.id,
             description: item.description,
             qty: item.qty,
             unit: item.unit,
@@ -59,10 +61,10 @@ export async function POST(request: Request) {
           }))
         },
         approvalSteps: {
-          create: approvalSteps.map((step: ApprovalStep) => ({
+          create: approvalSteps.map((step: ApprovalStep, index: number) => ({
             role: step.role,
             specificUser: step.specificUser,
-            stepOrder: step.stepOrder,
+            stepOrder: index + 1,
             status: 'Pending',
             limit: step.limit,
             duration: step.duration,
