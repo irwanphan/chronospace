@@ -1,25 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import Link from 'next/link';
 
-interface Budget {
-  id: string;
-  title: string;
-  year: number;
-  division: string;
-  totalBudget: number;
-  startDate: string;
-  finishDate: string;
-  status: string;
-  purchaseRequestStatus: string | null;
-}
+import { useSession } from 'next-auth/react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
+import { formatDate, formatCurrency } from '@/lib/utils';
+import { Budget } from '@/types/budget';
+import { WorkDivision } from '@/types/workDivision';
 
 export default function BudgetPlanningPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [stats, setStats] = useState({
     totalBudget: 0,
     totalPlans: 0,
@@ -34,35 +26,35 @@ export default function BudgetPlanningPage() {
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
   const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
   const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
-  useEffect(() => {
-    const fetchBudgets = async () => {
-      try {
-        const response = await fetch('/api/budgets');
-        if (response.ok) {
-          const data = await response.json();
-          setBudgets(data);
-          
-          // Calculate stats
-          const total = data.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
-          const completed = data.filter((b: Budget) => b.status === 'Completed').length;
-          const inProgress = data.filter((b: Budget) => b.status === 'In Progress').length;
-          const delayed = data.filter((b: Budget) => b.status === 'Delayed').length;
-          
-          setStats({
-            totalBudget: total,
-            totalPlans: data.length,
-            completedPercentage: Math.round((completed / data.length) * 100),
-            upcomingDeadlines: data.length,
-            inProgress: inProgress,
-            delayed: delayed
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching budgets:', error);
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/budget-planning');
+      if (response.ok) {
+        const data = await response.json();
+        setBudgets(data.budgets);
+        setDivisions(data.divisions);
+        
+        // Calculate stats
+        const total = data.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
+        const completed = data.filter((b: Budget) => b.status === 'Completed').length;
+        const inProgress = data.filter((b: Budget) => b.status === 'In Progress').length;
+        const delayed = data.filter((b: Budget) => b.status === 'Delayed').length;
+        
+        setStats({
+          totalBudget: total,
+          totalPlans: data.length,
+          completedPercentage: Math.round((completed / data.length) * 100),
+          upcomingDeadlines: data.length,
+          inProgress: inProgress,
+          delayed: delayed
+        });
       }
-    };
-
-    fetchBudgets();
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
   }, []);
 
   // Get top 3 largest budgets
@@ -73,7 +65,7 @@ export default function BudgetPlanningPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this budget?')) {
       try {
-        const response = await fetch(`/api/budgets/${id}`, {
+        const response = await fetch(`/api/budget-planning/${id}`, {
           method: 'DELETE',
         });
         
@@ -189,7 +181,7 @@ export default function BudgetPlanningPage() {
                 <td className="px-6 py-4 text-sm">{index + 1}</td>
                 <td className="px-6 py-4 text-sm">{budget.title}</td>
                 <td className="px-6 py-4 text-sm">{budget.year}</td>
-                <td className="px-6 py-4 text-sm">{budget.division}</td>
+                <td className="px-6 py-4 text-sm">{divisions.find(d => d.id === budget.division)?.divisionName}</td>
                 <td className="px-6 py-4 text-sm">{formatCurrency(budget.totalBudget)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
