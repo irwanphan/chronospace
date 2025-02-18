@@ -1,15 +1,16 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { formatDate, generateId } from '@/lib/utils';
+
 interface Division {
   id: string;
   divisionName: string;
 }
-
 interface FormData {
   projectCode: string;
   projectTitle: string;
@@ -23,6 +24,7 @@ interface FormData {
 export default function NewProjectPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [projectId, setProjectId] = useState<string>('');
   const [requestDate, setRequestDate] = useState<string>('');
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -36,28 +38,28 @@ export default function NewProjectPage() {
     finishDate: '',
   });
 
+  console.log(divisions)
+
+  const fetchDivisions = async () => {
+    try {
+      const response = await fetch('/api/workspace-management/work-division');
+      if (!response.ok) throw new Error('Failed to fetch divisions');
+      
+      const data = await response.json();
+      setDivisions(data.divisions || []);
+    } catch (error) {
+      console.error('Error fetching divisions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchDivisions();
     // Generate ID dan request date
     const prefix = 'PRJ';
     setProjectId(generateId(prefix));
     setRequestDate(formatDate(new Date()));
-  }, []);
-
-  useEffect(() => {
-    // Fetch divisions
-    const fetchDivisions = async () => {
-      try {
-        const response = await fetch('/api/work-divisions');
-        if (response.ok) {
-          const data = await response.json();
-          setDivisions(data);
-        }
-      } catch (error) {
-        console.error('Error fetching divisions:', error);
-      }
-    };
-
-    fetchDivisions();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +99,10 @@ export default function NewProjectPage() {
     }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">New Project</h1>
@@ -123,11 +129,11 @@ export default function NewProjectPage() {
             <select
               value={formData.division}
               onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%3E%3Cpath%20d%3D%22M10.293%204.293L6%208.586%201.707%204.293%203.121%202.879%206%205.757%208.879%202.879z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[center_right_1rem]"
+              className="w-full px-4 py-2 border rounded-lg bg-white"
               required
             >
               <option value="">Select Division</option>
-              {divisions.map((division) => (
+              {Array.isArray(divisions) && divisions.map((division) => (
                 <option key={division.id} value={division.id}>
                   {division.divisionName}
                 </option>
