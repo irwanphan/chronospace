@@ -136,7 +136,7 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative flex gap-2 overflow-visible">
+                  <div className="relative flex gap-2 items-center overflow-visible">
                     <Link href={`/project-planning/${project.id}`} className="p-2 hover:bg-gray-100 rounded-full">
                       <Eye className="w-4 h-4 text-gray-500" />
                     </Link>
