@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { Plus, X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Dialog } from '@/components/ui/Dialog';
-import { toast } from 'react-hot-toast';
 
 interface FormData {
   projectId: string;
@@ -46,6 +47,7 @@ interface WorkDivision {
 
 export default function NewBudgetPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -70,45 +72,25 @@ export default function NewBudgetPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
 
-  const fetchProjects = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch('/api/projects/available');
+      const response = await fetch('/api/project-planning/fetch-projects-vendors-divisions');
       if (response.ok) {
         const data = await response.json();
-        setProjects(data);
+        setProjects(data.projects || []);
+        setVendors(data.vendors || []);
+        setDivisions(data.workDivisions || []);
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast.error('Failed to fetch available projects');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const fetchVendors = async () => {
-    try {
-      const response = await fetch('/api/vendors');
-      if (!response.ok) throw new Error('Failed to fetch vendors');
-      const data = await response.json();
-      setVendors(data);
-    } catch (error) {
-      console.error('Failed to fetch vendors:', error);
-    }
-  };
-
-  const fetchDivisions = async () => {
-    try {
-      const response = await fetch('/api/work-divisions');
-      if (!response.ok) throw new Error('Failed to fetch divisions');
-      const data = await response.json();
-      setDivisions(data);
-    } catch (error) {
-      console.error('Failed to fetch divisions:', error);
-    }
-  };
-  
   useEffect(() => {
-    fetchProjects();
-    fetchVendors();
-    fetchDivisions();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -216,6 +198,10 @@ export default function NewBudgetPage() {
       }));
     }
   };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
 
   return (
     <>
