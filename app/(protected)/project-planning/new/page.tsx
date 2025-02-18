@@ -38,8 +38,6 @@ export default function NewProjectPage() {
     finishDate: '',
   });
 
-  console.log(divisions)
-
   const fetchDivisions = async () => {
     try {
       const response = await fetch('/api/workspace-management/work-division');
