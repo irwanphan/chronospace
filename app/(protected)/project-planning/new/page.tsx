@@ -186,6 +186,7 @@ export default function NewProjectPage() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 required
               >
+                {/* TODO: create starting year in config */}
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
