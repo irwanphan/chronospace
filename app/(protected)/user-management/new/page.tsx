@@ -1,9 +1,12 @@
 'use client';
-import { useState } from 'react';
-import { X, Camera } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+import { X, Camera } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import { WorkDivision } from '@/types/workDivision';
+import { Role } from '@/types/role';
 
 interface FormData {
   fullName: string;
@@ -24,6 +27,7 @@ interface FormData {
 export default function NewUserPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     email: '',
@@ -38,6 +42,19 @@ export default function NewUserPage() {
     password: '',
     confirmPassword: '',
   });
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
+
+  const fetchData = async () => {
+    const response = await fetch('/api/users/new');
+    const data = await response.json();
+    setRoles(data.roles);
+    setWorkDivisions(data.workDivisions);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +62,13 @@ export default function NewUserPage() {
 
     // Validasi password match
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      console.log('Submitting data:', formData); // Debug log
-
+      // console.log('Submitting data:', formData); // Debug log
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
@@ -65,15 +81,13 @@ export default function NewUserPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to create user');
       }
-
-      const result = await response.json();
-      console.log('Success:', result); // Debug log
-
+      // const result = await response.json();
+      // console.log('Success:', result); // Debug log
       router.push('/user-management');
       router.refresh();
     } catch (error) {
       console.error('Error creating user:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create user');
+      setError(error instanceof Error ? error.message : 'Failed to create user');
     } finally {
       setIsSubmitting(false);
     }
@@ -82,6 +96,8 @@ export default function NewUserPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       <h1 className="text-2xl font-semibold mb-6">New User</h1>
+
+      { error && <div className="bg-red-500 text-white p-4 rounded-lg">{error}</div>}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
         <div className="flex justify-center mb-6">
@@ -149,9 +165,9 @@ export default function NewUserPage() {
               required
             >
               <option value="">Select Role</option>
-              <option value="admin">Admin</option>
-              <option value="staff">Staff</option>
-              <option value="manager">Manager</option>
+              {roles.map(role => (
+                <option key={role.id} value={role.id}>{role.roleName}</option>
+              ))}
             </select>
           </div>
 
@@ -166,9 +182,9 @@ export default function NewUserPage() {
               required
             >
               <option value="">Select Division</option>
-              <option value="engineering">Engineering</option>
-              <option value="finance">Finance</option>
-              <option value="hr">HR</option>
+              {workDivisions.map(workDivision => (
+                <option key={workDivision.id} value={workDivision.id}>{workDivision.divisionName}</option>
+              ))}
             </select>
           </div>
 
