@@ -1,21 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
-import { formatDate } from '@/lib/utils';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  lastLogin: string;
-  createdAt: string;
-  image?: string;
-}
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
+import { User } from '@/types/user';
 
 export default function UserManagementPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);

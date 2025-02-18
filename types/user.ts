@@ -1,7 +1,9 @@
 export interface User {
   id: string;
   name: string;
+  email: string;
   role: string;
-  lastLogin: string | null;
+  lastLogin: string;
   createdAt: string;
+  image?: string;
 } 
