@@ -44,7 +44,7 @@ export async function PUT(
       data: {
         projectTitle: body.projectTitle,
         year: body.year,
-        division: body.division,
+        division: body.workDivisionId,
         status: body.status,
         startDate: new Date(body.startDate).toISOString(),
         finishDate: new Date(body.finishDate).toISOString(),

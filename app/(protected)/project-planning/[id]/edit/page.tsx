@@ -41,7 +41,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           projectCode: data.project.projectCode,              
           projectTitle: data.project.projectTitle,
           description: data.project.description,
-          requestDate: data.project.requestDate,
+          requestDate: formatISODate(data.project.requestDate),
           year: parseInt(data.project.year),
           startDate: formatISODate(data.project.startDate),
           finishDate: formatISODate(data.project.finishDate),
