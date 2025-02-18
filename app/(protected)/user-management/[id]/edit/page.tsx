@@ -269,6 +269,8 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
+        {/* TODO: can change user password / with access */}
+
         <div className="flex justify-end gap-3">
           <button
             type="button"
