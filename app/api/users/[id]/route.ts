@@ -6,22 +6,36 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: params.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,          // Ambil role
-        workDivision: true,  // Ambil workDivision
-        employeeId: true,
-        address: true,
-        residentId: true,
-        nationality: true,
-        birthday: true,
-      },
-    });
+    const [ user, roles, workDivisions ] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: params.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          role: true,          // Ambil role
+          workDivision: true,  // Ambil workDivision
+          employeeId: true,
+          address: true,
+          residentId: true,
+          nationality: true,
+          birthday: true,
+        },
+      }),
+      prisma.role.findMany({
+        select: {
+          id: true,
+          roleName: true,
+        },
+      }), 
+      prisma.workDivision.findMany({
+        select: {
+          id: true,
+          divisionName: true,
+        },
+      }), 
+    ]);
 
     if (!user) {
       return NextResponse.json(
@@ -33,7 +47,9 @@ export async function GET(
     return NextResponse.json({
       ...user,
       roleId: user.role,             // Map ke roleId
-      workDivisionId: user.workDivision  // Map ke workDivisionId
+      workDivisionId: user.workDivision,  // Map ke workDivisionId
+      roles,
+      workDivisions
     });
   } catch (error) {
     console.error('Error fetching user:', error);

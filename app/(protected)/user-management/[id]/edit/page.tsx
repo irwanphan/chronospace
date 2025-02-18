@@ -43,38 +43,30 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userRes, rolesRes, divisionsRes] = await Promise.all([
-          fetch(`/api/users/${params.id}`),
-          fetch('/api/roles'),
-          fetch('/api/work-divisions')
-        ]);
-
-        const [userData, rolesData, divisionsData] = await Promise.all([
-          userRes.json(),
-          rolesRes.json(),
-          divisionsRes.json()
-        ]);
-
-        setRoles(rolesData);
-        setDivisions(divisionsData);
+        const response = await fetch(`/api/users/${params.id}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const data = await response.json();
         setFormData({
-          name: userData.name,
-          email: userData.email,
-          phone: userData.phone || '',
-          roleId: userData.roleId,
-          workDivisionId: userData.workDivisionId,
-          employeeId: userData.employeeId,
-          address: userData.address || '',
-          residentId: userData.residentId,
-          nationality: userData.nationality,
-          birthday: new Date(userData.birthday).toISOString().split('T')[0],
+          name: data.name,
+          email: data.email,
+          phone: data.phone || '',
+          roleId: data.roleId,
+          workDivisionId: data.workDivisionId,
+          employeeId: data.employeeId,
+          address: data.address || '',
+          residentId: data.residentId,
+          nationality: data.nationality,
+          birthday: new Date(data.birthday).toISOString().split('T')[0],
           password: '',
           confirmPassword: '',
         });
-        setIsLoading(false);
+        setRoles(data.roles);
+        setDivisions(data.workDivisions);
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('Error:', error);
         setErrors({ general: 'Failed to load data' });
+      } finally {
         setIsLoading(false);
       }
     };
