@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatISODate } from '@/lib/utils';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface Division {
@@ -43,8 +43,8 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           description: data.project.description,
           requestDate: data.project.requestDate,
           year: parseInt(data.project.year),
-          startDate: formatDate(data.project.startDate),
-          finishDate: formatDate(data.project.finishDate),
+          startDate: formatISODate(data.project.startDate),
+          finishDate: formatISODate(data.project.finishDate),
           documents: data.project.documents || [],
         });
       } catch (error) {

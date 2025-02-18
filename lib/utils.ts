@@ -21,6 +21,12 @@ export const formatDate = (date: Date | string): string => {
   return `${day} ${month} ${year}`;
 }
 
+export const formatISODate = (date: string | Date | null): string => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+};
+
 export const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('id-ID').format(amount);
 };
