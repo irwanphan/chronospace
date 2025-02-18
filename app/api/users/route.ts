@@ -25,7 +25,7 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(users);
+    return NextResponse.json({ users: users || [] });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(

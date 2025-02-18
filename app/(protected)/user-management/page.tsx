@@ -5,20 +5,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
+import { formatDate } from '@/lib/utils';
 
 interface User {
   id: number;
   name: string;
   email: string;
   role: string;
-  lastLogin: string | null;
+  lastLogin: string;
   createdAt: string;
   image?: string;
 }
 
 export default function UserManagementPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
   const canCreateUser = session?.user?.access?.activityAccess?.createUser;
@@ -27,23 +30,26 @@ export default function UserManagementPage() {
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
 
   const fetchUsers = async () => {
-    const response = await fetch('/api/users');
-    const data = await response.json();
-    setUsers(data);
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      setError('Failed to load data');
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const formatDate = (date: string | null) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this user?')) {
@@ -51,7 +57,6 @@ export default function UserManagementPage() {
         const response = await fetch(`/api/users/${id}`, {
           method: 'DELETE',
         });
-        
         if (response.ok) {
           fetchUsers(); // Refresh list
           setActiveMenu(null); // Close popup
@@ -65,6 +70,12 @@ export default function UserManagementPage() {
   return (
     <div className="max-w-7xl">
       <h1 className="text-2xl font-semibold mb-6">User Management</h1>
+
+      {error && (
+        <div className="text-red-500 text-center py-4">
+          {error}
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -107,87 +118,99 @@ export default function UserManagementPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {users.map((user, index:number) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-3 py-2 text-sm">{index + 1}</td>
-                <td className="px-3 py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                      {user.image ? (
-                        <Image
-                          src={user.image}
-                          alt={user.name}
-                          width={32}
-                          height={32}
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-sm">
-                          {user.name.charAt(0)}
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="text-center py-4">Loading...</td>
+              </tr>
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center py-4 text-gray-500">
+                  No users found
+                </td>
+              </tr>
+            ) : (
+              users.map((user:User, index:number) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 text-sm">{index + 1}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
+                        {user.image ? (
+                          <Image
+                            src={user.image}
+                            alt={user.name}
+                            width={32}
+                            height={32}
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-sm">
+                            {user.name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-sm">{user.role}</td>
+                  <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
+                  <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
+                  <td className="px-3 py-2 text-right">
+                    <div className="relative overflow-visible">
+                      <button 
+                        onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                      >
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </button>
+
+                      {activeMenu === user.id.toString() && (
+                        <div className="absolute right-0 top-full mt-1 bg-white shadow-lg border border-gray-200 rounded-lg py-2 w-48 z-50">
+                          {canEditUser && (
+                            <button
+                              onClick={() => router.push(`/user-management/${user.id}/edit`)}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                            >
+                              <Pencil className="w-4 h-4" />
+                              Edit
+                            </button>
+                          )}
+                          {canManageUserAccess && (
+                            <button
+                              onClick={() => router.push(`/user-management/${user.id}/access-control`)}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                            >
+                              <Key className="w-4 h-4" />
+                              Access Control
+                            </button>
+                          )}
+                          {canDeleteUser && (
+                            <button
+                              onClick={() => handleDelete(user.id.toString())}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+                            >
+                              <Trash className="w-4 h-4" />
+                              Delete
+                            </button>
+                          )}
+                          {
+                            !canCreateUser && !canEditUser && !canDeleteUser && !canManageUserAccess && (
+                              <div className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
+                                <Lock className="w-4 h-4" />
+                                No Access
+                              </div>
+                            )
+                          }
                         </div>
                       )}
                     </div>
-                    <div>
-                      <div className="font-medium">{user.name}</div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-sm">{user.role}</td>
-                <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
-                <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
-                <td className="px-3 py-2 text-right">
-                  <div className="relative overflow-visible">
-                    <button 
-                      onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
-                      className="p-2 hover:bg-gray-100 rounded-full"
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-500" />
-                    </button>
-
-                    {activeMenu === user.id.toString() && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg border border-gray-200 rounded-lg py-2 w-48 z-50">
-                        {canEditUser && (
-                          <button
-                            onClick={() => router.push(`/user-management/${user.id}/edit`)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <Pencil className="w-4 h-4" />
-                            Edit
-                          </button>
-                        )}
-                        {canManageUserAccess && (
-                          <button
-                            onClick={() => router.push(`/user-management/${user.id}/access-control`)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <Key className="w-4 h-4" />
-                            Access Control
-                          </button>
-                        )}
-                        {canDeleteUser && (
-                          <button
-                            onClick={() => handleDelete(user.id.toString())}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                          >
-                            <Trash className="w-4 h-4" />
-                            Delete
-                          </button>
-                        )}
-                        {
-                          !canCreateUser && !canEditUser && !canDeleteUser && !canManageUserAccess && (
-                            <div className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                              <Lock className="w-4 h-4" />
-                              No Access
-                            </div>
-                          )
-                        }
-                      </div>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
