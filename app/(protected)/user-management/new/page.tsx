@@ -46,7 +46,7 @@ export default function NewUserPage() {
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
 
   const fetchData = async () => {
-    const response = await fetch('/api/users/check-role-and-division');
+    const response = await fetch('/api/user-management/check-role-and-division');
     const data = await response.json();
     setRoles(data.roles);
     setWorkDivisions(data.workDivisions);
@@ -69,7 +69,7 @@ export default function NewUserPage() {
 
     try {
       // console.log('Submitting data:', formData); // Debug log
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/user-management', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

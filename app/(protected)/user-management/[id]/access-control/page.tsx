@@ -156,7 +156,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
   useEffect(() => {
     const fetchUserAccess = async () => {
       try {
-        const response = await fetch(`/api/users/${params.id}/access`);
+        const response = await fetch(`/api/user-management/${params.id}/access`);
         if (!response.ok) throw new Error('Failed to fetch access');
         const data = await response.json();
         setAccess(data);
@@ -170,7 +170,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(`/api/users/${params.id}/access`, {
+      const response = await fetch(`/api/user-management/${params.id}/access`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

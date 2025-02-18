@@ -30,7 +30,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/api/users/${params.id}`);
+        const response = await fetch(`/api/user-management/${params.id}`);
         if (!response.ok) throw new Error('Failed to fetch data');
         
         const data = await response.json();
@@ -59,41 +59,6 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     fetchData();
   }, [params.id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    try {
-      const response = await fetch(`/api/users/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.error.includes('Email')) {
-          setErrors(prev => ({ ...prev, email: data.error }));
-        } else if (data.error.includes('Employee ID')) {
-          setErrors(prev => ({ ...prev, employeeId: data.error }));
-        } else if (data.error.includes('Resident ID')) {
-          setErrors(prev => ({ ...prev, residentId: data.error }));
-        } else {
-          setErrors(prev => ({ ...prev, general: data.error }));
-        }
-        return;
-      }
-
-      router.push('/user-management');
-    } catch (error) {
-      console.error('Error updating user:', error);
-      setErrors({ general: 'Failed to update user' });
-    }
-  };
-
   if (isLoading) return <div className="p-4">Loading...</div>;
 
   return (
@@ -106,7 +71,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-4 rounded-lg">
+      <form className="space-y-6 bg-white p-4 rounded-lg">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">

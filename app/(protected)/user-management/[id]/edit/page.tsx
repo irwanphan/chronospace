@@ -43,7 +43,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/api/users/${params.id}`);
+        const response = await fetch(`/api/user-management/${params.id}`);
         if (!response.ok) throw new Error('Failed to fetch data');
         
         const data = await response.json();
@@ -79,7 +79,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     setErrors({});
 
     try {
-      const response = await fetch(`/api/users/${params.id}`, {
+      const response = await fetch(`/api/user-management/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
