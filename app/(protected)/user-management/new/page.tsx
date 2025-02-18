@@ -46,7 +46,7 @@ export default function NewUserPage() {
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
 
   const fetchData = async () => {
-    const response = await fetch('/api/user-management/fetch-role-and-division');
+    const response = await fetch('/api/user-management/fetch-role-division');
     const data = await response.json();
     setRoles(data.roles);
     setWorkDivisions(data.workDivisions);
