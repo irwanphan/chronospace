@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
-
+import { formatDate, generateId } from '@/lib/utils';
 interface Division {
   id: string;
   divisionName: string;
@@ -37,23 +37,10 @@ export default function NewProjectPage() {
   });
 
   useEffect(() => {
-    // Generate ID dan request date hanya di client side
-    const generateId = () => {
-      const year = new Date().getFullYear();
-      const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-      return `${year}0109${randomNum}`;
-    };
-
-    const formatDate = () => {
-      return new Date().toLocaleDateString('en-US', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-      });
-    };
-
-    setProjectId(generateId());
-    setRequestDate(formatDate());
+    // Generate ID dan request date
+    const prefix = 'PRJ';
+    setProjectId(generateId(prefix));
+    setRequestDate(formatDate(new Date()));
   }, []);
 
   useEffect(() => {
@@ -80,7 +67,7 @@ export default function NewProjectPage() {
     try {
       console.log('Submitting data:', formData); // Debug log
 
-      const response = await fetch('/api/projects', {
+      const response = await fetch('/api/project-planning', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

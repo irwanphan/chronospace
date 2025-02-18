@@ -36,3 +36,10 @@ export const stripHtmlTags = (html: string | null) => {
   if (!html) return '-';
   return html.replace(/<[^>]*>/g, '');
 };
+
+export const generateId = ( prefix?: string ) => {
+  const year = new Date().getFullYear();
+  const month = new Date().getMonth() + 1;
+  const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `${prefix}/${year}${month}${randomNum}`;
+};
