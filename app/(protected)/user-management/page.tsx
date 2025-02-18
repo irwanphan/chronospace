@@ -8,11 +8,12 @@ import { useSession } from "next-auth/react";
 import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key, Eye } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { User } from '@/types/user';
-
+import { Role } from '@/types/role';
 export default function UserManagementPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
@@ -24,12 +25,13 @@ export default function UserManagementPage() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/user-management');
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
       const data = await response.json();
       setUsers(data.users || []);
+      setRoles(data.roles || []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       setError('Failed to load data');
@@ -46,7 +48,7 @@ export default function UserManagementPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this user?')) {
       try {
-        const response = await fetch(`/api/users/${id}`, {
+        const response = await fetch(`/api/user-management/${id}`, {
           method: 'DELETE',
         });
         if (response.ok) {
@@ -147,7 +149,7 @@ export default function UserManagementPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-sm">{user.role}</td>
+                  <td className="px-3 py-2 text-sm">{roles.find(role => role.id === user.role)?.roleName}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                   <td className="px-3 py-2 text-right">

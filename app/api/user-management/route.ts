@@ -19,29 +19,36 @@ interface UserPost {
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        workDivision: true,
-        employeeId: true,
-        lastLogin: true,
-        createdAt: true,
-        image: true,
-        userRoles: {
-          select: {
-            roleId: true,
+    const [users, roles] = await Promise.all([
+      prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          workDivision: true,
+          employeeId: true,
+          lastLogin: true,
+          createdAt: true,
+          image: true,
+          userRoles: {
+            select: {
+              roleId: true,
+            },
           },
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.role.findMany({
+      select: {
+        id: true,
+        roleName: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return NextResponse.json({ users });
+    }),
+  ]);
+    return NextResponse.json({ users, roles });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(

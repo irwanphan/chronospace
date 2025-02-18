@@ -16,7 +16,7 @@ export default withAuth(
     }
 
     // Cek akses menggunakan existing API
-    const accessResponse = await fetch(`${req.nextUrl.origin}/api/users/${token.sub}/access`);
+    const accessResponse = await fetch(`${req.nextUrl.origin}/api/user-management/${token.sub}/access`);
     if (!accessResponse.ok) {
       return NextResponse.redirect(new URL('/forbidden', req.url));
     }

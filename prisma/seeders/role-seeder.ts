@@ -15,7 +15,15 @@ export async function roleSeeder() {
       roleCode: 'CFO',
       roleName: 'Chief Financial Officer',
       description: 'Head of financial operations',
-      upperLevel: 'CEO',
+      upperLevel: 'role-ceo',
+      approvalLimit: 500000000 // 500 Juta
+    },
+    { 
+      id: 'role-cto',
+      roleCode: 'CTO',
+      roleName: 'Chief Technology Officer',
+      description: 'Head of technology operations',
+      upperLevel: 'role-ceo',
       approvalLimit: 500000000 // 500 Juta
     },
     { 
@@ -23,7 +31,7 @@ export async function roleSeeder() {
       roleCode: 'GM',
       roleName: 'General Manager',
       description: 'General management position',
-      upperLevel: 'CEO',
+      upperLevel: 'role-ceo',
       approvalLimit: 250000000 // 250 Juta
     },
     { 
@@ -31,23 +39,48 @@ export async function roleSeeder() {
       roleCode: 'DH',
       roleName: 'Department Head',
       description: 'Department management position',
-      upperLevel: 'GM',
+      upperLevel: 'role-gm',
       approvalLimit: 100000000 // 100 Juta
+    },
+    { 
+      id: 'role-hr',
+      roleCode: 'HR',
+      roleName: 'Human Resource Manager',
+      description: 'Human Resource management position',
+      upperLevel: 'role-dh',
+      approvalLimit: 50000000 // 50 Juta
     },
     { 
       id: 'role-fm',
       roleCode: 'FM',
       roleName: 'Finance Manager',
       description: 'Financial management position',
-      upperLevel: 'CFO',
+      upperLevel: 'role-cfo',
       approvalLimit: 50000000 // 50 Juta
     },
+    { 
+      id: 'role-fs',
+      roleCode: 'FS',
+      roleName: 'Finance Staff',
+      description: 'Financial staff position',
+      upperLevel: 'role-fm',
+      approvalLimit: 0
+    },
+    { 
+      id: 'role-it',
+      roleCode: 'IT',
+      roleName: 'IT Staff',
+      description: 'IT staff position',
+      upperLevel: 'role-cto',
+      approvalLimit: 0
+    },
+    
     {
       id: 'role-st',
       roleCode: 'ST',
       roleName: 'Staff',
       description: 'Staff position',
-      upperLevel: 'DH',
+      upperLevel: 'role-dh',
       approvalLimit: 0
     }
   ]
