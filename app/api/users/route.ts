@@ -1,5 +1,21 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import bcrypt from 'bcrypt';
+
+interface UserPost {
+  email: string;
+  password: string;
+  fullName: string;
+  phone: string;
+  role: string;
+  workDivision: string;
+  employeeId: string;
+  address: string;
+  residentId: string;
+  nationality: string;
+  birthday: string;
+  avatar?: File;
+}
 
 export async function GET() {
   try {
@@ -37,43 +53,54 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-
-    // Cek unique fields
-    const [existingEmail, existingEmployeeId, existingResidentId] = await Promise.all([
-      prisma.user.findUnique({ where: { email: body.email } }),
-      prisma.user.findUnique({ where: { employeeId: body.employeeId } }),
-      prisma.user.findUnique({ where: { residentId: body.residentId } })
-    ]);
-
-    if (existingEmail) {
+    const body: UserPost = await request.json();
+    
+    // Validasi data yang diperlukan
+    if (!body.email || !body.password || !body.fullName) {
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    if (existingEmployeeId) {
-      return NextResponse.json(
-        { error: 'Employee ID already exists' },
-        { status: 400 }
-      );
-    }
-
-    if (existingResidentId) {
-      return NextResponse.json(
-        { error: 'Resident ID already exists' },
-        { status: 400 }
-      );
-    }
-
-    const user = await prisma.user.create({
-      data: body
+    // Check if email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: body.email }
     });
 
-    return NextResponse.json(user);
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'Email already exists' },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email: body.email,
+        password: hashedPassword,
+        name: body.fullName,
+        phone: body.phone,
+        role: body.role,
+        workDivision: body.workDivision,
+        employeeId: body.employeeId,
+        address: body.address,
+        residentId: body.residentId,
+        nationality: body.nationality,
+        birthday: new Date(body.birthday),
+      }
+    });
+
+    return NextResponse.json({
+      ...user,
+      password: undefined
+    });
   } catch (error) {
-    console.error('Failed to create user:', error);
+    console.error('Error creating user:', error);
     return NextResponse.json(
       { error: 'Failed to create user' },
       { status: 500 }
