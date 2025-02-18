@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from "next-auth/react";
 
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key, Eye } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { User } from '@/types/user';
 
@@ -151,7 +151,13 @@ export default function UserManagementPage() {
                   <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                   <td className="px-3 py-2 text-right">
-                    <div className="relative overflow-visible">
+                    <div className="relative flex items-center gap-2">
+                      <Link
+                        href={`/user-management/${user.id}`}
+                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+                      >
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Link>
                       <button 
                         onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
                         className="p-2 hover:bg-gray-100 rounded-full"
