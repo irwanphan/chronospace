@@ -30,46 +30,26 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [projectRes, divisionsRes] = await Promise.all([
-          fetch(`/api/projects/${params.id}`),
-          fetch('/api/work-divisions')
-        ]);
+        const response = await fetch(`/api/project-planning/${params.id}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
 
-        if (!projectRes.ok || !divisionsRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [projectData, divisionsData] = await Promise.all([
-          projectRes.json(),
-          divisionsRes.json()
-        ]);
-
-        console.log('Project Data:', projectData); // Untuk debugging
-        console.log('Divisions Data:', divisionsData); // Untuk debugging
-
-        // Format tanggal ke YYYY-MM-DD
-        const formatDate = (date: string) => {
-          if (!date) return '';
-          return new Date(date).toISOString().split('T')[0];
-        };
-
-        setDivisions(divisionsData);
+        const data = await response.json();
+        setDivisions(data.divisions);
         setFormData({
-          workDivisionId: projectData.division || '',
-          projectId: projectData.projectId,
-          projectCode: projectData.projectCode,              
-          projectTitle: projectData.projectTitle,
-          description: projectData.description,
-          requestDate: projectData.requestDate,
-          year: parseInt(projectData.year),
-          startDate: formatDate(projectData.startDate),
-          finishDate: formatDate(projectData.finishDate),
-          documents: projectData.documents || [],
+          workDivisionId: data.project.division || '',
+          projectId: data.project.projectId,
+          projectCode: data.project.projectCode,              
+          projectTitle: data.project.projectTitle,
+          description: data.project.description,
+          requestDate: data.project.requestDate,
+          year: parseInt(data.project.year),
+          startDate: formatDate(data.project.startDate),
+          finishDate: formatDate(data.project.finishDate),
+          documents: data.project.documents || [],
         });
-
-        setIsLoading(false);
       } catch (error) {
         console.error('Failed to load data:', error);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -80,7 +60,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/projects/${params.id}`, {
+      const response = await fetch(`/api/project-planning/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +217,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         <div className="flex justify-end gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => router.push('/project-planning')}
             className="px-4 py-2 border rounded-lg hover:bg-gray-50"
           >
             Cancel
