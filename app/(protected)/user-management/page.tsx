@@ -62,7 +62,7 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="max-w-7xl">
+    <div className="wax-w-full">
       <h1 className="text-2xl font-semibold mb-6">User Management</h1>
 
       {error && (

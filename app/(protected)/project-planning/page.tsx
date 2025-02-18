@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
@@ -136,7 +136,10 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative overflow-visible">
+                  <div className="relative flex gap-2 overflow-visible">
+                    <Link href={`/project-planning/${project.id}`} className="p-2 hover:bg-gray-100 rounded-full">
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </Link>
                     <button 
                       onClick={() => setActiveMenu(activeMenu === project.id ? null : project.id)}
                       className="p-2 hover:bg-gray-100 rounded-full"
