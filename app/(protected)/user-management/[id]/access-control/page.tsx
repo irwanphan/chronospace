@@ -40,6 +40,8 @@ interface ActivityAccess {
   createUser: boolean;
   editUser: boolean;
   deleteUser: boolean;
+  changePassword: boolean;
+  changeOtherUserPassword: boolean;
   manageUserAccess: boolean;
 }
 
@@ -98,7 +100,9 @@ const ACTIVITY_ACCESS_ORDER = [
   'createUser',
   'editUser',
   'deleteUser',
-  'manageUserAccess'
+  'changePassword',
+  'changeOtherUserPassword',
+  'manageUserAccess',
 ] as const;
 
 const WORKSPACE_ACCESS_ORDER = [
@@ -139,7 +143,9 @@ export default function UserAccessControlPage({ params }: { params: { id: string
       createUser: false,
       editUser: false,
       deleteUser: false,
-      manageUserAccess: false
+      changePassword: false,
+      changeOtherUserPassword: false,
+      manageUserAccess: false,
     },
     workspaceAccess: {
       createPurchaseRequest: false,
