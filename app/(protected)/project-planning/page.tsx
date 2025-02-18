@@ -4,18 +4,7 @@ import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
-
-interface Project {
-  id: string;
-  projectId: string;
-  projectCode: string;
-  projectTitle: string;
-  division: string;
-  status: string;
-  startDate: string;
-  finishDate: string;
-  year: number;
-}
+import { Project } from '@/types/project';
 
 export default function ProjectPlanningPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -31,7 +20,7 @@ export default function ProjectPlanningPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('/api/projects');
+        const response = await fetch('/api/project-planning');
         if (response.ok) {
           const data = await response.json();
           setProjects(data);
@@ -54,7 +43,7 @@ export default function ProjectPlanningPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
-        const response = await fetch(`/api/projects/${id}`, {
+        const response = await fetch(`/api/project-planning/${id}`, {
           method: 'DELETE',
         });
         
