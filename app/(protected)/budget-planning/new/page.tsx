@@ -211,6 +211,13 @@ export default function NewBudgetPage() {
       <div className="space-y-8">
         <h1 className="text-2xl font-semibold mb-6">New Budget Plan</h1>
 
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+              <X className="w-4 h-4 absolute right-0" />
+              {error}
+            </div>
+          )}
+
         <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
           <div className="grid grid-cols-2 gap-6">
             <div>
@@ -405,11 +412,6 @@ export default function NewBudgetPage() {
 
           <hr className="my-6" />
 
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
-              {error}
-            </div>
-          )}
           <div className="flex items-center justify-end gap-3 pt-4 border-t">
             <Link
               href="/budget-planning"
