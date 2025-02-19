@@ -4,26 +4,21 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { Plus, X } from 'lucide-react';
-// import { toast } from 'react-hot-toast';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Dialog } from '@/components/ui/Dialog';
+import { Project } from '@/types/project';
+import { WorkDivision } from '@/types/workDivision';
+import { Vendor } from '@/types/vendor';
 
 interface FormData {
   projectId: string;
   title: string;
   year: string;
-  division: string;
+  workDivisionId: string;
   totalBudget: string;
   startDate: string;
   finishDate: string;
   description?: string;
-}
-
-interface Project {
-  id: string;
-  projectTitle: string;
-  status: string;
-  division: string;
 }
 
 interface BudgetItem {
@@ -33,16 +28,6 @@ interface BudgetItem {
   unit: string;
   unitPrice: number;
   vendor: string;
-}
-
-interface Vendor {
-  id: string;
-  vendorName: string;
-}
-
-interface WorkDivision {
-  id: string;
-  divisionName: string;
 }
 
 export default function NewBudgetPage() {
@@ -56,7 +41,7 @@ export default function NewBudgetPage() {
     projectId: '',
     title: '',
     year: new Date().getFullYear().toString(),
-    division: 'IT',
+    workDivisionId: '',
     totalBudget: '',
     startDate: '',
     finishDate: '',
@@ -141,7 +126,7 @@ export default function NewBudgetPage() {
     setIsSubmitting(true);
 
     // Validasi form
-    if (!formData.division) {
+    if (!formData.workDivisionId) {
       setError("Division is required");
       setIsSubmitting(false);
       return;
@@ -153,7 +138,7 @@ export default function NewBudgetPage() {
         title: formData.title,
         description: formData.description || '',
         year: parseInt(formData.year),
-        division: formData.division,
+        workDivisionId: formData.workDivisionId,
         totalBudget: selectedItems.reduce((total, item) => total + (item.qty * item.unitPrice), 0),
         startDate: new Date(formData.startDate).toISOString(),
         finishDate: new Date(formData.finishDate).toISOString(),
@@ -179,7 +164,6 @@ export default function NewBudgetPage() {
         throw new Error(errorData.message);
       }
 
-      // toast.success('Budget created successfully');
       router.push('/budget-planning');
       router.refresh();
     } catch (error) {
@@ -196,7 +180,7 @@ export default function NewBudgetPage() {
       setFormData(prev => ({
         ...prev,
         projectId,
-        division: selectedProject.division,
+        workDivisionId: selectedProject.workDivisionId,
         title: selectedProject.projectTitle
       }));
     }
@@ -247,21 +231,8 @@ export default function NewBudgetPage() {
               <label className="block mb-1.5">
                 Division <span className="text-red-500">*</span>
               </label>
-              {/* <select
-                value={formData.division}
-                onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-                required
-              >
-                <option value="">Select Division</option>
-                {divisions.map(division => (
-                  <option key={division.id} value={division.id}>
-                    {division.divisionName}
-                  </option>
-                ))}
-              </select> */}
-              <input type="hidden" name="division" value={formData.division} />
-              <input type="text" name="division-show" disabled value={divisions.find(d => d.id === formData.division)?.divisionName} 
+              <input type="hidden" name="workDivisionId" value={formData.workDivisionId} />
+              <input type="text" name="workDivisionId-show" disabled value={divisions.find(d => d.id === formData.workDivisionId)?.divisionName} 
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
               />
             </div>

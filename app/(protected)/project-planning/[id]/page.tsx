@@ -3,16 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDate, formatISODate, stripHtmlTags } from '@/lib/utils';
+import { WorkDivision } from '@prisma/client';
 
-interface Division {
-  id: string;
-  divisionName: string;
-}
-
-export default function EditProjectPage({ params }: { params: { id: string } }) {
+export default function ViewProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState({
     workDivisionId: '',
     projectId: '',
@@ -35,7 +31,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         const data = await response.json();
         setDivisions(data.divisions);
         setFormData({
-          workDivisionId: data.project.division || '',
+          workDivisionId: data.project.workDivisionId || '',
           projectId: data.project.projectId,
           projectCode: data.project.projectCode,              
           projectTitle: data.project.projectTitle,

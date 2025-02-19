@@ -15,7 +15,7 @@ interface FormData {
   projectCode: string;
   projectTitle: string;
   description: string;
-  division: string;
+  workDivisionId: string;
   year: string;
   startDate: string;
   finishDate: string;
@@ -32,7 +32,7 @@ export default function NewProjectPage() {
     projectCode: '',
     projectTitle: '',
     description: '',
-    division: '',
+    workDivisionId: '',
     year: new Date().getFullYear().toString(),
     startDate: '',
     finishDate: '',
@@ -125,8 +125,8 @@ export default function NewProjectPage() {
               Work Division <span className="text-red-500">*</span>
             </label>
             <select
-              value={formData.division}
-              onChange={(e) => setFormData(prev => ({ ...prev, division: e.target.value }))}
+              value={formData.workDivisionId}
+              onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg bg-white"
               required
             >

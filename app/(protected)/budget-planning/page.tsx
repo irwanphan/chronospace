@@ -181,7 +181,7 @@ export default function BudgetPlanningPage() {
                 <td className="px-6 py-4 text-sm">{index + 1}</td>
                 <td className="px-6 py-4 text-sm">{budget.title}</td>
                 <td className="px-6 py-4 text-sm">{budget.year}</td>
-                <td className="px-6 py-4 text-sm">{divisions.find(d => d.id === budget.division)?.divisionName}</td>
+                <td className="px-6 py-4 text-sm">{divisions.find(d => d.id === budget.workDivisionId)?.divisionName}</td>
                 <td className="px-6 py-4 text-sm">{formatCurrency(budget.totalBudget)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>

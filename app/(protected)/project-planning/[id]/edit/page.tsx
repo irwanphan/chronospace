@@ -4,16 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDate, formatISODate } from '@/lib/utils';
 import { RichTextEditor } from '@/components/RichTextEditor';
-
-interface Division {
-  id: string;
-  divisionName: string;
-}
+import { WorkDivision } from '@prisma/client';
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState({
     workDivisionId: '',
     projectId: '',
@@ -36,7 +32,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         const data = await response.json();
         setDivisions(data.divisions);
         setFormData({
-          workDivisionId: data.project.division || '',
+          workDivisionId: data.project.workDivisionId || '',
           projectId: data.project.projectId,
           projectCode: data.project.projectCode,              
           projectTitle: data.project.projectTitle,
