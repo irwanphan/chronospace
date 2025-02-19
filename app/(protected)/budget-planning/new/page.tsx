@@ -213,7 +213,6 @@ export default function NewBudgetPage() {
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
-              <X className="w-4 h-4 absolute right-0" />
               {error}
             </div>
           )}
