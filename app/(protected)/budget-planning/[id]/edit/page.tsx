@@ -40,6 +40,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [error, setError] = useState<string>('');
   const [newItem, setNewItem] = useState<BudgetItem>({
     description: '',
     qty: 0,
@@ -140,8 +141,11 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to update budget');
+        setError(data.error || 'Failed to update budget');
+        return;
       }
 
       toast.success('Budget updated successfully');
@@ -149,7 +153,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
       router.refresh();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update budget');
+      setError(error instanceof Error ? error.message : 'Failed to update budget');
     } finally {
       setIsSubmitting(false);
     }
@@ -160,6 +164,12 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">Edit Budget Plan</h1>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <div className="grid grid-cols-2 gap-6">

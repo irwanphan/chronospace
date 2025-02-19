@@ -51,6 +51,7 @@ export default function NewBudgetPage() {
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
     title: '',
@@ -83,7 +84,8 @@ export default function NewBudgetPage() {
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
-      toast.error('Failed to fetch available projects');
+      setError(error instanceof Error ? error.message : 'Failed to fetch available projects');
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -103,23 +105,23 @@ export default function NewBudgetPage() {
 
   const handleAddItem = () => {
     if (!newItem.description) {
-      toast.error("Please enter item description");
+      setError("Please enter item description");
       return;
     }
     if (!newItem.qty || newItem.qty <= 0) {
-      toast.error("Please enter valid quantity");
+      setError("Please enter valid quantity");
       return;
     }
     if (!newItem.unit) {
-      toast.error("Please enter unit");
+      setError("Please enter unit");
       return;
     }
     if (!newItem.unitPrice || newItem.unitPrice <= 0) {
-      toast.error("Please enter valid unit price");
+      setError("Please enter valid unit price");
       return;
     }
     if (!newItem.vendor) {
-      toast.error("Please select vendor");
+      setError("Please select vendor");
       return;
     }
 
@@ -140,7 +142,7 @@ export default function NewBudgetPage() {
 
     // Validasi form
     if (!formData.division) {
-      toast.error("Division is required");
+      setError("Division is required");
       setIsSubmitting(false);
       return;
     }
@@ -165,7 +167,7 @@ export default function NewBudgetPage() {
         }))
       };
 
-      const response = await fetch('/api/budgets', {
+      const response = await fetch('/api/budget-planning', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -173,15 +175,16 @@ export default function NewBudgetPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        setError(errorData.message);
         throw new Error(errorData.message);
       }
 
-      toast.success('Budget created successfully');
+      // toast.success('Budget created successfully');
       router.push('/budget-planning');
       router.refresh();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create budget');
+      setError(error instanceof Error ? error.message : 'Failed to create budget');
     } finally {
       setIsSubmitting(false);
     }
@@ -402,6 +405,11 @@ export default function NewBudgetPage() {
 
           <hr className="my-6" />
 
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+              {error}
+            </div>
+          )}
           <div className="flex items-center justify-end gap-3 pt-4 border-t">
             <Link
               href="/budget-planning"

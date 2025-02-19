@@ -25,9 +25,9 @@ export async function GET() {
 }
 
 // POST: Create new budget
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
+    const body = await request.json();
     console.log('Received request body:', body); // Debug log
 
     // Validasi input
@@ -39,16 +39,15 @@ export async function POST(req: Request) {
     if (!body.finishDate) return NextResponse.json({ message: "Finish date is required" }, { status: 400 });
     if (!body.items || !body.items.length) return NextResponse.json({ message: "Items are required" }, { status: 400 });
 
-    // Cek apakah project sudah memiliki budget
-    const existingBudget = await prisma.budget.findUnique({
+    // Check if budget already exists for project
+    const existingBudget = await prisma.budget.findFirst({
       where: { projectId: body.projectId }
     });
 
     if (existingBudget) {
-      return NextResponse.json(
-        { message: "This project already has a budget plan" },
-        { status: 400 }
-      );
+      return NextResponse.json({ 
+        error: 'This project already has a budget plan'
+      }, { status: 400 });
     }
 
     // Create budget dengan transaction
@@ -76,10 +75,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json(budget);
   } catch (error) {
-    console.error('Server error:', error); // Debug log
-    return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Failed to create budget' },
-      { status: 500 }
-    );
+    console.error('Error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to create budget'
+    }, { status: 500 });
   }
 } 
