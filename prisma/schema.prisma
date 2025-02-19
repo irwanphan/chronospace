@@ -113,6 +113,8 @@ model WorkDivision {
   description   String?
   upperDivision String?
   divisionHead  String?
+  budgets       Budget[]
+  projects      Project[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -169,7 +171,8 @@ model Project {
   projectCode String
   projectTitle String
   description String?
-  division    String
+  workDivisionId String
+  workDivision   WorkDivision @relation(fields: [workDivisionId], references: [id])
   year        Int
   startDate   DateTime
   finishDate  DateTime
@@ -182,14 +185,14 @@ model Project {
   @@map("projects")
 }
 
-
 model Budget {
   id            String   @id @default(cuid())
   projectId     String   @unique
   title         String
   description   String?
   year          Int
-  division      String
+  workDivisionId String
+  workDivision   WorkDivision @relation(fields: [workDivisionId], references: [id])
   totalBudget   Float
   startDate     DateTime
   finishDate    DateTime
@@ -203,6 +206,7 @@ model Budget {
 
   @@map("budgets")
   @@index([projectId])
+  @@index([workDivisionId])
 }
 
 model BudgetedItem {
