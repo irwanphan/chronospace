@@ -47,7 +47,7 @@ export default function RequestCard({
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex justify-between items-center gap-2 w-full">
           <span className="text-xs font-medium">#{id}</span>
           <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
             {type}

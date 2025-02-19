@@ -11,6 +11,7 @@ import CreateRequestFAB from '@/components/CreateRequestFAB';
 import StatCard from '@/components/StatCard';
 import { toast } from 'react-hot-toast';
 import { stripHtmlTags } from '@/lib/utils';
+import { WorkDivision } from '@/types/workDivision';
 
 interface PurchaseRequest {
   id: string;
@@ -39,6 +40,7 @@ export default function WorkspacePage() {
   };
   const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([]);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   console.log('purchaseRequests ', purchaseRequests)
 
   useEffect(() => {
@@ -56,20 +58,20 @@ export default function WorkspacePage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [canCreateRequest, router]);
 
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/workspace');
+      if (!response.ok) throw new Error('Failed to fetch requests');
+      const data = await response.json();
+      setPurchaseRequests(data.purchaseRequests);
+      setWorkDivisions(data.workDivisions);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to load requests');
+    }
+  };
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const response = await fetch('/api/purchase-requests');
-        if (!response.ok) throw new Error('Failed to fetch requests');
-        const data = await response.json();
-        setPurchaseRequests(data);
-      } catch (error) {
-        console.error('Error:', error);
-        toast.error('Failed to load requests');
-      }
-    };
-
-    fetchRequests();
+    fetchData();
   }, []);
 
   // console.log('Session:', session); // Debug session
@@ -78,7 +80,7 @@ export default function WorkspacePage() {
 
   return (
     <>
-      <div className="max-w-7xl">
+      <div className="max-w-full">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Overview</h1>
           {/* <div className="flex items-center gap-2">
@@ -155,12 +157,16 @@ export default function WorkspacePage() {
 
         {/* Request List */}
         <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {purchaseRequests.map((request) => (
-            <RequestCard
-              key={request.id}
-              id={request.id}
-              type="Purchase Request"
-              requestor={{
+          {purchaseRequests.map((request) => {
+            const workDivision = workDivisions.find(
+              (division) => division.id === request.budget.division
+            );
+            return (
+              <RequestCard
+                key={request.id}
+                id={request.id}
+                type="Purchase Request"
+                requestor={{
                 name: session?.user?.name || 'Unknown User',
               }}
               submittedAt={new Date(request.createdAt).toLocaleDateString('en-US', {
@@ -168,7 +174,7 @@ export default function WorkspacePage() {
                 month: 'short',
                 year: 'numeric'
               })}
-              workDivision={request.budget.division}
+              workDivision={workDivision?.divisionName || 'Unknown Division'}
               status={request.status}
               title={request.title}
               description={stripHtmlTags(request.description || '')}
@@ -188,7 +194,8 @@ export default function WorkspacePage() {
               onDecline={() => console.log('Decline clicked', request.id)}
               onApprove={() => console.log('Approve clicked', request.id)}
             />
-          ))}
+            );
+          })}
         </div>
 
         {/* Pagination */}
