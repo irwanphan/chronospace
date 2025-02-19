@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { Project } from '@/types/project';
+import { WorkDivision } from '@prisma/client';
 
 export default function ProjectPlanningPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     budgetAllocated: 0,
@@ -23,7 +25,8 @@ export default function ProjectPlanningPage() {
         const response = await fetch('/api/project-planning');
         if (response.ok) {
           const data = await response.json();
-          setProjects(data);
+          setProjects(data.projects);
+          setWorkDivisions(data.workDivisions);
           // Calculate stats
           setStats({
             total: data.length,
@@ -131,7 +134,7 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{project.projectId}</td>
                 <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
                 <td className="px-6 py-4 text-sm">{project.year}</td>
-                <td className="px-6 py-4 text-sm">{project.division}</td>
+                <td className="px-6 py-4 text-sm">{workDivisions.find(wd => wd.id === project.workDivisionId)?.divisionName}</td>
                 <td className="px-6 py-4 text-sm">{project.status}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>

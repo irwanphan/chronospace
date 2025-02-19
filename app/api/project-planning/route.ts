@@ -3,13 +3,16 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const [projects, workDivisions] = await Promise.all([
+      prisma.project.findMany({
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }),
+      prisma.workDivision.findMany()
+    ]);
 
-    return NextResponse.json(projects);
+    return NextResponse.json({ projects, workDivisions });
   } catch (error) {
     console.error('Error fetching projects:', error);
     return NextResponse.json(
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
         projectCode: body.projectCode,
         projectTitle: body.projectTitle,
         description: body.description || '', // Handle null/undefined
-        division: body.division,
+        workDivisionId: body.workDivisionId,
         year: parseInt(body.year),
         startDate: new Date(body.startDate),
         finishDate: new Date(body.finishDate),

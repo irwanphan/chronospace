@@ -183,6 +183,7 @@ model Project {
   updatedAt   DateTime @updatedAt
 
   @@map("projects")
+  @@index([workDivisionId])
 }
 
 model Budget {

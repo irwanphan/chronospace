@@ -25,7 +25,7 @@ export async function GET() {
         projectTitle: true,
         projectCode: true,
         status: true,
-        division: true
+        workDivisionId: true
       }
     });
 

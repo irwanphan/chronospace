@@ -87,7 +87,7 @@ export async function PUT(
         data: {
           title: data.title,
           year: parseInt(data.year),
-          division: data.division,
+          workDivisionId: data.workDivisionId,
           totalBudget: typeof data.totalBudget === 'string' 
             ? parseFloat(data.totalBudget.replace(/[,.]/g, ''))
             : data.totalBudget,

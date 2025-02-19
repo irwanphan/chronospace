@@ -3,7 +3,7 @@ export interface Project {
   projectId: string;
   projectCode: string;
   projectTitle: string;
-  division: string;
+  workDivisionId: string;
   status: string;
   startDate: string;
   finishDate: string;

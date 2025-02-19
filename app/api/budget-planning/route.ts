@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     if (!body.projectId) return NextResponse.json({ message: "Project ID is required" }, { status: 400 });
     if (!body.title) return NextResponse.json({ message: "Title is required" }, { status: 400 });
     if (!body.year) return NextResponse.json({ message: "Year is required" }, { status: 400 });
-    if (!body.division) return NextResponse.json({ message: "Division is required" }, { status: 400 });
+    if (!body.workDivisionId) return NextResponse.json({ message: "Division is required" }, { status: 400 });
     if (!body.startDate) return NextResponse.json({ message: "Start date is required" }, { status: 400 });
     if (!body.finishDate) return NextResponse.json({ message: "Finish date is required" }, { status: 400 });
     if (!body.items || !body.items.length) return NextResponse.json({ message: "Items are required" }, { status: 400 });
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
           title: body.title,
           description: body.description,
           year: body.year,
-          division: body.division,
+          workDivisionId: body.workDivisionId,
           totalBudget: body.totalBudget,
           startDate: new Date(body.startDate),
           finishDate: new Date(body.finishDate),
