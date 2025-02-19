@@ -7,15 +7,22 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const [budget, vendors] = await Promise.all([
-      prisma.budget.findUnique({
-        where: { id: params.id },
-        include: {
-          project: true,
-          items: true
-        },
-      }),
+    const budget = await prisma.budget.findUnique({
+      where: { id: params.id },
+      include: {
+        project: true,
+        items: true
+      },
+    });
+    const [vendors, project, workDivision] = await Promise.all([
       prisma.vendor.findMany(),
+      prisma.project.findUnique({
+        where: { id: budget?.projectId },
+        include: { workDivision: true }
+      }),
+      prisma.workDivision.findUnique({
+        where: { id: budget?.workDivisionId },
+      }),
     ]);
 
     if (!budget) {
@@ -31,6 +38,8 @@ export async function GET(
     return NextResponse.json({
       ...budget,
       vendors,
+      project,
+      workDivision,
       startDate: budget.startDate?.toISOString(),
       finishDate: budget.finishDate?.toISOString(),
     });
@@ -87,7 +96,11 @@ export async function PUT(
         data: {
           title: data.title,
           year: parseInt(data.year),
-          workDivisionId: data.workDivisionId,
+          workDivision: {
+            connect: {
+              id: data.workDivisionId
+            }
+          },
           totalBudget: typeof data.totalBudget === 'string' 
             ? parseFloat(data.totalBudget.replace(/[,.]/g, ''))
             : data.totalBudget,

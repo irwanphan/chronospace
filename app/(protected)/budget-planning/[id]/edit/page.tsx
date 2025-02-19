@@ -3,16 +3,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// import { toast } from 'react-hot-toast';
 import { Plus, X } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
 import { RichTextEditor } from '@/components/RichTextEditor';
-
+import { Vendor } from '@/types/vendor';
 interface FormData {
   projectId: string;
   title: string;
   year: string;
-  division: string;
+  workDivisionId: string;
   totalBudget: string;
   startDate: string;
   finishDate: string;
@@ -28,11 +27,6 @@ interface BudgetItem {
   vendor: string;
 }
 
-interface Vendor {
-  id: string;
-  vendorName: string;
-}
-
 export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +34,8 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [projectName, setProjectName] = useState<string>("");
+  const [workDivisionTitle, setWorkDivisionTitle] = useState<string>("");
   const [error, setError] = useState<string>('');
   const [newItem, setNewItem] = useState<BudgetItem>({
     description: '',
@@ -52,7 +48,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     projectId: '',
     title: '',
     year: '',
-    division: '',
+    workDivisionId: '',
     totalBudget: '',
     startDate: '',
     finishDate: '',
@@ -77,12 +73,14 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         });
 
         setVendors(data.vendors);
+        setProjectName(data.project.projectTitle);
+        setWorkDivisionTitle(data.workDivision.divisionName);
         setSelectedItems(itemsWithVendorNames);
         setFormData({
           projectId: data.projectId,
           title: data.title,
           year: data.year.toString(),
-          division: data.division,
+          workDivisionId: data.workDivisionId,
           totalBudget: data.totalBudget.toString(),
           startDate: new Date(data.startDate).toISOString().split('T')[0],
           finishDate: new Date(data.finishDate).toISOString().split('T')[0],
@@ -148,7 +146,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         return;
       }
 
-      // toast.success('Budget updated successfully');
       router.push('/budget-planning');
       router.refresh();
     } catch (error) {
@@ -179,7 +176,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             </label>
             <input
               type="text"
-              value={formData.projectId}
+              value={projectName}
               className="w-full px-4 py-2 border rounded-lg bg-gray-50"
               disabled
             />
@@ -191,7 +188,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             </label>
             <input
               type="text"
-              value={formData.division}
+              value={workDivisionTitle}
               className="w-full px-4 py-2 border rounded-lg bg-gray-50"
               disabled
             />

@@ -6,12 +6,13 @@ import Link from 'next/link';
 // import { toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { stripHtmlTags } from '@/lib/utils';
+import { Vendor } from '@/types/vendor';
 
 interface FormData {
   projectId: string;
   title: string;
   year: string;
-  division: string;
+  workDivisionId: string;
   totalBudget: string;
   startDate: string;
   finishDate: string;
@@ -27,21 +28,18 @@ interface BudgetItem {
   vendor: string;
 }
 
-interface Vendor {
-  id: string;
-  vendorName: string;
-}
-
-export default function EditBudgetPage({ params }: { params: { id: string } }) {
+export default function ViewBudgetPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [error, setError] = useState<string>('');
+  const [projectName, setProjectName] = useState<string>("");
+  const [workDivisionTitle, setWorkDivisionTitle] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
     title: '',
     year: '',
-    division: '',
+    workDivisionId: '',
     totalBudget: '',
     startDate: '',
     finishDate: '',
@@ -66,11 +64,13 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         });
 
         setSelectedItems(itemsWithVendorNames);
+        setProjectName(data.project.projectTitle);
+        setWorkDivisionTitle(data.workDivision.divisionName);
         setFormData({
           projectId: data.projectId,
           title: data.title,
           year: data.year.toString(),
-          division: data.division,
+          workDivisionId: data.workDivisionId,
           totalBudget: data.totalBudget.toString(),
           startDate: new Date(data.startDate).toISOString().split('T')[0],
           finishDate: new Date(data.finishDate).toISOString().split('T')[0],
@@ -115,7 +115,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             </label>
             <input
               type="text"
-              value={formData.projectId}
+              value={projectName}
               className="w-full px-4 py-2 border rounded-lg bg-white"
               disabled
             />
@@ -127,7 +127,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             </label>
             <input
               type="text"
-              value={formData.division}
+              value={workDivisionTitle}
               className="w-full px-4 py-2 border rounded-lg bg-white"
               disabled
             />
