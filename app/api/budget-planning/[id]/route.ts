@@ -7,13 +7,16 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const budget = await prisma.budget.findUnique({
-      where: { id: params.id },
-      include: {
-        project: true,
-        items: true
-      },
-    });
+    const [budget, vendors] = await Promise.all([
+      prisma.budget.findUnique({
+        where: { id: params.id },
+        include: {
+          project: true,
+          items: true
+        },
+      }),
+      prisma.vendor.findMany(),
+    ]);
 
     if (!budget) {
       return NextResponse.json(
@@ -27,6 +30,7 @@ export async function GET(
 
     return NextResponse.json({
       ...budget,
+      vendors,
       startDate: budget.startDate?.toISOString(),
       finishDate: budget.finishDate?.toISOString(),
     });

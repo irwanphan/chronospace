@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { RichTextEditor } from '@/components/RichTextEditor';
-import { Dialog } from '@/components/ui/Dialog';
+import Link from 'next/link';
+
 import { toast } from 'react-hot-toast';
+import { Plus, X } from 'lucide-react';
+import { Dialog } from '@/components/ui/Dialog';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface FormData {
   projectId: string;
@@ -57,51 +58,39 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     description: '',
   });
 
-  // console.log(vendors);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [budgetRes, vendorsRes] = await Promise.all([
-          fetch(`/api/budgets/${params.id}`),
-          fetch('/api/vendors')
-        ]);
+        const response = await fetch(`/api/budget-planning/${params.id}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
 
-        if (!budgetRes.ok || !vendorsRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [budgetData, vendorsData] = await Promise.all([
-          budgetRes.json(),
-          vendorsRes.json()
-        ]);
+        const data = await response.json();
 
         // Map vendor names to items
-        const itemsWithVendorNames = budgetData.items.map((item: BudgetItem) => {
-          const vendor = vendorsData.find((v: Vendor) => v.id === item.vendor);
+        const itemsWithVendorNames = data.items.map((item: BudgetItem) => {
+          const vendor = data.vendors.find((v: Vendor) => v.id === item.vendor);
           return {
             ...item,
             vendor: vendor ? vendor.vendorName : item.vendor // Use vendor name instead of ID
           };
         });
 
-        setVendors(vendorsData);
+        setVendors(data.vendors);
         setSelectedItems(itemsWithVendorNames);
         setFormData({
-          projectId: budgetData.projectId,
-          title: budgetData.title,
-          year: budgetData.year.toString(),
-          division: budgetData.division,
-          totalBudget: budgetData.totalBudget.toString(),
-          startDate: new Date(budgetData.startDate).toISOString().split('T')[0],
-          finishDate: new Date(budgetData.finishDate).toISOString().split('T')[0],
-          description: budgetData.description || '',
+          projectId: data.projectId,
+          title: data.title,
+          year: data.year.toString(),
+          division: data.division,
+          totalBudget: data.totalBudget.toString(),
+          startDate: new Date(data.startDate).toISOString().split('T')[0],
+          finishDate: new Date(data.finishDate).toISOString().split('T')[0],
+          description: data.description || '',
         });
-
-        setIsLoading(false);
       } catch (error) {
         console.error('Failed to load data:', error);
         toast.error('Failed to load budget data');
+      } finally {
         setIsLoading(false);
       }
     };
@@ -139,7 +128,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/budgets/${params.id}`, {
+      const response = await fetch(`/api/budget-planning/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +173,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
               className="w-full px-4 py-2 border rounded-lg bg-gray-50"
               disabled
             />
-            
           </div>
 
           <div>
