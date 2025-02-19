@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function ViewUserPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{
@@ -63,7 +63,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <h1 className="text-2xl font-semibold mb-6">Edit User</h1>
+      <h1 className="text-2xl font-semibold mb-6">View User</h1>
 
       {errors.general && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">

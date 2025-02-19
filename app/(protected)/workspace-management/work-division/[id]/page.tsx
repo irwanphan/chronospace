@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
 
-export default function EditWorkDivisionPage({ params }: { params: { id: string } }) {
+export default function ViewWorkDivisionPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{
@@ -44,7 +44,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-6">Edit Work Division</h1>
+      <h1 className="text-2xl font-semibold mb-6">View Work Division</h1>
 
       {errors.general && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">

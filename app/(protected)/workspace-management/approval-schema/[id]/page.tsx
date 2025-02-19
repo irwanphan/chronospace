@@ -32,7 +32,7 @@ interface FormattedSchema {
   }>;
 }
 
-export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
+export default function ViewApprovalSchemaPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -98,7 +98,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-6">Edit Approval Schema</h1>
+      <h1 className="text-2xl font-semibold mb-6">View Approval Schema</h1>
       
       <form className="bg-white rounded-lg p-6 space-y-6">
         <div className="space-y-4">

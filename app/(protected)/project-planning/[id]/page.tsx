@@ -56,7 +56,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold mb-6">Edit Project</h1>
+      <h1 className="text-2xl font-semibold mb-6">View Project Plan</h1>
 
       <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">

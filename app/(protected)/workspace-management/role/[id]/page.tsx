@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Role } from '@/types/role';
 
-export default function EditRolePage({ params }: { params: { id: string } }) {
+export default function ViewRolePage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{
@@ -36,7 +36,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-6">Edit Role</h1>
+      <h1 className="text-2xl font-semibold mb-6">View Role</h1>
 
       {errors.general && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
