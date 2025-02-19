@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useSession } from 'next-auth/react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash } from 'lucide-react';
+import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Eye } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
 import { WorkDivision } from '@/types/workDivision';
@@ -186,7 +186,10 @@ export default function BudgetPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative">
+                  <div className="relative flex items-center gap-2">
+                    <Link href={`/budget-planning/${budget.id}`} className="p-2 hover:bg-gray-100 rounded-full">
+                      <Eye className="w-4 h-4 text-gray-500" />
+                    </Link>
                     <button 
                       onClick={() => setActiveMenu(activeMenu === budget.id ? null : budget.id)}
                       className="p-2 hover:bg-gray-100 rounded-full"

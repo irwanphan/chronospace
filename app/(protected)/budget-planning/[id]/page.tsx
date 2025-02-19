@@ -4,9 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // import { toast } from 'react-hot-toast';
-import { Plus, X } from 'lucide-react';
-import { Dialog } from '@/components/ui/Dialog';
-import { RichTextEditor } from '@/components/RichTextEditor';
+import { X } from 'lucide-react';
+import { stripHtmlTags } from '@/lib/utils';
 
 interface FormData {
   projectId: string;
@@ -36,18 +35,8 @@ interface Vendor {
 export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
-  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [error, setError] = useState<string>('');
-  const [newItem, setNewItem] = useState<BudgetItem>({
-    description: '',
-    qty: 0,
-    unit: '',
-    unitPrice: 0,
-    vendor: ''
-  });
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
     title: '',
@@ -76,7 +65,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
           };
         });
 
-        setVendors(data.vendors);
         setSelectedItems(itemsWithVendorNames);
         setFormData({
           projectId: data.projectId,
@@ -107,58 +95,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     }));
   }, [selectedItems]);
 
-  const handleAddItem = () => {
-    if (!newItem.description || !newItem.qty || !newItem.unit || !newItem.unitPrice || !newItem.vendor) {
-      setError("Please fill all item fields");
-      return;
-    }
-
-    setSelectedItems([...selectedItems, newItem]);
-    setNewItem({
-      description: '',
-      qty: 0,
-      unit: '',
-      unitPrice: 0,
-      vendor: ''
-    });
-    setIsAddItemOpen(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/budget-planning/${params.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          items: selectedItems,
-          totalBudget: selectedItems.reduce((total, item) => total + (item.qty * item.unitPrice), 0),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to update budget');
-        return;
-      }
-
-      // toast.success('Budget updated successfully');
-      router.push('/budget-planning');
-      router.refresh();
-    } catch (error) {
-      console.error('Error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to update budget');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   if (isLoading) return <div className="p-4">Loading...</div>;
 
   return (
@@ -171,7 +107,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
+      <form className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block mb-1.5">
@@ -180,7 +116,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             <input
               type="text"
               value={formData.projectId}
-              className="w-full px-4 py-2 border rounded-lg bg-gray-50"
+              className="w-full px-4 py-2 border rounded-lg bg-white"
               disabled
             />
           </div>
@@ -192,7 +128,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             <input
               type="text"
               value={formData.division}
-              className="w-full px-4 py-2 border rounded-lg bg-gray-50"
+              className="w-full px-4 py-2 border rounded-lg bg-white"
               disabled
             />
           </div>
@@ -204,9 +140,8 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
+              readOnly
             />
           </div>
 
@@ -214,16 +149,12 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             <label className="block mb-1.5">
               Year <span className="text-red-500">*</span>
             </label>
-            <select
+            <input
+              type="text"
               value={formData.year}
-              onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-              required
-            >
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-            </select>
+              readOnly
+            />
           </div>
 
           <div>
@@ -233,9 +164,8 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             <input
               type="date"
               value={formData.startDate}
-              onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+              readOnly
             />
           </div>
 
@@ -246,19 +176,17 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             <input
               type="date"
               value={formData.finishDate}
-              onChange={(e) => setFormData(prev => ({ ...prev, finishDate: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+              readOnly
             />
           </div>
         </div>
 
         <div>
           <label className="block mb-1.5">Description</label>
-          <RichTextEditor
-            value={formData.description || ''}
-            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-          />
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            {stripHtmlTags(formData.description || '')}
+          </div>
         </div>
 
         <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
@@ -286,17 +214,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
                   <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.unitPrice)}</td>
                   <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}</td>
                   <td className="p-2">{item.vendor}</td>
-                  <td className="p-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedItems(selectedItems.filter((_, i) => i !== index));
-                      }}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </td>
+                  <td className="p-2"></td>
                 </tr>
               ))}
             </tbody>
@@ -308,15 +226,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={() => setIsAddItemOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Add Item
-        </button>
 
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -338,99 +247,17 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
           >
             <X className="w-4 h-4" />
-            Cancel
+            Back
           </Link>
           <button
-            type="submit"
-            disabled={isSubmitting}
+            type="button"
+            onClick={() => router.push(`/budget-planning/${params.id}/edit`)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
           >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            Edit
           </button>
         </div>
       </form>
-
-      <Dialog open={isAddItemOpen} onOpenChange={setIsAddItemOpen}>
-        <div className="p-6 space-y-6">
-          <h3 className="text-lg font-medium">Add New Item</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-1.5">Description</label>
-              <input
-                type="text"
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-1.5">Qty</label>
-                <input
-                  type="number"
-                  value={newItem.qty}
-                  onChange={(e) => setNewItem({ ...newItem, qty: Number(e.target.value) })}
-                  className="w-full px-4 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block mb-1.5">Unit</label>
-                <input
-                  type="text"
-                  value={newItem.unit}
-                  onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-1.5">Unit Price</label>
-              <input
-                type="number"
-                value={newItem.unitPrice}
-                onChange={(e) => setNewItem({ ...newItem, unitPrice: Number(e.target.value) })}
-                className="w-full px-4 py-2 border rounded-lg"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1.5">Vendor</label>
-              <select
-                value={newItem.vendor}
-                onChange={(e) => setNewItem({ ...newItem, vendor: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg bg-white"
-              >
-                <option value="">Select Vendor</option>
-                {vendors.map(vendor => (
-                  <option key={vendor.id} value={vendor.id}>
-                    {vendor.vendorName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsAddItemOpen(false)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleAddItem}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Add Item
-            </button>
-          </div>
-        </div>
-      </Dialog>
     </div>
   );
 } 
