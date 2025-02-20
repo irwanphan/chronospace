@@ -39,6 +39,8 @@ export async function userAccessSeeder() {
         },
         workspaceAccess: {
           createPurchaseRequest: false,
+          viewPurchaseRequest: true,
+          editPurchaseRequest: true,
           reviewApprovePurchaseRequest: true
         }
       },
@@ -78,7 +80,9 @@ export async function userAccessSeeder() {
         },
         workspaceAccess: {
           createPurchaseRequest: true,
-          reviewApprovePurchaseRequest: false
+          viewPurchaseRequest: true,
+          editPurchaseRequest: true,
+          reviewApprovePurchaseRequest: false,
         }
       }
     ]

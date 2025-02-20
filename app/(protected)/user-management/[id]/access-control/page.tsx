@@ -2,59 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface MenuAccess {
-  timeline: boolean;
-  workspace: boolean;
-  projectPlanning: boolean;
-  budgetPlanning: boolean;
-  userManagement: boolean;
-  workspaceManagement: boolean;
-}
-
-interface ActivityAccess {
-  createProject: boolean;
-  editProject: boolean;
-  deleteProject: boolean;
-
-  createBudget: boolean;
-  editBudget: boolean;
-  deleteBudget: boolean;
-
-  createWorkDivision: boolean;
-  editWorkDivision: boolean;
-  deleteWorkDivision: boolean;
-
-  createRole: boolean;
-  editRole: boolean;
-  deleteRole: boolean;
-
-  createVendor: boolean;
-  editVendor: boolean;
-  deleteVendor: boolean;
-
-  createApprovalSchema: boolean;
-  editApprovalSchema: boolean;
-  deleteApprovalSchema: boolean;
-
-  createUser: boolean;
-  editUser: boolean;
-  deleteUser: boolean;
-  changePassword: boolean;
-  changeOtherUserPassword: boolean;
-  manageUserAccess: boolean;
-}
-
-interface WorkspaceAccess {
-  createPurchaseRequest: boolean;
-  reviewApprovePurchaseRequest: boolean;
-}
-
-interface AccessControl {
-  menuAccess: MenuAccess;
-  activityAccess: ActivityAccess;
-  workspaceAccess: WorkspaceAccess;
-}
+import { AccessControl, MenuAccess, ActivityAccess, WorkspaceAccess } from '@/types/access-control';
 
 const MENU_ACCESS_ORDER = [
   'timeline',
@@ -66,37 +14,24 @@ const MENU_ACCESS_ORDER = [
 ] as const;
 
 const ACTIVITY_ACCESS_ORDER = [
-  // Project Management
   'createProject',
   'editProject',
   'deleteProject',
-
-  // Budget Management
   'createBudget',
   'editBudget',
   'deleteBudget',
-
-  // Work Division
   'createWorkDivision',
   'editWorkDivision',
   'deleteWorkDivision',
-
-  // Role Management
   'createRole',
   'editRole',
   'deleteRole',
-
-  // Vendor Management
   'createVendor',
   'editVendor',
   'deleteVendor',
-
-  // Approval Schema
   'createApprovalSchema',
   'editApprovalSchema',
   'deleteApprovalSchema',
-
-  // User Management
   'createUser',
   'editUser',
   'deleteUser',
@@ -107,51 +42,28 @@ const ACTIVITY_ACCESS_ORDER = [
 
 const WORKSPACE_ACCESS_ORDER = [
   'createPurchaseRequest',
+  'viewPurchaseRequest',
+  'editPurchaseRequest',
   'reviewApprovePurchaseRequest'
 ] as const;
 
+const createDefaultAccess = (): AccessControl => ({
+  menuAccess: Object.fromEntries(
+    MENU_ACCESS_ORDER.map(key => [key, false])
+  ) as Record<keyof MenuAccess, boolean>,
+  
+  activityAccess: Object.fromEntries(
+    ACTIVITY_ACCESS_ORDER.map(key => [key, false])
+  ) as Record<keyof ActivityAccess, boolean>,
+  
+  workspaceAccess: Object.fromEntries(
+    WORKSPACE_ACCESS_ORDER.map(key => [key, false])
+  ) as Record<keyof WorkspaceAccess, boolean>
+});
+
 export default function UserAccessControlPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [access, setAccess] = useState<AccessControl>({
-    menuAccess: {
-      timeline: false,
-      workspace: false,
-      projectPlanning: false,
-      budgetPlanning: false,
-      userManagement: false,
-      workspaceManagement: false
-    },
-    activityAccess: {
-      createProject: false,
-      editProject: false,
-      deleteProject: false,
-      createBudget: false,
-      editBudget: false,
-      deleteBudget: false,
-      createWorkDivision: false,
-      editWorkDivision: false,
-      deleteWorkDivision: false,
-      createRole: false,
-      editRole: false,
-      deleteRole: false,
-      createVendor: false,
-      editVendor: false,
-      deleteVendor: false,
-      createApprovalSchema: false,
-      editApprovalSchema: false,
-      deleteApprovalSchema: false,
-      createUser: false,
-      editUser: false,
-      deleteUser: false,
-      changePassword: false,
-      changeOtherUserPassword: false,
-      manageUserAccess: false,
-    },
-    workspaceAccess: {
-      createPurchaseRequest: false,
-      reviewApprovePurchaseRequest: false
-    }
-  });
+  const [access, setAccess] = useState<AccessControl>(createDefaultAccess());
 
   useEffect(() => {
     const fetchUserAccess = async () => {

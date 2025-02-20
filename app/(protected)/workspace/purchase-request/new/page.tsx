@@ -98,7 +98,7 @@ export default function NewRequestPage() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/workspace/purchase-requests/fetch-roles-schemas-users');
+      const response = await fetch('/api/workspace/purchase-requests/fetch-roles-schemas-users-availablebudgets');
       if (response.ok) {
         const data = await response.json();
         setRoles(data.roles);
@@ -204,7 +204,7 @@ export default function NewRequestPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/purchase-requests', {
+      const response = await fetch('/api/workspace/purchase-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -12,6 +12,16 @@ import StatCard from '@/components/StatCard';
 import { toast } from 'react-hot-toast';
 import { stripHtmlTags } from '@/lib/utils';
 import { WorkDivision } from '@/types/workDivision';
+import { WorkspaceAccess } from '@/types/access-control';
+import { Session } from 'next-auth';
+
+interface CustomSession extends Session {
+  user: {
+    access: {
+      workspaceAccess: WorkspaceAccess;
+    };
+  } & Session['user'];
+}
 
 interface PurchaseRequest {
   id: string;
@@ -33,16 +43,22 @@ interface PurchaseRequest {
 
 export default function WorkspacePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
-  const defaultAccess = {
-    createPurchaseRequest: false,
-    reviewApprovePurchaseRequest: false
-  };
-  const canCreateRequest = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([]);
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
-  console.log('purchaseRequests ', purchaseRequests)
-
+  const { data: session, status } = useSession() as { 
+    data: CustomSession | null, 
+    status: 'loading' | 'authenticated' | 'unauthenticated' 
+  };
+  const defaultAccess: WorkspaceAccess = {
+    createPurchaseRequest: false,
+    viewPurchaseRequest: false,
+    editPurchaseRequest: false,
+    reviewApprovePurchaseRequest: false
+  };
+  const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
+  const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
+  const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
+  
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Shortcut: Ctrl/Cmd + Shift + N
@@ -190,9 +206,9 @@ export default function WorkspacePage() {
                 'No deadline'
               }
               attachments={0}
-              onCheck={() => console.log('Check clicked', request.id)}
-              onDecline={() => console.log('Decline clicked', request.id)}
-              onApprove={() => console.log('Approve clicked', request.id)}
+              canCheck={canViewRequest}
+              canDecline={canReviewApproveRequest}
+              canApprove={canReviewApproveRequest}
             />
             );
           })}
