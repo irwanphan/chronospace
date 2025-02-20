@@ -41,7 +41,7 @@ interface ApprovalStepForm {
   specificUserId?: string;
   limit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 export default function NewRequestPage() {
@@ -77,25 +77,6 @@ export default function NewRequestPage() {
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
 
-  // Fetch budget plans
-  useEffect(() => {
-    const fetchBudgetPlans = async () => {
-      try {
-        const response = await fetch('/api/budgets/available');
-        if (!response.ok) throw new Error('Failed to fetch budgets');
-        const data = await response.json();
-        setBudgetPlans(data);
-      } catch (error) {
-        console.error('Error:', error);
-        toast.error('Failed to fetch budget plans');
-      }
-    };
-
-    fetchBudgetPlans();
-  }, []);
-
-  console.log('budgetPlans', budgetPlans)
-
   useEffect(() => {
     const generateRequestId = () => {
       const date = new Date();
@@ -115,46 +96,24 @@ export default function NewRequestPage() {
     });
   }, [session]);
 
-  useEffect(() => {
-    fetchRoles();
-    fetchUsers();
-    fetchSchemas();
-  }, []);
-
-  const fetchRoles = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch('/api/roles');
+      const response = await fetch('/api/workspace/purchase-requests/fetch-roles-schemas-users');
       if (response.ok) {
         const data = await response.json();
-        setRoles(Array.isArray(data) ? data : []);
+        setRoles(data.roles);
+        setUsers(data.users);
+        setSchemas(data.schemas);
+        setBudgetPlans(data.availableBudgets);
       }
     } catch (error) {
       console.error('Failed to fetch roles:', error);
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    }
-  };
-
-  const fetchSchemas = async () => {
-    try {
-      const response = await fetch('/api/approval-schemas');
-      if (!response.ok) throw new Error('Failed to fetch schemas');
-      const data = await response.json();
-      setSchemas(data);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Update project and items when budget is selected
   const handleBudgetChange = (budgetId: string) => {
@@ -511,7 +470,7 @@ export default function NewRequestPage() {
                       </td>
                       <td className="py-3 px-4">{step.duration} days</td>
                       <td className="py-3 px-4">
-                        {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                        {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-2">
@@ -583,7 +542,7 @@ export default function NewRequestPage() {
                             </span>
                           )}
                           <span>{step.duration}d</span>
-                          <span>{step.overtimeAction === 'NOTIFY' ? 'Notify Only' : 'Auto Reject'}</span>
+                          <span>{step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}</span>
                         </div>
                       ))}
                     </div>

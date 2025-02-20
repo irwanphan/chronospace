@@ -17,7 +17,7 @@ export default function CreateRequestFAB() {
             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-sm"
             onClick={() => setIsOpen(false)}
           >
-            Purchase Request / Memo
+            Purchase Request
           </Link>
           <Link 
             href="/workspace/purchase-order/new"

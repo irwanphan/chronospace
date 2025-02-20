@@ -7,7 +7,7 @@ export interface ApprovalSchema {
     role: string;
     specificUserId?: string;
     duration: number;
-    overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+    overtimeAction: 'Notify and Wait' | 'Auto Decline';
     limit?: number;
   }[];
 } 
