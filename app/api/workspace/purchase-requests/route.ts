@@ -23,6 +23,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { 
+      code,
       budgetId,
       title,
       description,
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
     // Create purchase request dengan items dan approval steps
     const purchaseRequest = await prisma.purchaseRequest.create({
       data: {
+        code,
         budgetId,
         title,
         description,

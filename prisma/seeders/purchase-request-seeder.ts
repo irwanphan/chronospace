@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-
+import { generateId } from "@/lib/utils";
 export async function purchaseRequestSeeder() {
   // Ambil budget pertama dan user Grace Staff
   const [budget, user] = await Promise.all([
@@ -21,6 +21,7 @@ export async function purchaseRequestSeeder() {
   // Buat purchase request pertama dengan item 1 dan 2
   await prisma.purchaseRequest.create({
     data: {
+      code: generateId('PR'),
       budgetId: budget.id,
       title: "Hardware & Software Procurement",
       description: "Procurement for IT equipment and licenses",

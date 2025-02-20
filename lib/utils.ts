@@ -45,7 +45,12 @@ export const stripHtmlTags = (html: string | null) => {
 
 export const generateId = ( prefix?: string ) => {
   const year = new Date().getFullYear();
-  const month = new Date().getMonth() + 1;
-  const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `${prefix}/${year}${month}${randomNum}`;
+  const month = formatMonth(new Date().getMonth() + 1);
+  const randomNum = Math.floor(Math.random() * 10000).toString().padStart(6, '0');
+  return `${prefix}/${year}/${month}/${randomNum}`;
 };
+
+export const formatMonth = (month: number): string => {
+  return month.toString().padStart(2, '0');
+};
+

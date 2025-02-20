@@ -5,7 +5,7 @@ import { X, Plus, Pencil, Trash, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { formatDate } from '@/lib/utils';
+import { formatDate, generateId } from '@/lib/utils';
 import AddStepModal from '@/components/AddStepModal';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
@@ -57,6 +57,7 @@ export default function NewRequestPage() {
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
   const [formData, setFormData] = useState({
+    code: '',
     budgetId: '',
     projectId: '',
     title: '',
@@ -78,18 +79,8 @@ export default function NewRequestPage() {
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
 
   useEffect(() => {
-    const generateRequestId = () => {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const random = Math.floor(Math.random() * 9000 + 1000);
-      return `${year}${month}${day}${random}`;
-    };
-
-    // Dalam implementasi nyata, data ini bisa diambil dari context/session user
     setRequestInfo({
-      id: generateRequestId(),
+      id: generateId('PR'),
       requestDate: new Date(),
       requestor: session?.user?.name || '',
       role: session?.user?.role || ''
@@ -213,6 +204,8 @@ export default function NewRequestPage() {
         body: JSON.stringify({
           ...formData,
           items: selectedItems,
+          code: requestInfo.id,
+          createdBy: session?.user?.id || '',
         }),
       });
 

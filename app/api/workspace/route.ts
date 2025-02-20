@@ -23,6 +23,11 @@ export async function GET() {
               }
             }
           },
+          user: {
+            select: {
+              name: true
+            }
+          },
           // approvalSteps: true
         },
         orderBy: {

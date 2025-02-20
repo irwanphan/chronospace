@@ -3,7 +3,8 @@ import Image from "next/image";
 import Avatar from "./ui/Avatar";
 
 interface RequestCardProps {
-  id: string;
+  // id: string;
+  code: string;
   type: string;
   requestor: {
     name: string;
@@ -26,7 +27,8 @@ interface RequestCardProps {
 }
 
 export default function RequestCard({
-  id,
+  // id,
+  code,
   type,
   requestor,
   submittedAt,
@@ -48,7 +50,7 @@ export default function RequestCard({
     <div className="bg-white rounded-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex justify-between items-center gap-2 w-full">
-          <span className="text-xs font-medium">#{id}</span>
+          <span className="text-xs font-medium">#{code}</span>
           <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
             {type}
           </span>

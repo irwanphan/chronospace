@@ -64,7 +64,7 @@ model User {
   lastLogin     DateTime?
   createdAt     DateTime  @default(now())
   access        UserAccess?
-
+  purchaseRequests PurchaseRequest[]
   @@map("users")
 }
 
@@ -251,11 +251,13 @@ model UserAccess {
 
 model PurchaseRequest {
   id              String                    @id @default(cuid())
+  code            String                    @unique
   budgetId        String
   title           String
   description     String?
   status          String                    // e.g., "Draft", "Submitted", "Approved", "Rejected"
   createdBy       String
+  user            User                      @relation(fields: [createdBy], references: [id])
   items           PurchaseRequestItem[]
   approvalSteps   PurchaseRequestApproval[]
   budget          Budget                    @relation(fields: [budgetId], references: [id])

@@ -24,6 +24,7 @@ interface CustomSession extends Session {
 
 interface PurchaseRequest {
   id: string;
+  code: string;
   title: string;
   documentType: string;
   description?: string;
@@ -34,6 +35,9 @@ interface PurchaseRequest {
     qty: number;
     unitPrice: number;
   }>;
+  user: {
+    name: string;
+  };
   budget: {
     id: string;
     totalBudget: number;
@@ -199,10 +203,10 @@ export default function WorkspacePage() {
             return (
               <RequestCard
                 key={request.id}
-                id={request.id}
-                type={request.documentType}
+                code={request.code}
+                type='Purchase Request'
                 requestor={{
-                  name: request.createdBy,
+                  name: request.user.name,
                 }}
                 submittedAt={new Date(request.createdAt).toLocaleDateString('en-US', {
                   day: 'numeric',
