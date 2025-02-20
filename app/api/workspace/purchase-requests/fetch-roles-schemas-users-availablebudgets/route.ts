@@ -32,17 +32,34 @@ export async function GET() {
       };
     }).filter(budget => budget.items.length > 0); // Hanya budget yang masih punya items
 
-    const [roles, schemas, users] = await Promise.all([
+    const [roles, users, schemas] = await Promise.all([
       prisma.role.findMany(),
-      prisma.approvalSchema.findMany(),
-      prisma.user.findMany()
+      prisma.user.findMany(),
+      prisma.approvalSchema.findMany({
+        include: {
+          approvalSteps: {
+            orderBy: {
+              order: 'asc'
+            }
+          }
+        },
+        where: {
+          documentType: 'Purchase Request'
+        }
+      })
     ]);
-    return NextResponse.json({ roles, schemas, users, availableBudgets });
+
+    return NextResponse.json({
+      roles,
+      users,
+      schemas: schemas.map(schema => ({
+        ...schema,
+        // steps: schema.approvalSteps  // Map approvalSteps ke steps
+      })),
+      availableBudgets
+    });
   } catch (error) {
-    console.error('Error fetching roles, schemas, and users:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch roles, schemas, and users' },
-      { status: 500 }
-    );
+    console.error('Error:', error);
+    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }
 }

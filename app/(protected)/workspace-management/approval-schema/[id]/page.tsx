@@ -23,7 +23,7 @@ interface FormattedSchema {
   description: string;
   workDivisions: string[];
   roles: string[];
-  steps: Array<{
+  approvalSteps: Array<{
     roleId: string;
     specificUserId?: string;
     budgetLimit?: number;
@@ -75,8 +75,8 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
             description: schema.description || '',
             workDivisions: parsedDivisions,
             roles: parsedRoles,
-            steps: Array.isArray(schema.steps)
-              ? schema.steps.map((step: ApiStep) => ({
+            approvalSteps: Array.isArray(schema.approvalSteps)
+              ? schema.approvalSteps.map((step: ApiStep) => ({
                   roleId: step.role || '',
                   specificUserId: step.specificUserId,
                   budgetLimit: step.limit,
@@ -158,7 +158,7 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
             />
           </div>
 
-          <div className="bg-white rounded-lg p-6 mt-6">
+          <div className="bg-white rounded-lg mt-10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium">Approval Steps</h2>
             </div>
@@ -179,14 +179,14 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
                   </tr>
                 </thead>
                 <tbody>
-                  {schema?.steps.length === 0 ? (
+                  {schema?.approvalSteps.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-4 text-gray-500">
                         No steps added yet
                       </td>
                     </tr>
                   ) : (
-                    schema?.steps.map((step, index) => (
+                    schema?.approvalSteps.map((step, index) => (
                       <tr key={index} className="border-b">
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">

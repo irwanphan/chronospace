@@ -15,11 +15,12 @@ interface ApprovalStepForm {
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 export default function NewApprovalSchemaPage() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -31,58 +32,35 @@ export default function NewApprovalSchemaPage() {
     description: '',
     workDivisions: [] as string[],
     roles: [] as string[],
-    steps: [] as ApprovalStepForm[],
+    approvalSteps: [] as ApprovalStepForm[],
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
 
   useEffect(() => {
-    fetchDivisions();
-    fetchRoles();
-    fetchUsers();
+    FetchData();
   }, []);
 
-  const fetchDivisions = async () => {
+  const FetchData = async () => {
     try {
-      const response = await fetch('/api/work-divisions');
+      const response = await fetch('/api/workspace-management/approval-schemas/fetch-roles-users-divisions');
       if (response.ok) {
         const data = await response.json();
-        setDivisions(Array.isArray(data) ? data : []);
+        setDivisions(data.workDivisions);
+        setRoles(data.roles);
+        setUsers(data.users);
       }
     } catch (error) {
-      console.error('Failed to fetch divisions:', error);
-    }
-  };
-
-  const fetchRoles = async () => {
-    try {
-      const response = await fetch('/api/roles');
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch roles:', error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
+      console.error('Failed to fetch data:', error);
+      setError('Failed to fetch data. Please try again later.');
     }
   };
 
   const addStep = (stepData: ApprovalStepForm) => {
     setFormData(prev => ({
       ...prev,
-      steps: [...prev.steps, stepData].sort((a, b) => {
+      approvalSteps: [...prev.approvalSteps, stepData].sort((a, b) => {
         // Sort by budget limit, undefined limits go last
         if (a.budgetLimit === undefined) return 1;
         if (b.budgetLimit === undefined) return -1;
@@ -94,19 +72,19 @@ export default function NewApprovalSchemaPage() {
   const removeStep = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      steps: prev.steps.filter((_, i) => i !== index),
+      approvalSteps: prev.approvalSteps.filter((_, i) => i !== index),
     }));
   };
 
   const handleEditStep = (index: number) => {
-    const step = formData.steps[index];
+    const approvalStep = formData.approvalSteps[index];
     setEditingStep({
       data: {
-        roleId: step.roleId,
-        specificUserId: step.specificUserId,
-        budgetLimit: step.budgetLimit,
-        duration: step.duration,
-        overtimeAction: step.overtimeAction,
+        roleId: approvalStep.roleId,
+        specificUserId: approvalStep.specificUserId,
+        budgetLimit: approvalStep.budgetLimit,
+        duration: approvalStep.duration,
+        overtimeAction: approvalStep.overtimeAction,
       },
       index
     });
@@ -118,7 +96,7 @@ export default function NewApprovalSchemaPage() {
       // Edit existing step
       setFormData(prev => ({
         ...prev,
-        steps: prev.steps.map((step, i) => 
+        approvalSteps: prev.approvalSteps.map((step, i) => 
           i === editingStep.index ? stepData : step
         ).sort((a, b) => {
           // Sort by budget limit, undefined limits go last
@@ -140,26 +118,42 @@ export default function NewApprovalSchemaPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/approval-schemas', {
+      const requestBody = {
+        name: formData.name,
+        documentType: formData.documentType,
+        description: formData.description || '',
+        workDivisions: JSON.stringify(formData.workDivisions),
+        roles: JSON.stringify(formData.roles),
+        approvalSteps: formData.approvalSteps.map((step, index) => ({
+          role: step.roleId,
+          specificUserId: step.specificUserId || null,
+          duration: step.duration,
+          overtimeAction: step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline',
+          limit: step.budgetLimit || null,
+          order: index + 1
+        }))
+      };
+
+      console.log('Submitting data:', requestBody);
+
+      const response = await fetch('/api/workspace-management/approval-schemas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          workDivisions: JSON.stringify(formData.workDivisions),
-          roles: JSON.stringify(formData.roles),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create approval schema');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create approval schema');
       }
 
       router.push('/workspace-management/approval-schema');
       router.refresh();
     } catch (error) {
       console.error('Error creating approval schema:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create approval schema');
     } finally {
       setIsSubmitting(false);
     }
@@ -168,6 +162,8 @@ export default function NewApprovalSchemaPage() {
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">New Approval Schema</h1>
+
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       
       <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
         <div className="space-y-4">
@@ -232,7 +228,7 @@ export default function NewApprovalSchemaPage() {
             />
           </div>
 
-          <div className="bg-white rounded-lg p-6 mt-6">
+          <div className="bg-white rounded-lg mt-10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium">Approval Steps</h2>
               <button
@@ -261,14 +257,14 @@ export default function NewApprovalSchemaPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {formData.steps.length === 0 ? (
+                  {formData.approvalSteps.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-4 text-gray-500">
                         No steps added yet
                       </td>
                     </tr>
                   ) : (
-                    formData.steps.map((step, index) => (
+                    formData.approvalSteps.map((step, index) => (
                       <tr key={index} className="border-b">
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">
@@ -288,9 +284,9 @@ export default function NewApprovalSchemaPage() {
                             }).format(step.budgetLimit) : '-'}
                           </td>
                         )}
-                        <td className="py-3 px-4">{step.duration / 24} days</td>
+                        <td className="py-3 px-4">{step.duration} days</td>
                         <td className="py-3 px-4">
-                          {step.overtimeAction === 'NOTIFY' ? 'Notify and Wait' : 'Auto Reject'}
+                          {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
@@ -315,21 +311,7 @@ export default function NewApprovalSchemaPage() {
                   )}
                 </tbody>
               </table>
-            </div>
-
-            <AddStepModal
-              isOpen={isAddStepModalOpen}
-              onClose={() => {
-                setIsAddStepModalOpen(false);
-                setEditingStep(null);
-              }}
-              onSubmit={handleStepSubmit}
-              roles={roles}
-              users={users}
-              documentType={formData.documentType}
-              editData={editingStep?.data}
-              isEdit={editingStep !== null}
-            />
+            </div>            
           </div>
         </div>
 
@@ -350,6 +332,20 @@ export default function NewApprovalSchemaPage() {
           </button>
         </div>
       </form>
+
+      <AddStepModal
+        isOpen={isAddStepModalOpen}
+        onClose={() => {
+          setIsAddStepModalOpen(false);
+          setEditingStep(null);
+        }}
+        onSubmit={handleStepSubmit}
+        roles={roles}
+        users={users}
+        documentType={formData.documentType}
+        editData={editingStep?.data}
+        isEdit={editingStep !== null}
+      />
     </div>
   );
 } 

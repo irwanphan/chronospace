@@ -3,7 +3,7 @@ export interface ApprovalSchema {
   name: string;
   description: string;
   documentType: string;
-  steps: {
+  approvalSteps: {
     role: string;
     specificUserId?: string;
     duration: number;

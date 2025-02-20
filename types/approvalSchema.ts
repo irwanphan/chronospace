@@ -6,7 +6,7 @@ export interface ApprovalStep {
   specificUserId?: string;
   limit?: number;
   duration: number; // dalam jam
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -19,7 +19,7 @@ export interface ApprovalSchema {
   roles: string | string[];
   title: string;
   description?: string;
-  steps: ApprovalStep[];
+  approvalSteps: ApprovalStep[];
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;

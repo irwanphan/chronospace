@@ -2,61 +2,69 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 interface RequestStep {
-  roleId: string;
+  role: string;
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
+  order: number;
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // console.log('Received data:', body);
+    console.log('Received data:', body);
 
     // Validasi data yang diterima
-    if (!body.name || !body.documentType || !body.workDivisions || !body.steps) {
+    if (!body.name || !body.workDivisions || !body.approvalSteps) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Parse workDivisions dan roles jika dalam bentuk string
-    const workDivisions = typeof body.workDivisions === 'string' 
-      ? JSON.parse(body.workDivisions) 
-      : body.workDivisions;
+    // Pastikan approvalSteps ada dan berbentuk array
+    if (!body.approvalSteps || !Array.isArray(body.approvalSteps)) {
+      return NextResponse.json({ error: 'Invalid approval steps' }, { status: 400 });
+    }
 
-    const roles = typeof body.roles === 'string'
-      ? JSON.parse(body.roles)
-      : body.roles;
+    // Parse workDivisions dan roles jika dalam bentuk string
+    // const workDivisions = typeof body.workDivisions === 'string' 
+    //   ? JSON.parse(body.workDivisions) 
+    //   : body.workDivisions;
+
+    // const roles = typeof body.roles === 'string'
+    //   ? JSON.parse(body.roles)
+    //   : body.roles;
 
     // Format data sebelum create
     const formattedData = {
       name: body.name,
       documentType: body.documentType,
-      divisions: Array.isArray(workDivisions) ? workDivisions.join(',') : workDivisions,
-      roles: Array.isArray(roles) ? roles.join(',') : roles,
-      title: body.name,
       description: body.description || '',
-      steps: {
-        create: body.steps.map((step: RequestStep) => ({
-          role: step.roleId,
-          specificUserId: step.specificUserId || null,
-          limit: step.budgetLimit || null,
+      // divisions: Array.isArray(workDivisions) ? workDivisions.join(',') : workDivisions,
+      // roles: Array.isArray(roles) ? roles.join(',') : roles,
+      divisions: body.workDivisions,
+      roles: body.roles,
+      approvalSteps: {
+        create: body.approvalSteps.map((step: RequestStep) => ({
+          role: step.role,
+          specificUserId: step.specificUserId,
           duration: step.duration,
-          overtime: step.overtimeAction
+          overtimeAction: step.overtimeAction,
+          limit: step.budgetLimit,
+          order: step.order
         }))
       }
     };
 
-    // console.log('Formatted data:', formattedData);
+    console.log('Formatted data:', formattedData);
 
     try {
       const schema = await prisma.approvalSchema.create({
         data: formattedData,
         include: {
-          steps: true
+          approvalSteps: true
         }
       });
       return NextResponse.json(schema);
@@ -70,7 +78,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating schema:', error);
     return NextResponse.json(
-      { error: 'Failed to create schema', details: error },
+      { error: 'Failed to create approval schema' },
       { status: 500 }
     );
   }
@@ -82,7 +90,7 @@ export async function GET() {
     const [ schemas, divisions, roles ] = await Promise.all([
       prisma.approvalSchema.findMany({
         include: {
-          steps: true,
+          approvalSteps: true,
         },
         orderBy: {
           createdAt: 'desc',

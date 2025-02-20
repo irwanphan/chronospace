@@ -40,7 +40,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     description: '',
     workDivisions: [] as string[],
     roles: [] as string[],
-    steps: [] as ApprovalStepForm[],
+    approvalSteps: [] as ApprovalStepForm[],
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
@@ -66,7 +66,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
           description: schema.description || '',
           workDivisions: schema.workDivisions || [],
           roles: schema.roles || [],
-          steps: schema.steps || []
+          approvalSteps: schema.approvalSteps || []
         });
 
         if (response.ok) {
@@ -92,8 +92,8 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
             description: schema.description || '',
             workDivisions: parsedDivisions,
             roles: parsedRoles,
-            steps: Array.isArray(schema.steps)
-              ? schema.steps.map((step: ApiStep) => ({
+            approvalSteps: Array.isArray(schema.approvalSteps)
+              ? schema.approvalSteps.map((step: ApiStep) => ({
                   roleId: step.role || '',
                   specificUserId: step.specificUserId,
                   budgetLimit: step.limit,
@@ -121,7 +121,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   const removeStep = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      steps: prev.steps.filter((_, i) => i !== index)
+      approvalSteps: prev.approvalSteps.filter((_, i) => i !== index)
     }));
   };
 
@@ -130,16 +130,28 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     setIsSubmitting(true);
 
     try {
+      const requestBody = {
+        name: formData.name,
+        documentType: formData.documentType,
+        description: formData.description || '',
+        workDivisions: JSON.stringify(formData.workDivisions),
+        roles: JSON.stringify(formData.roles),
+        approvalSteps: formData.approvalSteps.map((step, index) => ({
+          role: step.roleId,
+          specificUserId: step.specificUserId || null,
+          duration: step.duration,
+          overtimeAction: step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline',
+          limit: step.budgetLimit || null,
+          order: index + 1
+        }))
+      };
+
       const response = await fetch(`/api/workspace-management/approval-schemas/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          workDivisions: JSON.stringify(formData.workDivisions),
-          roles: JSON.stringify(formData.roles),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -157,12 +169,12 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   const handleAddStep = (stepData: ApprovalStepForm) => {
     setFormData(prev => ({
       ...prev,
-      steps: [...prev.steps, stepData]
+      approvalSteps: [...prev.approvalSteps, stepData]
     }));
   };
 
   const handleEditStep = (index: number) => {
-    const step = formData.steps[index];
+    const step = formData.approvalSteps[index];
     setEditingStep({
       data: {
         roleId: step.roleId,
@@ -181,7 +193,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
       // Edit existing step
       setFormData(prev => ({
         ...prev,
-        steps: prev.steps.map((step, i) => 
+        approvalSteps: prev.approvalSteps.map((step, i) => 
           i === editingStep.index ? stepData : step
         )
       }));
@@ -259,7 +271,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
             />
           </div>
 
-          <div className="bg-white rounded-lg p-6 mt-6">
+          <div className="bg-white rounded-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium">Approval Steps</h2>
               <button
@@ -291,14 +303,14 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                   </tr>
                 </thead>
                 <tbody>
-                  {formData.steps.length === 0 ? (
+                  {formData.approvalSteps.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-4 text-gray-500">
                         No steps added yet
                       </td>
                     </tr>
                   ) : (
-                    formData.steps.map((step, index) => (
+                    formData.approvalSteps.map((step, index) => (
                       <tr key={index} className="border-b">
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">

@@ -101,13 +101,14 @@ export default function NewRequestPage() {
       const response = await fetch('/api/workspace/purchase-requests/fetch-roles-schemas-users-availablebudgets');
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched schemas:', data.schemas); // Debug log
         setRoles(data.roles);
         setUsers(data.users);
         setSchemas(data.schemas);
         setBudgetPlans(data.availableBudgets);
       }
     } catch (error) {
-      console.error('Failed to fetch roles:', error);
+      console.error('Failed to fetch data:', error);
     }
   };
 
@@ -188,7 +189,7 @@ export default function NewRequestPage() {
   const handleSelectSchema = (schema: ApprovalSchema) => {
     setFormData(prev => ({
       ...prev,
-      steps: schema.steps.map(step => ({
+      steps: schema.approvalSteps.map(step => ({
         roleId: step.role,
         specificUserId: step.specificUserId,
         duration: step.duration,
@@ -517,7 +518,7 @@ export default function NewRequestPage() {
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl m-0">
               <h2 className="text-lg font-medium mb-4">Select Approval Schema</h2>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-                {schemas.map(schema => (
+                {schemas?.map(schema => (
                   <div 
                     key={schema.id}
                     onClick={() => handleSelectSchema(schema)}
@@ -526,7 +527,7 @@ export default function NewRequestPage() {
                     <h3 className="font-medium">{schema.name}</h3>
                     <p className="text-sm text-gray-600 group-hover:text-white transition-all duration-300">{schema.description}</p>
                     <div className="flex flex-col items-start pt-2">
-                      {schema.steps.map((step, index) => (
+                      {schema.approvalSteps?.map((step, index) => (
                         <div key={index} className="flex items-center gap-4 text-xs text-gray-600 group-hover:text-white transition-all duration-300">
                           <span className="font-medium">Step {index + 1}:</span>
                           <span className="font-medium">

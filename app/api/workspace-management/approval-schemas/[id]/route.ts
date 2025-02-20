@@ -6,7 +6,7 @@ interface RequestStep {
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
-  overtimeAction: 'NOTIFY' | 'AUTO_REJECT';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 export async function GET(
@@ -20,7 +20,7 @@ export async function GET(
           id: params.id
         },
         include: {
-          steps: {
+          approvalSteps: {
             orderBy: {
               order: 'asc'
             }
@@ -63,29 +63,29 @@ export async function PUT(
       description: body.description,
       divisions: typeof body.workDivisions === 'string' ? body.workDivisions : body.workDivisions[0],
       roles: typeof body.roles === 'string' ? body.roles : body.roles[0],
-      steps: {
+      approvalSteps: {
         deleteMany: {},
-        create: body.steps.map((step: RequestStep, index: number) => ({
+        create: body.approvalSteps.map((step: RequestStep, index: number) => ({
           role: step.roleId || '',
           specificUserId: step.specificUserId || null,
           limit: step.budgetLimit || null,
           duration: step.duration || 48,
-          overtime: step.overtimeAction || 'NOTIFY',
+          overtimeAction: step.overtimeAction || 'Notify and Wait',
           order: index
         }))
       }
     };
 
-    const schema = await prisma.approvalSchema.update({
+    const updatedSchema = await prisma.approvalSchema.update({
       where: { id: params.id },
       data: updateData,
       include: {
-        steps: true
+        approvalSteps: true
       }
     });
 
-    return NextResponse.json(schema);
-  } catch (error: Error | unknown) {
+    return NextResponse.json(updatedSchema);
+  } catch (error) {
     console.error('Detailed error:', error);
     return NextResponse.json(
       { error: 'Failed to update approval schema', details: error },

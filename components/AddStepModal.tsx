@@ -71,7 +71,7 @@ export default function AddStepModal({
 
   const handleRoleChange = (roleId: string) => {
     const role = roles.find(r => r.id === roleId);
-    setSelectedRoleLimit(role?.approvalLimit || null);
+    setSelectedRoleLimit(role?.approvalLimit || 0);
     setFormData(prev => ({ 
       ...prev, 
       roleId,

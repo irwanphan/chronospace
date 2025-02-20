@@ -124,12 +124,11 @@ model WorkDivision {
 model ApprovalSchema {
   id            String   @id @default(cuid())
   name          String
-  documentType  String   // 'Purchase Request' atau 'Memo'
+  description   String?
+  documentType  String
+  approvalSteps ApprovalStep[]
   divisions     String   // Array of division codes
   roles         String? 
-  title         String
-  description   String?
-  steps         ApprovalStep[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -138,15 +137,17 @@ model ApprovalSchema {
 }
 
 model ApprovalStep {
-  id            String   @id @default(cuid())
-  schemaId      String
-  role          String
-  specificUserId String?
-  limit         Float?
-  duration      Int
-  overtime      String   // 'Notify and Wait', 'Auto Approve', 'Auto Reject', 'Escalate'
-  order         Int
-  schema        ApprovalSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+  id              String   @id @default(cuid())
+  schemaId        String
+  schema          ApprovalSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
+  role            String
+  specificUserId  String?
+  duration        Int
+  overtimeAction  String
+  limit           Float?
+  order           Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("approval_steps")
   @@index([schemaId])

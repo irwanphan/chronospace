@@ -12,6 +12,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
+  await prisma.approvalStep.deleteMany();
   await prisma.approvalSchema.deleteMany();
   await prisma.purchaseRequest.deleteMany();
   await prisma.budgetedItem.deleteMany();

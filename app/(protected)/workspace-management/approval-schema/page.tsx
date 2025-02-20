@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import { Search, Filter, Plus } from 'lucide-react';
-import { ApprovalSchema } from '@/types/approvalSchema';
+import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
-import SchemaActions from './components/SchemaActions';
 import { stripHtmlTags } from '@/lib/utils';
+import SchemaActions from './components/SchemaActions';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -21,8 +21,7 @@ export default function ApprovalSchemaPage() {
       const response = await fetch('/api/workspace-management/approval-schemas');
       if (!response.ok) throw new Error('Failed to fetch schemas');
       const data = await response.json();
-
-      setSchemas(Array.isArray(data.schemas) ? data.schemas : []);
+      setSchemas(data.schemas || []);
       setDivisions(data.divisions);
       setRoles(data.roles);
       setIsLoading(false);
@@ -86,9 +85,19 @@ export default function ApprovalSchemaPage() {
   };
 
   const refreshData = async () => {
-    const schemasRes = await fetch('/api/workspace-management/approval-schemas');
-    const schemasData = await schemasRes.json();
-    setSchemas(schemasData);
+    try {
+      setIsLoading(true);
+      const refreshData = await fetch('/api/workspace-management/approval-schemas');
+      const data = await refreshData.json();
+      setSchemas(data.schemas);
+      setDivisions(data.divisions);
+      setRoles(data.roles);
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+      setError('Failed to refresh data');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -135,7 +144,7 @@ export default function ApprovalSchemaPage() {
             No approval schemas found
           </div>
         ) : (
-          schemas.map((schema) => (
+          schemas.map((schema: ApprovalSchema) => (
             <div key={schema.id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -174,7 +183,7 @@ export default function ApprovalSchemaPage() {
               <div className="mt-4 border-t pt-4">
                 <h4 className="font-medium mb-2">Approval Steps</h4>
                 <div className="space-y-2">
-                  {schema.steps.map((step, index) => (
+                  {schema.approvalSteps.map((step: ApprovalStep, index: number) => (
                     <div key={step.id} className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">Step {index + 1}:</span>
                       <span>
@@ -190,7 +199,7 @@ export default function ApprovalSchemaPage() {
                         </span>
                       )}
                       <span>{step.duration}d</span>
-                      <span>{step.overtimeAction === 'NOTIFY' ? 'Notify Only' : 'Auto Reject'}</span>
+                      <span>{step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}</span>
                     </div>
                   ))}
                 </div>
