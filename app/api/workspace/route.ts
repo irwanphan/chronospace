@@ -6,9 +6,27 @@ export async function GET() {
     const [purchaseRequests, workDivisions] = await Promise.all([
       prisma.purchaseRequest.findMany({
         include: {
-          items: true,
-          budget: true,
-          approvalSteps: true
+          // items: true,
+          budget: {
+            include: {
+              workDivision: {
+                select: {
+                  id: true,
+                  divisionName: true,
+                  divisionCode: true
+                }
+              },
+              project: {
+                select: {
+                  finishDate: true,
+                }
+              }
+            },
+            select: {
+              totalBudget: true
+            }
+          },
+          // approvalSteps: true
         },
         orderBy: {
           createdAt: 'desc'

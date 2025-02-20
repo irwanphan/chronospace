@@ -9,9 +9,8 @@ import { useRouter } from 'next/navigation';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
 import StatCard from '@/components/StatCard';
-import { toast } from 'react-hot-toast';
-import { stripHtmlTags } from '@/lib/utils';
-import { WorkDivision } from '@/types/workDivision';
+import { formatDate, stripHtmlTags } from '@/lib/utils';
+// import { WorkDivision } from '@/types/workDivision';
 import { WorkspaceAccess } from '@/types/access-control';
 import { Session } from 'next-auth';
 
@@ -26,15 +25,24 @@ interface CustomSession extends Session {
 interface PurchaseRequest {
   id: string;
   title: string;
+  documentType: string;
   description?: string;
   status: string;
+  createdBy: string;
   createdAt: string;
   items: Array<{
     qty: number;
     unitPrice: number;
   }>;
   budget: {
-    division: string;
+    id: string;
+    totalBudget: number;
+    project: {
+      finishDate: string;
+    };
+    workDivision: {
+      divisionName: string;
+    };
   };
   approvalSteps: Array<{
     limit?: number;
@@ -43,8 +51,9 @@ interface PurchaseRequest {
 
 export default function WorkspacePage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([]);
-  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const { data: session, status } = useSession() as { 
     data: CustomSession | null, 
     status: 'loading' | 'authenticated' | 'unauthenticated' 
@@ -80,19 +89,26 @@ export default function WorkspacePage() {
       if (!response.ok) throw new Error('Failed to fetch requests');
       const data = await response.json();
       setPurchaseRequests(data.purchaseRequests);
-      setWorkDivisions(data.workDivisions);
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Failed to load requests');
+      setError('Failed to load requests');
+    } finally {
+      setIsLoading(false);
     }
   };
   useEffect(() => {
     fetchData();
   }, []);
 
+  console.log('Purchase Requests:', purchaseRequests);
+
   // console.log('Session:', session); // Debug session
   // console.log('Access:', session?.user?.access); // Debug access
   // console.log('Can Create:', canCreateRequest); // Debug permission
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -109,6 +125,12 @@ export default function WorkspacePage() {
             </button>
           </div> */}
         </div>
+
+        { error && (
+          <div className="mb-4">
+            <p className="text-red-500">{error}</p>
+          </div>
+        )}
 
         {/* Filter Tabs */}
         <div className="flex flex-col gap-4 mb-8">
@@ -174,42 +196,46 @@ export default function WorkspacePage() {
         {/* Request List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {purchaseRequests.map((request) => {
-            const workDivision = workDivisions.find(
-              (division) => division.id === request.budget.division
-            );
             return (
               <RequestCard
                 key={request.id}
                 id={request.id}
-                type="Purchase Request"
+                type={request.documentType}
                 requestor={{
-                name: session?.user?.name || 'Unknown User',
-              }}
-              submittedAt={new Date(request.createdAt).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              })}
-              workDivision={workDivision?.divisionName || 'Unknown Division'}
-              status={request.status}
-              title={request.title}
-              description={stripHtmlTags(request.description || '')}
-              proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
-                request.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0)
-              )}`}
-              deadline={request.approvalSteps[0]?.limit ? 
-                new Date(Date.now() + request.approvalSteps[0].limit * 60 * 60 * 1000).toLocaleDateString('en-US', {
+                  name: request.createdBy,
+                }}
+                submittedAt={new Date(request.createdAt).toLocaleDateString('en-US', {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric'
-                }) : 
-                'No deadline'
-              }
-              attachments={0}
-              canCheck={canViewRequest}
-              canDecline={canReviewApproveRequest}
-              canApprove={canReviewApproveRequest}
-            />
+                })}
+                workDivision={request.budget.workDivision.divisionName}
+                status={request.status}
+                title={request.title}
+                description={stripHtmlTags(request.description || '')}
+                // proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
+                //   request.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0)
+                // )}`}
+                proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
+                  request.budget.totalBudget
+                )}`}
+                // deadline={request.approvalSteps[0]?.limit ? 
+                //   new Date(Date.now() + request.approvalSteps[0].limit * 60 * 60 * 1000).toLocaleDateString('en-US', {
+                //     day: 'numeric',
+                //     month: 'short',
+                //     year: 'numeric'
+                //   }) : 
+                //   'No deadline'
+                // }
+                deadline={formatDate(request.budget.project.finishDate) || 'No deadline'}
+                attachments={0}
+                canCheck={canViewRequest}
+                canDecline={canReviewApproveRequest}
+                canApprove={canReviewApproveRequest}
+                onCheck={() => router.push(`/purchase-request/${request.id}`)}
+                onDecline={() => {}}
+                onApprove={() => {}}
+              />
             );
           })}
         </div>

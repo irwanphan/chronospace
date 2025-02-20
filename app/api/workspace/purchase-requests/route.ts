@@ -98,20 +98,43 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const purchaseRequests = await prisma.purchaseRequest.findMany({
-      include: {
-        items: true,
-        budget: true,
-        approvalSteps: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const [purchaseRequestsRes, users] = await Promise.all([
+      prisma.purchaseRequest.findMany({
+        include: {
+          items: true,
+          budget: {
+            include: {
+              workDivision: {
+                select: {
+                  id: true,
+                  divisionName: true,
+                  divisionCode: true
+                }
+              }
+            }
+          },
+          approvalSteps: true,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }),
+      prisma.user.findMany({
+        select: {
+          id: true,
+          name: true
+        }
+      })
+    ]);
+
+    const purchaseRequests = purchaseRequestsRes.map(request => ({
+      ...request,
+      requestorName: users.find(user => user.id === request.createdBy)?.name || 'Unknown'
+    }));
 
     return NextResponse.json(purchaseRequests);
   } catch (error) {
-    console.error('Error fetching purchase requests:', error);
+    console.error('Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch purchase requests' },
       { status: 500 }
