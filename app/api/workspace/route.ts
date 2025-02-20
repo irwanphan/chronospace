@@ -21,9 +21,6 @@ export async function GET() {
                   finishDate: true,
                 }
               }
-            },
-            select: {
-              totalBudget: true
             }
           },
           // approvalSteps: true
