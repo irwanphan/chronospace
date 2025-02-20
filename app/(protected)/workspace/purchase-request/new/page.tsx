@@ -44,7 +44,7 @@ interface ApprovalStepForm {
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
-export default function NewRequestPage() {
+export default function NewPurchaseRequestPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);

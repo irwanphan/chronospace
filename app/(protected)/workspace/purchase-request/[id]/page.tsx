@@ -43,7 +43,7 @@ interface ApprovalStepForm {
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
-export default function NewRequestPage() {
+export default function ViewRequestPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,7 +167,7 @@ export default function NewRequestPage() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-4">New Purchase Request</h1>
+      <h1 className="text-2xl font-semibold mb-4">View Purchase Request</h1>
       
       {/* Request Info Card */}
       <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200 bg-white">
@@ -191,7 +191,7 @@ export default function NewRequestPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-gray-200">
+      <form className="bg-white rounded-lg p-6 border border-gray-200">
         <div className="space-y-6">
           <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
@@ -306,15 +306,6 @@ export default function NewRequestPage() {
               </tbody>
             </table>
           </div>
-
-          <button
-            type="button"
-            onClick={handleOpenItemModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Item
-          </button>
 
           <hr className="my-6" />
 

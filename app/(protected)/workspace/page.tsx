@@ -236,7 +236,7 @@ export default function WorkspacePage() {
                 canCheck={canViewRequest}
                 canDecline={canReviewApproveRequest}
                 canApprove={canReviewApproveRequest}
-                onCheck={() => router.push(`/purchase-request/${request.id}`)}
+                onCheck={() => router.push(`/workspace/purchase-request/${request.id}`)}
                 onDecline={() => {}}
                 onApprove={() => {}}
               />
