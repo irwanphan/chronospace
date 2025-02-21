@@ -38,7 +38,12 @@ export async function GET(
       }
     });
 
-    return NextResponse.json(purchaseRequest);
+    const currentStep = purchaseRequest?.approvalSteps.filter(step => step.status === 'PENDING').sort((a, b) => a.stepOrder - b.stepOrder)[0];
+
+    return NextResponse.json({
+      purchaseRequest,
+      currentStep
+    });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(

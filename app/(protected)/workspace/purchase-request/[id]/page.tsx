@@ -46,15 +46,17 @@ interface PurchaseRequest {
     }[];
   };
   items: PurchaseRequestItem[];
-  approvalSteps: {
-    status: string;
-    role: string;
-    specificUserId: string;
-    limit: number;
-    duration: number;
-    overtimeAction: string;
-    order: number;
-  }[];
+  approvalSteps: ApprovalStep[];
+}
+
+type ApprovalStep = {
+  role: string;
+  status: string;
+  specificUserId: string;
+  limit: number;
+  duration: number;
+  overtimeAction: string;
+  order: number;
 }
 
 export default function ViewRequestPage({ params }: { params: { id: string } }) {
@@ -63,33 +65,21 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
+  const [currentStep, setCurrentStep] = useState<ApprovalStep | null>(null);
   const [canDecline, setCanDecline] = useState(false);
   const [canApprove, setCanApprove] = useState(false);
 
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
-
-    // Cari step yang pending pertama
-    const currentStep = purchaseRequest.approvalSteps.find(step => step.status === 'submitted');
     if (!currentStep) return;
-
     // Cek apakah user memiliki akses
-    const hasAccess = 
-      // User memiliki role yang sesuai
-      (session.user.role === currentStep.role) ||
-      // Atau user adalah specific user yang ditunjuk
-      (currentStep.specificUserId === session.user.id);
-
-    // Cek apakah ini adalah step yang seharusnya (berdasarkan order)
-    const isCurrentStepOrder = purchaseRequest.approvalSteps
-      .filter(step => step.status === 'submitted')
-      .sort((a, b) => a.order - b.order)[0]?.order === currentStep.order;
-
-    if (hasAccess && isCurrentStepOrder) {
+    const hasAccess = session.user.id === currentStep.specificUserId || session.user.roleId === currentStep.role;
+    if (hasAccess && currentStep) {
       setCanDecline(true);
       setCanApprove(true);
     }
-  }, [session, purchaseRequest]);
+    // console.log("hasAccess", hasAccess, "CurrentStep", currentStep);
+  }, [session, purchaseRequest, currentStep]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,7 +87,8 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         const response = await fetch(`/api/workspace/purchase-requests/${params.id}`);
         if (response.ok) {
           const data = await response.json();
-          setPurchaseRequest(data);
+          setPurchaseRequest(data.purchaseRequest);
+          setCurrentStep(data.currentStep);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -117,7 +108,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     console.log('Approve');
   };
 
-  // console.log(purchaseRequest);
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -192,7 +182,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
               type="text"
               value={purchaseRequest?.title}
               className="w-full px-4 py-2 border rounded-lg"
-              required
+              readOnly
             />
           </div>
 

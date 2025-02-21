@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 
 interface CustomUser extends DefaultUser {
   role: string;
+  roleId: string;
   emailVerified: Date | null;
 }
 
@@ -111,6 +112,7 @@ export const authOptions: AuthOptions = {
           email: user.email,
           name: user.name,
           role: user.userRoles[0].role.roleName,
+          roleId: user.userRoles[0].role.id,
           access: {
             menuAccess,
             activityAccess,
@@ -146,6 +148,16 @@ export const authOptions: AuthOptions = {
 
         session.user.id = token.sub;
         session.user.role = token.role as string;
+        session.user.roleId = (await prisma.user.findUnique({
+          where: { id: token.sub },
+          include: {
+            userRoles: {
+              include: {
+                role: true
+              }
+            }
+          }
+        }))?.userRoles[0]?.roleId || '';
         session.user.access = {
           menuAccess: (userAccess?.menuAccess as unknown as MenuAccess) || {
             timeline: false,
@@ -177,11 +189,13 @@ export const authOptions: AuthOptions = {
             createUser: false,
             editUser: false,
             deleteUser: false,
-            manageUserAccess: false
+            manageUserAccess: false,
           },
           workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
             createPurchaseRequest: false,
-            reviewApprovePurchaseRequest: false
+            reviewApprovePurchaseRequest: false,
+            viewPurchaseRequest: false,
+            editPurchaseRequest: false
           }
         };
       }
