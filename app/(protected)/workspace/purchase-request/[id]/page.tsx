@@ -47,11 +47,13 @@ interface PurchaseRequest {
   };
   items: PurchaseRequestItem[];
   approvalSteps: {
+    status: string;
     role: string;
     specificUserId: string;
     limit: number;
     duration: number;
     overtimeAction: string;
+    order: number;
   }[];
 }
 
@@ -63,12 +65,32 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
   const [canDecline, setCanDecline] = useState(false);
   const [canApprove, setCanApprove] = useState(false);
+
   useEffect(() => {
-    if (session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest) {
+    if (!session?.user || !purchaseRequest?.approvalSteps) return;
+
+    // Cari step yang pending pertama
+    const currentStep = purchaseRequest.approvalSteps.find(step => step.status === 'submitted');
+    if (!currentStep) return;
+
+    // Cek apakah user memiliki akses
+    const hasAccess = 
+      // User memiliki role yang sesuai
+      (session.user.role === currentStep.role) ||
+      // Atau user adalah specific user yang ditunjuk
+      (currentStep.specificUserId === session.user.id);
+
+    // Cek apakah ini adalah step yang seharusnya (berdasarkan order)
+    const isCurrentStepOrder = purchaseRequest.approvalSteps
+      .filter(step => step.status === 'submitted')
+      .sort((a, b) => a.order - b.order)[0]?.order === currentStep.order;
+
+    if (hasAccess && isCurrentStepOrder) {
       setCanDecline(true);
       setCanApprove(true);
     }
-  }, [session]);
+  }, [session, purchaseRequest]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -86,6 +108,14 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     };
     fetchData();
   }, [params.id]);
+
+  const handleDecline = () => {
+    console.log('Decline');
+  };
+
+  const handleApprove = () => {
+    console.log('Approve');
+  };
 
   // console.log(purchaseRequest);
   if (isLoading) {
@@ -300,7 +330,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           </button>
           {canDecline && (
             <button 
-              // onClick={handleDecline}
+              onClick={handleDecline}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
             >
               <IconForbid className="w-5 h-5" />Decline
@@ -308,7 +338,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           )}
           {canApprove && (
             <button 
-              // onClick={handleApprove}
+              onClick={handleApprove}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
             >
               <Check className="w-5 h-5" />Approve
