@@ -1,6 +1,8 @@
 import { getInitials } from "@/lib/utils";
 import Image from "next/image";
 import Avatar from "./ui/Avatar";
+import { ScanSearch, Check } from "lucide-react";
+import { IconForbid } from "@tabler/icons-react";
 
 interface RequestCardProps {
   // id: string;
@@ -131,25 +133,25 @@ export default function RequestCard({
         {canCheck && (
           <button 
             onClick={onCheck}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
           >
-            Check
+            <ScanSearch className="w-5 h-5" />Check
           </button>
         )}
         {canDecline && (
           <button 
             onClick={onDecline}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
           >
-            Decline
+            <IconForbid className="w-5 h-5" />Decline
           </button>
         )}
         {canApprove && (
           <button 
             onClick={onApprove}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-1"
           >
-            Approve
+            <Check className="w-5 h-5" />Approve
           </button>
         )}
       </div>
