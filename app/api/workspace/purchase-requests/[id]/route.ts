@@ -11,17 +11,38 @@ export async function GET(
         id: params.id
       },
       include: {
-        items: true,
-        budget: true,
-        approvalSteps: true
+        items: {
+          include: {
+            budgetItem: {
+              include: {
+                vendor: true
+              }
+            }
+          }
+        },
+        budget: {
+          include: {
+            project: true
+          }
+        },
+        approvalSteps: true,
+        user: {
+          include: {
+            userRoles: {
+              include: {
+                role: true
+              }
+            }
+          }
+        }
       }
     });
 
     return NextResponse.json(purchaseRequest);
   } catch (error) {
-    console.error('Error fetching purchase requests:', error);
+    console.error('Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch purchase requests' },
+      { error: 'Failed to fetch purchase request' },
       { status: 500 }
     );
   }

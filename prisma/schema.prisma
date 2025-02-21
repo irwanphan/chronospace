@@ -65,6 +65,8 @@ model User {
   createdAt     DateTime  @default(now())
   access        UserAccess?
   purchaseRequests PurchaseRequest[]
+  purchaseRequestApprovals PurchaseRequestApproval[]
+  
   @@map("users")
 }
 
@@ -88,6 +90,8 @@ model Vendor {
   documents String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  budgetedItems BudgetedItem[]
+  purchaseRequestItems PurchaseRequestItem[]
 
   @@map("vendors")
 }
@@ -218,7 +222,8 @@ model BudgetedItem {
   qty         Int
   unit        String
   unitPrice   Float
-  vendor      String
+  vendorId    String
+  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   budget      Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   purchaseRequestItems PurchaseRequestItem[]
   createdAt   DateTime @default(now())
@@ -276,7 +281,8 @@ model PurchaseRequestItem {
   qty               Int
   unit              String
   unitPrice         Float
-  vendor            String
+  vendorId          String
+  vendor            Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
   budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id])
   createdAt         DateTime        @default(now())
@@ -299,7 +305,8 @@ model PurchaseRequestApproval {
   overtime         String          // overtime action
   comment          String?
   approvedAt       DateTime?       // waktu approval/reject
-  approvedBy       String?         // user yang approve/reject
+  approvedBy       String?         // optional field
+  user             User?           @relation(fields: [approvedBy], references: [id])  // make relation optional
   purchaseRequest  PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt

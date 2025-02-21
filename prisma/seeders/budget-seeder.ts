@@ -5,6 +5,7 @@ export async function budgetSeeder() {
   const projects = await prisma.project.findMany({
     select: { id: true, projectTitle: true, workDivisionId: true, year: true }
   });
+  const vendors = await prisma.vendor.findMany();
 
   for (const project of projects) {
     // Create budget for each project
@@ -28,21 +29,21 @@ export async function budgetSeeder() {
               qty: 10,
               unit: 'Unit',
               unitPrice: 15000000, // 15 Juta per unit
-              vendor: 'VDR001'
+              vendorId: vendors[0].id
             },
             {
               description: 'Software Licenses',
               qty: 50,
               unit: 'License',
               unitPrice: 2000000, // 2 Juta per license
-              vendor: 'VDR002'
+              vendorId: vendors[1].id
             },
             {
               description: 'Consulting Services',
               qty: 1,
               unit: 'Service',
               unitPrice: 100000000, // 100 Juta
-              vendor: 'VDR003'
+              vendorId: vendors[2].id
             }
           ]
         }

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+
 import { userSeeder } from './seeders/user-seeder';
 import { roleSeeder } from './seeders/role-seeder';
 import { workDivisionSeeder } from './seeders/work-division-seeder';
@@ -8,7 +9,6 @@ import { approvalSchemaSeeder } from './seeders/approval-schema-seeder';
 import { projectSeeder } from './seeders/project-seeder';
 import { budgetSeeder } from './seeders/budget-seeder';
 import { purchaseRequestSeeder } from './seeders/purchase-request-seeder';
-const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
@@ -20,8 +20,8 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.userAccess.deleteMany();
   await prisma.userRole.deleteMany();
-  await prisma.user.deleteMany();
   await prisma.vendor.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.workDivision.deleteMany();
   await prisma.role.deleteMany();
   // Seeders

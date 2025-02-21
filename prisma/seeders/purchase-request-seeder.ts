@@ -5,7 +5,11 @@ export async function purchaseRequestSeeder() {
   const [budget, user] = await Promise.all([
     prisma.budget.findFirst({
       include: {
-        items: true
+        items: {
+          include: {
+            vendor: true
+          }
+        }
       }
     }),
     prisma.user.findUnique({
@@ -35,7 +39,7 @@ export async function purchaseRequestSeeder() {
             qty: 10,
             unit: budget.items[0].unit,
             unitPrice: budget.items[0].unitPrice,
-            vendor: budget.items[0].vendor
+            vendorId: budget.items[0].vendorId
           }
         ]
       },
