@@ -230,11 +230,12 @@ export default function WorkspacePage() {
                 deadline={formatDate(request.budget.project.finishDate) || 'No deadline'}
                 attachments={0}
                 canCheck={canViewRequest}
-                canDecline={canReviewApproveRequest}
-                canApprove={canReviewApproveRequest}
+                // canDecline={canReviewApproveRequest}
+                // canApprove={canReviewApproveRequest}
                 onCheck={() => router.push(`/workspace/purchase-request/${request.id}`)}
-                onDecline={() => {}}
-                onApprove={() => {}}
+                // onDecline={() => {}}
+                // onApprove={() => {}}
+                canReview={canReviewApproveRequest}
               />
             );
           })}

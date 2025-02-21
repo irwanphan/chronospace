@@ -1,8 +1,7 @@
 import { getInitials } from "@/lib/utils";
 import Image from "next/image";
 import Avatar from "./ui/Avatar";
-import { ScanSearch, Check } from "lucide-react";
-import { IconForbid } from "@tabler/icons-react";
+import { ScanSearch } from "lucide-react";
 
 interface RequestCardProps {
   // id: string;
@@ -21,11 +20,12 @@ interface RequestCardProps {
   deadline: string;
   attachments: number;
   onCheck?: () => void;
-  onDecline?: () => void;
-  onApprove?: () => void;
+  // onDecline?: () => void;
+  // onApprove?: () => void;
   canCheck?: boolean;
-  canDecline?: boolean;
-  canApprove?: boolean;
+  // canDecline?: boolean;
+  // canApprove?: boolean;
+  canReview?: boolean;
 }
 
 export default function RequestCard({
@@ -42,11 +42,12 @@ export default function RequestCard({
   deadline,
   attachments,
   onCheck,
-  onDecline,
-  onApprove,
+  // onDecline,
+  // onApprove,
   canCheck,
-  canDecline,
-  canApprove,
+  // canDecline,
+  // canApprove,
+  canReview,
 }: RequestCardProps) {
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -133,12 +134,13 @@ export default function RequestCard({
         {canCheck && (
           <button 
             onClick={onCheck}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+            className={`px-4 py-2 border rounded-lg flex items-center gap-1 
+              ${canReview ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white hover:bg-gray-50'}`}
           >
-            <ScanSearch className="w-5 h-5" />Check
+            <ScanSearch className="w-5 h-5" />Check {canReview && '& Review'}
           </button>
         )}
-        {canDecline && (
+        {/* {canDecline && (
           <button 
             onClick={onDecline}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
@@ -153,7 +155,7 @@ export default function RequestCard({
           >
             <Check className="w-5 h-5" />Approve
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );
