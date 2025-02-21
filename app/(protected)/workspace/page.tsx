@@ -104,11 +104,7 @@ export default function WorkspacePage() {
     fetchData();
   }, []);
 
-  console.log('Purchase Requests:', purchaseRequests);
-
-  // console.log('Session:', session); // Debug session
-  // console.log('Access:', session?.user?.access); // Debug access
-  // console.log('Can Create:', canCreateRequest); // Debug permission
+  // console.log('Purchase Requests:', purchaseRequests);
 
   if (isLoading) {
     return <div>Loading...</div>;

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, Pencil } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 // import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-// import { useSession } from 'next-auth/react';
-
+import { Check, ChevronLeft, Pencil } from 'lucide-react';
+import { IconForbid } from '@tabler/icons-react';
 
 interface PurchaseRequestItem {
   id: string;
@@ -59,9 +59,16 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   // const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const { data: session } = useSession();
+  const { data: session } = useSession();
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
-  
+  const [canDecline, setCanDecline] = useState(false);
+  const [canApprove, setCanApprove] = useState(false);
+  useEffect(() => {
+    if (session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest) {
+      setCanDecline(true);
+      setCanApprove(true);
+    }
+  }, [session]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -278,7 +285,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
         <hr className="my-6" />
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-2">
           <Link
             href="/workspace"
             className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center"
@@ -289,8 +296,24 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
           >
-            <Pencil className='w-4 h-4 mr-2' />Submit
+            <Pencil className='w-4 h-4 mr-2' />Edit
           </button>
+          {canDecline && (
+            <button 
+              // onClick={handleDecline}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
+            >
+              <IconForbid className="w-5 h-5" />Decline
+            </button>
+          )}
+          {canApprove && (
+            <button 
+              // onClick={handleApprove}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
+            >
+              <Check className="w-5 h-5" />Approve
+            </button>
+          )}
         </div>
       </form>
     </div>
