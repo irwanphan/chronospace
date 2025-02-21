@@ -16,7 +16,7 @@ interface RequestItem {
   qty: number;
   unit: string;
   unitPrice: number;
-  vendor: string;
+  vendorId: string;
 }
 
 export async function POST(request: Request) {
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
             qty: item.qty,
             unit: item.unit,
             unitPrice: item.unitPrice,
-            vendor: item.vendor
+            vendorId: item.vendorId
           }))
         },
         approvalSteps: {

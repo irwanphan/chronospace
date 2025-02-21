@@ -51,7 +51,8 @@ export async function purchaseRequestSeeder() {
             status: "PENDING",
             duration: 24,
             limit: 100000000,
-            overtime: "Notify and Wait"
+            overtime: "Notify and Wait",
+            specificUser: "ertetrcm71x2fhs89hd00asgp"
           },
           {
             role: "role-gm", 

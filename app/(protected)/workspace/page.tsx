@@ -71,7 +71,7 @@ export default function WorkspacePage() {
   const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
   const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
-  
+
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Shortcut: Ctrl/Cmd + Shift + N
@@ -93,6 +93,7 @@ export default function WorkspacePage() {
       if (!response.ok) throw new Error('Failed to fetch requests');
       const data = await response.json();
       setPurchaseRequests(data.purchaseRequests);
+      setViewers(data.viewers);
     } catch (error) {
       console.error('Error:', error);
       setError('Failed to load requests');
@@ -104,7 +105,7 @@ export default function WorkspacePage() {
     fetchData();
   }, []);
 
-  // console.log('Purchase Requests:', purchaseRequests);
+  console.log('Purchase Requests:', purchaseRequests);
 
   if (isLoading) {
     return <div>Loading...</div>;

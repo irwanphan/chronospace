@@ -1,7 +1,8 @@
 export interface ApprovalStep {
   id?: string;
   schemaId: string;
-  stepNumber: number;
+  order: number;
+  status: string;
   role: string;
   specificUserId?: string;
   limit?: number;
