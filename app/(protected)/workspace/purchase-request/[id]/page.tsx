@@ -1,46 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Pencil, Trash, ListChecks } from 'lucide-react';
+import { ChevronLeft, Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { RichTextEditor } from '@/components/RichTextEditor';
+// import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { Role } from '@/types/role';
-import { User } from '@/types/user';
-import { ApprovalSchema } from '@/types/approval-schema';
-import { useSession } from 'next-auth/react';
+// import { useSession } from 'next-auth/react';
 
-interface BudgetPlan {
-  id: string;
-  title: string;
-  projectId: string;
-  project: {
-    projectCode: string;
-    projectTitle: string;
-  };
-  items: BudgetItem[];
-}
-
-interface BudgetItem {
-  id: string;
-  description: string;
-  qty: number;
-  unit: string;
-  unitPrice: number;
-  vendor: string;
-  isSubmitted?: boolean;
-  purchaseRequestId?: string;
-}
-
-interface ApprovalStepForm {
-  roleId: string;
-  specificUserId?: string;
-  limit?: number;
-  duration: number;
-  overtimeAction: 'Notify and Wait' | 'Auto Decline';
-}
 
 interface PurchaseRequestItem {
   id: string;
@@ -71,6 +38,7 @@ interface PurchaseRequest {
     };
   };
   user: {
+    name: string;
     userRoles: {
       role: {
         roleName: string;
@@ -88,29 +56,11 @@ interface PurchaseRequest {
 }
 
 export default function ViewRequestPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+  // const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
-  const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
-  const [formData, setFormData] = useState({
-    budgetId: '',
-    projectId: '',
-    title: '',
-    createdBy: '',
-    description: '',
-    items: [] as BudgetItem[],
-    steps: [] as ApprovalStepForm[],
-  });
-
-  const [requestInfo, setRequestInfo] = useState({
-    id: '',
-    requestDate: new Date(),
-    requestor: '',
-    role: ''
-  });
-
   
   useEffect(() => {
     const fetchData = async () => {
@@ -149,12 +99,14 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
               ID: <span className="font-semibold text-gray-900">{purchaseRequest?.code}</span>
             </div>
             <div className="text-sm text-gray-500">
-              Requestor: <span className="font-semibold text-gray-900">{purchaseRequest?.createdBy}</span>
+              Requestor: <span className="font-semibold text-gray-900">{purchaseRequest?.user?.name}</span>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-gray-500">
-              Request Date: <span className="font-semibold text-gray-900">{formatDate(new Date(purchaseRequest?.createdAt))}</span>
+              Request Date: <span className="font-semibold text-gray-900">
+                {purchaseRequest?.createdAt ? formatDate(new Date(purchaseRequest.createdAt)) : '-'}
+              </span>
             </div>
             <div className="text-sm text-gray-500">
               Requestor Role: <span className="font-semibold text-gray-900">{purchaseRequest?.user?.userRoles[0]?.role?.roleName}</span>
@@ -202,7 +154,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <input
               type="text"
               value={purchaseRequest?.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg"
               required
             />
@@ -267,17 +218,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                         {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
                       </td>
                       <td className="p-2">{item.budgetItem.vendor.vendorName}</td>
-                      <td className="p-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedItems(selectedItems.filter(i => i.id !== item.id));
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </td>
+                      <td className="p-2"></td>
                     </tr>
                   ))
                 )}
@@ -340,15 +281,15 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         <div className="flex justify-end gap-3">
           <Link
             href="/workspace"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center"
           >
-            Back
+            <ChevronLeft className='w-4 h-4 mr-2' />Back
           </Link>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
           >
-            Submit
+            <Pencil className='w-4 h-4 mr-2' />Submit
           </button>
         </div>
       </form>
