@@ -207,7 +207,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                   <th className="text-right p-2">Unit Price</th>
                   <th className="text-right p-2">Total Price</th>
                   <th className="text-left p-2">Vendor</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -245,7 +244,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                         {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
                       </td>
                       <td className="p-2">{item.budgetItem.vendor.vendorName}</td>
-                      <td className="p-2"></td>
                     </tr>
                   ))
                 )}
@@ -267,7 +265,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                   <th className="text-left py-3 px-4">Limit</th>
                   <th className="text-left py-3 px-4">Duration</th>
                   <th className="text-left py-3 px-4">Overtime</th>
-                  <th className="text-left py-3 px-4 w-16"></th>
                 </tr>
               </thead>
               <tbody>
@@ -281,20 +278,13 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                   purchaseRequest?.approvalSteps.map((step, index) => (
                     <tr key={index} className="border-b">
                       <td className="py-3 px-4">{index + 1}</td>
-                      <td className="py-3 px-4">
-                        {step.role}
-                      </td>
-                      <td className="py-3 px-4">
-                        {step.specificUserId || 'Any user with role'}
-                      </td>
-                      <td className="py-3 px-4">
-                        {step.limit || '-'}
-                      </td>
+                      <td className="py-3 px-4">{step.role}</td>
+                      <td className="py-3 px-4">{step.specificUserId || 'Any user with role'}</td>
+                      <td className="py-3 px-4">{step.limit || '-'}</td>
                       <td className="py-3 px-4">{step.duration} days</td>
                       <td className="py-3 px-4">
                         {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                       </td>
-                      <td className="py-3 px-4"></td>
                     </tr>
                   ))
                 )}
