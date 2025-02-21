@@ -84,6 +84,129 @@ export async function userAccessSeeder() {
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: false,
         }
+      },
+      {
+        userId: '289fhvr2gih9rg8ha9ih98a9f', // hr user id
+        menuAccess: {
+          timeline: true,
+          workspace: true,
+          projectPlanning: true,
+          budgetPlanning: true,
+          userManagement: true,
+          workspaceManagement: true
+        },
+        activityAccess: {
+          createProject: true,
+          editProject: true,
+          deleteProject: false,
+          createBudget: true,
+          editBudget: true,
+          deleteBudget: false,
+          createWorkDivision: true, 
+          editWorkDivision: true,
+          deleteWorkDivision: false,
+          createRole: true,
+          editRole: true,
+          deleteRole: false,
+          createVendor: true,
+          editVendor: true,
+          deleteVendor: false,
+          createApprovalSchema: true,
+          editApprovalSchema: true,
+          deleteApprovalSchema: false,
+          createUser: true,
+          editUser: true,
+          deleteUser: false,
+          manageUserAccess: false
+        },
+        workspaceAccess: {
+          createPurchaseRequest: true, 
+          viewPurchaseRequest: true,
+          editPurchaseRequest: true,
+          reviewApprovePurchaseRequest: true
+        }
+      },
+      {
+        userId: '389fuii7r0sdv8huqweuqrevu', // gm user id  
+        menuAccess: {
+          timeline: true,
+          workspace: true,
+          projectPlanning: true,
+          budgetPlanning: true,
+          userManagement: true, 
+          workspaceManagement: true
+        },
+        activityAccess: {
+          createProject: true,
+          editProject: true,
+          deleteProject: false, 
+          createBudget: true,
+          editBudget: true,
+          deleteBudget: false,
+          createWorkDivision: true,
+          editWorkDivision: true,
+          deleteWorkDivision: false,
+          createRole: true,
+          editRole: true,
+          deleteRole: false,
+          createVendor: true,
+          editVendor: true,
+          deleteVendor: false,
+          createApprovalSchema: true,
+          editApprovalSchema: true,
+          deleteApprovalSchema: false,
+          createUser: true,
+          editUser: true,
+          deleteUser: false,
+          manageUserAccess: false
+        },
+        workspaceAccess: {
+          createPurchaseRequest: false,
+          viewPurchaseRequest: true,
+          editPurchaseRequest: false,
+          reviewApprovePurchaseRequest: true
+        }
+      },
+      {
+        userId: 'ertetrcm71x2fhs89hd00asgp', // dh user id
+        menuAccess: {
+          timeline: true,
+          workspace: true,
+          projectPlanning: true,
+          budgetPlanning: true,
+          userManagement: true,
+          workspaceManagement: true
+        },
+        activityAccess: {
+          createProject: true,
+          editProject: true,  
+          deleteProject: false,
+          createBudget: true,
+          editBudget: true,
+          deleteBudget: false,
+          createWorkDivision: true,
+          editWorkDivision: true, 
+          deleteWorkDivision: false,
+          createRole: true,
+          editRole: true,
+          deleteRole: false,
+          createVendor: true,
+          editVendor: true,
+          deleteVendor: false,
+          createApprovalSchema: true,
+          editApprovalSchema: true,
+          deleteApprovalSchema: false,
+          createUser: true,
+          editUser: true,
+          deleteUser: false,
+          manageUserAccess: false
+        },
+        workspaceAccess: {
+          createPurchaseRequest: false,
+          viewPurchaseRequest: true,
+          editPurchaseRequest: false,
+          reviewApprovePurchaseRequest: true
+        }
       }
     ]
   });
