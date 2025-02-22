@@ -13,6 +13,7 @@ import { formatDate, stripHtmlTags } from '@/lib/utils';
 // import { WorkDivision } from '@/types/workDivision';
 import { WorkspaceAccess } from '@/types/access-control';
 import { Session } from 'next-auth';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface CustomSession extends Session {
   user: {
@@ -117,14 +118,7 @@ export default function WorkspacePage() {
   }, []); // Empty dependency array
 
   // console.log('Purchase Requests:', purchaseRequests);
-
-  if (isLoading) {
-    return <div>
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center h-screen">
-        <div className="w-20 h-20 border-t-2 border-b-2 border-blue-900 rounded-full animate-spin"></div>
-      </div>
-    </div>;
-  }
+  if (isLoading) return <LoadingSpin />
 
   return (
     <>
