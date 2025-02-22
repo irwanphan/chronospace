@@ -87,24 +87,36 @@ export default function WorkspacePage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [canCreateRequest, router]);
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch('/api/workspace');
-      if (!response.ok) throw new Error('Failed to fetch requests');
-      const data = await response.json();
-      setPurchaseRequests(data.purchaseRequests);
-    } catch (error) {
-      console.error('Error:', error);
-      setError('Failed to load requests');
-    } finally {
-      setIsLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchData();
-  }, []);
+    let mounted = true;
 
-  console.log('Purchase Requests:', purchaseRequests);
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/workspace');
+        if (!response.ok) throw new Error('Failed to fetch requests');
+        const data = await response.json();
+        
+        if (mounted) {  // Hanya update state jika komponen masih mounted
+          setPurchaseRequests(data.purchaseRequests);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        if (mounted) {
+          setError('Failed to load requests');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      mounted = false;  // Cleanup saat unmount
+    };
+  }, []); // Empty dependency array
+
+  // console.log('Purchase Requests:', purchaseRequests);
 
   if (isLoading) {
     return <div>Loading...</div>;
