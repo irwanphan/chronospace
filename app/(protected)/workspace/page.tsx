@@ -73,20 +73,20 @@ export default function WorkspacePage() {
   const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
   const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
 
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // Shortcut: Ctrl/Cmd + Shift + N
-      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'N') {
-        event.preventDefault();
-        if (canCreateRequest) {
-          router.push('/request/new');
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const handleKeyPress = (event: KeyboardEvent) => {
+  //     // Shortcut: Ctrl/Cmd + Shift + N
+  //     if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'N') {
+  //       event.preventDefault();
+  //       if (canCreateRequest) {
+  //         router.push('/request/new');
+  //       }
+  //     }
+  //   };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [canCreateRequest, router]);
+  //   window.addEventListener('keydown', handleKeyPress);
+  //   return () => window.removeEventListener('keydown', handleKeyPress);
+  // }, [canCreateRequest, router]);
 
   useEffect(() => {
     let mounted = true;
