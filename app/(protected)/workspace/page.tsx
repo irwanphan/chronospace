@@ -93,7 +93,6 @@ export default function WorkspacePage() {
       if (!response.ok) throw new Error('Failed to fetch requests');
       const data = await response.json();
       setPurchaseRequests(data.purchaseRequests);
-      setViewers(data.viewers);
     } catch (error) {
       console.error('Error:', error);
       setError('Failed to load requests');
