@@ -211,40 +211,19 @@ export default function WorkspacePage() {
                 key={request.id}
                 code={request.code}
                 type='Purchase Request'
-                requestor={{
-                  name: request.user.name,
-                }}
-                submittedAt={new Date(request.createdAt).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })}
+                requestor={{name: request.user.name}}
+                submittedAt={formatDate(request.createdAt) || 'No submission date'}
                 workDivision={request.budget.workDivision.divisionName}
                 status={request.status}
                 title={request.title}
                 description={stripHtmlTags(request.description || '')}
-                // proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
-                //   request.items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0)
-                // )}`}
                 proposedValue={`Rp ${new Intl.NumberFormat('id-ID').format(
                   request.budget.totalBudget
                 )}`}
-                // deadline={request.approvalSteps[0]?.limit ? 
-                //   new Date(Date.now() + request.approvalSteps[0].limit * 60 * 60 * 1000).toLocaleDateString('en-US', {
-                //     day: 'numeric',
-                //     month: 'short',
-                //     year: 'numeric'
-                //   }) : 
-                //   'No deadline'
-                // }
                 deadline={formatDate(request.budget.project.finishDate) || 'No deadline'}
                 attachments={0}
                 canCheck={canViewRequest}
-                // canDecline={canReviewApproveRequest}
-                // canApprove={canReviewApproveRequest}
                 onCheck={() => router.push(`/workspace/purchase-request/${request.id}`)}
-                // onDecline={() => {}}
-                // onApprove={() => {}}
                 canReview={canReviewApproveRequest}
               />
             );
