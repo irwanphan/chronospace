@@ -1,6 +1,22 @@
 import { prisma } from "@/lib/prisma";
-import { ApprovalStep } from "@/types/approvalSchema";
 import { NextResponse } from "next/server";
+
+interface ApprovalStep {
+  id: string;
+  role: string;
+  status: string;
+  purchaseRequestId: string;
+  specificUserId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  order: number;
+  overtimeAction: string;
+  approvedBy: string | null;
+  user: {
+    name: string;
+    id: string;
+  } | null;
+}
 
 export async function GET() {
   try {
@@ -67,12 +83,9 @@ export async function GET() {
     //     return steps.specificUserId !== null;
     //   }
     // };
-    // const getRoles = (param: ApprovalStep | ApprovalStep[]) => {
-    //   if (Array.isArray(param)) {
-    //     return param.map(step => step.role);
-    //   } else {
-    //     return param.role;
-    //   }
+    // const getRoles = (param: ApprovalStep[] | ApprovalStep) => {
+    //   const role = Array.isArray(param) ? param.map(step => step.role) : param.role;
+    //   return role;
     // };
 
     // // const listOfViewers = purchaseRequests.map(request => {
@@ -100,9 +113,9 @@ export async function GET() {
       sortedSteps.forEach(step => {
         // console.log('Processing step:', step); // Debug
         // Jika ada specificUser, tambahkan ke specificUserIds
-        if (step.specificUser && step.specificUser !== 'NULL') {
-          result.specificUserIds.push(step.specificUser);
-        } 
+        if (step.specificUserId && step.specificUserId !== 'NULL') {
+          result.specificUserIds.push(step.specificUserId);
+        }
         // Jika tidak ada specificUser, tambahkan role
         else {
           result.roleIds.push(step.role);
@@ -114,7 +127,7 @@ export async function GET() {
     };
 
     const fixedPurchaseRequests = purchaseRequests.map(request => {
-      const viewers = getViewers(request.approvalSteps);
+      const viewers = getViewers(request.approvalSteps as unknown as ApprovalStep[]);
       return {
         ...request,
         viewers
