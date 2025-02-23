@@ -6,7 +6,7 @@ interface ApprovalStep {
   role: string;
   status: string;
   purchaseRequestId: string;
-  specificUserId: string | null;
+  specificUser: string | null;
   createdAt: Date;
   updatedAt: Date;
   order: number;
@@ -113,8 +113,8 @@ export async function GET() {
       sortedSteps.forEach(step => {
         // console.log('Processing step:', step); // Debug
         // Jika ada specificUser, tambahkan ke specificUserIds
-        if (step.specificUserId && step.specificUserId !== 'NULL') {
-          result.specificUserIds.push(step.specificUserId);
+        if (step.specificUser && step.specificUser !== 'NULL') {
+          result.specificUserIds.push(step.specificUser);
         }
         // Jika tidak ada specificUser, tambahkan role
         else {
@@ -126,11 +126,32 @@ export async function GET() {
       return result;
     };
 
+    const getCurrentApprover = (steps: ApprovalStep[]) => {
+      const result = {
+        specificUserId: '',
+        roleId: ''
+      };
+      
+      const currentStep = steps.find(step => step.status === 'PENDING');
+
+      if (currentStep) {
+        if (currentStep.specificUser && currentStep.specificUser !== 'NULL') {
+          result.specificUserId = currentStep.specificUser;
+        } else {
+          result.roleId = currentStep.role;
+        }
+      }
+
+      return result;
+    };
+
     const fixedPurchaseRequests = purchaseRequests.map(request => {
       const viewers = getViewers(request.approvalSteps as unknown as ApprovalStep[]);
+      const approvers = getCurrentApprover(request.approvalSteps as unknown as ApprovalStep[]);
       return {
         ...request,
-        viewers
+        viewers,
+        approvers
       };
     });
 

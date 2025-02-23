@@ -117,7 +117,7 @@ export default function WorkspacePage() {
     };
   }, []); // Empty dependency array
 
-  // console.log('Purchase Requests:', purchaseRequests);
+  console.log('Purchase Requests:', purchaseRequests);
   if (isLoading) return <LoadingSpin />
 
   return (
