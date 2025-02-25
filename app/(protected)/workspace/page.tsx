@@ -37,6 +37,7 @@ interface PurchaseRequest {
     unitPrice: number;
   }>;
   user: {
+    id: string;
     name: string;
   };
   budget: {
@@ -211,7 +212,8 @@ export default function WorkspacePage() {
                 key={request.id}
                 code={request.code}
                 type='Purchase Request'
-                requestor={{name: request.user.name}}
+                requestor={{id: request.user.id, name: request.user.name}}
+                currentUserId={session?.user?.id || ''}
                 submittedAt={formatDate(request.createdAt) || 'No submission date'}
                 workDivision={request.budget.workDivision.divisionName}
                 status={request.status}

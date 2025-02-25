@@ -4,13 +4,13 @@ import Avatar from "./ui/Avatar";
 import { ScanSearch } from "lucide-react";
 
 interface RequestCardProps {
-  // id: string;
   code: string;
   type: string;
   requestor: {
+    id: string;
     name: string;
-    avatar?: string;
   };
+  currentUserId: string;
   submittedAt: string;
   workDivision: string;
   status: string;
@@ -20,19 +20,17 @@ interface RequestCardProps {
   deadline: string;
   attachments: number;
   onCheck?: () => void;
-  // onDecline?: () => void;
-  // onApprove?: () => void;
   canCheck?: boolean;
-  // canDecline?: boolean;
-  // canApprove?: boolean;
   canReview?: boolean;
+  reviewers?: string[];
+  approvers?: string[];
 }
 
 export default function RequestCard({
-  // id,
   code,
   type,
   requestor,
+  currentUserId,
   submittedAt,
   workDivision,
   status,
@@ -42,12 +40,10 @@ export default function RequestCard({
   deadline,
   attachments,
   onCheck,
-  // onDecline,
-  // onApprove,
   canCheck,
-  // canDecline,
-  // canApprove,
   canReview,
+  reviewers,
+  approvers,
 }: RequestCardProps) {
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
