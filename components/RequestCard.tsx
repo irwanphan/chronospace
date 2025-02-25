@@ -9,6 +9,7 @@ interface RequestCardProps {
   requestor: {
     id: string;
     name: string;
+    avatar?: string;
   };
   currentUserId: string;
   submittedAt: string;
@@ -127,31 +128,17 @@ export default function RequestCard({
       </div>
 
       <div className="flex items-center gap-2 justify-end">
-        {canCheck && (
-          <button 
-            onClick={onCheck}
-            className={`px-4 py-2 border rounded-lg flex items-center gap-1 
+        {/* if any of the reviewers is current users */}
+        { canCheck && 
+          reviewers?.some(reviewer => reviewer === currentUserId) && (
+            <button 
+              onClick={onCheck}
+              className={`px-4 py-2 border rounded-lg flex items-center gap-1 
               ${canReview ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white hover:bg-gray-50'}`}
           >
-            <ScanSearch className="w-5 h-5" />Check {canReview && '& Review'}
+            <ScanSearch className="w-5 h-5" />Check {canReview && approvers?.some(approver => approver === currentUserId) && '& Review'}
           </button>
         )}
-        {/* {canDecline && (
-          <button 
-            onClick={onDecline}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
-          >
-            <IconForbid className="w-5 h-5" />Decline
-          </button>
-        )}
-        {canApprove && (
-          <button 
-            onClick={onApprove}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-1"
-          >
-            <Check className="w-5 h-5" />Approve
-          </button>
-        )} */}
       </div>
     </div>
   );
