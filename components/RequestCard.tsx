@@ -130,7 +130,7 @@ export default function RequestCard({
       <div className="flex items-center gap-2 justify-end">
         {/* if any of the reviewers is current users */}
         { canCheck && 
-          reviewers?.some(reviewer => reviewer === currentUserId) && (
+          (reviewers?.some(reviewer => reviewer === currentUserId) || requestor.id === currentUserId) && (
             <button 
               onClick={onCheck}
               className={`px-4 py-2 border rounded-lg flex items-center gap-1 
