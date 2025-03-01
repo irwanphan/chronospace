@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 // import { useRouter } from 'next/navigation';
-import { formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
 import { Check, ChevronLeft, Pencil } from 'lucide-react';
 import { IconForbid } from '@tabler/icons-react';
@@ -39,6 +39,7 @@ interface PurchaseRequest {
     };
   };
   user: {
+    id: string;
     name: string;
     userRoles: {
       role: {
@@ -48,8 +49,15 @@ interface PurchaseRequest {
   };
   items: PurchaseRequestItem[];
   approvalSteps: ApprovalStep[];
+  viewers: {
+    specificUserIds: string[];
+    roleIds: string[];
+  };
+  approvers: {
+    specificUserId: string;
+    roleId: string;
+  };
 }
-
 type ApprovalStep = {
   role: string;
   status: string;
@@ -70,31 +78,30 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const { data: session } = useSession();
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
   const [currentStep, setCurrentStep] = useState<ApprovalStep | null>(null);
-  const [canDecline, setCanDecline] = useState(false);
-  const [canApprove, setCanApprove] = useState(false);
+  const [canReview, setCanReview] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
 
   console.log('purchaseRequest : ', purchaseRequest);
+  const isRequestor = purchaseRequest?.user.id === session?.user?.id;
 
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
     if (!currentStep) return;
 
+    if (purchaseRequest.viewers.specificUserIds.includes(session.user.id) || purchaseRequest.viewers.roleIds.includes(session.user.roleId)) {
+      setHasAccess(true);
+    }
+
     // Cek apakah user memiliki akses
     if (currentStep.specificUser !== null) {
       if (session.user.id === currentStep.specificUser) {
-        setHasAccess(true);
+        setCanReview(true);
       }
     } else {
       if (session.user.roleId === currentStep.role) {
-        setHasAccess(true);
+        setCanReview(true);
       }
-    }
-
-    if (hasAccess && currentStep) {
-      setCanDecline(true);
-      setCanApprove(true);
     }
   }, [session, purchaseRequest, currentStep, hasAccess]);
 
@@ -105,7 +112,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         if (response.ok) {
           const data = await response.json();
           setPurchaseRequest(data.purchaseRequest);
-          setCurrentStep(data.currentStep);
+          setCurrentStep(data.purchaseRequest.currentStep);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -324,7 +331,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                       <td className="py-3 px-4">{index + 1}</td>
                       <td className="py-3 px-4">{step.role}</td>
                       <td className="py-3 px-4">{step.specificUserDetails?.name || 'Any user with role'}</td>
-                      <td className="py-3 px-4">{step.limit || '-'}</td>
+                      <td className="py-3 px-4">{formatCurrency(step.limit) || '-'}</td>
                       <td className="py-3 px-4">{step.duration} days</td>
                       <td className="py-3 px-4">
                         {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
@@ -347,13 +354,15 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           >
             <ChevronLeft className='w-4 h-4 mr-2' />Back
           </Link>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
-          >
-            <Pencil className='w-4 h-4 mr-2' />Edit
-          </button>
-          {canDecline && (
+          {isRequestor && (
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
+            >
+              <Pencil className='w-4 h-4 mr-2' />Edit
+            </button>
+          )}
+          {canReview && (
             <button 
               onClick={handleDecline}
               type="button"
@@ -362,7 +371,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
               <IconForbid className="w-5 h-5" />Decline
             </button>
           )}
-          {canApprove && (
+          {canReview && (
             <button 
               onClick={() => setIsApproveModalOpen(true)}
               type="button"

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getViewers, getCurrentApprover, ApprovalStep } from '@/app/api/workspace/route';
 
 export async function GET(
   request: Request,
@@ -48,9 +49,15 @@ export async function GET(
 
     const currentStep = purchaseRequest?.approvalSteps.filter(step => step.status === 'PENDING').sort((a, b) => a.stepOrder - b.stepOrder)[0];
 
+    const fixedPurchaseRequest = {
+      ...purchaseRequest,
+      viewers: getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),
+      approvers: getCurrentApprover(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),
+      currentStep: currentStep
+    };
+
     return NextResponse.json({
-      purchaseRequest,
-      currentStep
+      purchaseRequest: fixedPurchaseRequest,
     });
   } catch (error) {
     console.error('Error:', error);

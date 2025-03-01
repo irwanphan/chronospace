@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-interface ApprovalStep {
+export interface ApprovalStep {
   id: string;
   role: string;
   status: string;
@@ -17,6 +17,51 @@ interface ApprovalStep {
     id: string;
   } | null;
 }
+
+export const getViewers = (steps: ApprovalStep[]) => {
+  const result = {
+    specificUserIds: [] as string[],
+    roleIds: [] as string[]
+  };
+
+  // Sort steps by order
+  const sortedSteps = steps.sort((a, b) => a.order - b.order);
+  
+  // Cek setiap step
+  sortedSteps.forEach(step => {
+    // console.log('Processing step:', step); // Debug
+    // Jika ada specificUser, tambahkan ke specificUserIds
+    if (step.specificUser && step.specificUser !== 'NULL') {
+      result.specificUserIds.push(step.specificUser);
+    }
+    // Jika tidak ada specificUser, tambahkan role
+    else {
+      result.roleIds.push(step.role);
+    }
+  });
+
+  // console.log('Final result:', result); // Debug
+  return result;
+};
+
+export const getCurrentApprover = (steps: ApprovalStep[]) => {
+  const result = {
+    specificUserId: '',
+    roleId: ''
+  };
+  
+  const currentStep = steps.find(step => step.status === 'PENDING');
+
+  if (currentStep) {
+    if (currentStep.specificUser && currentStep.specificUser !== 'NULL') {
+      result.specificUserId = currentStep.specificUser;
+    } else {
+      result.roleId = currentStep.role;
+    }
+  }
+
+  return result;
+};
 
 export async function GET() {
   try {
@@ -63,8 +108,6 @@ export async function GET() {
       }),
     ]);
 
-    
-
     // const getCurrentStep = (steps: ApprovalStep[]) => {
     //   // Sort steps by order
     //   const sortedSteps = steps.sort((a, b) => a.order - b.order);
@@ -100,51 +143,6 @@ export async function GET() {
     // //     return step.role;
     // //   });
     // // });
-
-    const getViewers = (steps: ApprovalStep[]) => {
-      const result = {
-        specificUserIds: [] as string[],
-        roleIds: [] as string[]
-      };
-
-      // Sort steps by order
-      const sortedSteps = steps.sort((a, b) => a.order - b.order);
-      
-      // Cek setiap step
-      sortedSteps.forEach(step => {
-        // console.log('Processing step:', step); // Debug
-        // Jika ada specificUser, tambahkan ke specificUserIds
-        if (step.specificUser && step.specificUser !== 'NULL') {
-          result.specificUserIds.push(step.specificUser);
-        }
-        // Jika tidak ada specificUser, tambahkan role
-        else {
-          result.roleIds.push(step.role);
-        }
-      });
-
-      // console.log('Final result:', result); // Debug
-      return result;
-    };
-
-    const getCurrentApprover = (steps: ApprovalStep[]) => {
-      const result = {
-        specificUserId: '',
-        roleId: ''
-      };
-      
-      const currentStep = steps.find(step => step.status === 'PENDING');
-
-      if (currentStep) {
-        if (currentStep.specificUser && currentStep.specificUser !== 'NULL') {
-          result.specificUserId = currentStep.specificUser;
-        } else {
-          result.roleId = currentStep.role;
-        }
-      }
-
-      return result;
-    };
 
     const fixedPurchaseRequests = purchaseRequests.map(request => {
       const viewers = getViewers(request.approvalSteps as unknown as ApprovalStep[]);
