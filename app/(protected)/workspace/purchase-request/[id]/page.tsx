@@ -284,6 +284,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                   <th className="text-left py-3 px-4">Limit</th>
                   <th className="text-left py-3 px-4">Duration</th>
                   <th className="text-left py-3 px-4">Overtime</th>
+                  <th className="text-left py-3 px-4">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -304,6 +305,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                       <td className="py-3 px-4">
                         {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                       </td>
+                      <td className="py-3 px-4">{step.status}</td>
                     </tr>
                   ))
                 )}
@@ -330,6 +332,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           {canDecline && (
             <button 
               onClick={handleDecline}
+              type="button"
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
             >
               <IconForbid className="w-5 h-5" />Decline
@@ -338,6 +341,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           {canApprove && (
             <button 
               onClick={handleApprove}
+              type="button"
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
             >
               <Check className="w-5 h-5" />Approve
