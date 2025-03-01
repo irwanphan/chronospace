@@ -25,7 +25,15 @@ export async function GET(
             project: true
           }
         },
-        approvalSteps: true,
+        approvalSteps: {
+          include: {
+            specificUserDetails: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
         user: {
           include: {
             userRoles: {

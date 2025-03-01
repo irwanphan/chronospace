@@ -57,6 +57,9 @@ type ApprovalStep = {
   duration: number;
   overtimeAction: string;
   order: number;
+  specificUserDetails: {
+    name: string;
+  };
 }
 
 export default function ViewRequestPage({ params }: { params: { id: string } }) {
@@ -281,7 +284,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                     <tr key={index} className="border-b">
                       <td className="py-3 px-4">{index + 1}</td>
                       <td className="py-3 px-4">{step.role}</td>
-                      <td className="py-3 px-4">{step.specificUser || 'Any user with role'}</td>
+                      <td className="py-3 px-4">{step.specificUserDetails?.name || 'Any user with role'}</td>
                       <td className="py-3 px-4">{step.limit || '-'}</td>
                       <td className="py-3 px-4">{step.duration} days</td>
                       <td className="py-3 px-4">

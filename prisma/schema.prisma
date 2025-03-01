@@ -66,7 +66,7 @@ model User {
   access        UserAccess?
   purchaseRequests PurchaseRequest[]
   purchaseRequestApprovals PurchaseRequestApproval[]
-  
+  specificUserDetails PurchaseRequestApproval[] @relation("SpecificUser")
   @@map("users")
 }
 
@@ -298,6 +298,7 @@ model PurchaseRequestApproval {
   purchaseRequestId String
   role             String
   specificUser     String?
+  specificUserDetails User? @relation("SpecificUser", fields: [specificUser], references: [id])
   stepOrder        Int
   status           String          // e.g., "Pending", "Approved", "Rejected"
   limit            Int?            // budget limit that can be approved by the selected role
