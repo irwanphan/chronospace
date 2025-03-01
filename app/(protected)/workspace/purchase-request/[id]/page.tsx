@@ -52,7 +52,7 @@ interface PurchaseRequest {
 type ApprovalStep = {
   role: string;
   status: string;
-  specificUserId: string;
+  specificUser: string;
   limit: number;
   duration: number;
   overtimeAction: string;
@@ -69,11 +69,13 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [canDecline, setCanDecline] = useState(false);
   const [canApprove, setCanApprove] = useState(false);
 
+  console.log('purchaseRequest : ', purchaseRequest);
+
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
     if (!currentStep) return;
     // Cek apakah user memiliki akses
-    const hasAccess = session.user.id === currentStep.specificUserId || session.user.roleId === currentStep.role;
+    const hasAccess = session.user.id === currentStep.specificUser || session.user.roleId === currentStep.role;
     if (hasAccess && currentStep) {
       setCanDecline(true);
       setCanApprove(true);
@@ -279,7 +281,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                     <tr key={index} className="border-b">
                       <td className="py-3 px-4">{index + 1}</td>
                       <td className="py-3 px-4">{step.role}</td>
-                      <td className="py-3 px-4">{step.specificUserId || 'Any user with role'}</td>
+                      <td className="py-3 px-4">{step.specificUser || 'Any user with role'}</td>
                       <td className="py-3 px-4">{step.limit || '-'}</td>
                       <td className="py-3 px-4">{step.duration} days</td>
                       <td className="py-3 px-4">
