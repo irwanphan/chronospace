@@ -12,6 +12,7 @@ interface RequestCardProps {
     avatar?: string;
   };
   currentUserId: string;
+  currentUserRole: string;
   submittedAt: string;
   workDivision: string;
   status: string;
@@ -23,8 +24,14 @@ interface RequestCardProps {
   onCheck?: () => void;
   canCheck?: boolean;
   canReview?: boolean;
-  reviewers?: string[];
-  approvers?: string[];
+  reviewers?: {
+    specificUserIds: string[];
+    roleIds: string[];
+  };
+  approvers?: {
+    specificUserId: string;
+    roleId: string;
+  };
 }
 
 export default function RequestCard({
@@ -32,6 +39,7 @@ export default function RequestCard({
   type,
   requestor,
   currentUserId,
+  currentUserRole,
   submittedAt,
   workDivision,
   status,
@@ -46,6 +54,7 @@ export default function RequestCard({
   reviewers,
   approvers,
 }: RequestCardProps) {
+
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
@@ -130,13 +139,22 @@ export default function RequestCard({
       <div className="flex items-center gap-2 justify-end">
         {/* if any of the reviewers is current users */}
         { canCheck && 
-          (reviewers?.some(reviewer => reviewer === currentUserId) || requestor.id === currentUserId) && (
+          ( reviewers?.specificUserIds.includes(currentUserId) || reviewers?.roleIds.includes(currentUserRole) || requestor.id === currentUserId) && (
             <button 
               onClick={onCheck}
+              type="button"
               className={`px-4 py-2 border rounded-lg flex items-center gap-1 
-              ${canReview ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white hover:bg-gray-50'}`}
+              ${canReview && 
+                ( approvers?.specificUserId === currentUserId || 
+                  approvers?.roleId === currentUserRole) ? 
+                  'bg-blue-600 text-white hover:bg-blue-700' : 
+                  'bg-white hover:bg-gray-50'}`}
           >
-            <ScanSearch className="w-5 h-5" />Check {canReview && approvers?.some(approver => approver === currentUserId) && '& Review'}
+            <ScanSearch className="w-5 h-5" />
+              Check {canReview && 
+                ( approvers?.specificUserId === currentUserId || 
+                  approvers?.roleId === currentUserRole) && 
+                  '& Review'}
           </button>
         )}
       </div>

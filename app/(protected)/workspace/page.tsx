@@ -53,6 +53,14 @@ interface PurchaseRequest {
   approvalSteps: Array<{
     limit?: number;
   }>;
+  viewers: {
+    specificUserIds: string[];
+    roleIds: string[];
+  };
+  approvers: {
+    specificUserId: string;
+    roleId: string;
+  };
 }
 
 export default function WorkspacePage() {
@@ -118,7 +126,7 @@ export default function WorkspacePage() {
     };
   }, []); // Empty dependency array
 
-  console.log('Purchase Requests:', purchaseRequests);
+  // console.log('Purchase Requests:', purchaseRequests);
   if (isLoading) return <LoadingSpin />
 
   return (
@@ -214,6 +222,7 @@ export default function WorkspacePage() {
                 type='Purchase Request'
                 requestor={{id: request.user.id, name: request.user.name}}
                 currentUserId={session?.user?.id || ''}
+                currentUserRole={session?.user?.roleId || ''}
                 submittedAt={formatDate(request.createdAt) || 'No submission date'}
                 workDivision={request.budget.workDivision.divisionName}
                 status={request.status}
@@ -227,6 +236,8 @@ export default function WorkspacePage() {
                 canCheck={canViewRequest}
                 onCheck={() => router.push(`/workspace/purchase-request/${request.id}`)}
                 canReview={canReviewApproveRequest}
+                reviewers={request.viewers}
+                approvers={request.approvers}
               />
             );
           })}

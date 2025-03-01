@@ -71,20 +71,30 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [currentStep, setCurrentStep] = useState<ApprovalStep | null>(null);
   const [canDecline, setCanDecline] = useState(false);
   const [canApprove, setCanApprove] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
 
   console.log('purchaseRequest : ', purchaseRequest);
 
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
     if (!currentStep) return;
+
     // Cek apakah user memiliki akses
-    const hasAccess = session.user.id === currentStep.specificUser || session.user.roleId === currentStep.role;
+    if (currentStep.specificUser !== null) {
+      if (session.user.id === currentStep.specificUser) {
+        setHasAccess(true);
+      }
+    } else {
+      if (session.user.roleId === currentStep.role) {
+        setHasAccess(true);
+      }
+    }
+
     if (hasAccess && currentStep) {
       setCanDecline(true);
       setCanApprove(true);
     }
-    // console.log("hasAccess", hasAccess, "CurrentStep", currentStep);
-  }, [session, purchaseRequest, currentStep]);
+  }, [session, purchaseRequest, currentStep, hasAccess]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,6 +122,10 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const handleApprove = () => {
     console.log('Approve');
   };
+
+  if (!hasAccess) {
+    return <div className="flex justify-center items-center h-screen">You don&apos;t have access to this page</div>;
+  }
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
