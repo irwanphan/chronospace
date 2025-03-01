@@ -48,7 +48,7 @@ export async function purchaseRequestSeeder() {
           {
             role: "role-dh",
             stepOrder: 1,
-            status: "PENDING",
+            status: "Pending",
             duration: 24,
             limit: 100000000,
             overtime: "Notify and Wait",
@@ -57,7 +57,7 @@ export async function purchaseRequestSeeder() {
           {
             role: "role-gm", 
             stepOrder: 2,
-            status: "PENDING",
+            status: "Pending",
             duration: 24,
             limit: 250000000,
             overtime: "Notify and Wait"

@@ -8,6 +8,7 @@ import { formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
 import { Check, ChevronLeft, Pencil } from 'lucide-react';
 import { IconForbid } from '@tabler/icons-react';
+import { Modal } from '@/components/ui/Modal';
 
 interface PurchaseRequestItem {
   id: string;
@@ -56,7 +57,7 @@ type ApprovalStep = {
   limit: number;
   duration: number;
   overtimeAction: string;
-  order: number;
+  stepOrder: number;
   specificUserDetails: {
     name: string;
   };
@@ -72,6 +73,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [canDecline, setCanDecline] = useState(false);
   const [canApprove, setCanApprove] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
 
   console.log('purchaseRequest : ', purchaseRequest);
 
@@ -119,8 +121,30 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     console.log('Decline');
   };
 
-  const handleApprove = () => {
-    console.log('Approve');
+  const handleApproveConfirm = async () => {
+    try {
+      const response = await fetch(`/api/workspace/purchase-requests/${params.id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stepOrder: currentStep?.stepOrder,
+          approvedBy: session?.user?.id
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to approve');
+      
+      // Refresh data
+      const updatedData = await response.json();
+      setPurchaseRequest(updatedData.purchaseRequest);
+      setCurrentStep(updatedData.currentStep);
+      setIsApproveModalOpen(false);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Failed to approve request');
+    }
   };
 
   if (!hasAccess) {
@@ -340,7 +364,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           )}
           {canApprove && (
             <button 
-              onClick={handleApprove}
+              onClick={() => setIsApproveModalOpen(true)}
               type="button"
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
             >
@@ -349,6 +373,31 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           )}
         </div>
       </form>
+
+      {/* Modal Konfirmasi */}
+      <Modal
+        isOpen={isApproveModalOpen}
+        onClose={() => setIsApproveModalOpen(false)}
+        title="Approval Confirmation"
+      >
+        <div>
+          <p>Are you sure you want to approve this purchase request?</p>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              onClick={() => setIsApproveModalOpen(false)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleApproveConfirm}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              Confirm Approval
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 } 
