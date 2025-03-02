@@ -90,16 +90,17 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [hasAccess, setHasAccess] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const isRequestor = purchaseRequest?.user.id === session?.user?.id;
 
+  // Debug
   console.log('purchaseRequest : ', purchaseRequest);
   console.log('viewers : ', purchaseRequest?.viewers);
   console.log('current user role : ', `role-${session?.user?.roleId}`);
-  console.log('has access : ', hasAccess);
-  const isRequestor = purchaseRequest?.user.id === session?.user?.id;
+  console.log('current step : ', currentStep);
+  // console.log('has access : ', hasAccess);
 
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.viewers) return;
-
     // console.log('Access Check Debug:', {
     //   userRole: session.user.roleId,
     //   availableRoles: purchaseRequest.viewers.roleIds,
@@ -116,30 +117,27 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     }
   }, [session, purchaseRequest]);
 
-  console.log('current step : ', currentStep);
-
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
     if (!currentStep) return;
 
     const userRoleWithPrefix = `${session.user.roleId}`;
-    
-    console.log('Debug values:', {
-      userRoleWithPrefix,
-      roleIdsArray: purchaseRequest.viewers.roleIds,
-      exactMatch: purchaseRequest.viewers.roleIds[0] === userRoleWithPrefix,
-      stringComparison: {
-        userRole: userRoleWithPrefix.toString(),
-        arrayRole: purchaseRequest.viewers.roleIds[0].toString()
-      }
-    });
+    // console.log('Debug values:', {
+    //   userRoleWithPrefix,
+    //   roleIdsArray: purchaseRequest.viewers.roleIds,
+    //   exactMatch: purchaseRequest.viewers.roleIds[0] === userRoleWithPrefix,
+    //   stringComparison: {
+    //     userRole: userRoleWithPrefix.toString(),
+    //     arrayRole: purchaseRequest.viewers.roleIds[0].toString()
+    //   }
+    // });
 
     const hasRoleAccess = purchaseRequest.viewers.roleIds.some(roleId => {
-      console.log('Comparing:', {
-        arrayRole: roleId,
-        userRole: userRoleWithPrefix,
-        isEqual: roleId === userRoleWithPrefix
-      });
+      // console.log('Comparing:', {
+      //   arrayRole: roleId,
+      //   userRole: userRoleWithPrefix,
+      //   isEqual: roleId === userRoleWithPrefix
+      // });
       return roleId === userRoleWithPrefix;
     });
 
@@ -198,20 +196,32 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
       if (!response.ok) throw new Error('Failed to approve');
       
-      // Fetch fresh data immediately
+      // Fetch fresh data
       const freshDataResponse = await fetch(`/api/workspace/purchase-requests/${params.id}`);
-      if (freshDataResponse.ok) {
-        const freshData = await freshDataResponse.json();
+      if (!freshDataResponse.ok) throw new Error('Failed to fetch updated data');
+      
+      const freshData = await freshDataResponse.json();
+      
+      // Pastikan data ada sebelum update state
+      if (freshData && freshData.purchaseRequest) {
         setPurchaseRequest(freshData.purchaseRequest);
         setCurrentStep(freshData.currentStep);
+        
+        // Update canReview berdasarkan status baru
+        if (freshData.currentStep?.status === 'Approved') {
+          setCanReview(false);
+        }
+      } else {
+        throw new Error('Invalid data received after approval');
       }
-
+      
       setIsApproveModalOpen(false);
     } catch (error) {
       console.error('Error:', error);
       setError('Failed to approve request');
     } finally {
       setIsApproving(false);
+      setCanReview(false);
     }
   };
 
@@ -423,23 +433,24 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
               <Pencil className='w-4 h-4 mr-2' />Edit
             </button>
           )}
-          {canReview && (
-            <button 
-              onClick={handleDecline}
-              type="button"
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
-            >
-              <IconForbid className="w-5 h-5" />Decline
-            </button>
-          )}
-          {canReview && (
-            <button 
-              onClick={() => setIsApproveModalOpen(true)}
-              type="button"
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
-            >
-              <Check className="w-5 h-5" />Approve
-            </button>
+          { canReview ? (
+            <>
+              <button 
+                onClick={handleDecline}
+                type="button"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
+              >
+                <IconForbid className="w-5 h-5" />Decline
+              </button>
+              <button 
+                onClick={() => setIsApproveModalOpen(true)}
+                type="button"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
+              >
+                <Check className="w-5 h-5" />Approve
+              </button>
+            </>
+          ) : ( <></>
           )}
         </div>
       </form>
