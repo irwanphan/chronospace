@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
 import { Check, ChevronLeft, Pencil } from 'lucide-react';
@@ -82,7 +81,6 @@ type ApprovalStep = {
 }
 
 export default function ViewRequestPage({ params }: { params: { id: string } }) {
-  // const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -91,6 +89,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [canReview, setCanReview] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   console.log('purchaseRequest : ', purchaseRequest);
   console.log('viewers : ', purchaseRequest?.viewers);
@@ -185,6 +184,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
   const handleApproveConfirm = async () => {
     try {
+      setIsApproving(true);
       const response = await fetch(`/api/workspace/purchase-requests/${params.id}/approve`, {
         method: 'POST',
         headers: {
@@ -198,14 +198,20 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
       if (!response.ok) throw new Error('Failed to approve');
       
-      // Refresh data
-      const updatedData = await response.json();
-      setPurchaseRequest(updatedData.purchaseRequest);
-      setCurrentStep(updatedData.currentStep);
+      // Fetch fresh data immediately
+      const freshDataResponse = await fetch(`/api/workspace/purchase-requests/${params.id}`);
+      if (freshDataResponse.ok) {
+        const freshData = await freshDataResponse.json();
+        setPurchaseRequest(freshData.purchaseRequest);
+        setCurrentStep(freshData.currentStep);
+      }
+
       setIsApproveModalOpen(false);
     } catch (error) {
       console.error('Error:', error);
       setError('Failed to approve request');
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -450,14 +456,26 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <button
               onClick={() => setIsApproveModalOpen(false)}
               className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+              disabled={isApproving}
             >
               Cancel
             </button>
             <button
               onClick={handleApproveConfirm}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              disabled={isApproving}
             >
-              Confirm Approval
+              {isApproving ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  Confirm Approval
+                </>
+              )}
             </button>
           </div>
         </div>
