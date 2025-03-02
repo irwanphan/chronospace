@@ -43,11 +43,18 @@ export async function GET(
               }
             }
           }
+        },
+        histories: {
+          include: {
+            actor: true
+          }
         }
       }
     });
 
-    const currentStep = purchaseRequest?.approvalSteps.filter(step => step.status === 'PENDING').sort((a, b) => a.stepOrder - b.stepOrder)[0];
+    const currentStep = purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
+
+    console.log('current step : ', currentStep);
 
     const fixedPurchaseRequest = {
       ...purchaseRequest,

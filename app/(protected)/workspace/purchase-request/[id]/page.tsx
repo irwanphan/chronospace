@@ -10,6 +10,16 @@ import { Check, ChevronLeft, Pencil } from 'lucide-react';
 import { IconForbid } from '@tabler/icons-react';
 import { Modal } from '@/components/ui/Modal';
 
+interface PurchaseRequestHistory {
+  id: string;
+  action: string;
+  actor: {
+    name: string;
+  };
+  createdAt: string;
+  comment: string;
+}
+
 interface PurchaseRequestItem {
   id: string;
   description: string;
@@ -83,13 +93,58 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
 
   console.log('purchaseRequest : ', purchaseRequest);
+  console.log('viewers : ', purchaseRequest?.viewers);
+  console.log('current user role : ', `role-${session?.user?.roleId}`);
+  console.log('has access : ', hasAccess);
   const isRequestor = purchaseRequest?.user.id === session?.user?.id;
+
+  useEffect(() => {
+    if (!session?.user || !purchaseRequest?.viewers) return;
+
+    // console.log('Access Check Debug:', {
+    //   userRole: session.user.roleId,
+    //   availableRoles: purchaseRequest.viewers.roleIds,
+    //   specificUsers: purchaseRequest.viewers.specificUserIds,
+    //   userId: session.user.id,
+    //   isRoleMatch: purchaseRequest.viewers.roleIds.includes(session.user.roleId),
+    //   isUserMatch: purchaseRequest.viewers.specificUserIds.includes(session.user.id)
+    // });
+
+    if ( purchaseRequest.viewers.specificUserIds.includes(session.user.id) 
+      || purchaseRequest.viewers.roleIds.includes(session.user.roleId)
+      || purchaseRequest.createdBy === session.user.id ) {
+      setHasAccess(true);
+    }
+  }, [session, purchaseRequest]);
+
+  console.log('current step : ', currentStep);
 
   useEffect(() => {
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
     if (!currentStep) return;
 
-    if (purchaseRequest.viewers.specificUserIds.includes(session.user.id) || purchaseRequest.viewers.roleIds.includes(session.user.roleId)) {
+    const userRoleWithPrefix = `${session.user.roleId}`;
+    
+    console.log('Debug values:', {
+      userRoleWithPrefix,
+      roleIdsArray: purchaseRequest.viewers.roleIds,
+      exactMatch: purchaseRequest.viewers.roleIds[0] === userRoleWithPrefix,
+      stringComparison: {
+        userRole: userRoleWithPrefix.toString(),
+        arrayRole: purchaseRequest.viewers.roleIds[0].toString()
+      }
+    });
+
+    const hasRoleAccess = purchaseRequest.viewers.roleIds.some(roleId => {
+      console.log('Comparing:', {
+        arrayRole: roleId,
+        userRole: userRoleWithPrefix,
+        isEqual: roleId === userRoleWithPrefix
+      });
+      return roleId === userRoleWithPrefix;
+    });
+
+    if (hasRoleAccess || purchaseRequest.viewers.specificUserIds.some(id => id === session.user.id)) {
       setHasAccess(true);
     }
 
@@ -407,6 +462,43 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           </div>
         </div>
       </Modal>
+
+      <PurchaseRequestHistory purchaseRequestId={params.id} />
+    </div>
+  );
+}
+
+function PurchaseRequestHistory({ purchaseRequestId }: { purchaseRequestId: string }) {
+  const [histories, setHistories] = useState<PurchaseRequestHistory[]>([]);
+
+  useEffect(() => {
+    const fetchHistories = async () => {
+      const response = await fetch(`/api/workspace/purchase-requests/${purchaseRequestId}/history`);
+      if (response.ok) {
+        const data = await response.json();
+        setHistories(data.histories);
+      }
+    };
+    fetchHistories();
+  }, [purchaseRequestId]);
+
+  return (
+    <div className="mt-6">
+      <h2 className="text-lg font-medium mb-4">Request History</h2>
+      <div className="space-y-2">
+        {histories.map((history) => (
+          <div key={history.id} className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm">
+              Request <span className="font-semibold">{history.action.toLowerCase()}</span> by{' '}
+              <span className="font-semibold">{history.actor.name}</span> on{' '}
+              {new Date(history.createdAt).toLocaleDateString()}
+            </p>
+            {history.comment && (
+              <p className="text-sm text-gray-600 mt-1">{history.comment}</p>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 } 

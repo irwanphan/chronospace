@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { stepOrder, approvedBy } = body;
+    const { stepOrder, approvedBy, comment } = body;
 
     // Update dalam transaksi
     const result = await prisma.$transaction(async (tx) => {
@@ -23,6 +23,16 @@ export async function POST(
           status: 'Approved',
           approvedBy,
           approvedAt: new Date()
+        }
+      });
+
+      // Create history
+      await tx.purchaseRequestHistory.create({
+        data: {
+          purchaseRequestId: params.id,
+          action: 'Approved',
+          actorId: approvedBy,
+          comment
         }
       });
 

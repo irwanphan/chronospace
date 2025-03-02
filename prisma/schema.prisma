@@ -67,6 +67,7 @@ model User {
   purchaseRequests PurchaseRequest[]
   purchaseRequestApprovals PurchaseRequestApproval[]
   specificUserDetails PurchaseRequestApproval[] @relation("SpecificUser")
+  purchaseRequestHistories PurchaseRequestHistory[]
   @@map("users")
 }
 
@@ -268,6 +269,7 @@ model PurchaseRequest {
   budget          Budget                    @relation(fields: [budgetId], references: [id])
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
+  histories       PurchaseRequestHistory[]
 
   @@map("purchase_requests")
   @@index([budgetId])
@@ -315,4 +317,19 @@ model PurchaseRequestApproval {
   @@map("purchase_request_approvals")
   @@index([purchaseRequestId])
   @@unique([purchaseRequestId, stepOrder])
+}
+
+model PurchaseRequestHistory {
+  id                String          @id @default(cuid())
+  purchaseRequestId String
+  action           String          // e.g., "SUBMITTED", "APPROVED", "DECLINED"
+  actorId          String          // user yang melakukan action
+  comment          String?         // optional comment
+  createdAt        DateTime        @default(now())
+  
+  actor            User            @relation(fields: [actorId], references: [id])
+  purchaseRequest  PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+
+  @@map("purchase_request_histories")
+  @@index([purchaseRequestId])
 }

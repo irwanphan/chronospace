@@ -50,7 +50,7 @@ export const getCurrentApprover = (steps: ApprovalStep[]) => {
     roleId: ''
   };
   
-  const currentStep = steps.find(step => step.status === 'PENDING');
+  const currentStep = steps.find(step => step.status === 'Pending');
 
   if (currentStep) {
     if (currentStep.specificUser && currentStep.specificUser !== 'NULL') {
