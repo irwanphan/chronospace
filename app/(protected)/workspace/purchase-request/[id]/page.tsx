@@ -390,7 +390,15 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                       <td className="py-3 px-4">
                         {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                       </td>
-                      <td className="py-3 px-4">{step.status}</td>
+                      <td className="py-3 px-4">
+                        {step.status === 'Pending' ? (
+                          <span className="text-yellow-500 p-1 border border-yellow-500 rounded-lg bg-yellow-50">{step.status}</span>
+                        ) : step.status === 'Approved' ? (
+                          <span className="text-green-500 p-1 border border-green-500 rounded-lg bg-green-50">{step.status}</span>
+                        ) : (
+                          <span className="text-red-500 p-1 border border-red-500 rounded-lg bg-red-50">{step.status}</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -483,7 +491,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 }
 
 function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHistory[] }) {
-  console.log('histories : ', histories);
   return (
     <div className="rounded-lg p-6 mb-6 border border-gray-200 bg-white">
       <h2 className="text-lg font-medium mb-4">Request History</h2>
