@@ -194,11 +194,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         setPurchaseRequest(freshData.purchaseRequest);
         setCurrentStep(freshData.currentStep);
         setHistories(freshData.purchaseRequest.histories);
-        
-        // Update canReview berdasarkan status baru
-        if (freshData.currentStep?.status === 'Approved') {
-          setCanReview(false);
-        }
+        setCanReview(false);
       } else {
         throw new Error('Invalid data received after approval');
       }
@@ -227,7 +223,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       { error && <div className="bg-red-500 text-white p-4 rounded-lg">{error}</div> }
       
       {/* Request Info Card */}
-      <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200 bg-white">
+      <div className="rounded-lg p-6 mb-6 border border-gray-200 bg-white">
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <div className="text-sm text-gray-500">
@@ -489,7 +485,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHistory[] }) {
   console.log('histories : ', histories);
   return (
-    <div className="mt-6">
+    <div className="rounded-lg p-6 mb-6 border border-gray-200 bg-white">
       <h2 className="text-lg font-medium mb-4">Request History</h2>
       <div className="space-y-2">
         {histories.map((history) => (
@@ -497,7 +493,7 @@ function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHisto
             <p className="text-sm">
               Request <span className="font-semibold">{history.action.toLowerCase()}</span> by{' '}
               <span className="font-semibold">{history.actor.name}</span> on{' '}
-              {new Date(history.createdAt).toLocaleDateString()}
+              {formatDate(new Date(history.createdAt))}
             </p>
             {history.comment && (
               <p className="text-sm text-gray-600 mt-1">{history.comment}</p>
