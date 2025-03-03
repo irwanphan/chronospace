@@ -177,17 +177,22 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         body: JSON.stringify({
           stepOrder: currentStep?.stepOrder,
           approvedBy: session?.user?.id,
-          comment: declineComment,
+          comment: declineComment || 'no comment',
           type: type
         })
       });
 
       if (!response.ok) throw new Error('Failed to decline');
       
-      const freshData = await response.json();
+      // Fetch fresh data
+      const freshDataResponse = await fetch(`/api/workspace/purchase-requests/${params.id}`);
+      if (!freshDataResponse.ok) throw new Error('Failed to fetch updated data');
+      
+      const freshData = await freshDataResponse.json();
       setPurchaseRequest(freshData.purchaseRequest);
       setCurrentStep(freshData.currentStep);
       setHistories(freshData.purchaseRequest.histories);
+      setCanReview(false);
       setIsDeclineModalOpen(false);
       setDeclineComment('');
     } catch (error) {
@@ -531,7 +536,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
               onChange={(e) => setDeclineComment(e.target.value)}
               placeholder="Some comment..."
               className="w-full px-4 py-2 border rounded-lg h-32 resize-none"
-              required
+              // required
             />
           </div>
 
@@ -550,7 +555,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <button
               onClick={() => handleDeclineConfirm('revision')}
               className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-              disabled={isDeclining || !declineComment}
+              disabled={isDeclining}
             >
               <PenSquare className="w-5 h-5" />
               Ask For Revision
@@ -558,7 +563,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <button
               onClick={() => handleDeclineConfirm('decline')}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
-              disabled={isDeclining || !declineComment}
+              disabled={isDeclining}
             >
               <IconForbid className="w-5 h-5" />
               Yes, I Decline
