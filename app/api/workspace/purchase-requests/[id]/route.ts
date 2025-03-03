@@ -54,8 +54,6 @@ export async function GET(
 
     const currentStep = purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
 
-    console.log('current step : ', currentStep);
-
     const fixedPurchaseRequest = {
       ...purchaseRequest,
       viewers: getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),

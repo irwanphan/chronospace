@@ -90,13 +90,14 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [hasAccess, setHasAccess] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const [histories, setHistories] = useState<PurchaseRequestHistory[]>([]);
   const isRequestor = purchaseRequest?.user.id === session?.user?.id;
 
   // Debug
   console.log('purchaseRequest : ', purchaseRequest);
-  console.log('viewers : ', purchaseRequest?.viewers);
-  console.log('current user role : ', `role-${session?.user?.roleId}`);
-  console.log('current step : ', currentStep);
+  // console.log('viewers : ', purchaseRequest?.viewers);
+  // console.log('current user role : ', `role-${session?.user?.roleId}`);
+  // console.log('current step : ', currentStep);
   // console.log('has access : ', hasAccess);
 
   useEffect(() => {
@@ -115,35 +116,19 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       || purchaseRequest.createdBy === session.user.id ) {
       setHasAccess(true);
     }
-  }, [session, purchaseRequest]);
 
-  useEffect(() => {
+    // REVIEWER CHECK
     if (!session?.user || !purchaseRequest?.approvalSteps) return;
     if (!currentStep) return;
 
-    const userRoleWithPrefix = `${session.user.roleId}`;
-    // console.log('Debug values:', {
-    //   userRoleWithPrefix,
-    //   roleIdsArray: purchaseRequest.viewers.roleIds,
-    //   exactMatch: purchaseRequest.viewers.roleIds[0] === userRoleWithPrefix,
-    //   stringComparison: {
-    //     userRole: userRoleWithPrefix.toString(),
-    //     arrayRole: purchaseRequest.viewers.roleIds[0].toString()
-    //   }
+    // const userRoleWithPrefix = `${session.user.roleId}`;
+    // const hasRoleAccess = purchaseRequest.viewers.roleIds.some(roleId => {
+    //   return roleId === userRoleWithPrefix;
     // });
 
-    const hasRoleAccess = purchaseRequest.viewers.roleIds.some(roleId => {
-      // console.log('Comparing:', {
-      //   arrayRole: roleId,
-      //   userRole: userRoleWithPrefix,
-      //   isEqual: roleId === userRoleWithPrefix
-      // });
-      return roleId === userRoleWithPrefix;
-    });
-
-    if (hasRoleAccess || purchaseRequest.viewers.specificUserIds.some(id => id === session.user.id)) {
-      setHasAccess(true);
-    }
+    // if (hasRoleAccess || purchaseRequest.viewers.specificUserIds.some(id => id === session.user.id)) {
+    //   setHasAccess(true);
+    // }
 
     // Cek apakah user memiliki akses
     if (currentStep.specificUser !== null) {
@@ -155,16 +140,18 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         setCanReview(true);
       }
     }
-  }, [session, purchaseRequest, currentStep, hasAccess]);
+  }, [session, purchaseRequest, currentStep]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch(`/api/workspace/purchase-requests/${params.id}`);
         if (response.ok) {
           const data = await response.json();
           setPurchaseRequest(data.purchaseRequest);
           setCurrentStep(data.purchaseRequest.currentStep);
+          setHistories(data.purchaseRequest.histories);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -206,6 +193,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       if (freshData && freshData.purchaseRequest) {
         setPurchaseRequest(freshData.purchaseRequest);
         setCurrentStep(freshData.currentStep);
+        setHistories(freshData.purchaseRequest.histories);
         
         // Update canReview berdasarkan status baru
         if (freshData.currentStep?.status === 'Approved') {
@@ -221,7 +209,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       setError('Failed to approve request');
     } finally {
       setIsApproving(false);
-      setCanReview(false);
     }
   };
 
@@ -492,25 +479,15 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         </div>
       </Modal>
 
-      <PurchaseRequestHistory purchaseRequestId={params.id} />
+      {histories.length > 0 && (
+        <PurchaseRequestHistory histories={histories} />
+      )}
     </div>
   );
 }
 
-function PurchaseRequestHistory({ purchaseRequestId }: { purchaseRequestId: string }) {
-  const [histories, setHistories] = useState<PurchaseRequestHistory[]>([]);
-
-  useEffect(() => {
-    const fetchHistories = async () => {
-      const response = await fetch(`/api/workspace/purchase-requests/${purchaseRequestId}/history`);
-      if (response.ok) {
-        const data = await response.json();
-        setHistories(data.histories);
-      }
-    };
-    fetchHistories();
-  }, [purchaseRequestId]);
-
+function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHistory[] }) {
+  console.log('histories : ', histories);
   return (
     <div className="mt-6">
       <h2 className="text-lg font-medium mb-4">Request History</h2>
