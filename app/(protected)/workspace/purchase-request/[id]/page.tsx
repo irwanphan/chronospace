@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { Check, ChevronLeft, Pencil } from 'lucide-react';
+import { Check, ChevronLeft, Pencil, X, PenSquare } from 'lucide-react';
 import { IconForbid } from '@tabler/icons-react';
 import { Modal } from '@/components/ui/Modal';
 
@@ -92,9 +92,12 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [isApproving, setIsApproving] = useState(false);
   const [histories, setHistories] = useState<PurchaseRequestHistory[]>([]);
   const isRequestor = purchaseRequest?.user.id === session?.user?.id;
+  const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+  const [declineComment, setDeclineComment] = useState('');
 
   // Debug
-  console.log('purchaseRequest : ', purchaseRequest);
+  // console.log('purchaseRequest : ', purchaseRequest);
   // console.log('viewers : ', purchaseRequest?.viewers);
   // console.log('current user role : ', `role-${session?.user?.roleId}`);
   // console.log('current step : ', currentStep);
@@ -163,8 +166,36 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     fetchData();
   }, [params.id]);
 
-  const handleDecline = () => {
-    console.log('Decline');
+  const handleDeclineConfirm = async (type: 'revision' | 'decline') => {
+    try {
+      setIsDeclining(true);
+      const response = await fetch(`/api/workspace/purchase-requests/${params.id}/decline`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stepOrder: currentStep?.stepOrder,
+          approvedBy: session?.user?.id,
+          comment: declineComment,
+          type: type
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to decline');
+      
+      const freshData = await response.json();
+      setPurchaseRequest(freshData.purchaseRequest);
+      setCurrentStep(freshData.currentStep);
+      setHistories(freshData.purchaseRequest.histories);
+      setIsDeclineModalOpen(false);
+      setDeclineComment('');
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Failed to decline request');
+    } finally {
+      setIsDeclining(false);
+    }
   };
 
   const handleApproveConfirm = async () => {
@@ -427,7 +458,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           { canReview ? (
             <>
               <button 
-                onClick={handleDecline}
+                onClick={() => setIsDeclineModalOpen(true)}
                 type="button"
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
               >
@@ -454,7 +485,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       >
         <div>
           <p>Are you sure you want to approve this purchase request?</p>
-          <div className="mt-4 flex justify-end gap-2">
+          <div className="mt-4 flex justify-center gap-2">
             <button
               onClick={() => setIsApproveModalOpen(false)}
               className="px-4 py-2 border rounded-lg hover:bg-gray-50"
@@ -478,6 +509,59 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                   Confirm Approval
                 </>
               )}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isDeclineModalOpen}
+        onClose={() => {
+          setIsDeclineModalOpen(false);
+          setDeclineComment('');
+        }}
+        title="Decline Confirmation"
+      >
+        <div className="space-y-4">
+          <p>Do you want to decline this request? You may ask for revision.</p>
+          
+          <div>
+            <textarea
+              value={declineComment}
+              onChange={(e) => setDeclineComment(e.target.value)}
+              placeholder="Some comment..."
+              className="w-full px-4 py-2 border rounded-lg h-32 resize-none"
+              required
+            />
+          </div>
+
+          <div className="flex justify-center gap-2">
+            <button
+              onClick={() => {
+                setIsDeclineModalOpen(false);
+                setDeclineComment('');
+              }}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              disabled={isDeclining}
+            >
+              <X className="w-5 h-5" />
+              Cancel
+            </button>
+            <button
+              onClick={() => handleDeclineConfirm('revision')}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              disabled={isDeclining || !declineComment}
+            >
+              <PenSquare className="w-5 h-5" />
+              Ask For Revision
+            </button>
+            <button
+              onClick={() => handleDeclineConfirm('decline')}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+              disabled={isDeclining || !declineComment}
+            >
+              <IconForbid className="w-5 h-5" />
+              Yes, I Decline
             </button>
           </div>
         </div>
