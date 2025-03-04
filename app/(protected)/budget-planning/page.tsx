@@ -37,16 +37,27 @@ export default function BudgetPlanningPage() {
         setDivisions(data.divisions);
         
         // Calculate stats
-        const total = data.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
-        const completed = data.filter((b: Budget) => b.status === 'Completed').length;
-        const inProgress = data.filter((b: Budget) => b.status === 'In Progress').length;
-        const delayed = data.filter((b: Budget) => b.status === 'Delayed').length;
+        const total = data.budgets.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
+        const completed = data.budgets.filter((b: Budget) => b.status === 'Completed').length;
+        const inProgress = data.budgets.filter((b: Budget) => b.status === 'In Progress').length;
+        const delayed = data.budgets.filter((b: Budget) => {
+          const startDate = new Date(b.startDate);
+          const today = new Date();
+          return startDate < today && b.status === 'Not Started';
+        }).length;
+        const upcoming = data.budgets.filter((b: Budget) => {
+          const finishDate = new Date(b.finishDate);
+          const today = new Date();
+          const thirtyDaysFromNow = new Date();
+          thirtyDaysFromNow.setDate(today.getDate() + 30);
+          return finishDate <= thirtyDaysFromNow && finishDate >= today;
+        }).length;
         
         setStats({
           totalBudget: total,
-          totalPlans: data.length,
-          completedPercentage: Math.round((completed / data.length) * 100),
-          upcomingDeadlines: data.length,
+          totalPlans: data.budgets.length,
+          completedPercentage: data.budgets.length > 0 ? Math.round((completed / data.budgets.length) * 100) : 0,
+          upcomingDeadlines: upcoming,
           inProgress: inProgress,
           delayed: delayed
         });
