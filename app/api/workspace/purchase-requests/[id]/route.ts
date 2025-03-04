@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getViewers, getCurrentApprover, ApprovalStep } from '@/app/api/workspace/route';
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function GET(
   request: Request,
@@ -79,12 +80,20 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
-    if (!session?.user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
     const { title, description } = await request.json();
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return new NextResponse('User not found', { status: 404 });
+    }
 
     const updated = await prisma.purchaseRequest.update({
       where: { id: params.id },
@@ -95,14 +104,18 @@ export async function PATCH(
           create: {
             action: 'Updated',
             actor: {
-              connect: { id: session.user.id }
+              connect: { email: session.user.email }
             },
             comment: 'Request details updated'
           }
         }
       },
       include: {
-        histories: true
+        histories: {
+          include: {
+            actor: true
+          }
+        }
       }
     });
 
