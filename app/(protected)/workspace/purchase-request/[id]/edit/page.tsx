@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { stripHtmlTags } from '@/lib/utils';
-import { Check, ChevronLeft } from 'lucide-react';
-import { Modal } from '@/components/ui/Modal';
+import { ChevronLeft } from 'lucide-react';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 interface PurchaseRequestHistory {
   id: string;
@@ -79,24 +78,17 @@ type ApprovalStep = {
   };
 }
 
-export default function ViewRequestPage({ params }: { params: { id: string } }) {
+export default function EditRequestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
-  const [currentStep, setCurrentStep] = useState<ApprovalStep | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
-  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
   const [histories, setHistories] = useState<PurchaseRequestHistory[]>([]);
-
-  // Debug
-  // console.log('purchaseRequest : ', purchaseRequest);
-  // console.log('viewers : ', purchaseRequest?.viewers);
-  // console.log('current user role : ', `role-${session?.user?.roleId}`);
-  // console.log('current step : ', currentStep);
-  // console.log('has access : ', hasAccess);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (purchaseRequest?.createdBy === session?.user?.id) {
@@ -112,8 +104,9 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         if (response.ok) {
           const data = await response.json();
           setPurchaseRequest(data.purchaseRequest);
-          setCurrentStep(data.purchaseRequest.currentStep);
           setHistories(data.purchaseRequest.histories);
+          setTitle(data.purchaseRequest.title);
+          setDescription(data.purchaseRequest.description || '');
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -125,43 +118,30 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     fetchData();
   }, [params.id]);
 
-  const handleApproveConfirm = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      setIsApproving(true);
-      const response = await fetch(`/api/workspace/purchase-requests/${params.id}/approve`, {
-        method: 'POST',
+      setIsSaving(true);
+      const response = await fetch(`/api/workspace/purchase-requests/${params.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          stepOrder: currentStep?.stepOrder,
-          approvedBy: session?.user?.id
+          title,
+          description
         })
       });
 
-      if (!response.ok) throw new Error('Failed to approve');
+      if (!response.ok) throw new Error('Failed to update');
       
-      // Fetch fresh data
-      const freshDataResponse = await fetch(`/api/workspace/purchase-requests/${params.id}`);
-      if (!freshDataResponse.ok) throw new Error('Failed to fetch updated data');
-      
-      const freshData = await freshDataResponse.json();
-      
-      // Pastikan data ada sebelum update state
-      if (freshData && freshData.purchaseRequest) {
-        setPurchaseRequest(freshData.purchaseRequest);
-        setCurrentStep(freshData.currentStep);
-        setHistories(freshData.purchaseRequest.histories);
-      } else {
-        throw new Error('Invalid data received after approval');
-      }
-      
-      setIsApproveModalOpen(false);
+      router.push(`/workspace/purchase-request/${params.id}`);
     } catch (error) {
       console.error('Error:', error);
-      setError('Failed to approve request');
+      setError('Failed to update request');
     } finally {
-      setIsApproving(false);
+      setIsSaving(false);
+      router.push(`/workspace/purchase-request/${params.id}`);
     }
   };
 
@@ -175,7 +155,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-4">View Purchase Request</h1>
+      <h1 className="text-2xl font-semibold mb-4">Edit Purchase Request</h1>
 
       { error && <div className="bg-red-500 text-white p-4 rounded-lg">{error}</div> }
       
@@ -203,7 +183,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      <form className="bg-white rounded-lg p-6 border border-gray-200">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-gray-200">
         <div className="space-y-6">
           <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
@@ -241,9 +221,10 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             </label>
             <input
               type="text"
-              value={purchaseRequest?.title}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg"
-              readOnly
+              required
             />
           </div>
 
@@ -251,9 +232,11 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <label className="block text-sm font-medium mb-1">
               Description <span className="text-red-500">*</span>
             </label>
-            <div className="px-4 py-2 border rounded-lg">
-              {stripHtmlTags(purchaseRequest?.description || '')}
-            </div>
+            <RichTextEditor
+              value={description}
+              onChange={setDescription}
+              placeholder="Enter request description..."
+            />
           </div>
 
           <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
@@ -376,50 +359,13 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
-            onClick={() => router.push(`/workspace/purchase-request/${params.id}/edit`)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            disabled={isSaving}
           >
-            Save Revision
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>
-
-      {/* Modal Konfirmasi */}
-      <Modal
-        isOpen={isApproveModalOpen}
-        onClose={() => setIsApproveModalOpen(false)}
-        title="Approval Confirmation"
-      >
-        <div>
-          <p>Are you sure you want to approve this purchase request?</p>
-          <div className="mt-4 flex justify-center gap-2">
-            <button
-              onClick={() => setIsApproveModalOpen(false)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-              disabled={isApproving}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleApproveConfirm}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-              disabled={isApproving}
-            >
-              {isApproving ? (
-                <>
-                  <span className="animate-spin">⏳</span>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Check className="w-5 h-5" />
-                  Confirm Approval
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </Modal>
 
       {histories.length > 0 && (
         <PurchaseRequestHistory histories={histories} />
