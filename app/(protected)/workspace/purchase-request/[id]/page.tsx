@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
 import { Check, ChevronLeft, Pencil, X, PenSquare } from 'lucide-react';
@@ -81,6 +82,7 @@ type ApprovalStep = {
 }
 
 export default function ViewRequestPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -459,6 +461,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
+              onClick={() => router.push(`/workspace/purchase-request/${params.id}/edit`)}
             >
               <Pencil className='w-4 h-4 mr-2' />Edit {purchaseRequest?.status === 'Revision' ? '/ Revision' : ''}
             </button>
