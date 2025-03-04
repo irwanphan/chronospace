@@ -100,6 +100,12 @@ export async function PATCH(
       data: {
         title,
         description,
+        approvalSteps: {
+          updateMany: {
+            where: { status: 'Revision' },
+            data: { status: 'Updated' }
+          }
+        },
         histories: {
           create: {
             action: 'Updated',
@@ -115,7 +121,8 @@ export async function PATCH(
           include: {
             actor: true
           }
-        }
+        },
+        approvalSteps: true
       }
     });
 
