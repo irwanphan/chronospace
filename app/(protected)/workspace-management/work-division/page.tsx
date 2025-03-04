@@ -1,24 +1,18 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
+import DivisionActions from './components/DivisionActions';
 
 import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
-import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   const fetchData = async () => {
     try {
@@ -43,23 +37,6 @@ export default function WorkDivisionPage() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this work division?')) {
-      try {
-        const response = await fetch(`/api/workspace-management/work-division/${id}`, {
-          method: 'DELETE',
-        });
-        
-        if (response.ok) {
-          fetchData();
-          setActiveMenu(null);
-        }
-      } catch (error) {
-        console.error('Failed to delete work division:', error);
-      }
-    }
-  };
 
   return (
     <div className="space-y-8">
@@ -132,40 +109,14 @@ export default function WorkDivisionPage() {
                     {users.find(user => user.id === division.divisionHead)?.name || '-'}
                   </td>
                   <td className="py-3 px-4">
-                    <div className="relative flex items-center gap-2" ref={dropdownRef}>
-                      <Link
-                        href={`/workspace-management/work-division/${division.id}`}
-                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                      >
-                        <Eye className="w-4 h-4 text-gray-500" />
-                      </Link>
-                      <button 
-                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                        onClick={() => setActiveMenu(activeMenu === division.id ? null : division.id)}
-                      >
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
-                      </button>
-                      
-                      {/* Popup Menu */}
-                      {activeMenu === division.id && (
-                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10 border border-gray-200">
-                          <button
-                            onClick={() => router.push(`/workspace-management/work-division/${division.id}/edit`)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <Pencil className="w-4 h-4" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(division.id)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                          >
-                            <Trash className="w-4 h-4" />
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    <DivisionActions 
+                      divisionId={division.id} 
+                      onDelete={async () => {
+                        const divisionsRes = await fetch('/api/workspace-management/work-division');
+                        const divisionsData = await divisionsRes.json();
+                        setDivisions(divisionsData.divisions);
+                      }} 
+                    />
                   </td>
                 </tr>
               ))
