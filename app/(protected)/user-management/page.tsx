@@ -1,30 +1,25 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from "next-auth/react";
 
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key, Eye } from 'lucide-react';
+import { Plus, Filter, Search } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { User } from '@/types/user';
 import { Role } from '@/types/role';
-import { useOnClickOutside } from '@/hooks/useOnClickOutside';
+import UserActions from './components/UserActions';
 
 export default function UserManagementPage() {
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { data: session } = useSession();
   const canCreateUser = session?.user?.access?.activityAccess?.createUser;
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   const fetchUsers = async () => {
     try {
@@ -48,22 +43,6 @@ export default function UserManagementPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      try {
-        const response = await fetch(`/api/user-management/${id}`, {
-          method: 'DELETE',
-        });
-        if (response.ok) {
-          fetchUsers(); // Refresh list
-          setActiveMenu(null); // Close popup
-        }
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-      }
-    }
-  };
 
   return (
     <div className="wax-w-full">
@@ -157,60 +136,18 @@ export default function UserManagementPage() {
                   <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                   <td className="px-3 py-2 text-right">
-                    <div className="relative flex items-center gap-2" ref={dropdownRef}>
-                      <Link
-                        href={`/user-management/${user.id}`}
-                        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                      >
-                        <Eye className="w-4 h-4 text-gray-500" />
-                      </Link>
-                      <button 
-                        onClick={() => setActiveMenu(activeMenu === user.id.toString() ? null : user.id.toString())}
-                        className="p-2 hover:bg-gray-100 rounded-full"
-                      >
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
-                      </button>
-
-                      {activeMenu === user.id.toString() && (
-                        <div className="absolute right-0 top-full mt-1 bg-white shadow-lg border border-gray-200 rounded-lg py-2 w-48 z-50">
-                          {canEditUser && (
-                            <button
-                              onClick={() => router.push(`/user-management/${user.id}/edit`)}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                            >
-                              <Pencil className="w-4 h-4" />
-                              Edit
-                            </button>
-                          )}
-                          {canManageUserAccess && (
-                            <button
-                              onClick={() => router.push(`/user-management/${user.id}/access-control`)}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                            >
-                              <Key className="w-4 h-4" />
-                              Access Control
-                            </button>
-                          )}
-                          {canDeleteUser && (
-                            <button
-                              onClick={() => handleDelete(user.id.toString())}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                            >
-                              <Trash className="w-4 h-4" />
-                              Delete
-                            </button>
-                          )}
-                          {
-                            !canCreateUser && !canEditUser && !canDeleteUser && !canManageUserAccess && (
-                              <div className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                                <Lock className="w-4 h-4" />
-                                No Access
-                              </div>
-                            )
-                          }
-                        </div>
-                      )}
-                    </div>
+                    <UserActions 
+                      userId={user.id.toString()}
+                      canEditUser={canEditUser ?? false}
+                      canManageUserAccess={canManageUserAccess ?? false}
+                      canDeleteUser={canDeleteUser ?? false}
+                      canCreateUser={canCreateUser ?? false}
+                      onDelete={async () => {
+                        const usersRes = await fetch('/api/user-management');
+                        const usersData = await usersRes.json();
+                        setUsers(usersData.users);
+                      }} 
+                    />
                   </td>
                 </tr>
               ))
