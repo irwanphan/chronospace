@@ -25,12 +25,21 @@ export default function ProjectPlanningPage() {
           const data = await response.json();
           setProjects(data.projects);
           setWorkDivisions(data.workDivisions);
+          
           // Calculate stats
+          const allocated = data.projects.filter((p: Project) => p.status === 'Allocated').length;
+          const active = data.projects.filter((p: Project) => p.status === 'Active').length;
+          const delayed = data.projects.filter((p: Project) => {
+            const finishDate = new Date(p.finishDate);
+            const today = new Date();
+            return finishDate < today && p.status !== 'Completed';
+          }).length;
+
           setStats({
-            total: data.length,
-            budgetAllocated: data.filter((p: Project) => p.status === 'Allocated').length,
-            active: data.filter((p: Project) => p.status === 'Active').length,
-            delayed: data.filter((p: Project) => p.status === 'Delayed').length,
+            total: data.projects.length,
+            budgetAllocated: allocated,
+            active: active,
+            delayed: delayed
           });
         }
       } catch (error) {
