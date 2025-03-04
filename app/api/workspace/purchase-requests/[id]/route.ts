@@ -54,7 +54,9 @@ export async function GET(
       }
     });
 
-    const currentStep = purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
+    const currentStep = purchaseRequest?.status === 'Updated' 
+      ? purchaseRequest.approvalSteps.filter(step => step.status === 'Updated').sort((a, b) => a.stepOrder - b.stepOrder)[0]
+      : purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
 
     const fixedPurchaseRequest = {
       ...purchaseRequest,
