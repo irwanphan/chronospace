@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { Check, ChevronLeft, Pencil } from 'lucide-react';
+import { Check, ChevronLeft } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 
 interface PurchaseRequestHistory {
@@ -87,12 +86,10 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const { data: session } = useSession();
   const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
   const [currentStep, setCurrentStep] = useState<ApprovalStep | null>(null);
-  const [canReview, setCanReview] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [histories, setHistories] = useState<PurchaseRequestHistory[]>([]);
-  const isRequestor = purchaseRequest?.user.id === session?.user?.id;
 
   // Debug
   // console.log('purchaseRequest : ', purchaseRequest);
@@ -105,22 +102,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     if (purchaseRequest?.createdBy === session?.user?.id) {
       setHasAccess(true);
     }
-
-    // REVIEWER CHECK
-    if (!session?.user || !purchaseRequest?.approvalSteps) return;
-    if (!currentStep) return;
-
-    // Cek apakah user memiliki akses
-    if (currentStep.specificUser !== null) {
-      if (session.user.id === currentStep.specificUser) {
-        setCanReview(true);
-      }
-    } else {
-      if (session.user.roleId === currentStep.role) {
-        setCanReview(true);
-      }
-    }
-  }, [session, purchaseRequest, currentStep]);
+  }, [session, purchaseRequest]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -170,7 +152,6 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         setPurchaseRequest(freshData.purchaseRequest);
         setCurrentStep(freshData.currentStep);
         setHistories(freshData.purchaseRequest.histories);
-        setCanReview(false);
       } else {
         throw new Error('Invalid data received after approval');
       }
@@ -386,36 +367,20 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         <hr className="my-6" />
 
         <div className="flex justify-end gap-2">
-          <Link
-            href="/workspace"
+          <button
+            type="button"
             className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center"
+            onClick={() => router.push(`/workspace/purchase-request/${params.id}`)}
           >
-            <ChevronLeft className='w-4 h-4 mr-2' />Back
-          </Link>
-          {isRequestor && (
-            purchaseRequest?.status === 'Revision' || 
-            !purchaseRequest?.approvalSteps.some(step => step.status === 'Approved')
-          ) && (
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
-              onClick={() => router.push(`/workspace/purchase-request/${params.id}/edit`)}
-            >
-              <Pencil className='w-4 h-4 mr-2' />Edit {purchaseRequest?.status === 'Revision' ? '/ Revision' : ''}
-            </button>
-          )}
-          { canReview ? (
-            <>
-              <button 
-                onClick={() => setIsApproveModalOpen(true)}
-                type="button"
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
-              >
-                <Check className="w-5 h-5" />Save Revision
-              </button>
-            </>
-          ) : ( <></>
-          )}
+            <ChevronLeft className='w-4 h-4 mr-2' />Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
+            onClick={() => router.push(`/workspace/purchase-request/${params.id}/edit`)}
+          >
+            Save Revision
+          </button>
         </div>
       </form>
 
