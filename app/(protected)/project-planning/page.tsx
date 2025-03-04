@@ -1,12 +1,11 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Filter, Search } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { Project } from '@/types/project';
 import { WorkDivision } from '@prisma/client';
-import { useOnClickOutside } from '@/hooks/useOnClickOutside';
+import ProjectActions from './components/ProjectActions';
 
 export default function ProjectPlanningPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -17,10 +16,6 @@ export default function ProjectPlanningPage() {
     active: 0,
     delayed: 0
   });
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -45,23 +40,6 @@ export default function ProjectPlanningPage() {
 
     fetchProjects();
   }, []);
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this project?')) {
-      try {
-        const response = await fetch(`/api/project-planning/${id}`, {
-          method: 'DELETE',
-        });
-        
-        if (response.ok) {
-          // Refresh data
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Failed to delete project:', error);
-      }
-    }
-  };
 
   return (
     <div className="space-y-8">
@@ -142,36 +120,15 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative flex gap-2 items-center overflow-visible" ref={dropdownRef}>
-                    <Link href={`/project-planning/${project.id}`} className="p-2 hover:bg-gray-100 rounded-full">
-                      <Eye className="w-4 h-4 text-gray-500" />
-                    </Link>
-                    <button 
-                      onClick={() => setActiveMenu(activeMenu === project.id ? null : project.id)}
-                      className="p-2 hover:bg-gray-100 rounded-full"
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-500" />
-                    </button>
-
-                    {activeMenu === project.id && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50 border border-gray-200">
-                        <button
-                          onClick={() => router.push(`/project-planning/${project.id}/edit`)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(project.id)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                        >
-                          <Trash className="w-4 h-4" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <ProjectActions 
+                    projectId={project.id}
+                    onDelete={async () => {
+                      const projectsRes = await fetch('/api/project-planning');
+                      const projectsData = await projectsRes.json();
+                      setProjects(projectsData.projects);
+                      setWorkDivisions(projectsData.workDivisions);
+                    }} 
+                  />
                 </td>
               </tr>
             ))}
