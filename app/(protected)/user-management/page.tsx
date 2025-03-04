@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,6 +9,8 @@ import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Lock, Key, Eye } fro
 import { formatDate } from '@/lib/utils';
 import { User } from '@/types/user';
 import { Role } from '@/types/role';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
+
 export default function UserManagementPage() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +23,8 @@ export default function UserManagementPage() {
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   const fetchUsers = async () => {
     try {
@@ -153,7 +157,7 @@ export default function UserManagementPage() {
                   <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                   <td className="px-3 py-2 text-right">
-                    <div className="relative flex items-center gap-2">
+                    <div className="relative flex items-center gap-2" ref={dropdownRef}>
                       <Link
                         href={`/user-management/${user.id}`}
                         className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"

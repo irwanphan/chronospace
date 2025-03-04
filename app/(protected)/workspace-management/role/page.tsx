@@ -1,22 +1,16 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
-import { useOnClickOutside } from '@/hooks/useOnClickOutside';
+import RoleActions from './components/RoleActions';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   useEffect(() => {
     fetchRoles();
@@ -37,26 +31,6 @@ export default function RolePage() {
       setRoles([]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this role?')) {
-      try {
-        const response = await fetch(`/api/workspace-management/roles/${id}`, {
-          method: 'DELETE',
-        });
-        
-        if (response.ok) {
-          // Refresh data setelah delete
-          const rolesRes = await fetch('/api/workspace-management/roles');
-          const rolesData = await rolesRes.json();
-          setRoles(rolesData);
-          setActiveMenu(null); // Tutup popup menu
-        }
-      } catch (error) {
-        console.error('Failed to delete role:', error);
-      }
     }
   };
 
@@ -137,40 +111,14 @@ export default function RolePage() {
                       }).format(role.approvalLimit)}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="relative flex items-center gap-2" ref={dropdownRef}>
-                        <Link
-                          href={`/workspace-management/role/${role.id}`}
-                          className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                        >
-                          <Eye className="w-4 h-4 text-gray-500" />
-                        </Link>
-                        <button 
-                          className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
-                          onClick={() => setActiveMenu(activeMenu === role.id ? null : role.id)}
-                        >
-                          <MoreVertical className="w-4 h-4 text-gray-500" />
-                        </button>
-                        
-                        {/* Popup Menu */}
-                        {activeMenu === role.id && (
-                          <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10 border border-gray-200">
-                            <button
-                              onClick={() => router.push(`/workspace-management/role/${role.id}/edit`)}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                            >
-                              <Pencil className="w-4 h-4" />
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(role.id)}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                            >
-                              <Trash className="w-4 h-4" />
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      <RoleActions 
+                        roleId={role.id} 
+                        onDelete={async () => {
+                          const rolesRes = await fetch('/api/workspace-management/roles');
+                          const rolesData = await rolesRes.json();
+                          setRoles(rolesData);
+                        }} 
+                      />
                     </td>
                   </tr>
                 )

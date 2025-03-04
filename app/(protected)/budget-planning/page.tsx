@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -8,6 +8,7 @@ import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Eye } from 'lucide-r
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
 import { WorkDivision } from '@/types/workDivision';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 export default function BudgetPlanningPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -22,10 +23,14 @@ export default function BudgetPlanningPage() {
   });
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
+
   const { data: session, status } = useSession();
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
   const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
   const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
+  
   const fetchData = async () => {
     try {
       const response = await fetch('/api/budget-planning');
@@ -186,7 +191,7 @@ export default function BudgetPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative flex items-center gap-2">
+                  <div className="relative flex items-center gap-2" ref={dropdownRef}>
                     <Link href={`/budget-planning/${budget.id}`} className="p-2 hover:bg-gray-100 rounded-full">
                       <Eye className="w-4 h-4 text-gray-500" />
                     </Link>
@@ -198,7 +203,7 @@ export default function BudgetPlanningPage() {
                     </button>
 
                     {activeMenu === budget.id && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50 border border-gray-200">
                         {status === 'authenticated' && canEditBudget && (
                           <button
                             onClick={() => router.push(`/budget-planning/${budget.id}/edit`)}

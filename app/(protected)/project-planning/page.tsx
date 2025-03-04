@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { Project } from '@/types/project';
 import { WorkDivision } from '@prisma/client';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 export default function ProjectPlanningPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -18,6 +19,8 @@ export default function ProjectPlanningPage() {
   });
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -139,7 +142,7 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative flex gap-2 items-center overflow-visible">
+                  <div className="relative flex gap-2 items-center overflow-visible" ref={dropdownRef}>
                     <Link href={`/project-planning/${project.id}`} className="p-2 hover:bg-gray-100 rounded-full">
                       <Eye className="w-4 h-4 text-gray-500" />
                     </Link>
@@ -151,7 +154,7 @@ export default function ProjectPlanningPage() {
                     </button>
 
                     {activeMenu === project.id && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50">
+                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50 border border-gray-200">
                         <button
                           onClick={() => router.push(`/project-planning/${project.id}/edit`)}
                           className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
