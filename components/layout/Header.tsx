@@ -1,12 +1,13 @@
 'use client';
 import { Bell, Search, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn, getInitials } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
@@ -15,6 +16,8 @@ const Header = () => {
   const userImage = session?.user?.image || "";
   const userName = session?.user?.name || "Guest";
   const userRole = session?.user?.role || "User";
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(userMenuRef, () => setShowUserMenu(false));
 
   return (
     <header className={cn(
@@ -47,7 +50,7 @@ const Header = () => {
           </span>
         </button>
 
-        <div className="relative">
+        <div className="relative" ref={userMenuRef}>
           <button 
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-1 transition-colors"
@@ -82,7 +85,7 @@ const Header = () => {
 
           {/* User Menu Popup */}
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
               <Link 
                 href="/profile"
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-gray-700"
