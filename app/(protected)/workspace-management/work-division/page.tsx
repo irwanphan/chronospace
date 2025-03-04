@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
@@ -7,6 +7,7 @@ import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-r
 import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
@@ -15,6 +16,9 @@ export default function WorkDivisionPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   const fetchData = async () => {
     try {
@@ -128,7 +132,7 @@ export default function WorkDivisionPage() {
                     {users.find(user => user.id === division.divisionHead)?.name || '-'}
                   </td>
                   <td className="py-3 px-4">
-                    <div className="relative flex items-center gap-2">
+                    <div className="relative flex items-center gap-2" ref={dropdownRef}>
                       <Link
                         href={`/workspace-management/work-division/${division.id}`}
                         className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
@@ -144,7 +148,7 @@ export default function WorkDivisionPage() {
                       
                       {/* Popup Menu */}
                       {activeMenu === division.id && (
-                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10 border border-gray-200">
                           <button
                             onClick={() => router.push(`/workspace-management/work-division/${division.id}/edit`)}
                             className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"

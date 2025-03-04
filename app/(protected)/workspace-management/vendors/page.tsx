@@ -1,10 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { Vendor } from '@/types/vendor';
 import { Search, Filter, MoreVertical, Plus, Pencil, Trash, Eye } from 'lucide-react';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -12,6 +13,9 @@ export default function VendorsPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   useEffect(() => {
     fetchVendors();
@@ -120,7 +124,7 @@ export default function VendorsPage() {
                   <td className="py-3 px-4">{vendor.vendorName}</td>
                   <td className="py-3 px-4">{vendor.email}</td>
                   <td className="py-3 px-4">
-                    <div className="relative flex items-center gap-2">
+                    <div className="relative flex items-center gap-2" ref={dropdownRef}>
                       <Link
                         href={`/workspace-management/vendors/${vendor.id}`}
                         className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
@@ -136,7 +140,7 @@ export default function VendorsPage() {
                       
                       {/* Popup Menu */}
                       {activeMenu === vendor.id && (
-                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10">
+                        <div className="absolute right-0 top-8 bg-white shadow-lg rounded-lg py-2 min-w-[120px] z-10 border border-gray-200">
                           <button
                             onClick={() => router.push(`/workspace-management/vendors/${vendor.id}/edit`)}
                             className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
