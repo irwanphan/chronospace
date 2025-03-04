@@ -1,14 +1,14 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useSession } from 'next-auth/react';
-import { Plus, Filter, Search, MoreVertical, Pencil, Trash, Eye } from 'lucide-react';
+import { Plus, Filter, Search } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
 import { WorkDivision } from '@/types/workDivision';
-import { useOnClickOutside } from '@/hooks/useOnClickOutside';
+import BudgetActions from './components/BudgetActions';
 
 export default function BudgetPlanningPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -21,10 +21,7 @@ export default function BudgetPlanningPage() {
     inProgress: 0,
     delayed: 0
   });
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(dropdownRef, () => setActiveMenu(null));
 
   const { data: session, status } = useSession();
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
@@ -66,25 +63,6 @@ export default function BudgetPlanningPage() {
   const largestBudgets = [...budgets]
     .sort((a, b) => b.totalBudget - a.totalBudget)
     .slice(0, 3);
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this budget?')) {
-      try {
-        const response = await fetch(`/api/budget-planning/${id}`, {
-          method: 'DELETE',
-        });
-        
-        if (response.ok) {
-          router.refresh();
-        } else {
-          throw new Error('Failed to delete budget');
-        }
-      } catch (error) {
-        console.error('Error deleting budget:', error);
-        alert('Failed to delete budget');
-      }
-    }
-  };
 
   return (
     <div className="space-y-8">
@@ -191,40 +169,14 @@ export default function BudgetPlanningPage() {
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
                 <td className="px-6 py-4 text-right">
-                  <div className="relative flex items-center gap-2" ref={dropdownRef}>
-                    <Link href={`/budget-planning/${budget.id}`} className="p-2 hover:bg-gray-100 rounded-full">
-                      <Eye className="w-4 h-4 text-gray-500" />
-                    </Link>
-                    <button 
-                      onClick={() => setActiveMenu(activeMenu === budget.id ? null : budget.id)}
-                      className="p-2 hover:bg-gray-100 rounded-full"
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-500" />
-                    </button>
-
-                    {activeMenu === budget.id && (
-                      <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50 border border-gray-200">
-                        {status === 'authenticated' && canEditBudget && (
-                          <button
-                            onClick={() => router.push(`/budget-planning/${budget.id}/edit`)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <Pencil className="w-4 h-4" />
-                            Edit
-                          </button>
-                        )}
-                        {status === 'authenticated' && canDeleteBudget && (
-                          <button
-                            onClick={() => handleDelete(budget.id)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-                          >
-                            <Trash className="w-4 h-4" />
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  <BudgetActions 
+                    budgetId={budget.id}
+                    canEditBudget={canEditBudget ?? false}
+                    canDeleteBudget={canDeleteBudget ?? false}
+                    onDelete={async () => {
+                      router.refresh();
+                    }} 
+                  />
                 </td>
               </tr>
             ))}
