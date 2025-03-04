@@ -453,11 +453,14 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             <ChevronLeft className='w-4 h-4 mr-2' />Back
           </Link>
           {isRequestor && (
+            purchaseRequest?.status === 'Revision' || 
+            !purchaseRequest?.approvalSteps.some(step => step.status === 'Approved')
+          ) && (
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
             >
-              <Pencil className='w-4 h-4 mr-2' />Edit
+              <Pencil className='w-4 h-4 mr-2' />Edit {purchaseRequest?.status === 'Revision' ? '/ Revision' : ''}
             </button>
           )}
           { canReview ? (
