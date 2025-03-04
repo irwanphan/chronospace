@@ -99,6 +99,7 @@ export async function PATCH(
       where: { id: params.id },
       data: {
         title,
+        status: 'Updated',
         description,
         approvalSteps: {
           updateMany: {

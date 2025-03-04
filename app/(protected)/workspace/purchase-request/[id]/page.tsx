@@ -429,7 +429,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                         {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
                       </td>
                       <td className="py-3 px-4">
-                        {step.status === 'Pending' ? (
+                        {step.status === 'Pending' || step.status === 'Updated' ? (
                           <span className="text-yellow-500 p-1 border border-yellow-500 rounded-lg bg-yellow-50">{step.status}</span>
                         ) : step.status === 'Approved' ? (
                           <span className="text-green-500 p-1 border border-green-500 rounded-lg bg-green-50">{step.status}</span>
