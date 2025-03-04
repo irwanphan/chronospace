@@ -105,7 +105,12 @@ export default function RequestCard({
 
         <div>
           <div className="text-xs text-gray-500 mb-1">Status</div>
-          <div className="font-medium text-yellow-600">{status}</div>
+          <div className={`font-medium 
+            ${status === 'Approved' ? 'text-green-600'
+            : status === 'Declined' ? 'text-red-600'
+            : 'text-yellow-600'}`}>
+            {status}
+          </div>
         </div>
       </div>
 
