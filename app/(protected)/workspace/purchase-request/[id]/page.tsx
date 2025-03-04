@@ -595,7 +595,7 @@ function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHisto
               {formatDate(new Date(history.createdAt))}
             </p>
             {history.comment && (
-              <p className="text-sm text-gray-600 mt-1">{history.comment}</p>
+              <p className="text-sm text-gray-600 mt-1">&quot;{history.comment}&quot;</p>
             )}
           </div>
         ))}
