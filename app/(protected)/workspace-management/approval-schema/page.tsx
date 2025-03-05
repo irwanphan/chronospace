@@ -8,6 +8,7 @@ import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
 import SchemaActions from './components/SchemaActions';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -99,6 +100,8 @@ export default function ApprovalSchemaPage() {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

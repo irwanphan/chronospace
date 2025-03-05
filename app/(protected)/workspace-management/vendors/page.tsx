@@ -5,6 +5,7 @@ import VendorActions from './components/VendorActions';
 import { Vendor } from '@/types/vendor';
 import { Search, Filter, Plus } from 'lucide-react';
 import Pagination from '@/components/Pagination';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -39,6 +40,8 @@ export default function VendorsPage() {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

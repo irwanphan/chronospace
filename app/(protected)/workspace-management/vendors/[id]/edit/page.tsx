@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function EditVendorPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -99,7 +100,7 @@ export default function EditVendorPage({ params }: { params: { id: string } }) {
   };
 
   if (error) return <div className="p-4 text-red-600">{error}</div>;
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="p-6">

@@ -10,6 +10,7 @@ import { User } from '@/types/user';
 import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface ApprovalStepForm {
   roleId: string;
@@ -29,6 +30,7 @@ interface ApiStep {
 
 export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -107,6 +109,8 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
         }
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -117,6 +121,8 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
   // useEffect(() => {
   //   console.log('Current formData:', formData);
   // }, [formData]);
+
+  if (isLoading) return <LoadingSpin />
 
   const removeStep = (index: number) => {
     setFormData(prev => ({

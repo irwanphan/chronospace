@@ -7,6 +7,7 @@ import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
 import Pagination from '@/components/Pagination';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
@@ -43,6 +44,8 @@ export default function WorkDivisionPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

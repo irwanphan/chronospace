@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function EditRolePage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -72,9 +73,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (isLoading) {
-    return <div className="p-4">Loading...</div>;
-  }
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="max-w-4xl">

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Vendor } from '@prisma/client';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function ViewVendorPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function ViewVendorPage({ params }: { params: { id: string } }) {
     fetchData();
   }, [params.id]);
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="p-6">

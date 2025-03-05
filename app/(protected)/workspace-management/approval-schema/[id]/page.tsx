@@ -8,7 +8,7 @@ import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import MultiSelect from '@/components/MultiSelect';
-
+import LoadingSpin from '@/components/ui/LoadingSpin';
 interface ApiStep {
   role: string;
   specificUserId?: string;
@@ -38,7 +38,7 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
   const [roles, setRoles] = useState<Role[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [schema, setSchema] = useState<FormattedSchema | null>(null);
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -90,12 +90,15 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
         }
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [params.id]);
 
+  if (isLoading) return <LoadingSpin />
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">View Approval Schema</h1>

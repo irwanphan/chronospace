@@ -6,6 +6,7 @@ import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
 import RoleActions from './components/RoleActions';
 import Pagination from '@/components/Pagination';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -39,6 +40,8 @@ export default function RolePage() {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

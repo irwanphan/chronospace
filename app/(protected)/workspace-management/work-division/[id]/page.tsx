@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function ViewWorkDivisionPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -38,9 +39,7 @@ export default function ViewWorkDivisionPage({ params }: { params: { id: string 
     fetchData();
   }, [params.id]);
 
-  if (isLoading) {
-    return <div className="p-4">Loading...</div>;
-  }
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="max-w-4xl">
