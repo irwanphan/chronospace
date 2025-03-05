@@ -88,6 +88,7 @@ export default function ProjectPlanningPage() {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">ID</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Title</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Year</th>
@@ -99,8 +100,9 @@ export default function ProjectPlanningPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {currentProjects.map((project) => (
+            {currentProjects.map((project, index) => (
               <tr key={project.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 text-sm">{startIndex + index + 1}</td>
                 <td className="px-6 py-4 text-sm">{project.projectId}</td>
                 <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
                 <td className="px-6 py-4 text-sm">{project.year}</td>
