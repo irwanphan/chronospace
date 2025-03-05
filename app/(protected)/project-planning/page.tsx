@@ -6,6 +6,8 @@ import { formatDate } from '@/lib/utils';
 import { Project } from '@/types/project';
 import { WorkDivision } from '@prisma/client';
 import ProjectActions from './components/ProjectActions';
+import { calculateProjectStats } from '@/lib/helpers';
+import StatsOverview from './components/StatsOverview';
 
 export default function ProjectPlanningPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -17,23 +19,6 @@ export default function ProjectPlanningPage() {
     delayed: 0
   });
 
-  const calculateStats = (projects: Project[]) => {
-    const allocated = projects.filter((p: Project) => p.status === 'Allocated').length;
-    const active = projects.filter((p: Project) => p.status === 'Active').length;
-    const delayed = projects.filter((p: Project) => {
-      const finishDate = new Date(p.finishDate);
-      const today = new Date();
-      return finishDate < today && p.status !== 'Completed';
-    }).length;
-
-    return {
-      total: projects.length,
-      budgetAllocated: allocated,
-      active: active,
-      delayed: delayed
-    };
-  };
-
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -42,7 +27,7 @@ export default function ProjectPlanningPage() {
           const data = await response.json();
           setProjects(data.projects);
           setWorkDivisions(data.workDivisions);
-          setStats(calculateStats(data.projects));
+          setStats(calculateProjectStats(data.projects));
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -56,29 +41,9 @@ export default function ProjectPlanningPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Project Plans Overview</h1>
-        <div className="flex items-center gap-2">
-          <input type="month" defaultValue="2025-01" className="px-4 py-2 border rounded-lg" />
-        </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="text-sm text-gray-600">Total Planned Projects</div>
-          <div className="text-2xl font-semibold mt-1">{stats.total} Projects</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="text-sm text-gray-600">Budget Allocated Projects</div>
-          <div className="text-2xl font-semibold mt-1">{stats.budgetAllocated} Projects</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="text-sm text-gray-600">Active Projects</div>
-          <div className="text-2xl font-semibold mt-1">{stats.active} Projects</div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-          <div className="text-sm text-gray-600">Delayed Projects</div>
-          <div className="text-2xl font-semibold mt-1">{stats.delayed} Projects</div>
-        </div>
-      </div>
+      <StatsOverview stats={stats} />
 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -138,7 +103,7 @@ export default function ProjectPlanningPage() {
                       const projectsData = await projectsRes.json();
                       setProjects(projectsData.projects);
                       setWorkDivisions(projectsData.workDivisions);
-                      setStats(calculateStats(projectsData.projects));
+                      setStats(calculateProjectStats(projectsData.projects));
                     }} 
                   />
                 </td>
