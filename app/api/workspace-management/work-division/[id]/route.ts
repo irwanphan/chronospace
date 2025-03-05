@@ -90,8 +90,17 @@ export async function DELETE(
 ) {
   try {
     // Check if division is used in approval schemas
+    const workDivision = await prisma.workDivision.findUnique({
+      where: { id: params.id },
+      select: { divisionCode: true }
+    });
+
     const schemasWithDivision = await prisma.approvalSchema.findMany({
-      where: { divisions: params.id }
+      where: {
+        divisions: {
+          contains: workDivision?.divisionCode
+        }
+      }
     });
 
     if (schemasWithDivision.length > 0) {

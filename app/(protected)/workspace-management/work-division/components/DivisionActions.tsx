@@ -25,7 +25,12 @@ export default function DivisionActions({ divisionId, onDelete }: DivisionAction
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete work division');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert(data.error);
+        return;
+      }
 
       onDelete();
       setShowDropdown(false);
