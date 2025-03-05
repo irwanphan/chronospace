@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useSession } from 'next-auth/react';
@@ -21,7 +20,6 @@ export default function BudgetPlanningPage() {
     inProgress: 0,
     delayed: 0
   });
-  const router = useRouter();
 
   const { data: session, status } = useSession();
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
@@ -185,7 +183,10 @@ export default function BudgetPlanningPage() {
                     canEditBudget={canEditBudget ?? false}
                     canDeleteBudget={canDeleteBudget ?? false}
                     onDelete={async () => {
-                      router.refresh();
+                      const budgetsRes = await fetch('/api/budget-planning');
+                      const data = await budgetsRes.json();
+                      setBudgets(data.budgets);
+                      setDivisions(data.divisions);
                     }} 
                   />
                 </td>
