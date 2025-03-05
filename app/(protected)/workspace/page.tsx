@@ -1,19 +1,16 @@
 'use client';
 
-// import { useState } from 'react';
 import { useEffect, useState } from 'react';
-// import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
-import StatCard from '@/components/StatCard';
 import { formatDate, stripHtmlTags } from '@/lib/utils';
-// import { WorkDivision } from '@/types/workDivision';
 import { WorkspaceAccess } from '@/types/access-control';
 import { Session } from 'next-auth';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import WorkspaceStats from './components/WorkspaceStats';
 
 interface CustomSession extends Session {
   user: {
@@ -81,21 +78,100 @@ export default function WorkspacePage() {
   const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
   const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
+  const [stats, setStats] = useState({
+    allRequests: 0,
+    newRequests: 0,
+    staleRequests: 0,
+    completedRequests: 0,
+    allRequestsChange: 0,
+    newRequestsChange: 0,
+    staleRequestsChange: 0,
+    completedRequestsChange: 0
+  });
 
-  // useEffect(() => {
-  //   const handleKeyPress = (event: KeyboardEvent) => {
-  //     // Shortcut: Ctrl/Cmd + Shift + N
-  //     if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'N') {
-  //       event.preventDefault();
-  //       if (canCreateRequest) {
-  //         router.push('/request/new');
-  //       }
-  //     }
-  //   };
+  const calculateStats = (requests: PurchaseRequest[]) => {
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const lastMonth = thisMonth - 1;
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+    
+    // Current stats
+    const allRequests = requests.length;
+    
+    // New requests (created in last 30 days)
+    const newRequests = requests.filter(req => {
+      const createdAt = new Date(req.createdAt);
+      return createdAt >= thirtyDaysAgo;
+    }).length;
 
-  //   window.addEventListener('keydown', handleKeyPress);
-  //   return () => window.removeEventListener('keydown', handleKeyPress);
-  // }, [canCreateRequest, router]);
+    // Stale requests (past project finish date and not completed/rejected)
+    const staleRequests = requests.filter(req => {
+      const finishDate = new Date(req.budget.project.finishDate);
+      return finishDate < now && 
+             req.status !== 'Completed' && 
+             req.status !== 'Rejected';
+    }).length;
+
+    // Completed requests
+    const completedRequests = requests.filter(req => 
+      req.status === 'Completed'
+    ).length;
+
+    // Calculate changes
+    // // TODO: diambil dari API
+    // const allRequestsChange = requests.length - previousTotalRequests; 
+    const allRequestsChange = 0
+
+    // New requests this month vs last month
+    const thisMonthNewRequests = requests.filter(req => {
+      const createdAt = new Date(req.createdAt);
+      return createdAt.getMonth() === thisMonth;
+    }).length;
+
+    const lastMonthNewRequests = requests.filter(req => {
+      const createdAt = new Date(req.createdAt);
+      return createdAt.getMonth() === lastMonth;
+    }).length;
+
+    const newRequestsChange = thisMonthNewRequests - lastMonthNewRequests;
+
+    // Stale requests change (current vs previous count)
+    const previousStaleRequests = requests.filter(req => {
+      const finishDate = new Date(req.budget.project.finishDate);
+      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+      return finishDate < thirtyDaysAgo && 
+             req.status !== 'Completed' && 
+             req.status !== 'Rejected';
+    }).length;
+
+    const staleRequestsChange = staleRequests - previousStaleRequests;
+
+    // TODO: diambil dari API
+    // Completed requests this month vs last month
+    // const thisMonthCompleted = requests.filter(req => {
+    //   const statusDate = new Date(req.updatedAt); // add updatedAt field
+    //   return req.status === 'Completed' && statusDate.getMonth() === thisMonth;
+    // }).length;
+
+    // const lastMonthCompleted = requests.filter(req => {
+    //   const statusDate = new Date(req.updatedAt);
+    //   return req.status === 'Completed' && statusDate.getMonth() === lastMonth;
+    // }).length;
+
+    // const completedRequestsChange = thisMonthCompleted - lastMonthCompleted;
+    const completedRequestsChange = 0
+
+    return {
+      allRequests,
+      newRequests,
+      staleRequests,
+      completedRequests,
+      allRequestsChange,
+      newRequestsChange,
+      staleRequestsChange,
+      completedRequestsChange
+    };
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -106,8 +182,9 @@ export default function WorkspacePage() {
         if (!response.ok) throw new Error('Failed to fetch requests');
         const data = await response.json();
         
-        if (mounted) {  // Hanya update state jika komponen masih mounted
+        if (mounted) {
           setPurchaseRequests(data.purchaseRequests);
+          setStats(calculateStats(data.purchaseRequests));
           setIsLoading(false);
         }
       } catch (error) {
@@ -122,9 +199,9 @@ export default function WorkspacePage() {
     fetchData();
 
     return () => {
-      mounted = false;  // Cleanup saat unmount
+      mounted = false;
     };
-  }, []); // Empty dependency array
+  }, []);
 
   // console.log('Purchase Requests:', purchaseRequests);
   if (isLoading) return <LoadingSpin />
@@ -134,15 +211,6 @@ export default function WorkspacePage() {
       <div className="max-w-full">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Overview</h1>
-          {/* <div className="flex items-center gap-2">
-            <button className="p-2">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <span className="text-sm font-medium">{currentMonth}</span>
-            <button className="p-2">
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div> */}
         </div>
 
         { error && (
@@ -184,33 +252,7 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard
-            title="All Requests Queue"
-            count={40}
-            change={8}
-            type="increase"
-          />
-          <StatCard
-            title="New Requests"
-            count={28}
-            change={8}
-            type="increase"
-          />
-          <StatCard
-            title="Stale Requests"
-            count={12}
-            change={2}
-            type="decrease"
-          />
-          <StatCard
-            title="Completed Requests"
-            count={30}
-            change={9}
-            type="increase"
-          />
-        </div>
+        <WorkspaceStats stats={stats} />
 
         {/* Request List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -269,9 +311,6 @@ export default function WorkspacePage() {
       {status === 'authenticated' && canCreateRequest && (
         <div className="relative">
           <CreateRequestFAB />
-          {/* <div className="fixed bottom-16 right-4 text-sm text-gray-500">
-            Press Ctrl+Shift+N
-          </div> */}
         </div>
       )}
     </>
