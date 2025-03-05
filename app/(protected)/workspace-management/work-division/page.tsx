@@ -3,16 +3,22 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Filter, Plus } from 'lucide-react';
 import DivisionActions from './components/DivisionActions';
-
 import { WorkDivision } from '@/types/workDivision';
 import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
+import Pagination from '@/components/Pagination';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentDivisions = divisions.slice(startIndex, endIndex);
 
   const fetchData = async () => {
     try {
@@ -97,7 +103,7 @@ export default function WorkDivisionPage() {
                 </td>
               </tr>
             ) : (
-              divisions.map((division, index) => (
+              currentDivisions.map((division, index) => (
                 <tr key={division.id} className="border-b">
                   <td className="py-3 px-4">{index + 1}</td>
                   <td className="py-3 px-4">{division.divisionCode}</td>
@@ -124,6 +130,12 @@ export default function WorkDivisionPage() {
           </tbody>
         </table>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={divisions.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 

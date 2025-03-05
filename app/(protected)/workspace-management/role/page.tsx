@@ -5,11 +5,18 @@ import { Search, Filter, Plus } from 'lucide-react';
 import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
 import RoleActions from './components/RoleActions';
+import Pagination from '@/components/Pagination';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRoles = roles.slice(startIndex, endIndex);
 
   useEffect(() => {
     fetchRoles();
@@ -92,7 +99,7 @@ export default function RolePage() {
                 </td>
               </tr>
             ) : (
-              roles.map((role, index) => {
+              currentRoles.map((role, index) => {
                 // console.log(role);
                 return (
                   <tr key={role.id} className="border-b">
@@ -126,6 +133,12 @@ export default function RolePage() {
           </tbody>
         </table>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={roles.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 

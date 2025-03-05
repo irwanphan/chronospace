@@ -4,11 +4,18 @@ import Link from 'next/link';
 import VendorActions from './components/VendorActions';
 import { Vendor } from '@/types/vendor';
 import { Search, Filter, Plus } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentVendors = vendors.slice(startIndex, endIndex);
 
   useEffect(() => {
     fetchVendors();
@@ -91,7 +98,7 @@ export default function VendorsPage() {
                 </td>
               </tr>
             ) : (
-              vendors.map((vendor, index) => (
+              currentVendors.map((vendor, index) => (
                 <tr key={vendor.id} className="border-b">
                   <td className="py-3 px-4">{index + 1}</td>
                   <td className="py-3 px-4">{vendor.vendorName}</td>
@@ -112,6 +119,12 @@ export default function VendorsPage() {
           </tbody>
         </table>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={vendors.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 
