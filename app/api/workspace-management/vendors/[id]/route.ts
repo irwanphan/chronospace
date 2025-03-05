@@ -89,9 +89,34 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if vendor is being used in any purchase request
+    const purchaseRequestsWithVendor = await prisma.purchaseRequestItem.findMany({
+      where: { vendorId: params.id }
+    });
+
+    if (purchaseRequestsWithVendor.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete vendor that is used in purchase requests' },
+        { status: 400 }
+      );
+    }
+
+    // Check if vendor is being used in any budget
+    const budgetItemsWithVendor = await prisma.budgetedItem.findMany({
+      where: { vendorId: params.id }
+    });
+
+    if (budgetItemsWithVendor.length > 0) { 
+      return NextResponse.json(
+        { error: 'Cannot delete vendor that is used in budgets' },
+        { status: 400 }
+      );
+    }
+
     await prisma.vendor.delete({
       where: { id: params.id },
     });
+    
     return NextResponse.json({ message: 'Vendor deleted successfully' });
   } catch (error) {
     console.error('Error deleting vendor:', error);

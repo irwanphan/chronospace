@@ -25,7 +25,12 @@ export default function VendorActions({ vendorId, onDelete }: VendorActionsProps
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete vendor');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert(data.error);
+        return;
+      }
 
       onDelete();
       setShowDropdown(false);
