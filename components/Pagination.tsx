@@ -27,7 +27,7 @@ export default function Pagination({
   if (totalPages <= 0) return null;
 
   return (
-    <div className={`flex justify-center gap-2 mt-4 ${className}`}>
+    <div className={`flex justify-center gap-2 my-6 ${className}`}>
       {getPageNumbers().map((pageNum) => (
         <button
           key={pageNum}

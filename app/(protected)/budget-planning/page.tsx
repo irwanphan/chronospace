@@ -8,7 +8,9 @@ import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
 import { WorkDivision } from '@/types/workDivision';
 import BudgetActions from './components/BudgetActions';
+import { calculateStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
+import BudgetStatsOverview from './components/BudgetStatsOverview';
 
 export default function BudgetPlanningPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -32,33 +34,6 @@ export default function BudgetPlanningPage() {
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
   const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
   const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
-  
-  const calculateStats = (budgets: Budget[]) => {
-    const total = budgets.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
-    const completed = budgets.filter((b: Budget) => b.status === 'Completed').length;
-    const inProgress = budgets.filter((b: Budget) => b.status === 'In Progress').length;
-    const delayed = budgets.filter((b: Budget) => {
-      const startDate = new Date(b.startDate);
-      const today = new Date();
-      return startDate < today && b.status === 'Not Started';
-    }).length;
-    const upcoming = budgets.filter((b: Budget) => {
-      const finishDate = new Date(b.finishDate);
-      const today = new Date();
-      const thirtyDaysFromNow = new Date();
-      thirtyDaysFromNow.setDate(today.getDate() + 30);
-      return finishDate <= thirtyDaysFromNow && finishDate >= today;
-    }).length;
-
-    return {
-      totalBudget: total,
-      totalPlans: budgets.length,
-      completedPercentage: budgets.length > 0 ? Math.round((completed / budgets.length) * 100) : 0,
-      upcomingDeadlines: upcoming,
-      inProgress: inProgress,
-      delayed: delayed
-    };
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,48 +66,10 @@ export default function BudgetPlanningPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-            <div className="text-sm text-gray-600">Total Planned Budget</div>
-            <div className="text-2xl font-semibold mt-1">{formatCurrency(stats.totalBudget)}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-            <div className="text-sm text-gray-600">Number of Plans</div>
-            <div className="text-2xl font-semibold mt-1">{stats.totalPlans} Plans</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-            <div className="text-sm text-gray-600">Completed Plans Percentage</div>
-            <div className="text-2xl font-semibold mt-1">{stats.completedPercentage}%</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-            <div className="text-sm text-gray-600">Upcoming Deadlines</div>
-            <div className="text-2xl font-semibold mt-1">{stats.upcomingDeadlines} Plans</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-6 bg-white p-4 rounded-lg shadow border border-gray-200">
-            <h2 className="font-semibold mb-4">Largest Budget Plans</h2>
-            {largestBudgets.map((budget) => (
-              <div key={budget.id} className="flex justify-between items-center mb-2">
-                <div>{budget.title}</div>
-                <div className="font-semibold">{formatCurrency(budget.totalBudget)}</div>
-              </div>
-            ))}
-          </div>
-          <div className="col-span-3 bg-white p-4 rounded-lg shadow border border-gray-200">
-            <h2 className="font-semibold mb-4">Plans in Progress</h2>
-            <div className="text-2xl font-semibold">{stats.inProgress} Plans</div>
-            <p className="text-sm text-gray-600 mt-2">Purchase Requests has been submitted</p>
-          </div>
-          <div className="col-span-3 bg-white p-4 rounded-lg shadow border border-gray-200">
-            <h2 className="font-semibold mb-4">Delayed Plans</h2>
-            <div className="text-2xl font-semibold">{stats.delayed} Plans</div>
-            <p className="text-sm text-gray-600 mt-2">Purchase Requests has not been submitted despite past Start Date</p>
-          </div>
-        </div>
-      </div>
+      <BudgetStatsOverview 
+        stats={stats}
+        largestBudgets={largestBudgets}
+      />
 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
