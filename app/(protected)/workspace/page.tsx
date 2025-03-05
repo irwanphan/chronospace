@@ -11,6 +11,8 @@ import { WorkspaceAccess } from '@/types/access-control';
 import { Session } from 'next-auth';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import WorkspaceStats from './components/WorkspaceStats';
+import { calculateRequestStats } from '@/lib/helpers';
+import Pagination from '@/components/Pagination';
 
 interface CustomSession extends Session {
   user: {
@@ -89,89 +91,12 @@ export default function WorkspacePage() {
     completedRequestsChange: 0
   });
 
-  const calculateStats = (requests: PurchaseRequest[]) => {
-    const now = new Date();
-    const thisMonth = now.getMonth();
-    const lastMonth = thisMonth - 1;
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-    
-    // Current stats
-    const allRequests = requests.length;
-    
-    // New requests (created in last 30 days)
-    const newRequests = requests.filter(req => {
-      const createdAt = new Date(req.createdAt);
-      return createdAt >= thirtyDaysAgo;
-    }).length;
-
-    // Stale requests (past project finish date and not completed/rejected)
-    const staleRequests = requests.filter(req => {
-      const finishDate = new Date(req.budget.project.finishDate);
-      return finishDate < now && 
-             req.status !== 'Completed' && 
-             req.status !== 'Rejected';
-    }).length;
-
-    // Completed requests
-    const completedRequests = requests.filter(req => 
-      req.status === 'Completed'
-    ).length;
-
-    // Calculate changes
-    // // TODO: diambil dari API
-    // const allRequestsChange = requests.length - previousTotalRequests; 
-    const allRequestsChange = 0
-
-    // New requests this month vs last month
-    const thisMonthNewRequests = requests.filter(req => {
-      const createdAt = new Date(req.createdAt);
-      return createdAt.getMonth() === thisMonth;
-    }).length;
-
-    const lastMonthNewRequests = requests.filter(req => {
-      const createdAt = new Date(req.createdAt);
-      return createdAt.getMonth() === lastMonth;
-    }).length;
-
-    const newRequestsChange = thisMonthNewRequests - lastMonthNewRequests;
-
-    // Stale requests change (current vs previous count)
-    const previousStaleRequests = requests.filter(req => {
-      const finishDate = new Date(req.budget.project.finishDate);
-      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-      return finishDate < thirtyDaysAgo && 
-             req.status !== 'Completed' && 
-             req.status !== 'Rejected';
-    }).length;
-
-    const staleRequestsChange = staleRequests - previousStaleRequests;
-
-    // TODO: diambil dari API
-    // Completed requests this month vs last month
-    // const thisMonthCompleted = requests.filter(req => {
-    //   const statusDate = new Date(req.updatedAt); // add updatedAt field
-    //   return req.status === 'Completed' && statusDate.getMonth() === thisMonth;
-    // }).length;
-
-    // const lastMonthCompleted = requests.filter(req => {
-    //   const statusDate = new Date(req.updatedAt);
-    //   return req.status === 'Completed' && statusDate.getMonth() === lastMonth;
-    // }).length;
-
-    // const completedRequestsChange = thisMonthCompleted - lastMonthCompleted;
-    const completedRequestsChange = 0
-
-    return {
-      allRequests,
-      newRequests,
-      staleRequests,
-      completedRequests,
-      allRequestsChange,
-      newRequestsChange,
-      staleRequestsChange,
-      completedRequestsChange
-    };
-  };
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPurchaseRequests = purchaseRequests.slice(startIndex, endIndex);
 
   useEffect(() => {
     let mounted = true;
@@ -184,7 +109,7 @@ export default function WorkspacePage() {
         
         if (mounted) {
           setPurchaseRequests(data.purchaseRequests);
-          setStats(calculateStats(data.purchaseRequests));
+          setStats(calculateRequestStats(data.purchaseRequests));
           setIsLoading(false);
         }
       } catch (error) {
@@ -256,7 +181,7 @@ export default function WorkspacePage() {
 
         {/* Request List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {purchaseRequests.map((request) => {
+          {currentPurchaseRequests.map((request) => {
             return (
               <RequestCard
                 key={request.id}
@@ -285,29 +210,15 @@ export default function WorkspacePage() {
           })}
         </div>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-            1
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50">
-            2
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50">
-            3
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50">
-            4
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50">
-            5
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50">
-            6
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={purchaseRequests.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
+
       </div>
-      
+
       {status === 'authenticated' && canCreateRequest && (
         <div className="relative">
           <CreateRequestFAB />

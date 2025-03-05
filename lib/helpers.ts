@@ -1,5 +1,6 @@
 import { Budget } from '@/types/budget';
 import { Project } from '@/types/project';
+import { PurchaseRequest } from '@prisma/client';
 
 export const calculateProjectStats = (projects: Project[]) => {
   const allocated = projects.filter((p: Project) => p.status === 'Allocated').length;
@@ -18,7 +19,7 @@ export const calculateProjectStats = (projects: Project[]) => {
   };
 };
 
-export const calculateStats = (budgets: Budget[]) => {
+export const calculateBudgetStats = (budgets: Budget[]) => {
   const total = budgets.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
   const completed = budgets.filter((b: Budget) => b.status === 'Completed').length;
   const inProgress = budgets.filter((b: Budget) => b.status === 'In Progress').length;
@@ -42,5 +43,92 @@ export const calculateStats = (budgets: Budget[]) => {
     upcomingDeadlines: upcoming,
     inProgress: inProgress,
     delayed: delayed
+  };
+};
+
+export const calculateRequestStats = (requests: PurchaseRequest[]) => {
+  const now = new Date();
+  const thisMonth = now.getMonth();
+  const lastMonth = thisMonth - 1;
+  const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+  
+  // Current stats
+  const allRequests = requests.length;
+  
+  // New requests (created in last 30 days)
+  const newRequests = requests.filter(req => {
+    const createdAt = new Date(req.createdAt);
+    return createdAt >= thirtyDaysAgo;
+  }).length;
+
+  // Stale requests (past project finish date and not completed/rejected)
+  // const staleRequests = requests.filter(req => {
+  //   const finishDate = new Date(req.budget.project.finishDate);
+  //   return finishDate < now && 
+  //          req.status !== 'Completed' && 
+  //          req.status !== 'Rejected';
+  // }).length;
+  const staleRequests = 0
+
+  // Completed requests
+  const completedRequests = requests.filter(req => 
+    req.status === 'Completed'
+  ).length;
+
+  // Calculate changes
+  // // TODO: diambil dari API
+  // const allRequestsChange = requests.length - previousTotalRequests; 
+  const allRequestsChange = 0
+
+  // New requests this month vs last month
+  const thisMonthNewRequests = requests.filter(req => {
+    const createdAt = new Date(req.createdAt);
+    return createdAt.getMonth() === thisMonth;
+  }).length;
+
+  const lastMonthNewRequests = requests.filter(req => {
+    const createdAt = new Date(req.createdAt);
+    return createdAt.getMonth() === lastMonth;
+  }).length;
+
+  const newRequestsChange = thisMonthNewRequests - lastMonthNewRequests;
+
+  // Stale requests change (current vs previous count)
+  // TODO: pass budget in
+  // const previousStaleRequests = requests.filter(req => {
+  //   const finishDate = new Date(req.budget.project.finishDate);
+  //   const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+  //   return finishDate < thirtyDaysAgo && 
+  //          req.status !== 'Completed' && 
+  //          req.status !== 'Rejected';
+  // }).length;
+
+  // const staleRequestsChange = staleRequests - previousStaleRequests;
+  const staleRequestsChange = 0
+
+  // TODO: diambil dari API
+  // Completed requests this month vs last month
+  // const thisMonthCompleted = requests.filter(req => {
+  //   const statusDate = new Date(req.updatedAt); // add updatedAt field
+  //   return req.status === 'Completed' && statusDate.getMonth() === thisMonth;
+  // }).length;
+
+  // const lastMonthCompleted = requests.filter(req => {
+  //   const statusDate = new Date(req.updatedAt);
+  //   return req.status === 'Completed' && statusDate.getMonth() === lastMonth;
+  // }).length;
+
+  // const completedRequestsChange = thisMonthCompleted - lastMonthCompleted;
+  const completedRequestsChange = 0
+
+  return {
+    allRequests,
+    newRequests,
+    staleRequests,
+    completedRequests,
+    allRequestsChange,
+    newRequestsChange,
+    staleRequestsChange,
+    completedRequestsChange
   };
 };

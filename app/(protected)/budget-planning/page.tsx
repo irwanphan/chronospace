@@ -8,7 +8,7 @@ import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
 import { WorkDivision } from '@/types/workDivision';
 import BudgetActions from './components/BudgetActions';
-import { calculateStats } from '@/lib/helpers';
+import { calculateBudgetStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
 import BudgetStatsOverview from './components/BudgetStatsOverview';
 import LoadingSpin from '@/components/ui/LoadingSpin';
@@ -45,7 +45,7 @@ export default function BudgetPlanningPage() {
           const data = await response.json();
           setBudgets(data.budgets);
           setDivisions(data.divisions);
-          setStats(calculateStats(data.budgets));
+          setStats(calculateBudgetStats(data.budgets));
         }
       } catch (error) {
         console.error('Error fetching budgets:', error);
@@ -136,7 +136,7 @@ export default function BudgetPlanningPage() {
                       const data = await response.json();
                       setBudgets(data.budgets);
                       setDivisions(data.divisions);
-                      setStats(calculateStats(data.budgets));
+                      setStats(calculateBudgetStats(data.budgets));
                     }} 
                   />
                 </td>
