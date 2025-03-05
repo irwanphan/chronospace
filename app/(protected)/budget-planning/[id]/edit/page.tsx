@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 import { Plus, X } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
 import { RichTextEditor } from '@/components/RichTextEditor';
@@ -70,7 +69,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
           const vendor = data.vendors.find((v: Vendor) => v.id === item.vendor);
           return {
             ...item,
-            vendor: vendor ? vendor.vendorName : item.vendor // Use vendor name instead of ID
+            vendor: vendor ? vendor.vendorName : item.vendor
           };
         });
 

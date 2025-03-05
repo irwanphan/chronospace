@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-// import { toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { stripHtmlTags } from '@/lib/utils';
 import { Vendor } from '@/types/vendor';
@@ -60,7 +58,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
           const vendor = data.vendors.find((v: Vendor) => v.id === item.vendor);
           return {
             ...item,
-            vendor: vendor ? vendor.vendorName : item.vendor // Use vendor name instead of ID
+            vendor: vendor ? vendor.vendorName : item.vendor
           };
         });
 
