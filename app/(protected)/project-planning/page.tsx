@@ -8,6 +8,7 @@ import { WorkDivision } from '@prisma/client';
 import ProjectActions from './components/ProjectActions';
 import { calculateProjectStats } from '@/lib/helpers';
 import StatsOverview from './components/StatsOverview';
+import Pagination from '@/components/Pagination';
 
 export default function ProjectPlanningPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -18,6 +19,12 @@ export default function ProjectPlanningPage() {
     active: 0,
     delayed: 0
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProjects = projects.slice(startIndex, endIndex);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -75,7 +82,7 @@ export default function ProjectPlanningPage() {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">ID</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Title</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Year</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Division</th>
@@ -86,7 +93,7 @@ export default function ProjectPlanningPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {projects.map((project) => (
+            {currentProjects.map((project) => (
               <tr key={project.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 text-sm">{project.projectId}</td>
                 <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
@@ -113,11 +120,12 @@ export default function ProjectPlanningPage() {
         </table>
       </div>
 
-      <div className="flex justify-center gap-2 mt-4">
-        <button className="px-3 py-1 rounded bg-blue-50 text-blue-600">1</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">2</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">3</button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={projects.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 
