@@ -25,7 +25,12 @@ export default function ProjectActions({ projectId, onDelete }: ProjectActionsPr
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete project');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert(data.error);
+        return;
+      }
 
       onDelete();
       setShowDropdown(false);

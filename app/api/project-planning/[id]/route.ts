@@ -68,6 +68,30 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if project has allocated budget
+    const project = await prisma.project.findUnique({
+      where: { id: params.id }
+    });
+
+    if (project?.status === 'Budget Allocated' || project?.status === 'Active') {
+      return NextResponse.json(
+        { error: 'Cannot delete project that has allocated budget or is active' },
+        { status: 400 }
+      );
+    }
+
+    // Check if project has budget plans
+    const budgetPlans = await prisma.budget.findMany({
+      where: { projectId: params.id }
+    });
+
+    if (budgetPlans.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete project that has budget allocated' },
+        { status: 400 }
+      );
+    }
+
     await prisma.project.delete({
       where: { id: params.id },
     });
