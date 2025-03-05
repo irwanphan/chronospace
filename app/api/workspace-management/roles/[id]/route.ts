@@ -73,14 +73,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if role is being used by any user
-    const usersWithRole = await prisma.user.findMany({
+    // Check if role is being used in any purchase request approval
+    const purchaseRequestApprovalsWithRole = await prisma.purchaseRequestApproval.findMany({
       where: { role: params.id }
     });
 
-    if (usersWithRole.length > 0) {
+    if (purchaseRequestApprovalsWithRole.length > 0) {  
       return NextResponse.json(
-        { error: 'Cannot delete role that is assigned to users' },
+        { error: 'Cannot delete role that is used in purchase request approvals' },
         { status: 400 }
       );
     }
@@ -93,6 +93,18 @@ export async function DELETE(
     if (approvalStepsWithRole.length > 0) {
       return NextResponse.json(
         { error: 'Cannot delete role that is used in approval schemas' },
+        { status: 400 }
+      );
+    }
+
+    // Check if role is being used by any user
+    const usersWithRole = await prisma.user.findMany({
+      where: { role: params.id }
+    });
+
+    if (usersWithRole.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete role that is assigned to users' },
         { status: 400 }
       );
     }
