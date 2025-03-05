@@ -89,9 +89,58 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if division is used in approval schemas
+    const schemasWithDivision = await prisma.approvalSchema.findMany({
+      where: { divisions: params.id }
+    });
+
+    if (schemasWithDivision.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete division that is used in approval schemas' },
+        { status: 400 }
+      );
+    }
+
+    // Check if division is used in projects
+    const projectsWithDivision = await prisma.project.findMany({
+      where: { workDivisionId: params.id }
+    });
+
+    if (projectsWithDivision.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete division that is used in projects' },
+        { status: 400 }
+      );
+    }
+
+    // Check if division is used in budgets
+    const budgetsWithDivision = await prisma.budget.findMany({
+      where: { workDivisionId: params.id }
+    });
+
+    if (budgetsWithDivision.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete division that is used in budget plans' },
+        { status: 400 }
+      );
+    }
+
+    // Check if division is used by users
+    const usersWithDivision = await prisma.user.findMany({
+      where: { workDivision: params.id }
+    });
+
+    if (usersWithDivision.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete division that has assigned users' },
+        { status: 400 }
+      );
+    }
+
     await prisma.workDivision.delete({
       where: { id: params.id },
     });
+    
     return NextResponse.json({ message: 'Work division deleted successfully' });
   } catch (error) {
     console.error('Error deleting work division:', error);
