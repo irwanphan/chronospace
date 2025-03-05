@@ -35,28 +35,13 @@ export default function NewWorkDivisionPage() {
   }>({});
 
   useEffect(() => {
-    const fetchWorkDivisions = async () => {
-      try {
-        const response = await fetch('/api/work-divisions');
-        if (response.ok) {
-          const data = await response.json();
-          setWorkDivisions(data);
-        }
-      } catch (error) {
-        console.error('Error fetching work divisions:', error);
-      }
-    };
-
-    fetchWorkDivisions();
-  }, []);
-
-  useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/users');
+        const response = await fetch('/api/workspace-management/work-division/fetch-users-workdivisions');
         if (response.ok) {
           const data = await response.json();
-          setUsers(data);
+          setUsers(data.users);
+          setWorkDivisions(data.workDivisions);
         }
       } catch (error) {
         console.error('Error fetching users:', error);
