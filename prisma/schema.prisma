@@ -225,7 +225,7 @@ model BudgetedItem {
   unitPrice   Float
   vendorId    String
   vendor      Vendor   @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
-  budget      Budget   @relation(fields: [budgetId], references: [id], onUpdate: Cascade)
+  budget      Budget   @relation(fields: [budgetId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   purchaseRequestItems PurchaseRequestItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -286,7 +286,7 @@ model PurchaseRequestItem {
   vendorId          String
   vendor            Vendor          @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
   purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
-  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id])
+  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id], onDelete: Cascade)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 

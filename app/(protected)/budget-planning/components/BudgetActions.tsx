@@ -32,7 +32,12 @@ export default function BudgetActions({
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete budget');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert(data.error);
+        return;
+      }
 
       onDelete();
       setShowDropdown(false);

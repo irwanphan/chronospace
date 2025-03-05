@@ -150,8 +150,42 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.budget.delete({
-      where: { id: params.id },
+    // Check if budget has any purchase requests
+    const purchaseRequests = await prisma.purchaseRequest.findMany({
+      where: { budgetId: params.id },
+      select: { code: true }
+    });
+
+    if (purchaseRequests.length > 0) {
+      const prCodes = purchaseRequests.map(pr => pr.code).join(', ');
+      return NextResponse.json(
+        { 
+          error: `Cannot delete budget because it is being used in purchase request(s): ${prCodes}. Please delete the purchase requests first if possible. Contact your administrator for further assistance.` 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Hapus dalam transaction untuk memastikan konsistensi
+    await prisma.$transaction(async (tx) => {
+      // 1. Hapus purchase request items yang terkait dengan budgeted items
+      await tx.purchaseRequestItem.deleteMany({
+        where: {
+          budgetItem: {
+            budgetId: params.id
+          }
+        }
+      });
+
+      // 2. Hapus budgeted items
+      await tx.budgetedItem.deleteMany({
+        where: { budgetId: params.id }
+      });
+
+      // 3. Hapus budget
+      await tx.budget.delete({
+        where: { id: params.id }
+      });
     });
     
     return NextResponse.json({ message: 'Budget deleted successfully' });
