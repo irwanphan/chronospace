@@ -98,9 +98,63 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if user has purchase requests
+    const purchaseRequests = await prisma.purchaseRequest.findMany({
+      where: { createdBy: params.id }
+    });
+
+    if (purchaseRequests.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete user that has created purchase requests' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user is involved in PR approvals
+    const prApprovals = await prisma.purchaseRequestApproval.findMany({
+      where: { 
+        OR: [
+          { approvedBy: params.id },
+          { specificUser: params.id }
+        ]
+      }
+    });
+
+    if (prApprovals.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete user that is involved in purchase request approvals' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user is specified in approval schemas
+    const approvalSteps = await prisma.approvalStep.findMany({
+      where: { specificUserId: params.id }
+    });
+
+    if (approvalSteps.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete user that is specified in approval schemas' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user is division head
+    const divisions = await prisma.workDivision.findMany({
+      where: { divisionHead: params.id }
+    });
+
+    if (divisions.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete user that is assigned as division head' },
+        { status: 400 }
+      );
+    }
+
     await prisma.user.delete({
       where: { id: params.id },
     });
+    
     return NextResponse.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error deleting user:', error);
