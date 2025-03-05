@@ -9,8 +9,10 @@ import ProjectActions from './components/ProjectActions';
 import { calculateProjectStats } from '@/lib/helpers';
 import StatsOverview from './components/StatsOverview';
 import Pagination from '@/components/Pagination';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function ProjectPlanningPage() {
+  const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [stats, setStats] = useState({
@@ -38,11 +40,15 @@ export default function ProjectPlanningPage() {
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchProjects();
   }, []);
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

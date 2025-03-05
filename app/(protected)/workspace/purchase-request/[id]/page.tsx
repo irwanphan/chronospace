@@ -9,6 +9,7 @@ import { stripHtmlTags } from '@/lib/utils';
 import { Check, ChevronLeft, Pencil, X, PenSquare } from 'lucide-react';
 import { IconForbid } from '@tabler/icons-react';
 import { Modal } from '@/components/ui/Modal';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface PurchaseRequestHistory {
   id: string;
@@ -251,7 +252,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   }
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <LoadingSpin />
   }
 
   return (

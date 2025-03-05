@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import { stripHtmlTags } from '@/lib/utils';
 import { Vendor } from '@/types/vendor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface FormData {
   projectId: string;
@@ -95,7 +96,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
     }));
   }, [selectedItems]);
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

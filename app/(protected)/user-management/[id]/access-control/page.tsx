@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AccessControl, MenuAccess, ActivityAccess, WorkspaceAccess } from '@/types/access-control';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 const MENU_ACCESS_ORDER = [
   'timeline',
@@ -64,6 +65,7 @@ const createDefaultAccess = (): AccessControl => ({
 export default function UserAccessControlPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [access, setAccess] = useState<AccessControl>(createDefaultAccess());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserAccess = async () => {
@@ -74,11 +76,15 @@ export default function UserAccessControlPage({ params }: { params: { id: string
         setAccess(data);
       } catch (error) {
         console.error('Error fetching access:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserAccess();
   }, [params.id]);
+
+  if (isLoading) return <LoadingSpin />
 
   const handleSubmit = async () => {
     try {

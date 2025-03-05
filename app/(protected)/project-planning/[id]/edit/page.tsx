@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { formatDate, formatISODate } from '@/lib/utils';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { WorkDivision } from '@prisma/client';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -72,7 +73,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
     }
   };
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

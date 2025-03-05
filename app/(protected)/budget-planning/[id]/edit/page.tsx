@@ -7,6 +7,8 @@ import { Plus, X } from 'lucide-react';
 import { Dialog } from '@/components/ui/Dialog';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Vendor } from '@/types/vendor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
+
 interface FormData {
   projectId: string;
   title: string;
@@ -156,7 +158,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">

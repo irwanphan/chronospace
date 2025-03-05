@@ -10,6 +10,7 @@ import { User } from '@/types/user';
 import { Role } from '@/types/role';
 import UserActions from './components/UserActions';
 import Pagination from '@/components/Pagination';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +51,8 @@ export default function UserManagementPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="wax-w-full">

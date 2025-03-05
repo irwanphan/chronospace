@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface Role {
   id: string;
@@ -109,7 +110,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8 max-w-3xl">

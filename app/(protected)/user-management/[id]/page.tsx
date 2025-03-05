@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function ViewUserPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function ViewUserPage({ params }: { params: { id: string } }) {
     fetchData();
   }, [params.id]);
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8 max-w-3xl">

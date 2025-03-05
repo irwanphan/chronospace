@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface PurchaseRequestHistory {
   id: string;
@@ -150,7 +151,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   }
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <LoadingSpin />
   }
 
   return (

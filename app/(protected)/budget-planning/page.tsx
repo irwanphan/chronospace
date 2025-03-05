@@ -11,8 +11,10 @@ import BudgetActions from './components/BudgetActions';
 import { calculateStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
 import BudgetStatsOverview from './components/BudgetStatsOverview';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function BudgetPlanningPage() {
+  const [isLoading, setIsLoading] = useState(true);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [stats, setStats] = useState({
@@ -47,10 +49,14 @@ export default function BudgetPlanningPage() {
         }
       } catch (error) {
         console.error('Error fetching budgets:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  if (isLoading) return <LoadingSpin />
 
   // Get top 3 largest budgets
   const largestBudgets = [...budgets]
