@@ -25,7 +25,12 @@ export default function RoleActions({ roleId, onDelete }: RoleActionsProps) {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete role');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert(data.error);
+        return;
+      }
 
       onDelete();
       setShowDropdown(false);

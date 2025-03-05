@@ -73,9 +73,34 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if role is being used by any user
+    const usersWithRole = await prisma.user.findMany({
+      where: { role: params.id }
+    });
+
+    if (usersWithRole.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete role that is assigned to users' },
+        { status: 400 }
+      );
+    }
+
+    // Check if role is being used in any approval step
+    const approvalStepsWithRole = await prisma.approvalStep.findMany({
+      where: { role: params.id }
+    });
+
+    if (approvalStepsWithRole.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete role that is used in approval schemas' },
+        { status: 400 }
+      );
+    }
+
     await prisma.role.delete({
       where: { id: params.id },
     });
+    
     return NextResponse.json({ message: 'Role deleted successfully' });
   } catch (error) {
     console.error('Error deleting role:', error);
