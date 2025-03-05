@@ -17,6 +17,23 @@ export default function ProjectPlanningPage() {
     delayed: 0
   });
 
+  const calculateStats = (projects: Project[]) => {
+    const allocated = projects.filter((p: Project) => p.status === 'Allocated').length;
+    const active = projects.filter((p: Project) => p.status === 'Active').length;
+    const delayed = projects.filter((p: Project) => {
+      const finishDate = new Date(p.finishDate);
+      const today = new Date();
+      return finishDate < today && p.status !== 'Completed';
+    }).length;
+
+    return {
+      total: projects.length,
+      budgetAllocated: allocated,
+      active: active,
+      delayed: delayed
+    };
+  };
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -25,22 +42,7 @@ export default function ProjectPlanningPage() {
           const data = await response.json();
           setProjects(data.projects);
           setWorkDivisions(data.workDivisions);
-          
-          // Calculate stats
-          const allocated = data.projects.filter((p: Project) => p.status === 'Allocated').length;
-          const active = data.projects.filter((p: Project) => p.status === 'Active').length;
-          const delayed = data.projects.filter((p: Project) => {
-            const finishDate = new Date(p.finishDate);
-            const today = new Date();
-            return finishDate < today && p.status !== 'Completed';
-          }).length;
-
-          setStats({
-            total: data.projects.length,
-            budgetAllocated: allocated,
-            active: active,
-            delayed: delayed
-          });
+          setStats(calculateStats(data.projects));
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -136,6 +138,7 @@ export default function ProjectPlanningPage() {
                       const projectsData = await projectsRes.json();
                       setProjects(projectsData.projects);
                       setWorkDivisions(projectsData.workDivisions);
+                      setStats(calculateStats(projectsData.projects));
                     }} 
                   />
                 </td>
