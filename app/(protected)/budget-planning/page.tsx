@@ -26,45 +26,47 @@ export default function BudgetPlanningPage() {
   const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
   const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
   
-  const fetchData = async () => {
-    try {
-      const response = await fetch('/api/budget-planning');
-      if (response.ok) {
-        const data = await response.json();
-        setBudgets(data.budgets);
-        setDivisions(data.divisions);
-        
-        // Calculate stats
-        const total = data.budgets.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
-        const completed = data.budgets.filter((b: Budget) => b.status === 'Completed').length;
-        const inProgress = data.budgets.filter((b: Budget) => b.status === 'In Progress').length;
-        const delayed = data.budgets.filter((b: Budget) => {
-          const startDate = new Date(b.startDate);
-          const today = new Date();
-          return startDate < today && b.status === 'Not Started';
-        }).length;
-        const upcoming = data.budgets.filter((b: Budget) => {
-          const finishDate = new Date(b.finishDate);
-          const today = new Date();
-          const thirtyDaysFromNow = new Date();
-          thirtyDaysFromNow.setDate(today.getDate() + 30);
-          return finishDate <= thirtyDaysFromNow && finishDate >= today;
-        }).length;
-        
-        setStats({
-          totalBudget: total,
-          totalPlans: data.budgets.length,
-          completedPercentage: data.budgets.length > 0 ? Math.round((completed / data.budgets.length) * 100) : 0,
-          upcomingDeadlines: upcoming,
-          inProgress: inProgress,
-          delayed: delayed
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching budgets:', error);
-    }
+  const calculateStats = (budgets: Budget[]) => {
+    const total = budgets.reduce((sum: number, budget: Budget) => sum + budget.totalBudget, 0);
+    const completed = budgets.filter((b: Budget) => b.status === 'Completed').length;
+    const inProgress = budgets.filter((b: Budget) => b.status === 'In Progress').length;
+    const delayed = budgets.filter((b: Budget) => {
+      const startDate = new Date(b.startDate);
+      const today = new Date();
+      return startDate < today && b.status === 'Not Started';
+    }).length;
+    const upcoming = budgets.filter((b: Budget) => {
+      const finishDate = new Date(b.finishDate);
+      const today = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+      return finishDate <= thirtyDaysFromNow && finishDate >= today;
+    }).length;
+
+    return {
+      totalBudget: total,
+      totalPlans: budgets.length,
+      completedPercentage: budgets.length > 0 ? Math.round((completed / budgets.length) * 100) : 0,
+      upcomingDeadlines: upcoming,
+      inProgress: inProgress,
+      delayed: delayed
+    };
   };
+
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/budget-planning');
+        if (response.ok) {
+          const data = await response.json();
+          setBudgets(data.budgets);
+          setDivisions(data.divisions);
+          setStats(calculateStats(data.budgets));
+        }
+      } catch (error) {
+        console.error('Error fetching budgets:', error);
+      }
+    };
     fetchData();
   }, []);
 
@@ -183,10 +185,11 @@ export default function BudgetPlanningPage() {
                     canEditBudget={canEditBudget ?? false}
                     canDeleteBudget={canDeleteBudget ?? false}
                     onDelete={async () => {
-                      const budgetsRes = await fetch('/api/budget-planning');
-                      const data = await budgetsRes.json();
+                      const response = await fetch('/api/budget-planning');
+                      const data = await response.json();
                       setBudgets(data.budgets);
                       setDivisions(data.divisions);
+                      setStats(calculateStats(data.budgets));
                     }} 
                   />
                 </td>
