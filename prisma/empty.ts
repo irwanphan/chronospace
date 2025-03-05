@@ -4,6 +4,9 @@ async function main() {
   // Clear existing data
   await prisma.approvalStep.deleteMany();
   await prisma.approvalSchema.deleteMany();
+  await prisma.purchaseRequestItem.deleteMany();
+  await prisma.purchaseRequestApproval.deleteMany();
+  await prisma.purchaseRequestHistory.deleteMany();
   await prisma.purchaseRequest.deleteMany();
   await prisma.budgetedItem.deleteMany();
   await prisma.budget.deleteMany();
