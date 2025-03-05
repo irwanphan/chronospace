@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/utils';
 import { User } from '@/types/user';
 import { Role } from '@/types/role';
 import UserActions from './components/UserActions';
+import Pagination from '@/components/Pagination';
 
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,12 @@ export default function UserManagementPage() {
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentUsers = users.slice(startIndex, endIndex);
 
   const fetchUsers = async () => {
     try {
@@ -106,7 +113,7 @@ export default function UserManagementPage() {
                 </td>
               </tr>
             ) : (
-              users.map((user:User, index:number) => (
+              currentUsers.map((user:User, index:number) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-3 py-2 text-sm">{index + 1}</td>
                   <td className="px-3 py-2">
@@ -156,14 +163,12 @@ export default function UserManagementPage() {
         </table>
       </div>
 
-      <div className="flex justify-center gap-2 mt-4">
-        <button className="px-3 py-1 rounded bg-blue-50 text-blue-600">1</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">2</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">3</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">4</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">5</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">6</button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={users.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 

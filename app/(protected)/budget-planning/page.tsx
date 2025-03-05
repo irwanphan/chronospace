@@ -8,6 +8,7 @@ import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
 import { WorkDivision } from '@/types/workDivision';
 import BudgetActions from './components/BudgetActions';
+import Pagination from '@/components/Pagination';
 
 export default function BudgetPlanningPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -20,6 +21,12 @@ export default function BudgetPlanningPage() {
     inProgress: 0,
     delayed: 0
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentBudgets = budgets.slice(startIndex, endIndex);
 
   const { data: session, status } = useSession();
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
@@ -170,7 +177,7 @@ export default function BudgetPlanningPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {budgets.map((budget, index) => (
+            {currentBudgets.map((budget, index) => (
               <tr key={budget.id}>
                 <td className="px-6 py-4 text-sm">{index + 1}</td>
                 <td className="px-6 py-4 text-sm">{budget.title}</td>
@@ -199,11 +206,12 @@ export default function BudgetPlanningPage() {
         </table>
       </div>
 
-      <div className="flex justify-center gap-2 mt-4">
-        <button className="px-3 py-1 rounded bg-blue-50 text-blue-600">1</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">2</button>
-        <button className="px-3 py-1 rounded hover:bg-gray-50">3</button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={budgets.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 
