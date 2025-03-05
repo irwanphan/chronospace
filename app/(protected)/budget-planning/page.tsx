@@ -67,9 +67,6 @@ export default function BudgetPlanningPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Budget Plans Overview</h1>
-        <div className="flex items-center gap-2">
-          <input type="month" defaultValue="2025-01" className="px-4 py-2 border rounded-lg" />
-        </div>
       </div>
 
       <BudgetStatsOverview 
@@ -105,7 +102,7 @@ export default function BudgetPlanningPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow border border-gray-200">
+      <div className="bg-white rounded-lg shadow border border-gray-200 mb-8">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>

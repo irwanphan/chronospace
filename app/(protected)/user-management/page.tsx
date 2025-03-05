@@ -92,7 +92,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow border border-gray-200">
+      <div className="bg-white rounded-lg shadow border border-gray-200 mb-8">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -118,7 +118,9 @@ export default function UserManagementPage() {
             ) : (
               currentUsers.map((user:User, index:number) => (
                 <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 text-sm">{index + 1}</td>
+                  <td className="px-3 py-2 text-sm">
+                    {startIndex + index + 1}
+                  </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
