@@ -13,6 +13,7 @@ import LoadingSpin from '@/components/ui/LoadingSpin';
 import WorkspaceStats from './components/WorkspaceStats';
 import { calculateRequestStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
+import { Grid2X2, List } from 'lucide-react';
 
 interface CustomSession extends Session {
   user: {
@@ -91,8 +92,9 @@ export default function WorkspacePage() {
     completedRequestsChange: 0
   });
 
+  const [displayAsList, setDisplayAsList] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = displayAsList ? 10 : 6;
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -145,22 +147,36 @@ export default function WorkspacePage() {
         )}
 
         {/* Filter Tabs */}
-        <div className="flex flex-col gap-4 mb-8">
+        <div className="flex flex-row gap-4 border-b border-gray-200 mb-4 justify-between">
           <div className="flex items-center gap-4">
-            <Link href="?type=all" className="text-blue-600 hover:underline">
+            <Link href="?type=all" className="text-blue-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Show All Request
             </Link>
-            <Link href="?type=purchase-request" className="text-gray-600 hover:underline">
+            <Link href="?type=purchase-request" className="text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Purchase Request
             </Link>
-            <Link href="?type=purchase-order" className="text-gray-600 hover:underline">
+            <Link href="?type=purchase-order" className="text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Purchase Order
             </Link>
-            <Link href="?type=memo" className="text-gray-600 hover:underline">
+            <Link href="?type=memo" className="text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Memo
             </Link>
           </div>
 
+          <div className="flex items-center gap-4">
+            {/* clickable button showing thumbnail and list */}
+            <button className={`text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300 ${!displayAsList ? 'text-blue-600' : 'text-gray-600'}`} 
+              onClick={() => setDisplayAsList(false)}>
+              <Grid2X2 className="w-4 h-4" />
+            </button>
+            <button className={`text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300 ${displayAsList ? 'border-blue-600' : 'border-transparent'}`} 
+              onClick={() => setDisplayAsList(true)}>
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 mb-8">
           <div className="flex items-center gap-2">
             <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-sm">
               In Queue
