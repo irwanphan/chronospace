@@ -1,69 +1,63 @@
 import { prisma } from "@/lib/prisma";
 import { generateId } from "@/lib/utils";
+
+interface BudgetedItem {
+  id: string;
+  description: string;
+  qty: number;
+  unit: string;
+  unitPrice: number;
+  vendorId: string;
+}
+
 export async function purchaseRequestSeeder() {
-  // Ambil budget pertama dan user Grace Staff
-  const [budget, user] = await Promise.all([
-    prisma.budget.findFirst({
-      include: {
+  // Get 7 random budgets
+  const budgets = await prisma.budget.findMany({
+    include: {
+      items: true,
+      project: true
+    },
+    take: 7
+  });
+
+  for (const budget of budgets) {
+    // Create PR
+    await prisma.purchaseRequest.create({
+      data: {
+        code: generateId(budget.project.workDivisionId),
+        title: `PR for ${budget.title}`,
+        description: `Purchase request for ${budget.title}`,
+        budgetId: budget.id,
+        status: "Pending",
+        createdBy: 'fg71xui7r000asgpgraji935t', // Sesuaikan dengan user ID yang ada
         items: {
-          include: {
-            vendor: true
-          }
+          create: generatePRItems(budget.items)
         }
       }
-    }),
-    prisma.user.findUnique({
-      where: { email: 'staff@example.com' }
-    })
-  ]);
-
-  if (!budget || !user) {
-    console.log('No budget or user found');
-    return;
+    });
   }
+}
 
-  // Buat purchase request pertama dengan item 1 dan 2
-  await prisma.purchaseRequest.create({
-    data: {
-      code: generateId('PR'),
-      budgetId: budget.id,
-      title: "Hardware & Software Procurement",
-      description: "Procurement for IT equipment and licenses",
-      status: "Submitted",
-      createdBy: user.id,
-      items: {
-        create: [
-          {
-            budgetItemId: budget.items[0].id, // Hardware Equipment
-            description: budget.items[0].description,
-            qty: 10,
-            unit: budget.items[0].unit,
-            unitPrice: budget.items[0].unitPrice,
-            vendorId: budget.items[0].vendorId
-          }
-        ]
-      },
-      approvalSteps: {
-        create: [
-          {
-            role: "role-dh",
-            stepOrder: 1,
-            status: "Pending",
-            duration: 24,
-            limit: 100000000,
-            overtime: "Notify and Wait",
-            specificUser: "ertetrcm71x2fhs89hd00asgp"
-          },
-          {
-            role: "role-gm", 
-            stepOrder: 2,
-            status: "Pending",
-            duration: 24,
-            limit: 250000000,
-            overtime: "Notify and Wait"
-          }
-        ]
-      }
-    }
+// function generatePRCode(divisionId: string): string {
+//   const currentDate = new Date();
+//   const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+//   const randomNum = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+//   return `PR/${divisionId}/${month}/2025/${randomNum}`;
+// }
+
+function generatePRItems(budgetItems: BudgetedItem[]) {
+  return budgetItems.map(item => {
+    // Random qty between 1 and the budgeted qty
+    const maxQty = Math.min(item.qty, 5); // Cap at 5 for reasonable numbers
+    const requestedQty = Math.floor(Math.random() * maxQty) + 1;
+    
+    return {
+      description: item.description,
+      qty: requestedQty,
+      unit: item.unit,
+      unitPrice: item.unitPrice,
+      budgetItemId: item.id,
+      vendorId: item.vendorId
+    };
   });
 } 
