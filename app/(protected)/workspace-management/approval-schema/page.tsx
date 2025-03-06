@@ -9,6 +9,7 @@ import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
 import SchemaActions from './components/SchemaActions';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Pagination from '@/components/Pagination';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -16,6 +17,12 @@ export default function ApprovalSchemaPage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSchemas = schemas.slice(startIndex, endIndex);
 
   const fetchSchemas = async () => {
     try {
@@ -147,7 +154,7 @@ export default function ApprovalSchemaPage() {
             No approval schemas found
           </div>
         ) : (
-          schemas.map((schema: ApprovalSchema) => (
+          currentSchemas.map((schema: ApprovalSchema) => (
             <div key={schema.id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -211,7 +218,12 @@ export default function ApprovalSchemaPage() {
           ))
         )}
       </div>
-
+      <Pagination
+        currentPage={currentPage}
+        totalItems={schemas.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 } 

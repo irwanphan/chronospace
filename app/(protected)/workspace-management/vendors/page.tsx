@@ -103,7 +103,7 @@ export default function VendorsPage() {
             ) : (
               currentVendors.map((vendor, index) => (
                 <tr key={vendor.id} className="border-b">
-                  <td className="py-3 px-4">{index + 1}</td>
+                  <td className="py-3 px-4">{startIndex + index + 1}</td>
                   <td className="py-3 px-4">{vendor.vendorName}</td>
                   <td className="py-3 px-4">{vendor.email}</td>
                   <td className="py-3 px-4">

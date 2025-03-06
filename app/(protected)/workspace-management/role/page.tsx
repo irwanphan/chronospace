@@ -106,7 +106,7 @@ export default function RolePage() {
                 // console.log(role);
                 return (
                   <tr key={role.id} className="border-b">
-                    <td className="py-3 px-4">{index + 1}</td>
+                    <td className="py-3 px-4">{startIndex + index + 1}</td>
                     <td className="py-3 px-4">{role.roleName}</td>
                     <td className="py-3 px-4">
                       {stripHtmlTags(role.description) || '-'}

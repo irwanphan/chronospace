@@ -119,7 +119,7 @@ export default function BudgetPlanningPage() {
           <tbody className="divide-y divide-gray-200">
             {currentBudgets.map((budget, index) => (
               <tr key={budget.id}>
-                <td className="px-6 py-4 text-sm">{index + 1}</td>
+                <td className="px-6 py-4 text-sm">{startIndex + index + 1}</td>
                 <td className="px-6 py-4 text-sm">{budget.title}</td>
                 <td className="px-6 py-4 text-sm">{budget.year}</td>
                 <td className="px-6 py-4 text-sm">{divisions.find(d => d.id === budget.workDivisionId)?.divisionName}</td>

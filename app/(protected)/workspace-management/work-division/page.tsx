@@ -108,7 +108,7 @@ export default function WorkDivisionPage() {
             ) : (
               currentDivisions.map((division, index) => (
                 <tr key={division.id} className="border-b">
-                  <td className="py-3 px-4">{index + 1}</td>
+                  <td className="py-3 px-4">{startIndex + index + 1}</td>
                   <td className="py-3 px-4">{division.divisionCode}</td>
                   <td className="py-3 px-4">{division.divisionName}</td>
                   <td className="py-3 px-4">
