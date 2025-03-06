@@ -4,31 +4,44 @@ export async function vendorSeeder() {
   await prisma.vendor.createMany({
     data: [
       {
-        id: 'VDR001813yer198y9137r91y',
-        vendorCode: 'VDR001',
-        vendorName: 'PT Maju Jaya',
-        address: 'Jl. Raya Utama No. 123, Jakarta',
+        id: 'vendor-1',
+        vendorName: 'PT Maju Teknologi',
+        vendorCode: 'VDR-001',
+        address: 'Jl. Teknologi No. 123, Jakarta',
         phone: '021-5551234',
-        email: 'sales@majujaya.com',
-        documents: JSON.stringify(['SIUP', 'TDP', 'NPWP'])
+        email: 'contact@majuteknologi.com',
       },
       {
-        id: 'VDR002813yer198y9154d76r',
-        vendorCode: 'VDR002',
-        vendorName: 'CV Tekno Solusi',
-        address: 'Jl. Teknologi No. 45, Bandung',
-        phone: '022-4445678',
-        email: 'info@teknosolusi.com',
-        documents: JSON.stringify(['SIUP', 'TDP', 'NPWP'])
+        id: 'vendor-2',
+        vendorName: 'PT Solusi Digital',
+        vendorCode: 'VDR-002',
+        address: 'Jl. Digital No. 456, Bandung',
+        phone: '022-5555678',
+        email: 'info@solusidigital.com',
       },
       {
-        id: 'VDR003813yer137r91yeqr78u',
-        vendorCode: 'VDR003',
-        vendorName: 'PT Sumber Makmur',
-        address: 'Jl. Industri Raya No. 78, Surabaya',
-        phone: '031-3334567',
-        email: 'procurement@sumbermakmur.com',
-        documents: JSON.stringify(['SIUP', 'TDP', 'NPWP'])
+        id: 'vendor-3',
+        vendorName: 'PT Sistem Andal',
+        vendorCode: 'VDR-003',
+        address: 'Jl. Sistem No. 789, Surabaya',
+        phone: '031-5559012',
+        email: 'contact@sistemandal.com',
+      },
+      {
+        id: 'vendor-4',
+        vendorName: 'PT Infrastruktur Prima',
+        vendorCode: 'VDR-004',
+        address: 'Jl. Prima No. 321, Medan',
+        phone: '061-5553456',
+        email: 'info@infraprima.com',
+      },
+      {
+        id: 'vendor-5',
+        vendorName: 'PT Konsultan Profesional',
+        vendorCode: 'VDR-005',
+        address: 'Jl. Profesional No. 654, Semarang',
+        phone: '024-5557890',
+        email: 'contact@konpro.com',
       }
     ]
   });

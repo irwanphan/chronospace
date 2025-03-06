@@ -1,53 +1,87 @@
 import { prisma } from "@/lib/prisma";
 
 export async function budgetSeeder() {
-  // Get project IDs first
-  const projects = await prisma.project.findMany({
-    select: { id: true, projectTitle: true, workDivisionId: true, year: true }
+  // Get all allocated projects
+  const allocatedProjects = await prisma.project.findMany({
+    where: { status: 'Allocated' }
   });
-  const vendors = await prisma.vendor.findMany();
 
-  for (const project of projects) {
-    // Create budget for each project
+  for (const project of allocatedProjects) {
     await prisma.budget.create({
       data: {
-        projectId: project.id,
         title: `Budget Plan for ${project.projectTitle}`,
-        description: `Annual budget plan for ${project.workDivisionId} division`,
+        description: `Budget allocation for ${project.projectTitle}`,
+        projectId: project.id,
         year: project.year,
+        startDate: project.startDate,
+        finishDate: project.finishDate,
+        status: 'Draft',
+        totalBudget: generateBudgetAmount(),
         workDivisionId: project.workDivisionId,
-        totalBudget: 350000000, // 350 Juta
-        startDate: new Date(`${project.year}-01-01`),
-        finishDate: new Date(`${project.year}-12-31`),
-        status: 'In Progress',
-        purchaseRequestStatus: 'Not Submitted',
-        // Create budget items
         items: {
-          create: [
-            {
-              description: 'Hardware Equipment',
-              qty: 10,
-              unit: 'Unit',
-              unitPrice: 15000000, // 15 Juta per unit
-              vendorId: vendors[0].id
-            },
-            {
-              description: 'Software Licenses',
-              qty: 50,
-              unit: 'License',
-              unitPrice: 2000000, // 2 Juta per license
-              vendorId: vendors[1].id
-            },
-            {
-              description: 'Consulting Services',
-              qty: 1,
-              unit: 'Service',
-              unitPrice: 100000000, // 100 Juta
-              vendorId: vendors[2].id
-            }
-          ]
+          create: generateBudgetItems(project.workDivisionId)
         }
       }
     });
   }
+}
+
+// Helper function to generate random budget amount between 100M to 500M
+function generateBudgetAmount(): number {
+  return Math.floor(Math.random() * (500000000 - 100000000) + 100000000);
+}
+
+// Helper function to generate budget items based on division
+function generateBudgetItems(divisionId: string) {
+  const items = [];
+  const categories = {
+    'ITE': [
+      { desc: 'Hardware Equipment', unit: 'Set' },
+      { desc: 'Software Licenses', unit: 'License' },
+      { desc: 'Network Infrastructure', unit: 'Unit' },
+      { desc: 'IT Consulting Services', unit: 'Service' }
+    ],
+    'FIN': [
+      { desc: 'Financial Software', unit: 'License' },
+      { desc: 'Accounting Services', unit: 'Service' },
+      { desc: 'Financial Consulting', unit: 'Service' },
+      { desc: 'Training Materials', unit: 'Package' }
+    ],
+    'OPS': [
+      { desc: 'Machinery Equipment', unit: 'Unit' },
+      { desc: 'Operational Tools', unit: 'Set' },
+      { desc: 'Safety Equipment', unit: 'Set' },
+      { desc: 'Maintenance Service', unit: 'Service' }
+    ],
+    'HRD': [
+      { desc: 'Training Equipment', unit: 'Set' },
+      { desc: 'HR Software License', unit: 'License' },
+      { desc: 'Consulting Services', unit: 'Service' },
+      { desc: 'Office Equipment', unit: 'Set' }
+    ],
+    'MKT': [
+      { desc: 'Marketing Tools', unit: 'Set' },
+      { desc: 'Digital Advertising', unit: 'Package' },
+      { desc: 'Marketing Software', unit: 'License' },
+      { desc: 'Event Equipment', unit: 'Set' }
+    ]
+  };
+
+  const divisionItems = categories[divisionId as keyof typeof categories] || categories['ITE'];
+  
+  // Generate 3-5 items per budget
+  const numItems = Math.floor(Math.random() * 3) + 3;
+  
+  for (let i = 0; i < numItems; i++) {
+    const item = divisionItems[i % divisionItems.length];
+    items.push({
+      description: item.desc,
+      qty: Math.floor(Math.random() * 10) + 1,
+      unit: item.unit,
+      unitPrice: Math.floor(Math.random() * (50000000 - 10000000) + 10000000),
+      vendorId: `vendor-${Math.floor(Math.random() * 5) + 1}` // Assuming we have vendors with IDs vendor-1 to vendor-5
+    });
+  }
+
+  return items;
 }
