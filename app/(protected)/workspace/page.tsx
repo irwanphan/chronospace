@@ -185,18 +185,18 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 mb-4">
+        <div className="flex flex-col gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-sm">
+            <button className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg border border-blue-600 text-sm">
               In Queue
             </button>
-            <button className="px-4 py-2 hover:bg-gray-50 rounded-full text-sm">
+            <button className="px-3 py-1 hover:bg-gray-50 rounded-lg border border-gray-300 text-sm">
               Stale
             </button>
-            <button className="px-4 py-2 hover:bg-gray-50 rounded-full text-sm">
+            <button className="px-3 py-1 hover:bg-gray-50 rounded-lg border border-gray-300 text-sm">
               Approved
             </button>
-            <button className="px-4 py-2 hover:bg-gray-50 rounded-full text-sm">
+            <button className="px-3 py-1 hover:bg-gray-50 rounded-lg border border-gray-300 text-sm">
               Show All
             </button>
           </div>
