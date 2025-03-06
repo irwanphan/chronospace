@@ -1,6 +1,7 @@
-# Budget & Project Management System
+# ChronoSpace
 
-A comprehensive system for managing budgets, projects, and purchase requests built with Next.js 14, Prisma, and Tailwind CSS.
+Streamline Projects, Budgets & Approvals in One Place.
+ChronoSpace is a comprehensive system for managing budgets, projects, and purchase requests built with Next.js 14, Prisma, and Tailwind CSS.
 
 ## Features
 
