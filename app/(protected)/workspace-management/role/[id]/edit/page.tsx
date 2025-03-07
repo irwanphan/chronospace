@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
-
+import Card from '@/components/ui/Card';
 export default function EditRolePage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -85,74 +85,76 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Role Code <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.roleCode}
-            onChange={(e) => setFormData(prev => ({ ...prev, roleCode: e.target.value }))}
-            className={`w-full px-4 py-2 border rounded-lg ${errors.roleCode ? 'border-red-500' : ''}`}
-            required
-          />
-          {errors.roleCode && (
-            <p className="mt-1 text-sm text-red-600">{errors.roleCode}</p>
-          )}
-        </div>
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Role Code <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.roleCode}
+              onChange={(e) => setFormData(prev => ({ ...prev, roleCode: e.target.value }))}
+              className={`w-full px-4 py-2 border rounded-lg ${errors.roleCode ? 'border-red-500' : ''}`}
+              required
+            />
+            {errors.roleCode && (
+              <p className="mt-1 text-sm text-red-600">{errors.roleCode}</p>
+            )}
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Role Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.roleName}
-            onChange={(e) => setFormData(prev => ({ ...prev, roleName: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg"
-            required
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Role Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.roleName}
+              onChange={(e) => setFormData(prev => ({ ...prev, roleName: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <RichTextEditor
-            value={formData.description}
-            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <RichTextEditor
+              value={formData.description}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Approval Limit <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            value={formData.approvalLimit}
-            onChange={(e) => setFormData(prev => ({ ...prev, approvalLimit: Number(e.target.value) }))}
-            className="w-full px-4 py-2 border rounded-lg"
-            min="0"
-            required
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Approval Limit <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              value={formData.approvalLimit}
+              onChange={(e) => setFormData(prev => ({ ...prev, approvalLimit: Number(e.target.value) }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              min="0"
+              required
+            />
+          </div>
 
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.push(`/workspace-management/role`)}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push(`/workspace-management/role`)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

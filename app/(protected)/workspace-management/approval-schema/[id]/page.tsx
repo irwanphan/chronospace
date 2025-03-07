@@ -9,6 +9,7 @@ import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import MultiSelect from '@/components/MultiSelect';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 interface ApiStep {
   role: string;
   specificUserId?: string;
@@ -103,143 +104,145 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
     <div className="max-w-4xl">
       <h1 className="text-2xl font-semibold mb-6">View Approval Schema</h1>
       
-      <form className="bg-white rounded-lg p-6 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-1.5">
-              Schema Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={schema?.name || ''}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              readOnly
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Document Type <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={schema?.documentType || ''}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-              readOnly
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Apply to Work Division <span className="text-red-500">*</span>
-            </label>
-            <MultiSelect
-              options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
-              value={schema?.workDivisions || []}
-              onChange={() => {}}
-              readonly
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Apply to Roles <span className="text-red-500">*</span>
-            </label>
-            <MultiSelect
-              options={roles.map(role => ({ id: role.id!, name: role.roleName }))}
-              value={schema?.roles || []}
-              onChange={() => {}}
-              readonly
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">Description</label>
-            <div 
-              className="w-full px-4 py-2 border rounded-lg"
-              dangerouslySetInnerHTML={{ __html: schema?.description || '' }}
-            />
-          </div>
-
-          <div className="bg-white rounded-lg mt-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium">Approval Steps</h2>
+      <Card className="p-6">
+        <form className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1.5">
+                Schema Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={schema?.name || ''}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                readOnly
+              />
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4">#</th>
-                    <th className="text-left py-3 px-4">Role</th>
-                    <th className="text-left py-3 px-4">Specific User</th>
-                    {schema?.documentType === 'Purchase Request' && (
-                      <th className="text-left py-3 px-4">Limit</th>
-                    )}
-                    <th className="text-left py-3 px-4">Duration</th>
-                    <th className="text-left py-3 px-4">Overtime</th>
-                    <th className="text-left py-3 px-4 w-16"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {schema?.approvalSteps.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-4 text-gray-500">
-                        No steps added yet
-                      </td>
+            <div>
+              <label className="block mb-1.5">
+                Document Type <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={schema?.documentType || ''}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                readOnly
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Apply to Work Division <span className="text-red-500">*</span>
+              </label>
+              <MultiSelect
+                options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
+                value={schema?.workDivisions || []}
+                onChange={() => {}}
+                readonly
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Apply to Roles <span className="text-red-500">*</span>
+              </label>
+              <MultiSelect
+                options={roles.map(role => ({ id: role.id!, name: role.roleName }))}
+                value={schema?.roles || []}
+                onChange={() => {}}
+                readonly
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">Description</label>
+              <div 
+                className="w-full px-4 py-2 border rounded-lg"
+                dangerouslySetInnerHTML={{ __html: schema?.description || '' }}
+              />
+            </div>
+
+            <div className="bg-white rounded-lg mt-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium">Approval Steps</h2>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4">#</th>
+                      <th className="text-left py-3 px-4">Role</th>
+                      <th className="text-left py-3 px-4">Specific User</th>
+                      {schema?.documentType === 'Purchase Request' && (
+                        <th className="text-left py-3 px-4">Limit</th>
+                      )}
+                      <th className="text-left py-3 px-4">Duration</th>
+                      <th className="text-left py-3 px-4">Overtime</th>
+                      <th className="text-left py-3 px-4 w-16"></th>
                     </tr>
-                  ) : (
-                    schema?.approvalSteps.map((step, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-3 px-4">{index + 1}</td>
-                        <td className="py-3 px-4">
-                          {roles.find(r => r.id === step.roleId)?.roleName}
+                  </thead>
+                  <tbody>
+                    {schema?.approvalSteps.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-4 text-gray-500">
+                          No steps added yet
                         </td>
-                        <td className="py-3 px-4">
-                          {step.specificUserId 
-                            ? users.find(u => u.id === step.specificUserId)?.name 
-                            : 'Any user with role'}
-                        </td>
-                        {schema?.documentType === 'Purchase Request' && (
-                          <td className="py-3 px-4">
-                            {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(step.budgetLimit) : '-'}
-                          </td>
-                        )}
-                        <td className="py-3 px-4">{step.duration} days</td>
-                        <td className="py-3 px-4">
-                          {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
-                        </td>
-                        <td className="py-3 px-4"></td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      schema?.approvalSteps.map((step, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="py-3 px-4">{index + 1}</td>
+                          <td className="py-3 px-4">
+                            {roles.find(r => r.id === step.roleId)?.roleName}
+                          </td>
+                          <td className="py-3 px-4">
+                            {step.specificUserId 
+                              ? users.find(u => u.id === step.specificUserId)?.name 
+                              : 'Any user with role'}
+                          </td>
+                          {schema?.documentType === 'Purchase Request' && (
+                            <td className="py-3 px-4">
+                              {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0,
+                              }).format(step.budgetLimit) : '-'}
+                            </td>
+                          )}
+                          <td className="py-3 px-4">{step.duration} days</td>
+                          <td className="py-3 px-4">
+                            {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
+                          </td>
+                          <td className="py-3 px-4"></td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t">
-          <Link
-            href="/workspace-management/approval-schema"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-          >
-            <X className="w-4 h-4" />
-            Back
-          </Link>
-          <button
-            type="submit"
-            onClick={() => router.push(`/workspace-management/approval-schema/${params.id}/edit`)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-          >
-            Edit
-          </button>
-        </div>
-      </form>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t">
+            <Link
+              href="/workspace-management/approval-schema"
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Back
+            </Link>
+            <button
+              type="submit"
+              onClick={() => router.push(`/workspace-management/approval-schema/${params.id}/edit`)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              Edit
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

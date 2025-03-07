@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Role } from '@/types/role';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function ViewRolePage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -43,71 +44,73 @@ export default function ViewRolePage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form className="bg-white rounded-lg p-6 border border-gray-200 space-y-6">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Role Code <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={role.roleCode}
-            className={`w-full px-4 py-2 border rounded-lg`}
-            readOnly
-          />
-          {errors.roleCode && (
-            <p className="mt-1 text-sm text-red-600">{errors.roleCode}</p>
-          )}
-        </div>
+      <Card className="p-6">
+        <form className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Role Code <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={role.roleCode}
+              className={`w-full px-4 py-2 border rounded-lg`}
+              readOnly
+            />
+            {errors.roleCode && (
+              <p className="mt-1 text-sm text-red-600">{errors.roleCode}</p>
+            )}
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Role Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={role.roleName}
-            className="w-full px-4 py-2 border rounded-lg"
-            readOnly
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Role Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={role.roleName}
+              className="w-full px-4 py-2 border rounded-lg"
+              readOnly
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <div 
-            className="w-full px-4 py-2 border rounded-lg"
-            dangerouslySetInnerHTML={{ __html: role.description || '' }}
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <div 
+              className="w-full px-4 py-2 border rounded-lg"
+              dangerouslySetInnerHTML={{ __html: role.description || '' }}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Approval Limit <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={role.approvalLimit}
-            className="w-full px-4 py-2 border rounded-lg"
-            readOnly
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Approval Limit <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={role.approvalLimit}
+              className="w-full px-4 py-2 border rounded-lg"
+              readOnly
+            />
+          </div>
 
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.push(`/workspace-management/role`)}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/workspace-management/role/${params.id}/edit`)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Edit
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push(`/workspace-management/role`)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/workspace-management/role/${params.id}/edit`)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Edit
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Vendor } from '@prisma/client';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function ViewVendorPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -50,103 +51,105 @@ export default function ViewVendorPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form className="space-y-6 border border-gray-200 rounded-lg p-6">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Vendor Code <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={vendor?.vendorCode}
-            className="w-full px-4 py-2 border rounded-lg"
-            readOnly
-          />
-          {errors.vendorCode && (
-            <p className="mt-1 text-sm text-red-600">{errors.vendorCode}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Vendor Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={vendor?.vendorName}
-            className="w-full px-4 py-2 border rounded-lg"
-            readOnly
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Vendor Address
-          </label>
-          <div 
-            className="w-full px-4 py-2 border rounded-lg"
-            dangerouslySetInnerHTML={{ __html: vendor?.address || '' }}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+      <Card className="p-6">
+        <form className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Phone <span className="text-red-500">*</span>
+              Vendor Code <span className="text-red-500">*</span>
             </label>
             <input
-              type="tel"
-              value={vendor?.phone}
+              type="text"
+              value={vendor?.vendorCode}
               className="w-full px-4 py-2 border rounded-lg"
               readOnly
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={vendor?.email}
-              className="w-full px-4 py-2 border rounded-lg"
-              readOnly
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+            {errors.vendorCode && (
+              <p className="mt-1 text-sm text-red-600">{errors.vendorCode}</p>
             )}
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Supporting Documents
-          </label>
-          <div className="mt-1">
-            <span className="ml-3 text-gray-500">
-              {vendor!.documents!.length > 0 
-                ? `${vendor!.documents!.length} files selected` 
-                : 'No document uploaded'}
-            </span>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Vendor Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={vendor?.vendorName}
+              className="w-full px-4 py-2 border rounded-lg"
+              readOnly
+            />
           </div>
-        </div>
 
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.push('/workspace-management/vendors')}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Back
-          </button>
-          <button
-            type="submit"
-            onClick={() => router.push(`/workspace-management/vendors/${params.id}/edit`)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Edit
-          </button>
-        </div>
-      </form>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Vendor Address
+            </label>
+            <div 
+              className="w-full px-4 py-2 border rounded-lg"
+              dangerouslySetInnerHTML={{ __html: vendor?.address || '' }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Phone <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={vendor?.phone}
+                className="w-full px-4 py-2 border rounded-lg"
+                readOnly
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                value={vendor?.email}
+                className="w-full px-4 py-2 border rounded-lg"
+                readOnly
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Supporting Documents
+            </label>
+            <div className="mt-1">
+              <span className="ml-3 text-gray-500">
+                {vendor!.documents!.length > 0 
+                  ? `${vendor!.documents!.length} files selected` 
+                  : 'No document uploaded'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push('/workspace-management/vendors')}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              onClick={() => router.push(`/workspace-management/vendors/${params.id}/edit`)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Edit
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

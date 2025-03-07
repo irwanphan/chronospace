@@ -7,6 +7,7 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 import { User } from '@/types/user';
 import { WorkDivision } from '@/types/workDivision';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function EditWorkDivisionPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -90,95 +91,97 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-gray-200 p-6 rounded-lg">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Division Code <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.divisionCode}
-            onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
-            className={`w-full px-4 py-2 border rounded-lg ${errors.divisionCode ? 'border-red-500' : ''}`}
-            required
-          />
-          {errors.divisionCode && (
-            <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Division Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.divisionName}
-            onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
-            className="w-full px-4 py-2 border rounded-lg"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <RichTextEditor
-            value={formData.description}
-            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-1">Upper Division</label>
-            <select
-              value={formData.upperDivision}
-              onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-            >
-              <option value="">-</option>
-              {divisions.map(div => (
-                <option key={div.id} value={div.id}>
-                  {div.divisionName}
-                </option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium mb-1">
+              Division Code <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.divisionCode}
+              onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
+              className={`w-full px-4 py-2 border rounded-lg ${errors.divisionCode ? 'border-red-500' : ''}`}
+              required
+            />
+            {errors.divisionCode && (
+              <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Division Head</label>
-            <select
-              value={formData.divisionHead}
-              onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-            >
-              <option value="">-</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium mb-1">
+              Division Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.divisionName}
+              onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
+              className="w-full px-4 py-2 border rounded-lg"
+              required
+            />
           </div>
-        </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <RichTextEditor
+              value={formData.description}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Upper Division</label>
+              <select
+                value={formData.upperDivision}
+                onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+              >
+                <option value="">-</option>
+                {divisions.map(div => (
+                  <option key={div.id} value={div.id}>
+                    {div.divisionName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Division Head</label>
+              <select
+                value={formData.divisionHead}
+                onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+              >
+                <option value="">-</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
 
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 
