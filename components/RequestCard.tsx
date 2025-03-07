@@ -2,6 +2,7 @@ import { getInitials } from "@/lib/utils";
 import Image from "next/image";
 import Avatar from "./ui/Avatar";
 import { ScanSearch } from "lucide-react";
+import Card from "./ui/Card";
 
 interface RequestCardProps {
   code: string;
@@ -56,7 +57,7 @@ export default function RequestCard({
 }: RequestCardProps) {
 
   return (
-    <div className="bg-white rounded-lg p-6 border border-gray-200">
+    <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex justify-between items-center gap-2 w-full">
           <span className="text-xs font-medium">#{code}</span>
@@ -163,6 +164,6 @@ export default function RequestCard({
           </button>
         )}
       </div>
-    </div>
+    </Card>
   );
 } 
