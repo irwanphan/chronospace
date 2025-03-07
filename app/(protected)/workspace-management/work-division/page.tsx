@@ -8,6 +8,7 @@ import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
@@ -82,7 +83,7 @@ export default function WorkDivisionPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow border border-gray-200">
+      <Card className="mb-8 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b">
@@ -107,7 +108,7 @@ export default function WorkDivisionPage() {
               </tr>
             ) : (
               currentDivisions.map((division, index) => (
-                <tr key={division.id} className="border-b">
+                <tr key={division.id} className="border-b hover:bg-blue-50">
                   <td className="py-3 px-4">{startIndex + index + 1}</td>
                   <td className="py-3 px-4">{division.divisionCode}</td>
                   <td className="py-3 px-4">{division.divisionName}</td>
@@ -132,7 +133,7 @@ export default function WorkDivisionPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
       <Pagination
         currentPage={currentPage}
         totalItems={divisions.length}

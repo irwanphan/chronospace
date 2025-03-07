@@ -10,6 +10,7 @@ import { stripHtmlTags } from '@/lib/utils';
 import SchemaActions from './components/SchemaActions';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Pagination from '@/components/Pagination';
+import Card from '@/components/ui/Card';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -155,7 +156,7 @@ export default function ApprovalSchemaPage() {
           </div>
         ) : (
           currentSchemas.map((schema: ApprovalSchema) => (
-            <div key={schema.id} className="border rounded-lg p-4">
+            <Card key={schema.id} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-medium">{schema.name}</h3>
@@ -214,7 +215,7 @@ export default function ApprovalSchemaPage() {
                   ))}
                 </div>
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>

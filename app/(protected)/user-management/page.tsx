@@ -11,7 +11,7 @@ import { Role } from '@/types/role';
 import UserActions from './components/UserActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
-
+import Card from '@/components/ui/Card';
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -92,7 +92,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow border border-gray-200 mb-8">
+      <Card className="mb-8 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -117,7 +117,7 @@ export default function UserManagementPage() {
               </tr>
             ) : (
               currentUsers.map((user:User, index:number) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className="hover:bg-blue-50">
                   <td className="px-3 py-2 text-sm">
                     {startIndex + index + 1}
                   </td>
@@ -166,7 +166,7 @@ export default function UserManagementPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       <Pagination
         currentPage={currentPage}

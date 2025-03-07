@@ -7,6 +7,7 @@ import { stripHtmlTags } from '@/lib/utils';
 import RoleActions from './components/RoleActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -79,7 +80,7 @@ export default function RolePage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow border border-gray-200">
+      <Card className="mb-8 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b">
@@ -105,7 +106,7 @@ export default function RolePage() {
               currentRoles.map((role, index) => {
                 // console.log(role);
                 return (
-                  <tr key={role.id} className="border-b">
+                  <tr key={role.id} className="border-b hover:bg-blue-50">
                     <td className="py-3 px-4">{startIndex + index + 1}</td>
                     <td className="py-3 px-4">{role.roleName}</td>
                     <td className="py-3 px-4">
@@ -135,7 +136,7 @@ export default function RolePage() {
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
       <Pagination
         currentPage={currentPage}
         totalItems={roles.length}

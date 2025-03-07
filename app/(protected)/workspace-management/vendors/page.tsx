@@ -6,6 +6,7 @@ import { Vendor } from '@/types/vendor';
 import { Search, Filter, Plus } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -79,7 +80,7 @@ export default function VendorsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow border border-gray-200">
+      <Card className="mb-8 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b">
@@ -102,7 +103,7 @@ export default function VendorsPage() {
               </tr>
             ) : (
               currentVendors.map((vendor, index) => (
-                <tr key={vendor.id} className="border-b">
+                <tr key={vendor.id} className="border-b hover:bg-blue-50">
                   <td className="py-3 px-4">{startIndex + index + 1}</td>
                   <td className="py-3 px-4">{vendor.vendorName}</td>
                   <td className="py-3 px-4">{vendor.email}</td>
@@ -121,7 +122,7 @@ export default function VendorsPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
       <Pagination
         currentPage={currentPage}
         totalItems={vendors.length}

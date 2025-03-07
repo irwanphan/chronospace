@@ -37,14 +37,14 @@ export default function SchemaActions({ schemaId, onDelete }: SchemaActionsProps
     <div className="relative" ref={dropdownRef}>
       <Link
         href={`/workspace-management/approval-schema/${schemaId}`}
-        className="p-2 hover:bg-gray-100 rounded-full inline-flex ml-1"
+        className="p-2 hover:bg-white hover:text-blue-500 rounded-full inline-flex ml-1"
       >
         <Eye className="w-4 h-4" />
       </Link>
 
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="p-2 hover:bg-gray-100 rounded-full"
+        className="p-2 hover:bg-white hover:text-blue-500 rounded-full"
       >
         <MoreHorizontal className="w-4 h-4" />
       </button>

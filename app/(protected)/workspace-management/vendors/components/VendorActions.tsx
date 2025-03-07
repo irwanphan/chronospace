@@ -41,19 +41,19 @@ export default function VendorActions({ vendorId, onDelete }: VendorActionsProps
   };
 
   return (
-    <div className="relative flex items-center gap-2" ref={dropdownRef}>
+    <div className="relative flex items-center gap-2 transition-all duration-300" ref={dropdownRef}>
       <Link
         href={`/workspace-management/vendors/${vendorId}`}
-        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+        className="p-1 cursor-pointer w-6 h-6 hover:text-blue-500 rounded-full"
       >
-        <Eye className="w-4 h-4 text-gray-500" />
+        <Eye className="w-4 h-4" />
       </Link>
       
       <button 
-        className="p-1 cursor-pointer w-6 h-6 hover:bg-gray-100 rounded-full"
+        className="p-1 cursor-pointer w-6 h-6 hover:text-blue-500 rounded-full"
         onClick={() => setShowDropdown(!showDropdown)}
       >
-        <MoreVertical className="w-4 h-4 text-gray-500" />
+        <MoreVertical className="w-4 h-4" />
       </button>
       
       {showDropdown && (
