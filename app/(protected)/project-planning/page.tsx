@@ -10,6 +10,7 @@ import { calculateProjectStats } from '@/lib/helpers';
 import StatsOverview from './components/StatsOverview';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function ProjectPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -84,9 +85,9 @@ export default function ProjectPlanningPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow border border-gray-200">
+      <Card className="mb-8 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">ID</th>
@@ -101,7 +102,7 @@ export default function ProjectPlanningPage() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {currentProjects.map((project, index) => (
-              <tr key={project.id} className="hover:bg-gray-50">
+              <tr key={project.id} className="hover:bg-blue-50">
                 <td className="px-6 py-4 text-sm">{startIndex + index + 1}</td>
                 <td className="px-6 py-4 text-sm">{project.projectId}</td>
                 <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
@@ -126,7 +127,7 @@ export default function ProjectPlanningPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       <Pagination
         currentPage={currentPage}
