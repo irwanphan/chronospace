@@ -12,6 +12,7 @@ import { calculateBudgetStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
 import BudgetStatsOverview from './components/BudgetStatsOverview';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function BudgetPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -102,9 +103,9 @@ export default function BudgetPlanningPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow border border-gray-200 mb-8">
+      <Card className="mb-8 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Title</th>
@@ -144,7 +145,7 @@ export default function BudgetPlanningPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       <Pagination
         currentPage={currentPage}
