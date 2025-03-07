@@ -5,6 +5,7 @@ import {
   IconFlagFilled,
   IconInfoCircleFilled
 } from "@tabler/icons-react"
+import Card from "./ui/Card";
 
 interface StatCardProps {
   title: string;
@@ -49,7 +50,7 @@ export default function StatCard({ title, count, change, type }: StatCardProps) 
   const IconColor = getIconColor(title);
 
   return (
-    <div className="relative bg-white p-6 rounded-lg border border-gray-200 overflow-hidden">
+    <Card className="relative overflow-hidden">
       {/* Background Icon */}
       <div className={`absolute bottom-0 right-0 transform translate-x-6 translate-y-6 opacity-[0.08]
         ${IconColor}
@@ -70,6 +71,6 @@ export default function StatCard({ title, count, change, type }: StatCardProps) 
           {type === "increase" ? "+" : "-"}{Math.abs(change)} In this Month
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

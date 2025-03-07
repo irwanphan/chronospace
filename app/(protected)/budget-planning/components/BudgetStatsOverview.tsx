@@ -1,3 +1,4 @@
+import Card from "@/components/ui/Card";
 import { formatCurrency } from "@/lib/utils";
 import { 
   IconPresentationFilled, 
@@ -61,7 +62,7 @@ function StatsCard({ title, value, suffix }: StatsCardProps) {
   const Icon = getIcon(title);
   const IconColor = getIconColor(title);
   return (
-    <div className="bg-white p-4 rounded-lg shadow border border-gray-200 relative overflow-hidden">
+    <Card className="relative overflow-hidden">
       <div className={`absolute bottom-0 right-0 transform translate-x-6 translate-y-6 opacity-[0.08]
         ${IconColor}
       `}>
@@ -72,7 +73,7 @@ function StatsCard({ title, value, suffix }: StatsCardProps) {
       <div className="text-2xl font-semibold mt-1">
         {value}{suffix && ` ${suffix}`}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -88,7 +89,7 @@ function LargestBudgets({ budgets }: LargestBudgetsProps) {
   const Icon = getIcon("Largest Budget Plans");
   const IconColor = getIconColor("Largest Budget Plans");
   return (
-    <div className="col-span-6 bg-white p-4 rounded-lg shadow border border-gray-200 relative overflow-hidden">
+    <Card className="col-span-6 relative overflow-hidden">
       <div className={`absolute bottom-0 right-0 transform translate-x-6 translate-y-6 opacity-[0.08]
         ${IconColor}
       `}>
@@ -101,7 +102,7 @@ function LargestBudgets({ budgets }: LargestBudgetsProps) {
           <div className="font-semibold">{formatCurrency(budget.totalBudget)}</div>
         </div>
       ))}
-    </div>
+    </Card>
   );
 }
 
@@ -115,7 +116,7 @@ function StatusCard({ title, count, description }: StatusCardProps) {
   const Icon = getIcon(title);
   const IconColor = getIconColor(title);
   return (
-    <div className="col-span-3 bg-white p-4 rounded-lg shadow border border-gray-200 relative overflow-hidden">
+    <Card className="col-span-3 relative overflow-hidden">
       <div className={`absolute bottom-0 right-0 transform translate-x-6 translate-y-6 opacity-[0.08]
         ${IconColor}
       `}>
@@ -124,7 +125,7 @@ function StatusCard({ title, count, description }: StatusCardProps) {
       <h2 className="font-semibold mb-4">{title}</h2>
       <div className="text-2xl font-semibold">{count} Plans</div>
       <p className="text-sm text-gray-600 mt-2">{description}</p>
-    </div>
+    </Card>
   );
 }
 
