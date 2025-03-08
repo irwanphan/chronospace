@@ -64,6 +64,8 @@ interface PurchaseRequest {
   };
 }
 
+type FilterType = 'in-queue' | 'stale' | 'approved' | 'all';
+
 export default function WorkspacePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +101,31 @@ export default function WorkspacePage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentPurchaseRequests = purchaseRequests.slice(startIndex, endIndex);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('in-queue');
+
+  const filterRequests = (requests: PurchaseRequest[]) => {
+    switch (activeFilter) {
+      case 'in-queue':
+        return requests.filter(req => req.status !== 'Approved');
+      
+      case 'stale':
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        return requests.filter(req => {
+          const createdDate = new Date(req.createdAt);
+          return createdDate < threeDaysAgo && req.status !== 'Approved';
+        });
+      
+      case 'approved':
+        return requests.filter(req => req.status === 'Approved');
+      
+      default:
+        return requests;
+    }
+  };
+
+  const filteredRequests = filterRequests(purchaseRequests);
+  const currentPurchaseRequests = filteredRequests.slice(startIndex, endIndex);
   const setPage = usePageTitleStore(state => state.setPage);
   
   useEffect(() => {
@@ -193,16 +219,44 @@ export default function WorkspacePage() {
 
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg border border-blue-600 text-sm">
+            <button 
+              className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
+                activeFilter === 'in-queue' 
+                  ? 'bg-blue-50 text-blue-600 border-blue-600' 
+                  : 'hover:bg-gray-50 border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('in-queue')}
+            >
               In Queue
             </button>
-            <button className="px-3 py-1 hover:bg-gray-50 rounded-lg border border-gray-300 text-sm">
+            <button 
+              className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
+                activeFilter === 'stale' 
+                  ? 'bg-blue-50 text-blue-600 border-blue-600' 
+                  : 'hover:bg-gray-50 border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('stale')}
+            >
               Stale
             </button>
-            <button className="px-3 py-1 hover:bg-gray-50 rounded-lg border border-gray-300 text-sm">
+            <button 
+              className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
+                activeFilter === 'approved' 
+                  ? 'bg-blue-50 text-blue-600 border-blue-600' 
+                  : 'hover:bg-gray-50 border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('approved')}
+            >
               Approved
             </button>
-            <button className="px-3 py-1 hover:bg-gray-50 rounded-lg border border-gray-300 text-sm">
+            <button 
+              className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
+                activeFilter === 'all' 
+                  ? 'bg-blue-50 text-blue-600 border-blue-600' 
+                  : 'hover:bg-gray-50 border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('all')}
+            >
               Show All
             </button>
           </div>
