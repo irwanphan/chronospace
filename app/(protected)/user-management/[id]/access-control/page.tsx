@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AccessControl, MenuAccess, ActivityAccess, WorkspaceAccess } from '@/types/access-control';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 const MENU_ACCESS_ORDER = [
   'timeline',
@@ -145,75 +146,77 @@ export default function UserAccessControlPage({ params }: { params: { id: string
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">User Access Control</h1>
       
-      {/* Menu Access */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Menu Access</h2>
-        <div className="grid grid-cols-1 gap-3">
-          {MENU_ACCESS_ORDER.map((key) => (
-            <label key={key} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={access.menuAccess[key]}
-                onChange={(e) => handleMenuAccessChange(key, e.target.checked)}
-                className="rounded border-gray-300 w-4 h-4 cursor-pointer"
-              />
-              <span className="text-sm">{formatLabel(key)}</span>
-            </label>
-          ))}
+      <Card className="p-6">
+        {/* Menu Access */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Menu Access</h2>
+          <div className="grid grid-cols-1 gap-3">
+            {MENU_ACCESS_ORDER.map((key) => (
+              <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={access.menuAccess[key]}
+                  onChange={(e) => handleMenuAccessChange(key, e.target.checked)}
+                  className="rounded border-gray-300 w-4 h-4 cursor-pointer"
+                />
+                <span className="text-sm">{formatLabel(key)}</span>
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Activity Access */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Activity Access</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {ACTIVITY_ACCESS_ORDER.map((key) => (
-            <label key={key} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={access.activityAccess[key]}
-                onChange={(e) => handleActivityAccessChange(key, e.target.checked)}
-                className="rounded border-gray-300 w-4 h-4 cursor-pointer"
-              />
-              <span className="text-sm">{formatLabel(key)}</span>
-            </label>
-          ))}
+        {/* Activity Access */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Activity Access</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {ACTIVITY_ACCESS_ORDER.map((key) => (
+              <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={access.activityAccess[key]}
+                  onChange={(e) => handleActivityAccessChange(key, e.target.checked)}
+                  className="rounded border-gray-300 w-4 h-4 cursor-pointer"
+                />
+                <span className="text-sm">{formatLabel(key)}</span>
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Workspace Access */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Workspace Access</h2>
-        <div className="grid grid-cols-1 gap-3">
-          {WORKSPACE_ACCESS_ORDER.map((key) => (
-            <label key={key} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={access.workspaceAccess[key]}
-                onChange={(e) => handleWorkspaceAccessChange(key, e.target.checked)}
-                className="rounded border-gray-300 w-4 h-4 cursor-pointer"
-              />
-              <span className="text-sm">{formatLabel(key)}</span>
-            </label>
-          ))}
+        {/* Workspace Access */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Workspace Access</h2>
+          <div className="grid grid-cols-1 gap-3">
+            {WORKSPACE_ACCESS_ORDER.map((key) => (
+              <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={access.workspaceAccess[key]}
+                  onChange={(e) => handleWorkspaceAccessChange(key, e.target.checked)}
+                  className="rounded border-gray-300 w-4 h-4 cursor-pointer"
+                />
+                <span className="text-sm">{formatLabel(key)}</span>
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <hr className="my-4" />
-      <div className="flex justify-end gap-4">
-        <button
-          onClick={() => router.push('/user-management')}
-          className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Submit
-        </button>
-      </div>
+        <hr className="my-4" />
+        <div className="flex justify-end gap-4">
+          <button
+            onClick={() => router.push('/user-management')}
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Submit
+          </button>
+        </div>
+      </Card>
     </div>
   );
 } 

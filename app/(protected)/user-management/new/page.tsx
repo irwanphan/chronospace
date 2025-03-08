@@ -7,6 +7,7 @@ import { X, Camera } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
+import Card from '@/components/ui/Card';
 
 interface FormData {
   fullName: string;
@@ -46,7 +47,7 @@ export default function NewUserPage() {
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
 
   const fetchData = async () => {
-    const response = await fetch('/api/user-management/fetch-role-division');
+    const response = await fetch('/api/user-management/fetch-roles-divisions');
     const data = await response.json();
     setRoles(data.roles);
     setWorkDivisions(data.workDivisions);
@@ -95,13 +96,14 @@ export default function NewUserPage() {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <h1 className="text-2xl font-semibold mb-6">New User</h1>
+      <h1 className="text-2xl font-semibold mb-6">Add New User</h1>
 
       { error && <div className="bg-red-500 text-white p-4 rounded-lg">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6">
-        <div className="flex justify-center mb-6">
-          <div className="relative">
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
             <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
               <Camera className="w-8 h-8 text-gray-400" />
             </div>
@@ -297,9 +299,10 @@ export default function NewUserPage() {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-        </div>
-      </form>
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

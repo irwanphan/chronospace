@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 interface Role {
   id: string;
@@ -122,172 +123,174 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-4 rounded-lg">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Full Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
-              required
-            />
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className={`w-full px-4 py-2 border rounded-lg ${errors.email ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Role <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.roleId}
+                onChange={(e) => setFormData(prev => ({ ...prev, roleId: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg bg-white"
+                required
+              >
+                <option value="">Select Role</option>
+                {roles.map(role => (
+                  <option key={role.id} value={role.id}>{role.roleName}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Work Division <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.workDivisionId}
+                onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg bg-white"
+                required
+              >
+                <option value="">Select Division</option>
+                {divisions.map(division => (
+                  <option key={division.id} value={division.id}>{division.divisionName}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Employee ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.employeeId}
+                onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
+                className={`w-full px-4 py-2 border rounded-lg ${errors.employeeId ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.employeeId && (
+                <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>
+              )}
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className={`w-full px-4 py-2 border rounded-lg ${errors.email ? 'border-red-500' : ''}`}
-              required
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
-              required
+            <label className="block text-sm font-medium mb-1">Address</label>
+            <RichTextEditor
+              value={formData.address || ''}
+              onChange={(value: string) => setFormData(prev => ({ ...prev, address: value }))}
+              placeholder="Enter description..."
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Role <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.roleId}
-              onChange={(e) => setFormData(prev => ({ ...prev, roleId: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg bg-white"
-              required
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Resident ID / Passport ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.residentId}
+                onChange={(e) => setFormData(prev => ({ ...prev, residentId: e.target.value }))}
+                className={`w-full px-4 py-2 border rounded-lg ${errors.residentId ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.residentId && (
+                <p className="mt-1 text-sm text-red-600">{errors.residentId}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Nationality <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.nationality}
+                onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Birthday <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.birthday}
+                onChange={(e) => setFormData(prev => ({ ...prev, birthday: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg"
+                required
+              />
+            </div>
+          </div>
+
+          {/* TODO: can change user password / with access */}
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
             >
-              <option value="">Select Role</option>
-              {roles.map(role => (
-                <option key={role.id} value={role.id}>{role.roleName}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Work Division <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.workDivisionId}
-              onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg bg-white"
-              required
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              <option value="">Select Division</option>
-              {divisions.map(division => (
-                <option key={division.id} value={division.id}>{division.divisionName}</option>
-              ))}
-            </select>
+              Save Changes
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Employee ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.employeeId}
-              onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
-              className={`w-full px-4 py-2 border rounded-lg ${errors.employeeId ? 'border-red-500' : ''}`}
-              required
-            />
-            {errors.employeeId && (
-              <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Address</label>
-          <RichTextEditor
-            value={formData.address || ''}
-            onChange={(value: string) => setFormData(prev => ({ ...prev, address: value }))}
-            placeholder="Enter description..."
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Resident ID / Passport ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.residentId}
-              onChange={(e) => setFormData(prev => ({ ...prev, residentId: e.target.value }))}
-              className={`w-full px-4 py-2 border rounded-lg ${errors.residentId ? 'border-red-500' : ''}`}
-              required
-            />
-            {errors.residentId && (
-              <p className="mt-1 text-sm text-red-600">{errors.residentId}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Nationality <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.nationality}
-              onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Birthday <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={formData.birthday}
-              onChange={(e) => setFormData(prev => ({ ...prev, birthday: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg"
-              required
-            />
-          </div>
-        </div>
-
-        {/* TODO: can change user password / with access */}
-
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
+        </form>
+      </Card>
     </div>
   );
 } 

@@ -7,6 +7,7 @@ import { Dialog } from '@/components/ui/Dialog';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Vendor } from '@/types/vendor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 interface FormData {
   projectId: string;
@@ -169,185 +170,186 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block mb-1.5">
-              Project <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={projectName}
-              className="w-full px-4 py-2 border rounded-lg bg-gray-50"
-              disabled
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Division <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={workDivisionTitle}
-              className="w-full px-4 py-2 border rounded-lg bg-gray-50"
-              disabled
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Year <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.year}
-              onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-              required
-            >
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Start Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Finish Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={formData.finishDate}
-              onChange={(e) => setFormData(prev => ({ ...prev, finishDate: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-1.5">Description</label>
-          <RichTextEditor
-            value={formData.description || ''}
-            onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-          />
-        </div>
-
-        <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-2">#</th>
-                <th className="text-left p-2">Description</th>
-                <th className="text-left p-2">Qty</th>
-                <th className="text-left p-2">Unit</th>
-                <th className="text-right p-2">Unit Price</th>
-                <th className="text-right p-2">Total Price</th>
-                <th className="text-left p-2">Vendor</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedItems.map((item, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-2">{index + 1}</td>
-                  <td className="p-2">{item.description}</td>
-                  <td className="p-2">{item.qty}</td>
-                  <td className="p-2">{item.unit}</td>
-                  <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.unitPrice)}</td>
-                  <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}</td>
-                  <td className="p-2">{item.vendor}</td>
-                  <td className="p-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedItems(selectedItems.filter((_, i) => i !== index));
-                      }}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {selectedItems.length === 0 && (
-            <div className="text-gray-500 text-sm mt-4">
-              No items selected
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1.5">
+                Project <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={projectName}
+                className="w-full px-4 py-2 border rounded-lg bg-gray-50"
+                disabled
+              />
             </div>
-          )}
-        </div>
 
-        <button
-          type="button"
-          onClick={() => setIsAddItemOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Add Item
-        </button>
+            <div>
+              <label className="block mb-1.5">
+                Division <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={workDivisionTitle}
+                className="w-full px-4 py-2 border rounded-lg bg-gray-50"
+                disabled
+              />
+            </div>
 
-        <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1.5">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Year <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.year}
+                onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                required
+              >
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Start Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Finish Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.finishDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, finishDate: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                required
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block mb-1.5">
-              Total Budget <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={new Intl.NumberFormat('id-ID').format(Number(formData.totalBudget))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
-              readOnly
+            <label className="block mb-1.5">Description</label>
+            <RichTextEditor
+              value={formData.description || ''}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
             />
           </div>
-        </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t">
-          <Link
-            href="/budget-planning"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-          >
-            <X className="w-4 h-4" />
-            Cancel
-          </Link>
+          <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-2">#</th>
+                  <th className="text-left p-2">Description</th>
+                  <th className="text-left p-2">Qty</th>
+                  <th className="text-left p-2">Unit</th>
+                  <th className="text-right p-2">Unit Price</th>
+                  <th className="text-right p-2">Total Price</th>
+                  <th className="text-left p-2">Vendor</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedItems.map((item, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="p-2">{index + 1}</td>
+                    <td className="p-2">{item.description}</td>
+                    <td className="p-2">{item.qty}</td>
+                    <td className="p-2">{item.unit}</td>
+                    <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.unitPrice)}</td>
+                    <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}</td>
+                    <td className="p-2">{item.vendor}</td>
+                    <td className="p-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedItems(selectedItems.filter((_, i) => i !== index));
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedItems.length === 0 && (
+              <div className="text-gray-500 text-sm mt-4">
+                No items selected
+              </div>
+            )}
+          </div>
+
           <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+            type="button"
+            onClick={() => setIsAddItemOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            <Plus className="w-4 h-4" />
+            Add Item
           </button>
-        </div>
-      </form>
 
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1.5">
+                Total Budget <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={new Intl.NumberFormat('id-ID').format(Number(formData.totalBudget))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
+                readOnly
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t">
+            <Link
+              href="/budget-planning"
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </Card>
       <Dialog open={isAddItemOpen} onOpenChange={setIsAddItemOpen}>
         <div className="p-6 space-y-6">
           <h3 className="text-lg font-medium">Add New Item</h3>

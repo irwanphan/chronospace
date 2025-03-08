@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { formatDate, generateId } from '@/lib/utils';
+import Card from '@/components/ui/Card';
 
 interface Division {
   id: string;
@@ -116,141 +117,143 @@ export default function NewProjectPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4">Request Information</h2>
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-1.5">
-              Work Division <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.workDivisionId}
-              onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg bg-white"
-              required
-            >
-              <option value="">Select Division</option>
-              {Array.isArray(divisions) && divisions.map((division) => (
-                <option key={division.id} value={division.id}>
-                  {division.divisionName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Project Code <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.projectCode}
-              onChange={(e) => setFormData(prev => ({ ...prev, projectCode: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Project Title / Project Brief <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.projectTitle}
-              onChange={(e) => setFormData(prev => ({ ...prev, projectTitle: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Project Full Description
-            </label>
-            <RichTextEditor
-              value={formData.description}
-              onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-4">
             <div>
               <label className="block mb-1.5">
-                Project Year <span className="text-red-500">*</span>
+                Work Division <span className="text-red-500">*</span>
               </label>
               <select
-                value={formData.year}
-                onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                value={formData.workDivisionId}
+                onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg bg-white"
                 required
               >
-                {/* TODO: create starting year in config */}
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
+                <option value="">Select Division</option>
+                {Array.isArray(divisions) && divisions.map((division) => (
+                  <option key={division.id} value={division.id}>
+                    {division.divisionName}
+                  </option>
+                ))}
               </select>
             </div>
+
             <div>
               <label className="block mb-1.5">
-                Start Date <span className="text-red-500">*</span>
+                Project Code <span className="text-red-500">*</span>
               </label>
               <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                type="text"
+                value={formData.projectCode}
+                onChange={(e) => setFormData(prev => ({ ...prev, projectCode: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
               />
             </div>
+
             <div>
               <label className="block mb-1.5">
-                Finish Date <span className="text-red-500">*</span>
+                Project Title / Project Brief <span className="text-red-500">*</span>
               </label>
               <input
-                type="date"
-                value={formData.finishDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, finishDate: e.target.value }))}
+                type="text"
+                value={formData.projectTitle}
+                onChange={(e) => setFormData(prev => ({ ...prev, projectTitle: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block mb-1.5">
-              Supporting Documents
-            </label>
-            <div className="border rounded-lg p-4">
-              <button
-                type="button"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Upload Document
-              </button>
-              <p className="text-sm text-gray-500 mt-2">No document uploaded</p>
+            <div>
+              <label className="block mb-1.5">
+                Project Full Description
+              </label>
+              <RichTextEditor
+                value={formData.description}
+                onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block mb-1.5">
+                  Project Year <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.year}
+                  onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                  required
+                >
+                  {/* TODO: create starting year in config */}
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1.5">
+                  Start Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1.5">
+                  Finish Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.finishDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, finishDate: e.target.value }))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Supporting Documents
+              </label>
+              <div className="border rounded-lg p-4">
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Upload Document
+                </button>
+                <p className="text-sm text-gray-500 mt-2">No document uploaded</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t">
-          <Link
-            href="/project-planning"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-          >
-            <X className="w-4 h-4" />
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-        </div>
-      </form>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t">
+            <Link
+              href="/project-planning"
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 
