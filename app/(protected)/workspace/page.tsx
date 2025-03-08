@@ -98,10 +98,13 @@ export default function WorkspacePage() {
   const [displayAsList, setDisplayAsList] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = displayAsList ? 10 : 6;
-  // Calculate pagination
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+
   const [activeFilter, setActiveFilter] = useState<FilterType>('in-queue');
+
+  const handleFilterChange = (filter: FilterType) => {
+    setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
 
   const filterRequests = (requests: PurchaseRequest[]) => {
     switch (activeFilter) {
@@ -124,8 +127,14 @@ export default function WorkspacePage() {
     }
   };
 
+  // Filter requests first
   const filteredRequests = filterRequests(purchaseRequests);
+  
+  // Then calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
   const currentPurchaseRequests = filteredRequests.slice(startIndex, endIndex);
+
   const setPage = usePageTitleStore(state => state.setPage);
   
   useEffect(() => {
@@ -225,7 +234,7 @@ export default function WorkspacePage() {
                   ? 'bg-blue-50 text-blue-600 border-blue-600' 
                   : 'hover:bg-gray-50 border-gray-300'
               }`}
-              onClick={() => setActiveFilter('in-queue')}
+              onClick={() => handleFilterChange('in-queue')}
             >
               In Queue
             </button>
@@ -235,7 +244,7 @@ export default function WorkspacePage() {
                   ? 'bg-blue-50 text-blue-600 border-blue-600' 
                   : 'hover:bg-gray-50 border-gray-300'
               }`}
-              onClick={() => setActiveFilter('stale')}
+              onClick={() => handleFilterChange('stale')}
             >
               Stale
             </button>
@@ -245,7 +254,7 @@ export default function WorkspacePage() {
                   ? 'bg-blue-50 text-blue-600 border-blue-600' 
                   : 'hover:bg-gray-50 border-gray-300'
               }`}
-              onClick={() => setActiveFilter('approved')}
+              onClick={() => handleFilterChange('approved')}
             >
               Approved
             </button>
@@ -255,7 +264,7 @@ export default function WorkspacePage() {
                   ? 'bg-blue-50 text-blue-600 border-blue-600' 
                   : 'hover:bg-gray-50 border-gray-300'
               }`}
-              onClick={() => setActiveFilter('all')}
+              onClick={() => handleFilterChange('all')}
             >
               Show All
             </button>
@@ -297,7 +306,7 @@ export default function WorkspacePage() {
 
         <Pagination
           currentPage={currentPage}
-          totalItems={purchaseRequests.length}
+          totalItems={filteredRequests.length}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
         />
