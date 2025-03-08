@@ -28,35 +28,13 @@ export async function GET() {
 }
 
 // POST: Create new budget
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
-    console.log('Received request body:', body); // Debug log
+    const body = await request.json();
+    console.log('Received request body:', body);
 
-    // Validasi input
-    if (!body.projectId) return NextResponse.json({ message: "Project ID is required" }, { status: 400 });
-    if (!body.title) return NextResponse.json({ message: "Title is required" }, { status: 400 });
-    if (!body.year) return NextResponse.json({ message: "Year is required" }, { status: 400 });
-    if (!body.workDivisionId) return NextResponse.json({ message: "Division is required" }, { status: 400 });
-    if (!body.startDate) return NextResponse.json({ message: "Start date is required" }, { status: 400 });
-    if (!body.finishDate) return NextResponse.json({ message: "Finish date is required" }, { status: 400 });
-    if (!body.items || !body.items.length) return NextResponse.json({ message: "Items are required" }, { status: 400 });
-
-    // Cek apakah project sudah memiliki budget
-    const existingBudget = await prisma.budget.findUnique({
-      where: { projectId: body.projectId }
-    });
-
-    if (existingBudget) {
-      return NextResponse.json(
-        { message: "This project already has a budget plan" },
-        { status: 400 }
-      );
-    }
-
-    // Create budget dengan transaction
-    const budget = await prisma.$transaction(async (tx) => {
-      const newBudget = await tx.budget.create({
+    const result = await prisma.$transaction(async (tx) => {
+      const budget = await tx.budget.create({
         data: {
           projectId: body.projectId,
           title: body.title,
@@ -66,22 +44,38 @@ export async function POST(req: Request) {
           totalBudget: body.totalBudget,
           startDate: new Date(body.startDate),
           finishDate: new Date(body.finishDate),
-          status: "In Progress",
+          status: body.status,
           items: {
-            create: body.items
+            create: body.items.map((item: { description: string; qty: number; unit: string; unitPrice: number; vendor: string }) => ({
+              description: item.description,
+              qty: Number(item.qty),
+              unit: item.unit,
+              unitPrice: Number(item.unitPrice),
+              vendorId: item.vendor
+            }))
           }
         },
+        include: {
+          items: true,
+          project: true,
+          workDivision: true,
+        }
       });
-      
-      console.log('Created budget:', newBudget); // Debug log
-      return newBudget;
+
+      // Update project status to Allocated
+      await tx.project.update({
+        where: { id: body.projectId },
+        data: { status: 'Allocated' }
+      });
+
+      return budget;
     });
 
-    return NextResponse.json(budget);
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('Server error:', error); // Debug log
+    console.error('Server error:', error);
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Failed to create budget' },
+      { error: 'Failed to create budget: ' + (error as Error).message },
       { status: 500 }
     );
   }

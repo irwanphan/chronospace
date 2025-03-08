@@ -163,8 +163,7 @@ export default function NewBudgetPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message);
-        throw new Error(errorData.message);
+        throw new Error(errorData.error || 'Failed to create budget');
       }
 
       router.push('/budget-planning');
@@ -180,14 +179,30 @@ export default function NewBudgetPage() {
   const handleProjectChange = (projectId: string) => {
     const selectedProject = projects.find(p => p.id === projectId);
     if (selectedProject) {
+      console.log('Selected project dates:', {
+        start: selectedProject.startDate,
+        finish: selectedProject.finishDate
+      });
+
+      // Format dates properly
+      const formattedStartDate = selectedProject.startDate ? 
+        new Date(selectedProject.startDate).toISOString().split('T')[0] : '';
+      const formattedFinishDate = selectedProject.finishDate ? 
+        new Date(selectedProject.finishDate).toISOString().split('T')[0] : '';
+
+      console.log('Formatted dates:', {
+        start: formattedStartDate,
+        finish: formattedFinishDate
+      });
+
       setFormData(prev => ({
         ...prev,
         projectId,
         workDivisionId: selectedProject.workDivisionId,
         title: selectedProject.projectTitle,
         description: selectedProject.description || '',
-        startDate: selectedProject.startDate?.split('T')[0] || '',
-        finishDate: selectedProject.finishDate?.split('T')[0] || ''
+        startDate: formattedStartDate,
+        finishDate: formattedFinishDate
       }));
     }
   };
