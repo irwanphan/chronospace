@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, X } from 'lucide-react';
-import { Dialog } from '@/components/ui/Dialog';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Vendor } from '@/types/vendor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import Modal from '@/components/Modal';
 
 interface FormData {
   projectId: string;
@@ -350,10 +350,15 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
           </div>
         </form>
       </Card>
-      <Dialog open={isAddItemOpen} onOpenChange={setIsAddItemOpen}>
+
+      <Modal 
+        isOpen={isAddItemOpen} 
+        onClose={() => setIsAddItemOpen(false)}
+        title="Add Budget Item"
+      >
         <div className="p-6 space-y-6">
           <h3 className="text-lg font-medium">Add New Item</h3>
-          
+        
           <div className="space-y-4">
             <div>
               <label className="block mb-1.5">Description</label>
@@ -430,7 +435,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
             </button>
           </div>
         </div>
-      </Dialog>
+      </Modal>
     </div>
   );
 } 

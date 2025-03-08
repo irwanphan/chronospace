@@ -11,7 +11,6 @@ import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema } from '@/types/approval-schema';
 import { useSession } from 'next-auth/react';
-import { Dialog } from '@/components/ui/Dialog';
 import { toast } from 'react-hot-toast';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
@@ -576,7 +575,11 @@ export default function NewPurchaseRequestPage() {
         isEdit={editingStep !== null}
       />
 
-      <Dialog open={isItemModalOpen} onOpenChange={setIsItemModalOpen}>
+      <Modal 
+        isOpen={isItemModalOpen} 
+        onClose={() => setIsItemModalOpen(false)}
+        title="Select Budget Items"
+      >
         <div className="p-6 space-y-6">
           <h3 className="text-lg font-medium">Select Budget Items</h3>
           
@@ -641,7 +644,7 @@ export default function NewPurchaseRequestPage() {
             </button>
           </div>
         </div>
-      </Dialog>
+      </Modal>
     </div>
   );
 } 
