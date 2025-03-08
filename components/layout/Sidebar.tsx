@@ -1,11 +1,11 @@
 'use client';
-import { Calendar, Users, BarChart2, Settings, Clock, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
+import { IconBriefcaseFilled, IconCoins, IconId, IconLayoutDashboardFilled, IconStack2Filled, IconSubtask } from '@tabler/icons-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -41,37 +41,37 @@ const Sidebar = () => {
     {
       name: 'Timeline',
       href: '/timeline',
-      icon: Clock,
+      icon: IconLayoutDashboardFilled,
       show: userAccess.timeline
     },
     {
       name: 'Workspace',
       href: '/workspace',
-      icon: LayoutDashboard,
+      icon: IconStack2Filled,
       show: userAccess.workspace
     },
     {
       name: 'Project Planning',
       href: '/project-planning',
-      icon: Calendar,
+      icon: IconBriefcaseFilled,
       show: userAccess.projectPlanning
     },
     {
       name: 'Budget Planning',
       href: '/budget-planning',
-      icon: BarChart2,
+      icon: IconCoins,
       show: userAccess.budgetPlanning
     },
     {
       name: 'User Management',
       href: '/user-management',
-      icon: Users,
+      icon: IconId,
       show: userAccess.userManagement
     },
     {
       name: 'Workspace Management',
       href: '/workspace-management',
-      icon: Settings,
+      icon: IconSubtask,
       show: userAccess.workspaceManagement
     }
   ].filter(item => item.show);
