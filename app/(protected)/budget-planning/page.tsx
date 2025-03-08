@@ -13,6 +13,7 @@ import Pagination from '@/components/Pagination';
 import BudgetStatsOverview from './components/BudgetStatsOverview';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 export default function BudgetPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +38,12 @@ export default function BudgetPlanningPage() {
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
   const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
   const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
+
+  const setPage = usePageTitleStore(state => state.setPage);
+  
+  useEffect(() => {
+    setPage('Budget Planning', ['']);
+  }, [setPage]);
 
   useEffect(() => {
     const fetchData = async () => {

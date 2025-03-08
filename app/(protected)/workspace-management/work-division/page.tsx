@@ -9,6 +9,7 @@ import { stripHtmlTags } from '@/lib/utils';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
@@ -21,6 +22,11 @@ export default function WorkDivisionPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentDivisions = divisions.slice(startIndex, endIndex);
+  const setPage = usePageTitleStore(state => state.setPage);
+  
+  useEffect(() => {
+    setPage('Workspace Management', ['']);
+  }, [setPage]);
 
   const fetchData = async () => {
     try {

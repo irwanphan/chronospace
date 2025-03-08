@@ -11,6 +11,7 @@ import StatsOverview from './components/StatsOverview';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 export default function ProjectPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +29,12 @@ export default function ProjectPlanningPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentProjects = projects.slice(startIndex, endIndex);
+
+  const setPage = usePageTitleStore(state => state.setPage);
+  
+  useEffect(() => {
+    setPage('Project Planning', ['']);
+  }, [setPage]);
 
   useEffect(() => {
     const fetchProjects = async () => {

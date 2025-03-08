@@ -11,6 +11,7 @@ import SchemaActions from './components/SchemaActions';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Pagination from '@/components/Pagination';
 import Card from '@/components/ui/Card';
+import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -24,6 +25,11 @@ export default function ApprovalSchemaPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentSchemas = schemas.slice(startIndex, endIndex);
+  const setPage = usePageTitleStore(state => state.setPage);
+  
+  useEffect(() => {
+    setPage('Workspace Management', ['Approval Schema']);
+  }, [setPage]);
 
   const fetchSchemas = async () => {
     try {

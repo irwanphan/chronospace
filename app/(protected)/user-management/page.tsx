@@ -12,6 +12,8 @@ import UserActions from './components/UserActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { usePageTitleStore } from '@/store/usePageTitleStore';
+
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -28,6 +30,12 @@ export default function UserManagementPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentUsers = users.slice(startIndex, endIndex);
+
+  const setPage = usePageTitleStore(state => state.setPage);
+  
+  useEffect(() => {
+    setPage('User Management', ['']);
+  }, [setPage]);
 
   const fetchUsers = async () => {
     try {
@@ -56,7 +64,7 @@ export default function UserManagementPage() {
 
   return (
     <div className="wax-w-full">
-      <h1 className="text-2xl font-semibold mb-6">User Management</h1>
+      <h1 className="text-2xl font-semibold mb-6">User List</h1>
 
       {error && (
         <div className="text-red-500 text-center py-4">
