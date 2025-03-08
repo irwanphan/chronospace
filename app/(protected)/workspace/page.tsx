@@ -156,16 +156,16 @@ export default function WorkspacePage() {
         {/* Filter Tabs */}
         <div className="flex flex-row gap-4 border-b border-gray-200 mb-4 justify-between">
           <div className="flex items-center gap-4">
-            <Link href="?type=all" className="text-blue-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
+            <Link href="?type=all" className="text-blue-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Show All Request
             </Link>
-            <Link href="?type=purchase-request" className="text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
+            <Link href="?type=purchase-request" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Purchase Request
             </Link>
-            <Link href="?type=purchase-order" className="text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
+            <Link href="?type=purchase-order" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Purchase Order
             </Link>
-            <Link href="?type=memo" className="text-gray-600 px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
+            <Link href="?type=memo" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
               Memo
             </Link>
           </div>
