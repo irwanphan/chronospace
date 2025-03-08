@@ -1,29 +1,29 @@
 'use client';
-import { Star, Users, Building2, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { IconBuildingSkyscraper, IconIdBadge2, IconSchema, IconUsersGroup } from '@tabler/icons-react';
 
 const subNavigation = [
   {
     name: 'Work Division',
     href: '/workspace-management/work-division',
-    icon: Star
+    icon: IconUsersGroup
   },
   {
     name: 'Role',
     href: '/workspace-management/role',
-    icon: Users
+    icon: IconIdBadge2
   },
   {
     name: 'Vendors',
     href: '/workspace-management/vendors',
-    icon: Building2
+    icon: IconBuildingSkyscraper
   },
   {
     name: 'Approval Schema',
     href: '/workspace-management/approval-schema',
-    icon: FileCheck
+    icon: IconSchema
   }
 ];
 
