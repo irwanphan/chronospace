@@ -184,7 +184,10 @@ export default function NewBudgetPage() {
         ...prev,
         projectId,
         workDivisionId: selectedProject.workDivisionId,
-        title: selectedProject.projectTitle
+        title: selectedProject.projectTitle,
+        description: selectedProject.description || '',
+        startDate: selectedProject.startDate?.split('T')[0] || '',
+        finishDate: selectedProject.finishDate?.split('T')[0] || ''
       }));
     }
   };

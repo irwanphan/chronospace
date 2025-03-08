@@ -13,6 +13,9 @@ export async function GET() {
           projectTitle: true,
           workDivisionId: true,
           status: true,
+          description: true,
+          startDate: true,
+          finishDate: true,
           workDivision: {
             select: {
               id: true,
