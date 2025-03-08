@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import Card from '@/components/ui/Card';
 
 interface WorkDivision {
   id: string;
@@ -95,106 +96,108 @@ export default function NewWorkDivisionPage() {
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-1.5">
-              Division Code <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.divisionCode}
-              onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.divisionCode ? 'border-red-500' : ''}`}
-              placeholder="HR"
-              required
-            />
-            {errors.divisionCode && (
-              <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Division Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.divisionName}
-              onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              placeholder="Human Resources"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1.5">
-              Division Description
-            </label>
-            <RichTextEditor
-              value={formData.description}
-              onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
             <div>
               <label className="block mb-1.5">
-                Upper Division (Parent)
+                Division Code <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.upperDivision}
-                onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-              >
-                <option value="">-</option>
-                {workDivisions
-                  .filter(division => division.divisionCode !== formData.divisionCode)
-                  .map((workDivision) => (
-                    <option key={workDivision.id} value={workDivision.id}>
-                      {workDivision.divisionName}
+              <input
+                type="text"
+                value={formData.divisionCode}
+                onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.divisionCode ? 'border-red-500' : ''}`}
+                placeholder="HR"
+                required
+              />
+              {errors.divisionCode && (
+                <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Division Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.divisionName}
+                onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Human Resources"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1.5">
+                Division Description
+              </label>
+              <RichTextEditor
+                value={formData.description}
+                onChange={(value: string) => setFormData(prev => ({ ...prev, description: value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1.5">
+                  Upper Division (Parent)
+                </label>
+                <select
+                  value={formData.upperDivision}
+                  onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                >
+                  <option value="">-</option>
+                  {workDivisions
+                    .filter(division => division.divisionCode !== formData.divisionCode)
+                    .map((workDivision) => (
+                      <option key={workDivision.id} value={workDivision.id}>
+                        {workDivision.divisionName}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1.5">
+                  Division Head
+                </label>
+                <select
+                  value={formData.divisionHead}
+                  onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                >
+                  <option value="">-</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
                     </option>
                   ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1.5">
-                Division Head
-              </label>
-              <select
-                value={formData.divisionHead}
-                onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-              >
-                <option value="">-</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
+                </select>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t">
-          <Link
-            href="/workspace-management/work-division"
-            className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-          >
-            <X className="w-4 h-4" />
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-        </div>
-      </form>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t">
+            <Link
+              href="/workspace-management/work-division"
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

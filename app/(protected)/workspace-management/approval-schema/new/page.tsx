@@ -167,7 +167,7 @@ export default function NewApprovalSchemaPage() {
       {error && <div className="text-red-500 mb-4">{error}</div>}
       
       <Card className="p-6">
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 space-y-6 border border-gray-200">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
               <label className="block mb-1.5">
