@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react';
 import { Dialog } from '@/components/ui/Dialog';
 import { toast } from 'react-hot-toast';
 import Card from '@/components/ui/Card';
+import Modal from '@/components/Modal';
 
 interface BudgetPlan {
   id: string;
@@ -518,54 +519,48 @@ export default function NewPurchaseRequestPage() {
         </Card>
       </div>
 
-      {isSchemaModalOpen && (
-        <div className="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setIsSchemaModalOpen(false)}>
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl m-0">
-            <h2 className="text-lg font-medium mb-4">Select Approval Schema</h2>
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-              {schemas?.map(schema => (
-                <div 
-                  key={schema.id}
-                  onClick={() => handleSelectSchema(schema)}
-                  className="p-4 border rounded-lg cursor-pointer group hover:bg-blue-600 hover:text-white hover:border-blue-700 transition-all duration-300"
-                >
-                  <h3 className="font-medium">{schema.name}</h3>
-                  <p className="text-sm text-gray-600 group-hover:text-white transition-all duration-300">{schema.description}</p>
-                  <div className="flex flex-col items-start pt-2">
-                    {schema.approvalSteps?.map((step, index) => (
-                      <div key={index} className="flex items-center gap-4 text-xs text-gray-600 group-hover:text-white transition-all duration-300">
-                        <span className="font-medium">Step {index + 1}:</span>
-                        <span className="font-medium">
-                          {roles.find(r => r.id === step.role)?.roleName}
-                        </span>
-                        {step.limit && (
-                          <span>
-                            {new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(step.limit)}
-                          </span>
-                        )}
-                        <span>{step.duration}d</span>
-                        <span>{step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}</span>
-                      </div>
-                    ))}
+      <Modal 
+        isOpen={isSchemaModalOpen} 
+        onClose={() => setIsSchemaModalOpen(false)}
+        title="Select Approval Schema"
+        maxWidth="2xl"
+      >
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+          {schemas?.map(schema => (
+            <div 
+              key={schema.id}
+              onClick={() => handleSelectSchema(schema)}
+              className="p-4 border rounded-lg cursor-pointer group hover:bg-blue-600 hover:text-white hover:border-blue-700 transition-all duration-300"
+            >
+              <h3 className="font-medium">{schema.name}</h3>
+              <p className="text-sm text-gray-600 group-hover:text-white transition-all duration-300">
+                {schema.description}
+              </p>
+              <div className="flex flex-col items-start pt-2">
+                {schema.approvalSteps?.map((step, index) => (
+                  <div key={index} className="flex items-center gap-4 text-xs text-gray-600 group-hover:text-white transition-all duration-300">
+                    <span className="font-medium">Step {index + 1}:</span>
+                    <span className="font-medium">
+                      {roles.find(r => r.id === step.role)?.roleName}
+                    </span>
+                    {step.limit && (
+                      <span>
+                        {new Intl.NumberFormat('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                          minimumFractionDigits: 0,
+                        }).format(step.limit)}
+                      </span>
+                    )}
+                    <span>{step.duration}d</span>
+                    <span>{step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}</span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setIsSchemaModalOpen(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+      </Modal>
 
       <AddStepModal
         isOpen={isAddStepModalOpen}

@@ -5,11 +5,11 @@ import Link from 'next/link';
 
 import { Plus, X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { Dialog } from '@/components/ui/Dialog';
 import { Project } from '@/types/project';
 import { WorkDivision } from '@/types/workDivision';
 import { Vendor } from '@/types/vendor';
 import Card from '@/components/ui/Card';
+import Modal from '@/components/Modal';
 
 interface FormData {
   projectId: string;
@@ -404,10 +404,12 @@ export default function NewBudgetPage() {
         </Card>
       </div>
 
-      <Dialog open={isAddItemOpen} onOpenChange={setIsAddItemOpen}>
-        <div className="p-6 space-y-6">
-          <h3 className="text-lg font-medium">Add New Item</h3>
-          
+      <Modal 
+        isOpen={isAddItemOpen} 
+        onClose={() => setIsAddItemOpen(false)}
+        title="Add Budget Item"
+      >
+        <form onSubmit={handleAddItem}>
           <div className="space-y-4">
             <div>
               <label className="block mb-1.5">Description</label>
@@ -483,8 +485,8 @@ export default function NewBudgetPage() {
               Add Item
             </button>
           </div>
-        </div>
-      </Dialog>
+        </form>
+      </Modal>
     </>
   );
 } 
