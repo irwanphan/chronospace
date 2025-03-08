@@ -59,9 +59,11 @@ export default function NewBudgetPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
 
+  console.log('projects : ', projects);
+
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/project-planning/fetch-projects-vendors-divisions');
+      const response = await fetch('/api/budget-planning/fetch-required-to-create-budget');
       if (response.ok) {
         const data = await response.json();
         setProjects(data.projects || []);
