@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { BudgetedItem } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch specific budget
@@ -20,6 +21,8 @@ export async function GET(
       },
     });
 
+    const vendors = await prisma.vendor.findMany();
+
     if (!budget) {
       return NextResponse.json(
         { error: 'Budget not found' },
@@ -32,6 +35,7 @@ export async function GET(
 
     return NextResponse.json({
       ...budget,
+      vendors,
       startDate: budget.startDate?.toISOString(),
       finishDate: budget.finishDate?.toISOString(),
     });
@@ -50,87 +54,69 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const data = await request.json();
+    const body = await request.json();
+    console.log('Received data:', body);
 
-    // Ambil data budget lama untuk mengetahui project sebelumnya
-    const existingBudget = await prisma.budget.findUnique({
-      where: { id: params.id },
-      include: { project: true }
-    });
-
-    if (!existingBudget) {
-      return NextResponse.json(
-        { error: 'Budget not found' },
-        { status: 404 }
-      );
-    }
-
-    // Jika project berubah, cek apakah project baru sudah memiliki budget
-    if (data.projectId !== existingBudget.projectId) {
-      const newProject = await prisma.project.findUnique({
-        where: { id: data.projectId },
-        include: { budget: true }
+    // Use transaction to ensure data consistency
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Delete purchase request items yang terkait dengan budgeted items
+      await tx.purchaseRequestItem.deleteMany({
+        where: {
+          budgetItem: {
+            budgetId: params.id
+          }
+        }
       });
 
-      if (newProject?.budget) {
-        return NextResponse.json(
-          { error: 'The selected project already has a budget allocated' },
-          { status: 400 }
-        );
-      }
-    }
+      // 2. Delete existing budget items
+      await tx.budgetedItem.deleteMany({
+        where: {
+          budgetId: params.id
+        }
+      });
 
-    // Mulai transaksi
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Update budget
+      // 3. Update budget and create new items
       const updatedBudget = await tx.budget.update({
-        where: { id: params.id },
+        where: {
+          id: params.id
+        },
         data: {
-          title: data.title,
-          year: parseInt(data.year),
-          workDivision: {
-            connect: {
-              id: data.workDivisionId
-            }
-          },
-          totalBudget: typeof data.totalBudget === 'string' 
-            ? parseFloat(data.totalBudget.replace(/[,.]/g, ''))
-            : data.totalBudget,
-          startDate: new Date(data.startDate),
-          finishDate: new Date(data.finishDate),
-          description: data.description,
-          status: data.status,
-          project: {
-            connect: {
-              id: data.projectId
+          title: body.title,
+          year: parseInt(body.year),
+          workDivisionId: body.workDivisionId,
+          totalBudget: parseFloat(body.totalBudget),
+          startDate: new Date(body.startDate),
+          finishDate: new Date(body.finishDate),
+          description: body.description,
+          items: {
+            createMany: {
+              data: body.items.map((item: BudgetedItem) => ({
+                description: item.description,
+                qty: Number(item.qty),
+                unit: item.unit,
+                unitPrice: Number(item.unitPrice),
+                vendorId: item.vendorId,
+              }))
             }
           }
         },
-      });
-
-      // 2. Jika project berubah, update status kedua project
-      if (data.projectId !== existingBudget.projectId) {
-        // Reset status project lama
-        await tx.project.update({
-          where: { id: existingBudget.projectId },
-          data: { status: 'DRAFT' }
-        });
-      }
-
-      // Selalu update status project baru
-      await tx.project.update({
-        where: { id: data.projectId },
-        data: { status: 'ALLOCATED' }
+        include: {
+          items: true,
+          project: true,
+          workDivision: true,
+        }
       });
 
       return updatedBudget;
     });
 
+    console.log('Updated result:', result);
     return NextResponse.json(result);
+
   } catch (error) {
-    console.error('Error updating budget:', error);
+    console.error('Error in PUT route:', error);
     return NextResponse.json(
-      { error: 'Failed to update budget' },
+      { error: 'Failed to update budget: ' + (error as Error).message },
       { status: 500 }
     );
   }
