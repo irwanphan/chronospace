@@ -7,6 +7,7 @@ import { stripHtmlTags } from '@/lib/utils';
 import { Vendor } from '@/types/vendor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { Budget } from '@/types/budget';
 
 interface FormData {
   projectId: string;
@@ -25,16 +26,15 @@ interface BudgetItem {
   qty: number;
   unit: string;
   unitPrice: number;
-  vendor: string;
+  vendor: Vendor;
 }
 
 export default function ViewBudgetPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
+  const [budgetPlan, setBudgetPlan] = useState<Budget>({} as Budget);
   const [error, setError] = useState<string>('');
-  const [projectName, setProjectName] = useState<string>("");
-  const [workDivisionTitle, setWorkDivisionTitle] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
     title: '',
@@ -54,18 +54,8 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
 
         const data = await response.json();
 
-        // Map vendor names to items
-        const itemsWithVendorNames = data.items.map((item: BudgetItem) => {
-          const vendor = data.vendors.find((v: Vendor) => v.id === item.vendor);
-          return {
-            ...item,
-            vendor: vendor ? vendor.vendorName : item.vendor
-          };
-        });
-
-        setSelectedItems(itemsWithVendorNames);
-        setProjectName(data.project.projectTitle);
-        setWorkDivisionTitle(data.workDivision.divisionName);
+        setBudgetPlan(data);
+        setSelectedItems(data.items);
         setFormData({
           projectId: data.projectId,
           title: data.title,
@@ -116,7 +106,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
               </label>
               <input
                 type="text"
-                value={projectName}
+                value={budgetPlan.project.projectTitle}
                 className="w-full px-4 py-2 border rounded-lg bg-white"
                 disabled
               />
@@ -128,7 +118,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
               </label>
               <input
                 type="text"
-                value={workDivisionTitle}
+                value={budgetPlan.workDivision.divisionName}
                 className="w-full px-4 py-2 border rounded-lg bg-white"
                 disabled
               />
@@ -214,7 +204,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
                     <td className="p-2">{item.unit}</td>
                     <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.unitPrice)}</td>
                     <td className="p-2 text-right">{new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}</td>
-                    <td className="p-2">{item.vendor}</td>
+                    <td className="p-2">{item.vendor.vendorName}</td>
                     <td className="p-2"></td>
                   </tr>
                 ))}
