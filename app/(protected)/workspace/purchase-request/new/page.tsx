@@ -18,6 +18,7 @@ import Modal from '@/components/Modal';
 interface BudgetPlan {
   id: string;
   title: string;
+  description: string;
   projectId: string;
   project: {
     projectCode: string;
@@ -32,7 +33,9 @@ interface BudgetItem {
   qty: number;
   unit: string;
   unitPrice: number;
-  vendor: string;
+  vendor: {
+    vendorName: string;
+  };
   isSubmitted?: boolean;
   purchaseRequestId?: string;
 }
@@ -72,7 +75,8 @@ export default function NewPurchaseRequestPage() {
     id: '',
     requestDate: new Date(),
     requestor: '',
-    role: ''
+    role: '',
+    description: ''
   });
 
   // Hapus state yang tidak digunakan
@@ -84,7 +88,8 @@ export default function NewPurchaseRequestPage() {
       id: generateId('PR'),
       requestDate: new Date(),
       requestor: session?.user?.name || '',
-      role: session?.user?.role || ''
+      role: session?.user?.role || '',
+      description: ''
     });
   }, [session]);
 
@@ -111,12 +116,14 @@ export default function NewPurchaseRequestPage() {
   // Update project and items when budget is selected
   const handleBudgetChange = (budgetId: string) => {
     const selectedBudget = budgetPlans.find(budget => budget.id === budgetId);
+    console.log('Selected budget:', selectedBudget);
     if (selectedBudget) {
       setFormData(prev => ({
         ...prev,
         budgetId,
         projectId: selectedBudget.projectId,
         title: selectedBudget.title,
+        description: selectedBudget.description,
         createdBy: session?.user?.id || '',
       }));
     }
@@ -242,12 +249,12 @@ export default function NewPurchaseRequestPage() {
         setSelectedVendor(null);
       }
     } else {
-      if (selectedVendor && item.vendor !== selectedVendor) {
+      if (selectedVendor && item.vendor.vendorName !== selectedVendor) {
         toast.error('Cannot select items from different vendors in one request');
         return;
       }
       setSelectedItems(prev => [...prev, item]);
-      setSelectedVendor(item.vendor);
+      setSelectedVendor(item.vendor.vendorName);
     }
   };
 
@@ -377,7 +384,7 @@ export default function NewPurchaseRequestPage() {
                           <td className="p-2 text-right">
                             {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
                           </td>
-                          <td className="p-2">{item.vendor}</td>
+                          <td className="p-2">{item.vendor.vendorName}</td>
                           <td className="p-2">
                             <button
                               type="button"
@@ -579,9 +586,10 @@ export default function NewPurchaseRequestPage() {
         isOpen={isItemModalOpen} 
         onClose={() => setIsItemModalOpen(false)}
         title="Select Budget Items"
+        maxWidth="2xl"
       >
-        <div className="p-6 space-y-6">
-          <h3 className="text-lg font-medium">Select Budget Items</h3>
+        <div className="space-y-6">
+          {/* <h3 className="text-lg font-medium">Select Budget Items</h3> */}
           
           {formData.budgetId && (
             <div className="overflow-x-auto">
@@ -599,7 +607,7 @@ export default function NewPurchaseRequestPage() {
                 <tbody>
                   {budgetPlans.find(b => b.id === formData.budgetId)?.items.map((item) => {
                     const isSelected = selectedItems.some(i => i.id === item.id);
-                    const isDisabled: boolean = Boolean(selectedVendor && item.vendor !== selectedVendor);
+                    const isDisabled: boolean = Boolean(selectedVendor && item.vendor.vendorName !== selectedVendor);
 
                     return (
                       <tr key={item.id} className="border-b">
@@ -609,7 +617,7 @@ export default function NewPurchaseRequestPage() {
                         <td className="p-2 text-right">
                           {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
                         </td>
-                        <td className="p-2">{item.vendor}</td>
+                        <td className="p-2">{item.vendor.vendorName}</td>
                         <td className="p-2 text-center">
                           <button
                             type="button"

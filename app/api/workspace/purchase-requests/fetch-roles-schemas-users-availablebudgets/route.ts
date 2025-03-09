@@ -8,7 +8,8 @@ export async function GET() {
         project: true,
         items: {
           include: {
-            purchaseRequestItems: true
+            purchaseRequestItems: true,
+            vendor: true
           }
         }
       },
@@ -26,6 +27,7 @@ export async function GET() {
       return {
         id: budget.id,
         title: budget.title,
+        description: budget.description,
         projectId: budget.projectId,
         project: budget.project,
         items: availableItems // Hanya tampilkan items yang available
