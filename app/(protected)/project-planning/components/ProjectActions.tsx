@@ -7,10 +7,11 @@ import { useRouter } from 'next/navigation';
 
 interface ProjectActionsProps {
   projectId: string;
+  projectStatus: string;
   onDelete: () => void;
 }
 
-export default function ProjectActions({ projectId, onDelete }: ProjectActionsProps) {
+export default function ProjectActions({ projectId, projectStatus, onDelete }: ProjectActionsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -58,27 +59,40 @@ export default function ProjectActions({ projectId, onDelete }: ProjectActionsPr
       
       {showDropdown && (
         <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg py-2 w-36 z-50 border border-gray-200">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/project-planning/${projectId}/edit`);
-              setShowDropdown(false);
-            }}
-            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-          >
-            <Edit className="w-4 h-4" />
-            Edit
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete();
-            }}
-            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
-          >
-            <Trash className="w-4 h-4" />
-            Delete
-          </button>
+          {projectStatus !== 'Allocated' ? (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/project-planning/${projectId}/edit`);
+                  setShowDropdown(false);
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600 flex items-center gap-2"
+              >
+                <Trash className="w-4 h-4" />
+                Delete
+              </button>
+            </>
+          ) : (
+            <p className="w-full text-sm px-4 py-2 text-left"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(false);
+              }}
+            >
+              Allocated projects cannot be edited nor deleted.
+            </p>
+          )}
         </div>
       )}
     </div>

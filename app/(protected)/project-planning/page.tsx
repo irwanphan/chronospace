@@ -121,6 +121,7 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-right">
                   <ProjectActions 
                     projectId={project.id}
+                    projectStatus={project.status}
                     onDelete={async () => {
                       const projectsRes = await fetch('/api/project-planning');
                       const projectsData = await projectsRes.json();
