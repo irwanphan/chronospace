@@ -116,11 +116,12 @@ export default function BudgetPlanningPage() {
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Title</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Year</th>
+              {/* <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Year</th> */}
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Division</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Total Budget</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Start Date</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Finish Date</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Status</th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -129,16 +130,18 @@ export default function BudgetPlanningPage() {
               <tr key={budget.id} className="hover:bg-blue-50">
                 <td className="px-6 py-4 text-sm">{startIndex + index + 1}</td>
                 <td className="px-6 py-4 text-sm">{budget.title}</td>
-                <td className="px-6 py-4 text-sm">{budget.year}</td>
+                {/* <td className="px-6 py-4 text-sm">{budget.year}</td> */}
                 <td className="px-6 py-4 text-sm">{divisions.find(d => d.id === budget.workDivisionId)?.divisionName}</td>
                 <td className="px-6 py-4 text-sm">{formatCurrency(budget.totalBudget)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
+                <td className="px-6 py-4 text-sm">{budget.status}</td>
                 <td className="px-6 py-4 text-right">
                   <BudgetActions 
                     budgetId={budget.id}
                     canEditBudget={canEditBudget ?? false}
                     canDeleteBudget={canDeleteBudget ?? false}
+                    budgetStatus={budget.status}
                     onDelete={async () => {
                       const response = await fetch('/api/budget-planning');
                       const data = await response.json();
