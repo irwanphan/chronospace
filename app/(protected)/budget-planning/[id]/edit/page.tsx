@@ -36,6 +36,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [budgetPlan, setBudgetPlan] = useState<Budget>({} as Budget);
+  const [budgetStatus, setBudgetStatus] = useState<string>('');
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [error, setError] = useState<string>('');
@@ -57,8 +58,8 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
     description: '',
   });
 
-  console.log('selectedItems', selectedItems);
-  console.log('budgetPlan', budgetPlan)
+  // console.log('selectedItems', selectedItems);
+  // console.log('budgetPlan', budgetPlan)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +72,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         setSelectedItems(data.items); 
         setVendors(data.vendors);
         setBudgetPlan(data);
+        setBudgetStatus(data.status);
         setFormData({
           projectId: data.projectId,
           title: data.title,
@@ -135,7 +137,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
       ),
     };
 
-    console.log('Submitting data:', submitData);
+    // console.log('Submitting data:', submitData);
 
     try {
       const response = await fetch(`/api/budget-planning/${params.id}`, {
@@ -147,7 +149,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
       });
 
       const data = await response.json();
-      console.log('Response:', data);
+      // console.log('Response:', data);
 
       if (!response.ok) {
         setError(data.error || 'Failed to update budget');
@@ -165,6 +167,21 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   };
 
   if (isLoading) return <LoadingSpin />
+
+  if (budgetStatus === 'In Progress') {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-2xl font-semibold mb-6">Budget is in progress and cannot be edited.</h1>
+        <p className="text-sm text-gray-600">Please contact the administrator to change the status of the budget plan.</p>
+        <button
+          onClick={() => router.push('/budget-planning')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Back to Budget Planning
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div>
