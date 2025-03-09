@@ -167,7 +167,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       }
     };
     fetchData();
-  }, [params.id]);
+  }, [params.id, hasAccess]);
 
   const handleDeclineConfirm = async (type: 'revision' | 'decline') => {
     try {
@@ -247,12 +247,12 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     }
   };
 
-  if (!hasAccess) {
-    return <div className="flex justify-center items-center h-screen">You don&apos;t have access to this page</div>;
-  }
-
   if (isLoading) {
     return <LoadingSpin />
+  }
+
+  if (!hasAccess) {
+    return <div className="flex justify-center items-center h-screen">You don&apos;t have access to this page</div>;
   }
 
   return (
