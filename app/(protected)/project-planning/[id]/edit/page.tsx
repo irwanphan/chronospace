@@ -12,6 +12,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [projectStatus, setProjectStatus] = useState('');
   const [formData, setFormData] = useState({
     workDivisionId: '',
     projectId: '',
@@ -33,6 +34,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
 
         const data = await response.json();
         setDivisions(data.divisions);
+        setProjectStatus(data.project.status);
         setFormData({
           workDivisionId: data.project.workDivisionId || '',
           projectId: data.project.projectId,
@@ -75,6 +77,21 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   };
 
   if (isLoading) return <LoadingSpin />
+
+  if (projectStatus === 'Allocated') {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-2xl font-semibold mb-6">Allocated projects cannot be edited.</h1>
+        <p className="text-sm text-gray-600">Please contact the administrator to change the status of the project.</p>
+        <button
+          onClick={() => router.push('/project-planning')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Back to Project Planning
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
