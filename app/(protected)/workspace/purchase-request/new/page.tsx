@@ -214,6 +214,14 @@ export default function NewPurchaseRequestPage() {
           items: selectedItems,
           code: requestInfo.id,
           createdBy: session?.user?.id || '',
+          approvalSteps: formData.steps.map((step, index) => ({
+            roleId: step.roleId,
+            specificUserId: step.specificUserId,
+            duration: step.duration,
+            overtimeAction: step.overtimeAction,
+            limit: step.limit,
+            order: index + 1
+          }))
         }),
       });
 

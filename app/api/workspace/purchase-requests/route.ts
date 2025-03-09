@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface ApprovalStep {
-  role: string;
-  specificUser?: string;
+  roleId: string;
+  specificUserId?: string;
   stepOrder: number;
   limit?: number;
   duration: number;
-  overtime: string;
+  overtimeAction: string;
 }
 
 interface RequestItem {
@@ -22,38 +22,18 @@ interface RequestItem {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { 
-      code,
-      budgetId,
-      title,
-      description,
-      createdBy,
-      items = [],
-      approvalSteps = []
-    } = body;
-
-    // Debug log
     console.log('Received request body:', body);
 
-    // Validasi input
-    if (!budgetId || !title) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Create purchase request dengan items dan approval steps
-    const purchaseRequest = await prisma.purchaseRequest.create({
+    const result = await prisma.purchaseRequest.create({
       data: {
-        code,
-        budgetId,
-        title,
-        description,
-        status: 'Submitted',
-        createdBy,
+        code: body.code,
+        budgetId: body.budgetId,
+        title: body.title,
+        description: body.description,
+        status: "Submitted",
+        createdBy: body.createdBy,
         items: {
-          create: items.map((item: RequestItem) => ({
+          create: body.items.map((item: RequestItem) => ({
             budgetItemId: item.id,
             description: item.description,
             qty: item.qty,
@@ -63,14 +43,14 @@ export async function POST(request: Request) {
           }))
         },
         approvalSteps: {
-          create: approvalSteps.map((step: ApprovalStep, index: number) => ({
-            role: step.role,
-            specificUser: step.specificUser,
+          create: body.steps.map((step: ApprovalStep, index: number) => ({
+            role: step.roleId,
+            specificUser: step.specificUserId,
             stepOrder: index + 1,
-            status: 'Pending',
+            status: "Pending",
             limit: step.limit,
             duration: step.duration,
-            overtime: step.overtime
+            overtime: step.overtimeAction
           }))
         }
       },
@@ -80,19 +60,11 @@ export async function POST(request: Request) {
       }
     });
 
-    // Update budget status
-    await prisma.budget.update({
-      where: { id: budgetId },
-      data: {
-        purchaseRequestStatus: 'SUBMITTED'
-      }
-    });
-
-    return NextResponse.json(purchaseRequest);
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error creating purchase request:', error);
     return NextResponse.json(
-      { error: 'Failed to create purchase request', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to create request: ' + (error as Error).message },
       { status: 500 }
     );
   }
