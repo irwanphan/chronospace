@@ -36,7 +36,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [budgetPlan, setBudgetPlan] = useState<Budget>({} as Budget);
-  const [budgetStatus, setBudgetStatus] = useState<string>('');
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [error, setError] = useState<string>('');
@@ -72,7 +71,6 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         setSelectedItems(data.items); 
         setVendors(data.vendors);
         setBudgetPlan(data);
-        setBudgetStatus(data.status);
         setFormData({
           projectId: data.projectId,
           title: data.title,
@@ -168,7 +166,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
 
   if (isLoading) return <LoadingSpin />
 
-  if (budgetStatus === 'In Progress') {
+  if (budgetPlan.status === 'In Progress') {
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-semibold mb-6">Budget is in progress and cannot be edited.</h1>

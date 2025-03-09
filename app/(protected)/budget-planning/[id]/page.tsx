@@ -236,18 +236,24 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
             <Link
               href="/budget-planning"
               className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-            >
+              >
               <X className="w-4 h-4" />
               Back
             </Link>
             <button
               type="button"
+              disabled={budgetPlan.status === 'In Progress'}
               onClick={() => router.push(`/budget-planning/${params.id}/edit`)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
-            >
+              >
               Edit
             </button>
           </div>
+          {budgetPlan.status === 'In Progress' && (
+            <div className="text-gray-500 flex justify-end text-sm mt-4">
+              Budget is in progress and cannot be edited.
+            </div>
+          )}
         </form>
       </Card>
     </div>
