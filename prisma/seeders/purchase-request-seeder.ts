@@ -91,6 +91,11 @@ export async function purchaseRequestSeeder() {
         data: approvalSteps
       });
 
+      await prisma.budget.update({
+        where: { id: budget.id },
+        data: { status: 'In Progress' }
+      });
+
       // Update PR status based on final approval step
       const lastStep = approvalSteps[approvalSteps.length - 1];
       if (lastStep.status === 'Rejected') {
