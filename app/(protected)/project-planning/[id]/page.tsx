@@ -11,6 +11,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [projectStatus, setProjectStatus] = useState<string>('');
   const [formData, setFormData] = useState({
     workDivisionId: '',
     projectId: '',
@@ -32,6 +33,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
 
         const data = await response.json();
         setDivisions(data.divisions);
+        setProjectStatus(data.project.status);
         setFormData({
           workDivisionId: data.project.workDivisionId || '',
           projectId: data.project.projectId,
@@ -177,12 +179,18 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
             </button>
             <button
               type="button"
+              disabled={projectStatus === 'Allocated'}
               onClick={() => router.push(`/project-planning/${params.id}/edit`)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               Edit
             </button>
           </div>
+          {projectStatus === 'Allocated' && (
+            <div className="flex justify-end text-gray-500 text-sm mt-4 block w-full">
+              Project is allocated and cannot be edited.
+            </div>
+          )}
         </form>
       </Card>
     </div>
