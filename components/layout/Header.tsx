@@ -19,7 +19,10 @@ const Header = () => {
   const userRole = session?.user?.role || "User";
   const userMenuRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(userMenuRef, () => setShowUserMenu(false));
-  const { title, breadcrumbs } = usePageTitleStore();
+  const { 
+    title, 
+    // breadcrumbs 
+  } = usePageTitleStore();
 
   return (
     <header className={cn(
@@ -28,14 +31,14 @@ const Header = () => {
     )}>
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-semibold">{title}</h1>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        {/* <div className="flex items-center gap-2 text-sm text-gray-500">
           {breadcrumbs.map((crumb, index) => (
             <div key={index}>
               {index > 0 && <span>/</span>}
               <span>{crumb}</span>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
       
       <div className="flex items-center gap-6">

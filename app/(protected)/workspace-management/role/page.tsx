@@ -8,7 +8,6 @@ import RoleActions from './components/RoleActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
-import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -20,11 +19,6 @@ export default function RolePage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentRoles = roles.slice(startIndex, endIndex);
-  const setPage = usePageTitleStore(state => state.setPage);
-  
-  useEffect(() => {
-    setPage('Workspace Management', ['Role']);
-  }, [setPage]);
 
   useEffect(() => {
     fetchRoles();

@@ -12,7 +12,6 @@ import UserActions from './components/UserActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
-import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,12 +29,6 @@ export default function UserManagementPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentUsers = users.slice(startIndex, endIndex);
-
-  const setPage = usePageTitleStore(state => state.setPage);
-  
-  useEffect(() => {
-    setPage('User Management', ['']);
-  }, [setPage]);
 
   const fetchUsers = async () => {
     try {

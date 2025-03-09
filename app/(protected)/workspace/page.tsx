@@ -14,7 +14,6 @@ import WorkspaceStats from './components/WorkspaceStats';
 import { calculateRequestStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
 import { Grid2X2, List } from 'lucide-react';
-import { usePageTitleStore } from '@/store/usePageTitleStore';
 
 interface CustomSession extends Session {
   user: {
@@ -134,12 +133,6 @@ export default function WorkspacePage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentPurchaseRequests = filteredRequests.slice(startIndex, endIndex);
-
-  const setPage = usePageTitleStore(state => state.setPage);
-  
-  useEffect(() => {
-    setPage('Workspace', ['']);
-  }, [setPage]);
 
   // console.log('Display as list:', displayAsList);
   useEffect(() => {

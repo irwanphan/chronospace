@@ -3,6 +3,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function ProtectedLayout({
   children,
@@ -10,6 +11,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const { isCollapsed } = useSidebarStore();
+  usePageTitle();
 
   return (
     <div className="flex h-screen">

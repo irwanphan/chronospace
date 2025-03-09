@@ -1,14 +1,6 @@
 'use client';
 
-import { usePageTitleStore } from '@/store/usePageTitleStore';
-import { useEffect } from 'react';
-
 export default function TimelinePage() {
-  const setPage = usePageTitleStore(state => state.setPage);
-  
-  useEffect(() => {
-    setPage('Workspace Update', ['']);
-  }, [setPage]);
 
   return (
     <div>
