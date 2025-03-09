@@ -57,7 +57,24 @@ const pageConfigs: Record<string, { title: string; breadcrumbs: string[] }> = {
   '/timeline': {
     title: 'Workspace Updates',
     breadcrumbs: ['Home', 'Workspace Updates']
-  }
+  },
+  '/workspace-management/work-division': {
+    title: 'Workspace Management',
+    breadcrumbs: ['Home', 'Workspace Management', 'Work Division']
+  },
+  '/workspace-management/vendors': {
+    title: 'Workspace Management',
+    breadcrumbs: ['Home', 'Workspace Management', 'Vendors']
+  },
+  '/workspace-management/role': {
+    title: 'Workspace Management',
+    breadcrumbs: ['Home', 'Workspace Management', 'Role']
+  },
+  '/workspace-management/approval-schema': {
+    title: 'Workspace Management',
+    breadcrumbs: ['Home', 'Workspace Management', 'Approval Schema']
+  },
+  
 };
 
 export function usePageTitle() {
