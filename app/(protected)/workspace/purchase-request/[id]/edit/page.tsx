@@ -38,6 +38,7 @@ interface BudgetItem {
   unitPrice: number;
   vendor: {
     vendorName: string;
+    vendorId: string;
   };
   isSubmitted?: boolean;
   purchaseRequestId?: string;
@@ -257,36 +258,53 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/workspace/purchase-requests', {
-        method: 'POST',
+      const response = await fetch(`/api/workspace/purchase-requests/${params.id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          items: selectedItems,
-          code: requestInfo.id,
-          createdBy: session?.user?.id || '',
-          steps: formData.steps.map((step, index) => ({
+          code: formData.code,
+          budgetId: formData.budgetId,
+          projectId: formData.projectId,
+          title: formData.title,
+          createdBy: session?.user?.id,
+          description: formData.description,
+          items: selectedItems.map(item => ({
+            budgetItemId: item.id,
+            description: item.description,
+            qty: item.qty,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            vendorId: item.vendor.vendorId,
+            vendorName: item.vendor.vendorName
+          })),
+          approvalSteps: formData.steps.map((step, index) => ({
             roleId: step.roleId,
-            specificUserId: step.specificUserId,
+            specificUserId: step.specificUserId || null,
+            stepOrder: index + 1,
+            status: 'Pending',
+            budgetLimit: step.budgetLimit || null,
             duration: step.duration,
             overtimeAction: step.overtimeAction,
-            budgetLimit: step.budgetLimit,
-            order: index + 1
+            approvedAt: null,
+            approvedBy: null,
+            note: null
           }))
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create request');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update request');
       }
 
       router.push('/workspace');
       router.refresh();
+      toast.success('Purchase request updated successfully');
     } catch (error) {
-      console.error('Error creating request:', error);
-      alert('Failed to create request');
+      console.error('Error updating request:', error);
+      toast.error('Failed to update request');
     } finally {
       setIsSubmitting(false);
     }

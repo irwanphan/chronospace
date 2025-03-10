@@ -4,6 +4,19 @@ import { getViewers, getCurrentApprover, ApprovalStep } from '@/app/api/workspac
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+interface ApprovalStepUpdate {
+  roleId: string;
+  specificUserId: string | null;
+  stepOrder: number;
+  status: string;
+  budgetLimit: number | null;
+  duration: number;
+  overtimeAction: string;
+  comment: string | null;
+  approvedAt: Date | null;
+  approvedBy: string | null;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -82,7 +95,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
+export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -92,51 +105,56 @@ export async function PATCH(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const { title, description } = await request.json();
+    const body = await request.json();
+    const { title, description, approvalSteps } = body;
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+    // Delete existing approval steps
+    await prisma.purchaseRequestApproval.deleteMany({
+      where: { purchaseRequestId: params.id }
     });
 
-    if (!user) {
-      return new NextResponse('User not found', { status: 404 });
-    }
-
+    // Update purchase request with new data
     const updated = await prisma.purchaseRequest.update({
       where: { id: params.id },
       data: {
         title,
-        status: 'Updated',
         description,
+        status: 'Updated',
         approvalSteps: {
-          updateMany: {
-            where: { status: 'Revision' },
-            data: { status: 'Updated' }
-          }
+          create: approvalSteps.map((step: ApprovalStepUpdate) => ({
+            role: step.roleId,
+            specificUser: step.specificUserId,
+            stepOrder: step.stepOrder,
+            status: 'Pending',
+            limit: step.budgetLimit,
+            duration: step.duration,
+            overtime: step.overtimeAction || 'Auto Decline', // TODO: overtimeAction return undefinedm saved as Auto Decline
+            comment: null,
+            approvedAt: null,
+            approvedBy: null
+          }))
         },
         histories: {
           create: {
             action: 'Updated',
-            actor: {
-              connect: { email: session.user.email }
-            },
-            comment: 'Request details updated'
+            actorId: session.user.id,
+            comment: 'Request details and approval steps updated'
           }
         }
       },
       include: {
+        approvalSteps: true,
         histories: {
           include: {
             actor: true
           }
-        },
-        approvalSteps: true
+        }
       }
     });
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('Failed to update request:', error);
+    console.error('Error updating request:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
