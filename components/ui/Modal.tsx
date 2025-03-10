@@ -3,9 +3,10 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  maxWidth?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-xl' }: ModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -17,7 +18,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-xl">
+      <div className={`relative bg-white rounded-lg shadow-xl p-6 w-full ${maxWidth}`}>
         {title && (
           <h3 className="text-lg text-center font-semibold mb-4">{title}</h3>
         )}
@@ -26,3 +27,5 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     </div>
   );
 } 
+
+export default Modal;

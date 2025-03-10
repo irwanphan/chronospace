@@ -16,11 +16,8 @@ export async function GET(
       include: {
         items: {
           include: {
-            budgetItem: {
-              include: {
-                vendor: true
-              }
-            }
+            vendor: true,
+            budgetItem: true,
           }
         },
         budget: {
