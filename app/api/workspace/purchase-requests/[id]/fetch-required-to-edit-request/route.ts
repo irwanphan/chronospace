@@ -67,8 +67,28 @@ export async function GET(
       currentStep: currentStep
     };
 
+    const [roles, users, schemas] = await Promise.all([
+      prisma.role.findMany(),
+      prisma.user.findMany(),
+      prisma.approvalSchema.findMany({
+        include: {
+          approvalSteps: {
+            orderBy: {
+              order: 'asc'
+            }
+          }
+        },
+        where: {
+          documentType: 'Purchase Request'
+        }
+      })
+    ]);
+
     return NextResponse.json({
       purchaseRequest: fixedPurchaseRequest,
+      roles,
+      users,
+      schemas
     });
   } catch (error) {
     console.error('Error:', error);
