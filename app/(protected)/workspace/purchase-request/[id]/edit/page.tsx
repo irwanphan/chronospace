@@ -15,7 +15,7 @@ import { toast } from 'react-hot-toast';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
 import LoadingSpin from '@/components/ui/LoadingSpin';
-import { PurchaseRequest } from '@prisma/client';
+// import { PurchaseRequest } from '@prisma/client';
 import { IconListCheck } from '@tabler/icons-react';
 
 interface BudgetPlan {
@@ -56,7 +56,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
+  // const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
   const [budgetPlan, setBudgetPlan] = useState<BudgetPlan | null>(null);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -77,7 +77,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
   });
 
   // console.log('budgetPlan : ', budgetPlan);
-  console.log('purchaseRequest : ', purchaseRequest);
+  // console.log('purchaseRequest : ', purchaseRequest);
 
   const [requestInfo, setRequestInfo] = useState({
     id: '',
@@ -108,11 +108,11 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
         if (response.ok) {
           const data = await response.json();
 
-          // console.log('data : ', data);
+          console.log('data : ', data);
           setRoles(data.roles);
           setUsers(data.users);
           setSchemas(data.schemas);
-          setPurchaseRequest(data.purchaseRequest);
+          // setPurchaseRequest(data.purchaseRequest);
           setBudgetPlan(data.purchaseRequest.budget);
           
           // Initialize selected items with existing items
