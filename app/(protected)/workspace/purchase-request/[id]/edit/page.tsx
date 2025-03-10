@@ -43,8 +43,17 @@ interface BudgetItem {
   purchaseRequestId?: string;
 }
 
+// TODO: type is messed up, need to fix database schema
 interface ApprovalStepForm {
   roleId: string;
+  specificUserId?: string;
+  budgetLimit?: number;
+  duration: number;
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
+}
+// matching ApprovalStepForm with ApprovalStepForm, so that roleId is role
+interface ApprovalStepFormInitial {
+  role: string;
   specificUserId?: string;
   limit?: number;
   duration: number;
@@ -137,10 +146,10 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
             createdBy: data.purchaseRequest.createdBy,
             description: data.purchaseRequest.description,
             items: data.purchaseRequest.items,
-            steps: data.purchaseRequest.approvalSteps.map((step: ApprovalStepForm) => ({
-              roleId: step.roleId,
+            steps: data.purchaseRequest.approvalSteps.map((step: ApprovalStepFormInitial) => ({
+              roleId: step.role,
               specificUserId: step.specificUserId,
-              limit: step.limit,
+              budgetLimit: step.limit,
               duration: step.duration,
               overtimeAction: step.overtimeAction
             }))
@@ -177,9 +186,9 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
       ...prev,
       steps: [...prev.steps, stepData].sort((a, b) => {
         // Sort by budget limit, undefined limits go last
-        if (a.limit === undefined) return 1;
-        if (b.limit === undefined) return -1;
-        return a.limit - b.limit;
+        if (a.budgetLimit === undefined) return 1;
+        if (b.budgetLimit === undefined) return -1;
+        return a.budgetLimit - b.budgetLimit;
       }),
     }));
   };
@@ -197,7 +206,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
       data: {
         roleId: step.roleId,
         specificUserId: step.specificUserId,
-        limit: step.limit,
+        budgetLimit: step.budgetLimit,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
       },
@@ -207,6 +216,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
   };
 
   const handleStepSubmit = (stepData: ApprovalStepForm) => {
+    console.log('stepData : ', stepData);
     if (editingStep !== null) {
       // Edit existing step
       setFormData(prev => ({
@@ -215,9 +225,9 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
           i === editingStep.index ? stepData : step
         ).sort((a, b) => {
           // Sort by budget limit, undefined limits go last
-          if (a.limit === undefined) return 1;
-          if (b.limit === undefined) return -1;
-          return a.limit - b.limit;
+          if (a.budgetLimit === undefined) return 1;
+          if (b.budgetLimit === undefined) return -1;
+          return a.budgetLimit - b.budgetLimit;
         })
       }));
       setEditingStep(null);
@@ -236,7 +246,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
         specificUserId: step.specificUserId,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
-        limit: step.limit
+        budgetLimit: step.limit
       }))
     }));
     setIsSchemaModalOpen(false);
@@ -262,7 +272,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
             specificUserId: step.specificUserId,
             duration: step.duration,
             overtimeAction: step.overtimeAction,
-            limit: step.limit,
+            budgetLimit: step.budgetLimit,
             order: index + 1
           }))
         }),
@@ -526,11 +536,11 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                               : 'Any user with role'}
                           </td>
                           <td className="py-3 px-4">
-                            {step.limit ? new Intl.NumberFormat('id-ID', {
+                            {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
                               style: 'currency',
                               currency: 'IDR',
                               minimumFractionDigits: 0,
-                            }).format(step.limit) : '-'}
+                            }).format(step.budgetLimit) : '-'}
                           </td>
                           <td className="py-3 px-4">{step.duration} days</td>
                           <td className="py-3 px-4">
