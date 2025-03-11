@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import { Plus, Filter, Search } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { User } from '@/types/user';
-import { Role } from '@/types/role';
 import UserActions from './components/UserActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
@@ -16,7 +15,6 @@ import Card from '@/components/ui/Card';
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const canCreateUser = session?.user?.access?.activityAccess?.createUser;
@@ -30,6 +28,8 @@ export default function UserManagementPage() {
   const endIndex = startIndex + itemsPerPage;
   const currentUsers = users.slice(startIndex, endIndex);
 
+  console.log(users);
+
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
@@ -38,8 +38,8 @@ export default function UserManagementPage() {
         throw new Error('Failed to fetch data');
       }
       const data = await response.json();
+      console.log(data);
       setUsers(data.users || []);
-      setRoles(data.roles || []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       setError('Failed to load data');
@@ -145,7 +145,7 @@ export default function UserManagementPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-sm">{roles.find(role => role.id === user.role)?.roleName}</td>
+                  <td className="px-3 py-2 text-sm">{user.role.roleName}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.lastLogin)}</td>
                   <td className="px-3 py-2 text-sm">{formatDate(user.createdAt)}</td>
                   <td className="px-3 py-2 text-right">
