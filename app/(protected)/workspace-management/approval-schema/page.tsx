@@ -6,7 +6,7 @@ import { Search, Filter, Plus } from 'lucide-react';
 import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
-import { stripHtmlTags } from '@/lib/utils';
+import { stripHtmlTags, formatCurrency } from '@/lib/utils';
 import SchemaActions from './components/SchemaActions';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Pagination from '@/components/Pagination';
@@ -24,67 +24,66 @@ export default function ApprovalSchemaPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentSchemas = schemas.slice(startIndex, endIndex);
-
-  const fetchSchemas = async () => {
-    try {
-      const response = await fetch('/api/workspace-management/approval-schemas');
-      if (!response.ok) throw new Error('Failed to fetch schemas');
-      const data = await response.json();
-      setSchemas(data.schemas || []);
-      setDivisions(data.divisions);
-      setRoles(data.roles);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch schemas:', error);
-      setError('Failed to load approval schemas');
-    }
-  };
+  
+  console.log('approval schemas', schemas)
 
   useEffect(() => {
+    const fetchSchemas = async () => {
+      try {
+        const response = await fetch('/api/workspace-management/approval-schemas');
+        if (!response.ok) throw new Error('Failed to fetch schemas');
+        const data = await response.json();
+        setSchemas(data.approvalSchemas || []);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch schemas:', error);
+        setError('Failed to load approval schemas');
+      }
+    };
     fetchSchemas();
   }, []);
 
   const getDivisionNames = (schema: ApprovalSchema) => {
-    if (!schema.divisions) return '';
+    if (!schema.workDivisionIds) return '';
     
     let divisionList: string[];
     try {
       // Handle berbagai format data
-      if (typeof schema.divisions === 'string') {
+      if (typeof schema.workDivisionIds === 'string') {
         // Jika string dimulai dengan '[', berarti array dalam string
-        divisionList = schema.divisions.startsWith('[') 
-          ? JSON.parse(schema.divisions)
-          : [schema.divisions];
+        divisionList = schema.workDivisionIds.startsWith('[') 
+          ? JSON.parse(schema.workDivisionIds)
+          : [schema.workDivisionIds];
       } else {
-        divisionList = schema.divisions;
+        divisionList = schema.workDivisionIds;
       }
 
       return divisions
         .filter(div => divisionList.includes(div.id || ''))
-        .map(div => div.divisionName)
+        .map(div => div.name)
         .join(', ');
     } catch (error) {
       console.error('Error parsing divisions:', error);
-      return schema.divisions.toString();  // Fallback: tampilkan data mentah
+      return schema.workDivisionIds.toString();  // Fallback: tampilkan data mentah
     }
   };
 
   const getRoleNames = (schema: ApprovalSchema) => {
-    if (!schema.roles) return '';
+    if (!schema.roleIds) return '';
     
     let roleList: string[];
     try {
       // Coba parse jika dalam format JSON string
-      roleList = typeof schema.roles === 'string'
-        ? (schema.roles as string).startsWith('[')
-          ? JSON.parse(schema.roles as string)
-          : [schema.roles]
-        : schema.roles;
+      roleList = typeof schema.roleIds === 'string'
+        ? (schema.roleIds as string).startsWith('[')
+          ? JSON.parse(schema.roleIds as string)
+          : [schema.roleIds]
+        : schema.roleIds;
     } catch {
       // Fallback jika parsing gagal
-      roleList = typeof schema.roles === 'string' 
-        ? [schema.roles] 
-        : schema.roles;
+      roleList = typeof schema.roleIds === 'string' 
+        ? [schema.roleIds] 
+        : schema.roleIds;
     }
 
     return roles
@@ -198,15 +197,11 @@ export default function ApprovalSchemaPage() {
                     <div key={step.id} className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">Step {index + 1}:</span>
                       <span>
-                        {roles.find(r => r.id === step.role)?.roleName}
+                        {step.role.roleName}
                       </span>
-                      {step.limit && (
+                      {step.budgetLimit && (
                         <span className="text-gray-500">
-                          {new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(step.limit)}
+                          {formatCurrency(step.budgetLimit)}
                         </span>
                       )}
                       <span>{step.duration}d</span>
