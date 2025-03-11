@@ -19,7 +19,7 @@ export async function purchaseRequestSeeder() {
     include: {
       approvalSteps: {
         orderBy: {
-          order: 'asc'
+          stepOrder: 'asc'
         }
       }
     }
@@ -73,16 +73,16 @@ export async function purchaseRequestSeeder() {
         purchaseRequestId: pr.id,
         roleId: step.roleId,
         specificUserId: step.specificUserId,
-        stepOrder: step.order,
-        status: step.order < 3 ? 'Approved' : getRandomApprovalStatus(),
+        stepOrder: step.stepOrder,
+        status: step.stepOrder < 3 ? 'Approved' : getRandomApprovalStatus(),
         budgetLimit: step.budgetLimit ? Number(step.budgetLimit) : null,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
-        comment: step.order < 3 ? 
+        comment: step.stepOrder < 3 ? 
           `Approved by ${step.roleId}` : 
           getRandomComment(),
-        actedAt: step.order < 3 ? new Date() : null,
-        actorId: step.order < 3 ? 
+        actedAt: step.stepOrder < 3 ? new Date() : null,
+        actorId: step.stepOrder < 3 ? 
           (step.specificUserId || 'fg71xui7r000asgpgraji935t') : 
           null
       }));

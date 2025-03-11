@@ -14,21 +14,21 @@ export async function approvalSchemaSeeder() {
           roleId: 'role-gm',
           duration: 24,
           overtimeAction: 'Notify and Wait',
-          order: 1,
+          stepOrder: 1,
           budgetLimit: 250000000 // 250 Juta
         },
         {
           roleId: 'role-cfo',
           duration: 48,
           overtimeAction: 'Notify and Wait',
-          order: 2,
+          stepOrder: 2,
           budgetLimit: 500000000 // 500 Juta
         },
         {
           roleId: 'role-ceo',
           duration: 72,
           overtimeAction: 'Notify and Wait',
-          order: 3,
+          stepOrder: 3,
           budgetLimit: 1000000000 // 1 Miliar
         }
       ]
@@ -52,21 +52,21 @@ export async function approvalSchemaSeeder() {
           roleId: 'role-gm',
           duration: 4,
           overtimeAction: 'Auto Decline',
-          order: 1,
+          stepOrder: 1,
           budgetLimit: 250000000 // 250 Juta
         },
         {
           roleId: 'role-cfo',
           duration: 8,
           overtimeAction: 'Auto Decline',
-          order: 2,
+          stepOrder: 2,
           budgetLimit: 500000000 // 500 Juta
         },
         {
           roleId: 'role-ceo',
           duration: 12,
           overtimeAction: 'Auto Decline',
-          order: 3,
+          stepOrder: 3,
           budgetLimit: 1000000000 // 1 Miliar
         }
       ]

@@ -9,5 +9,6 @@ export interface ApprovalSchema {
     duration: number;
     overtimeAction: 'Notify and Wait' | 'Auto Decline';
     limit?: number;
+    stepOrder: number;
   }[];
 } 

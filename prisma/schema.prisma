@@ -167,7 +167,7 @@ model ApprovalStep {
   duration       Int
   overtimeAction String
   budgetLimit    Float?
-  order          Int
+  stepOrder      Int
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 

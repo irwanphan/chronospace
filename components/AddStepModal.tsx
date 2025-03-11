@@ -47,7 +47,7 @@ export default function AddStepModal({
   useEffect(() => {
     if (editData) {
       const role = roles.find(r => r.id === editData.roleId);
-      setSelectedRoleLimit(role?.approvalLimit || null);
+      setSelectedRoleLimit(role?.budgetLimit || null);
       setFormData(editData);
     }
   }, [editData, roles]);
@@ -89,11 +89,11 @@ export default function AddStepModal({
 
   const handleRoleChange = (roleId: string) => {
     const role = roles.find(r => r.id === roleId);
-    setSelectedRoleLimit(role?.approvalLimit || 0);
+    setSelectedRoleLimit(role?.budgetLimit || 0);
     setFormData(prev => ({ 
       ...prev, 
       roleId,
-      budgetLimit: role?.approvalLimit || undefined
+      budgetLimit: role?.budgetLimit || undefined
     }));
   };
 

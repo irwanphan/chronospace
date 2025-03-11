@@ -8,7 +8,7 @@ export async function GET() {
         select: {
           id: true,
           roleName: true,
-          approvalLimit: true,
+          budgetLimit: true,
         },
       }),
       prisma.user.findMany({
@@ -21,7 +21,7 @@ export async function GET() {
       prisma.workDivision.findMany({
         select: {
           id: true,
-          divisionName: true,
+          name: true,
         }
       }),
     ]);

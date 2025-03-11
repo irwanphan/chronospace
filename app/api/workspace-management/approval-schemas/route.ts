@@ -7,7 +7,7 @@ interface RequestStep {
   budgetLimit?: number;
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
-  order: number;  
+  stepOrder: number;  
 }
 
 export async function POST(request: Request) {
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
           duration: step.duration,
           overtimeAction: step.overtimeAction,
           limit: step.budgetLimit,
-          order: step.order
+          stepOrder: step.stepOrder
         }))
       }
     };

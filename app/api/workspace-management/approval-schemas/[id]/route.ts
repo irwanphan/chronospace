@@ -7,6 +7,7 @@ interface RequestStep {
   budgetLimit?: number;
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
+  stepOrder: number;
 }
 
 export async function GET(
@@ -25,7 +26,7 @@ export async function GET(
               role: true
             },
             orderBy: {
-              order: 'asc'
+              stepOrder: 'asc'
             }
           }
         }
@@ -60,40 +61,54 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    console.log('Request body:', body);
+    
+    // Validate required fields
+    if (!body.name || !body.documentType || !body.approvalSteps) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
 
-    const updateData = {
-      name: body.name,
-      documentType: body.documentType,
-      description: body.description,
-      divisions: typeof body.workDivisions === 'string' ? body.workDivisions : body.workDivisions[0],
-      roles: typeof body.roles === 'string' ? body.roles : body.roles[0],
-      approvalSteps: {
-        deleteMany: {},
-        create: body.approvalSteps.map((step: RequestStep, index: number) => ({
-          role: step.roleId || '',
-          specificUserId: step.specificUserId || null,
-          limit: step.budgetLimit || null,
-          duration: step.duration || 48,
-          overtimeAction: step.overtimeAction || 'Notify and Wait',
-          order: index
-        }))
-      }
-    };
+    // Ensure approvalSteps is an array and not empty
+    if (!Array.isArray(body.approvalSteps) || body.approvalSteps.length === 0) {
+      return NextResponse.json(
+        { error: 'Approval steps must be a non-empty array' },
+        { status: 400 }
+      );
+    }
 
     const updatedSchema = await prisma.approvalSchema.update({
-      where: { id: params.id },
-      data: updateData,
-      include: {
-        approvalSteps: true
+      where: {
+        id: params.id
+      },
+      data: {
+        name: body.name,
+        documentType: body.documentType,
+        description: body.description,
+        workDivisionIds: body.workDivisionIds,
+        roleIds: body.roleIds,
+        approvalSteps: {
+          deleteMany: {},  // Delete existing steps
+          createMany: {    // Create new steps
+            data: body.approvalSteps.map((step: RequestStep) => ({
+              roleId: step.roleId,
+              specificUserId: step.specificUserId,
+              duration: step.duration,
+              overtimeAction: step.overtimeAction,
+              budgetLimit: step.budgetLimit,
+              stepOrder: step.stepOrder
+            }))
+          }
+        }
       }
     });
 
     return NextResponse.json(updatedSchema);
   } catch (error) {
-    console.error('Detailed error:', error);
+    console.error('Error updating schema:', error);
     return NextResponse.json(
-      { error: 'Failed to update approval schema', details: error },
+      { error: 'Failed to update schema' },
       { status: 500 }
     );
   }
