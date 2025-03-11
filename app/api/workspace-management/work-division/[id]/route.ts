@@ -22,8 +22,30 @@ export async function GET(
       );
     }
 
+    // Filter out user assigned as head of other work divisions but not the current work division
+    const users = await prisma.user.findMany({
+      where: {
+        NOT: {
+          workDivisionHeadOf: {
+            some: {
+              id: { not: workDivision.id }
+            }
+          }
+        }
+      }
+    });
+
+    // Filter out work divisions that are not the current work division
+    const workDivisions = await prisma.workDivision.findMany({
+      where: {
+        id: { not: workDivision.id }
+      }
+    });
+
     return NextResponse.json({
-      workDivision
+      workDivision,
+      users,
+      workDivisions
     });
   } catch (error) {
     console.error('Error:', error);

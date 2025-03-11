@@ -13,17 +13,17 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{
-    divisionCode?: string;
+    code?: string;
     general?: string;
   }>({});
   const [users, setUsers] = useState<User[]>([]);
-  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState({
-    divisionCode: '',
-    divisionName: '',
+    code: '',
+    name: '',
     description: '',
-    divisionHead: '',
-    upperDivision: '',
+    headId: '',
+    upperWorkDivisionId: '',
   });
 
   useEffect(() => {
@@ -34,9 +34,9 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
         if (!response.ok) throw new Error('Failed to fetch data');
         
         const data = await response.json();
-        setFormData(data.division);
+        setFormData(data.workDivision);
         setUsers(data.users);
-        setDivisions(data.divisions.filter((div: WorkDivision) => div.id !== params.id)); // Exclude current division
+        setWorkDivisions(data.workDivisions);
       } catch (error) {
         console.error('Error fetching data:', error);
         setErrors({ general: 'Failed to load data' });
@@ -99,13 +99,13 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
             </label>
             <input
               type="text"
-              value={formData.divisionCode}
-              onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
-              className={`w-full px-4 py-2 border rounded-lg ${errors.divisionCode ? 'border-red-500' : ''}`}
+              value={formData.code}
+              onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+              className={`w-full px-4 py-2 border rounded-lg ${errors.code ? 'border-red-500' : ''}`}
               required
             />
-            {errors.divisionCode && (
-              <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
+            {errors.code && (
+              <p className="mt-1 text-sm text-red-600">{errors.code}</p>
             )}
           </div>
 
@@ -115,8 +115,8 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
             </label>
             <input
               type="text"
-              value={formData.divisionName}
-              onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg"
               required
             />
@@ -134,14 +134,14 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
             <div>
               <label className="block text-sm font-medium mb-1">Upper Division</label>
               <select
-                value={formData.upperDivision}
-                onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
+                value={formData.upperWorkDivisionId}
+                onChange={(e) => setFormData(prev => ({ ...prev, upperWorkDivisionId: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               >
                 <option value="">-</option>
-                {divisions.map(div => (
+                {workDivisions.map(div => (
                   <option key={div.id} value={div.id}>
-                    {div.divisionName}
+                    {div.name}
                   </option>
                 ))}
               </select>
@@ -150,8 +150,8 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
             <div>
               <label className="block text-sm font-medium mb-1">Division Head</label>
               <select
-                value={formData.divisionHead}
-                onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
+                value={formData.headId}
+                onChange={(e) => setFormData(prev => ({ ...prev, headId: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               >
                 <option value="">-</option>
