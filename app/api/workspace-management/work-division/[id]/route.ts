@@ -6,22 +6,16 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const [divisions, division, users] = await Promise.all([
-      prisma.workDivision.findMany({
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.workDivision.findUnique({
-        where: { id: params.id }
-      }),
-      prisma.user.findMany({
-        select: {
-          id: true,
-          name: true
-        }
-      })
-    ]);
+    const workDivision = await prisma.workDivision.findUnique({
+      where: { id: params.id },
+      include: {
+        head: true,
+        upperWorkDivision: true,
+        subDivisions: true
+      }
+    });
 
-    if (!division) {
+    if (!workDivision) {
       return NextResponse.json(
         { error: 'Work division not found' },
         { status: 404 }
@@ -29,9 +23,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      divisions,
-      division,
-      users
+      workDivision
     });
   } catch (error) {
     console.error('Error:', error);
@@ -52,7 +44,7 @@ export async function PUT(
     // Cek apakah division code sudah digunakan division lain
     const existingDivision = await prisma.workDivision.findFirst({
       where: {
-        divisionCode: body.divisionCode,
+        code: body.code,
         id: { not: params.id }
       }
     });
@@ -67,11 +59,11 @@ export async function PUT(
     const division = await prisma.workDivision.update({
       where: { id: params.id },
       data: {
-        divisionCode: body.divisionCode,
-        divisionName: body.divisionName,
+        code: body.code,
+        name: body.name,
         description: body.description,
-        divisionHead: body.divisionHead,
-        upperDivision: body.upperDivision,
+        headId: body.headId,
+        upperWorkDivisionId: body.upperWorkDivisionId,
       },
     });
     return NextResponse.json(division);
@@ -92,13 +84,15 @@ export async function DELETE(
     // Check if division is used in approval schemas
     const workDivision = await prisma.workDivision.findUnique({
       where: { id: params.id },
-      select: { divisionCode: true }
+      select: { code: true }
     });
 
     const schemasWithDivision = await prisma.approvalSchema.findMany({
       where: {
-        divisions: {
-          contains: workDivision?.divisionCode
+        workDivisions: {
+          some: {
+            code: workDivision?.code
+          }
         }
       }
     });
@@ -136,7 +130,7 @@ export async function DELETE(
 
     // Check if division is used by users
     const usersWithDivision = await prisma.user.findMany({
-      where: { workDivision: params.id }
+      where: { workDivisionId: params.id }
     });
 
     if (usersWithDivision.length > 0) {

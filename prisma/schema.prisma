@@ -120,19 +120,21 @@ model Role {
 }
 
 model WorkDivision {
-  id                String           @id @default(cuid())
-  code              String           @unique
-  name              String
-  description       String?
-  upperWorkDivision String?
-  headId            String?
-  head              User?            @relation("workDivisionHead", fields: [headId], references: [id])
-  budgets           Budget[]
-  projects          Project[]
-  user              User[]           @relation("workDivisionUsers")
-  approvalSchemas   ApprovalSchema[] @relation("ApprovalSchemaWorkDivisions")
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id                  String           @id @default(cuid())
+  code                String           @unique
+  name                String
+  description         String?
+  upperWorkDivisionId String?
+  upperWorkDivision   WorkDivision?    @relation("upperWorkDivision", fields: [upperWorkDivisionId], references: [id])
+  subDivisions        WorkDivision[]   @relation("upperWorkDivision")
+  headId              String?
+  head                User?            @relation("workDivisionHead", fields: [headId], references: [id])
+  budgets             Budget[]
+  projects            Project[]
+  user                User[]           @relation("workDivisionUsers")
+  approvalSchemas     ApprovalSchema[] @relation("ApprovalSchemaWorkDivisions")
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
   @@map("work_divisions")
 }

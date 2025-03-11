@@ -27,7 +27,7 @@ export default function NewWorkDivisionPage() {
     code: '',
     name: '',
     description: '',
-    upperWorkDivision: '',
+    upperWorkDivisionId: '',
     headId: '',
   });
   const [errors, setErrors] = useState<{
@@ -146,8 +146,8 @@ export default function NewWorkDivisionPage() {
                   Upper Division (Parent)
                 </label>
                 <select
-                  value={formData.upperWorkDivision}
-                  onChange={(e) => setFormData(prev => ({ ...prev, upperWorkDivision: e.target.value }))}
+                  value={formData.upperWorkDivisionId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, upperWorkDivisionId: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 >
                   <option value="">-</option>

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         name: body.name,
         description: body.description,
         headId: body.headId,
-        upperWorkDivision: body.upperWorkDivision,
+        upperWorkDivisionId: body.upperWorkDivisionId,
       }
     });
 
