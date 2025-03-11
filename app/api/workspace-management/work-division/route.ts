@@ -3,21 +3,16 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const [divisions, users] = await Promise.all([
-      prisma.workDivision.findMany({
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.user.findMany({
-        select: {
-          id: true,
-          name: true
-        }
-      })
-    ]);
+    const workDivisions = await prisma.workDivision.findMany({
+      include: {
+        head: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
 
     return NextResponse.json({
-      divisions,
-      users
+      workDivisions
     });
   } catch (error) {
     console.error('Error:', error);
@@ -34,7 +29,7 @@ export async function POST(request: Request) {
 
     // Cek apakah division code sudah ada
     const existingDivision = await prisma.workDivision.findUnique({
-      where: { divisionCode: body.divisionCode }
+      where: { code: body.code }
     });
 
     if (existingDivision) {
@@ -46,11 +41,11 @@ export async function POST(request: Request) {
 
     const division = await prisma.workDivision.create({
       data: {
-        divisionCode: body.divisionCode,
-        divisionName: body.divisionName,
+        code: body.code,
+        name: body.name,
         description: body.description,
-        divisionHead: body.divisionHead,
-        upperDivision: body.upperDivision,
+        headId: body.headId,
+        upperWorkDivision: body.upperWorkDivision,
       }
     });
 
