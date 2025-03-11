@@ -116,7 +116,7 @@ export default function WorkDivisionPage() {
                   </td>
                   <td className="py-3 px-4">
                     <DivisionActions 
-                      divisionId={division.id} 
+                      workDivisionId={division.id} 
                       onDelete={async () => {
                         const divisionsRes = await fetch('/api/workspace-management/work-division');
                         const divisionsData = await divisionsRes.json();

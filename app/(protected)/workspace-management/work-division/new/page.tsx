@@ -8,8 +8,8 @@ import Card from '@/components/ui/Card';
 
 interface WorkDivision {
   id: string;
-  divisionCode: string;
-  divisionName: string;
+  code: string;
+  name: string;
 }
 
 interface User {
@@ -24,11 +24,11 @@ export default function NewWorkDivisionPage() {
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState({
-    divisionCode: '',
-    divisionName: '',
+    code: '',
+    name: '',
     description: '',
-    upperDivision: '',
-    divisionHead: '',
+    upperWorkDivision: '',
+    headId: '',
   });
   const [errors, setErrors] = useState<{
     divisionCode?: string;
@@ -105,8 +105,8 @@ export default function NewWorkDivisionPage() {
               </label>
               <input
                 type="text"
-                value={formData.divisionCode}
-                onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
+                value={formData.code}
+                onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.divisionCode ? 'border-red-500' : ''}`}
                 placeholder="HR"
                 required
@@ -122,8 +122,8 @@ export default function NewWorkDivisionPage() {
               </label>
               <input
                 type="text"
-                value={formData.divisionName}
-                onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Human Resources"
                 required
@@ -146,16 +146,16 @@ export default function NewWorkDivisionPage() {
                   Upper Division (Parent)
                 </label>
                 <select
-                  value={formData.upperDivision}
-                  onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
+                  value={formData.upperWorkDivision}
+                  onChange={(e) => setFormData(prev => ({ ...prev, upperWorkDivision: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 >
                   <option value="">-</option>
                   {workDivisions
-                    .filter(division => division.divisionCode !== formData.divisionCode)
+                    .filter(division => division.code !== formData.code)
                     .map((workDivision) => (
                       <option key={workDivision.id} value={workDivision.id}>
-                        {workDivision.divisionName}
+                        {workDivision.name}
                       </option>
                     ))}
                 </select>
@@ -165,8 +165,8 @@ export default function NewWorkDivisionPage() {
                   Division Head
                 </label>
                 <select
-                  value={formData.divisionHead}
-                  onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
+                  value={formData.headId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, headId: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 >
                   <option value="">-</option>
