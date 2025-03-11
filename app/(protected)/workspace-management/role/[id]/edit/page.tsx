@@ -16,7 +16,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
     roleCode: '',
     roleName: '',
     description: '',
-    approvalLimit: 0,
+    budgetLimit: 0,
   });
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
           roleCode: data.roleCode,
           roleName: data.roleName,
           description: data.description || '',
-          approvalLimit: data.approvalLimit || 0,
+          budgetLimit: data.budgetLimit || 0,
         });
         setIsLoading(false);
       } catch (error) {
@@ -126,12 +126,12 @@ export default function EditRolePage({ params }: { params: { id: string } }) {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Approval Limit <span className="text-red-500">*</span>
+              Budget Limit <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
-              value={formData.approvalLimit}
-              onChange={(e) => setFormData(prev => ({ ...prev, approvalLimit: Number(e.target.value) }))}
+              value={formData.budgetLimit}
+              onChange={(e) => setFormData(prev => ({ ...prev, budgetLimit: Number(e.target.value) }))}
               className="w-full px-4 py-2 border rounded-lg"
               min="0"
               required

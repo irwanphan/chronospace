@@ -87,7 +87,7 @@ export default function RolePage() {
               <th className="text-left py-3 px-4">#</th>
               <th className="text-left py-3 px-4">Name</th>
               <th className="text-left py-3 px-4">Description</th>
-              <th className="text-left py-3 px-4">Approval Limit</th>
+              <th className="text-left py-3 px-4">Budget Limit</th>
               <th className="text-left py-3 px-4 w-16"></th>
             </tr>
           </thead>
@@ -118,7 +118,7 @@ export default function RolePage() {
                         currency: 'IDR',
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0,
-                      }).format(role.approvalLimit)}
+                      }).format(role.budgetLimit)}
                     </td>
                     <td className="py-3 px-4">
                       <RoleActions 
