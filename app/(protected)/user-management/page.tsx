@@ -28,28 +28,25 @@ export default function UserManagementPage() {
   const endIndex = startIndex + itemsPerPage;
   const currentUsers = users.slice(startIndex, endIndex);
 
-  console.log(users);
-
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/user-management');
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await response.json();
-      console.log(data);
-      setUsers(data.users || []);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      setError('Failed to load data');
-      setUsers([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/user-management');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        console.log(data);
+        setUsers(data.users || []);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        setError('Failed to load data');
+        setUsers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchUsers();
   }, []);
 

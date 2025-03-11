@@ -146,7 +146,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">User Access Control</h1>
       
-      <Card className="p-6">
+      <Card className="p-6 space-y-6">
         {/* Menu Access */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Menu Access</h2>

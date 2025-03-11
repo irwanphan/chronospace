@@ -36,17 +36,18 @@ export default function ViewUserPage({ params }: { params: { id: string } }) {
         if (!response.ok) throw new Error('Failed to fetch data');
         
         const data = await response.json();
+        console.log(data);
         setFormData({
-          name: data.name,
-          email: data.email,
-          phone: data.phone || '',
-          roleId: data.roleId,
-          workDivisionId: data.workDivisionId,
-          employeeId: data.employeeId,
-          address: data.address || '',
-          residentId: data.residentId,
-          nationality: data.nationality,
-          birthday: new Date(data.birthday).toISOString().split('T')[0],
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone || '',
+          roleId: data.user.role.roleName,
+          workDivisionId: data.user.workDivision.name,
+          employeeId: data.user.employeeId,
+          address: data.user.address || '',
+          residentId: data.user.residentId,
+          nationality: data.user.nationality,
+          birthday: new Date(data.user.birthday).toISOString().split('T')[0],
           password: '',
           confirmPassword: '',
         });
