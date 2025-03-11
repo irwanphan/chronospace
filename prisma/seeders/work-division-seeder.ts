@@ -2,12 +2,12 @@ import { prisma } from "@/lib/prisma";
 
 export async function workDivisionSeeder() {
   const divisions = [
-    { id: 'RND', divisionName: 'Research & Development', divisionCode: 'RND', description: 'Research & Development' },
-    { id: 'FIN', divisionName: 'Finance', divisionCode: 'FIN', description: 'Finance' },
-    { id: 'HRD', divisionName: 'Human Resources', divisionCode: 'HRD', description: 'Human Resources' },
-    { id: 'ITE', divisionName: 'Information Technology', divisionCode: 'ITE', description: 'Information Technology' },
-    { id: 'OPS', divisionName: 'Operations', divisionCode: 'OPS', description: 'Operations' },
-    { id: 'MKT', divisionName: 'Marketing', divisionCode: 'MKT', description: 'Marketing' },
+    { id: 'RND', name: 'Research & Development', code: 'RND', description: 'Research & Development' },
+    { id: 'FIN', name: 'Finance', code: 'FIN', description: 'Finance' },
+    { id: 'HRD', name: 'Human Resources', code: 'HRD', description: 'Human Resources' },
+    { id: 'ITE', name: 'Information Technology', code: 'ITE', description: 'Information Technology' },
+    { id: 'OPS', name: 'Operations', code: 'OPS', description: 'Operations' },
+    { id: 'MKT', name: 'Marketing', code: 'MKT', description: 'Marketing' },
   ]
 
   await prisma.workDivision.createMany({
@@ -19,8 +19,8 @@ export async function workDivisionSeeder() {
       prisma.workDivision.upsert({
         where: { id: division.id },
         update: {
-          divisionName: division.divisionName,
-          divisionCode: division.divisionCode,
+          name: division.name,
+          code: division.code,
         },
         create: division,
       })

@@ -57,7 +57,7 @@ model User {
   role                     Role                      @relation(fields: [roleId], references: [id])
   phone                    String
   workDivisionId           String
-  workDivision             WorkDivision              @relation("DivisionUsers", fields: [workDivisionId], references: [id])
+  workDivision             WorkDivision              @relation("workDivisionUsers", fields: [workDivisionId], references: [id])
   employeeId               String                    @unique
   address                  String?
   residentId               String                    @unique
@@ -70,7 +70,7 @@ model User {
   purchaseRequestApprovals PurchaseRequestApproval[]
   specificUserDetails      PurchaseRequestApproval[] @relation("SpecificUser")
   purchaseRequestHistories PurchaseRequestHistory[]
-  divisionHeadOf           WorkDivision[]            @relation("DivisionHead")
+  workDivisionHeadOf       WorkDivision[]            @relation("workDivisionHead")
   specificUser             ApprovalStep[]            @relation("SpecificUser")
 
   @@map("users")
@@ -107,44 +107,48 @@ model Role {
   roleName                 String
   description              String?
   upperLevel               String?
-  approvalLimit            Int
+  budgetLimit              Float?
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   userRoles                UserRole[]
   purchaseRequestApprovals PurchaseRequestApproval[]
   approvalSteps            ApprovalStep[]
   user                     User[]
+  approvalSchemas          ApprovalSchema[]          @relation("ApprovalSchemaRoles")
 
   @@map("roles")
 }
 
 model WorkDivision {
-  id             String    @id @default(cuid())
-  divisionCode   String    @unique
-  divisionName   String
-  description    String?
-  upperDivision  String?
-  divisionHeadId String?
-  divisionHead   User?     @relation("DivisionHead", fields: [divisionHeadId], references: [id])
-  budgets        Budget[]
-  projects       Project[]
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  user           User[]    @relation("DivisionUsers")
+  id                String           @id @default(cuid())
+  code              String           @unique
+  name              String
+  description       String?
+  upperWorkDivision String?
+  headId            String?
+  head              User?            @relation("workDivisionHead", fields: [headId], references: [id])
+  budgets           Budget[]
+  projects          Project[]
+  user              User[]           @relation("workDivisionUsers")
+  approvalSchemas   ApprovalSchema[] @relation("ApprovalSchemaWorkDivisions")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@map("work_divisions")
 }
 
 model ApprovalSchema {
-  id            String         @id @default(cuid())
-  name          String
-  description   String?
-  documentType  String
-  approvalSteps ApprovalStep[]
-  divisions     String // Array of division codes
-  roles         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  documentType    String
+  approvalSteps   ApprovalStep[]
+  workDivisionIds String // Array of division codes
+  workDivisions   WorkDivision[] @relation("ApprovalSchemaWorkDivisions")
+  roleIds         String?
+  roles           Role[]         @relation("ApprovalSchemaRoles")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([name])
   @@map("approval_schemas")
@@ -160,7 +164,7 @@ model ApprovalStep {
   specificUser   User?          @relation("SpecificUser", fields: [specificUserId], references: [id])
   duration       Int
   overtimeAction String
-  limit          Float?
+  budgetLimit    Float?
   order          Int
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt

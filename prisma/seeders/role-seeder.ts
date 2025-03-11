@@ -8,7 +8,7 @@ export async function roleSeeder() {
       roleName: 'Chief Executive Officer',
       description: 'Highest level executive position',
       upperLevel: null,
-      approvalLimit: 1000000000 // 1 Miliar
+      budgetLimit: 1000000000 // 1 Miliar
     },
     { 
       id: 'role-cfo',
@@ -16,7 +16,7 @@ export async function roleSeeder() {
       roleName: 'Chief Financial Officer',
       description: 'Head of financial operations',
       upperLevel: 'role-ceo',
-      approvalLimit: 500000000 // 500 Juta
+      budgetLimit: 500000000 // 500 Juta
     },
     { 
       id: 'role-cto',
@@ -24,7 +24,7 @@ export async function roleSeeder() {
       roleName: 'Chief Technology Officer',
       description: 'Head of technology operations',
       upperLevel: 'role-ceo',
-      approvalLimit: 500000000 // 500 Juta
+      budgetLimit: 500000000 // 500 Juta
     },
     { 
       id: 'role-gm',
@@ -32,7 +32,7 @@ export async function roleSeeder() {
       roleName: 'General Manager',
       description: 'General management position',
       upperLevel: 'role-ceo',
-      approvalLimit: 250000000 // 250 Juta
+      budgetLimit: 250000000 // 250 Juta
     },
     { 
       id: 'role-dh',
@@ -40,7 +40,7 @@ export async function roleSeeder() {
       roleName: 'Department Head',
       description: 'Department management position',
       upperLevel: 'role-gm',
-      approvalLimit: 100000000 // 100 Juta
+      budgetLimit: 100000000 // 100 Juta
     },
     { 
       id: 'role-hr',
@@ -48,7 +48,7 @@ export async function roleSeeder() {
       roleName: 'Human Resource Manager',
       description: 'Human Resource management position',
       upperLevel: 'role-dh',
-      approvalLimit: 50000000 // 50 Juta
+      budgetLimit: 50000000 // 50 Juta
     },
     { 
       id: 'role-fm',
@@ -56,7 +56,7 @@ export async function roleSeeder() {
       roleName: 'Finance Manager',
       description: 'Financial management position',
       upperLevel: 'role-cfo',
-      approvalLimit: 50000000 // 50 Juta
+      budgetLimit: 50000000 // 50 Juta
     },
     { 
       id: 'role-fs',
@@ -64,7 +64,7 @@ export async function roleSeeder() {
       roleName: 'Finance Staff',
       description: 'Financial staff position',
       upperLevel: 'role-fm',
-      approvalLimit: 0
+      budgetLimit: 0
     },
     { 
       id: 'role-it',
@@ -72,7 +72,7 @@ export async function roleSeeder() {
       roleName: 'IT Staff',
       description: 'IT staff position',
       upperLevel: 'role-cto',
-      approvalLimit: 0
+      budgetLimit: 0
     },
     
     {
@@ -81,7 +81,7 @@ export async function roleSeeder() {
       roleName: 'Staff',
       description: 'Staff position',
       upperLevel: 'role-dh',
-      approvalLimit: 0
+      budgetLimit: 0
     }
   ]
 
@@ -97,7 +97,7 @@ export async function roleSeeder() {
           roleName: role.roleName,
           description: role.description,
           upperLevel: role.upperLevel,
-          approvalLimit: role.approvalLimit,
+          budgetLimit: role.budgetLimit,
         },
         create: role,
       })
