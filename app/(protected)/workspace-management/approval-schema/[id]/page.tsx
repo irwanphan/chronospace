@@ -10,22 +10,25 @@ import { User } from '@/types/user';
 import MultiSelect from '@/components/MultiSelect';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
-interface ApiStep {
-  role: string;
+import { formatCurrency } from '@/lib/utils';
+interface ApprovalStep {
+  id: string;
+  role: Role;
   specificUserId?: string;
-  limit?: number;
+  budgetLimit?: number;
   duration: number;
-  overtime: 'Notify and Wait' | 'Auto Decline';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 interface FormattedSchema {
   name: string;
   documentType: string;
   description: string;
-  workDivisions: string[];
-  roles: string[];
+  workDivisionIds: string | string[];
+  roleIds: string | string[];
   approvalSteps: Array<{
-    roleId: string;
+    id: string;
+    role: Role;
     specificUserId?: string;
     budgetLimit?: number;
     duration: number;
@@ -40,55 +43,40 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
   const [users, setUsers] = useState<User[]>([]);
   const [schema, setSchema] = useState<FormattedSchema | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  console.log('schema : ', schema)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // console.log('Fetching schema with ID:', params.id);
         const response = await fetch(`/api/workspace-management/approval-schemas/${params.id}`);
-        // console.log('Response:', response);
         if (!response.ok) {
           throw new Error('Failed to fetch schema');
         }
         const data = await response.json();
         const { schema, divisions, roles, users } = data;
-        setDivisions(Array.isArray(divisions) ? divisions : []);
-        setRoles(Array.isArray(roles) ? roles : []);
-        setUsers(Array.isArray(users) ? users : []);
-        setSchema(schema);
 
-        if (response.ok) {
-          // Parse divisions dan roles dari string menjadi array
-          const parsedDivisions = schema.divisions 
-            ? schema.divisions.startsWith('[') 
-              ? JSON.parse(schema.divisions)
-              : schema.divisions.split(',')
-            : [];
+        setDivisions(divisions || []);
+        setRoles(roles || []);
+        setUsers(users || []);
 
-          const parsedRoles = schema.roles
-            ? schema.roles.startsWith('[') 
-              ? JSON.parse(schema.roles)
-              : schema.roles.split(',')
-            : [];
+        const formattedData = {
+          ...schema,
+          roleIds: schema.roleIds ? JSON.parse(schema.roleIds) : [],
+          workDivisionIds: schema.workDivisionIds ? JSON.parse(schema.workDivisionIds) : [],
+          approvalSteps: Array.isArray(schema.approvalSteps)
+            ? schema.approvalSteps.map((step: ApprovalStep) => ({
+                id: step.id || '',
+                role: step.role || '',
+                specificUserId: step.specificUserId,
+                budgetLimit: step.budgetLimit,
+                duration: step.duration,
+                overtimeAction: step.overtimeAction
+              }))
+            : []
+        };
 
-          const formattedData = {
-            name: schema.name || '',
-            documentType: schema.documentType || '',
-            description: schema.description || '',
-            workDivisions: parsedDivisions,
-            roles: parsedRoles,
-            approvalSteps: Array.isArray(schema.approvalSteps)
-              ? schema.approvalSteps.map((step: ApiStep) => ({
-                  roleId: step.role || '',
-                  specificUserId: step.specificUserId,
-                  budgetLimit: step.limit,
-                  duration: step.duration,
-                  overtimeAction: step.overtime
-                }))
-              : []
-          };
-          // console.log('Formatted Data:', formattedData);
-          setSchema(formattedData);
-        }
+        setSchema(formattedData);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -136,8 +124,8 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
                 Apply to Work Division <span className="text-red-500">*</span>
               </label>
               <MultiSelect
-                options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
-                value={schema?.workDivisions || []}
+                options={divisions.map(div => ({ id: div.id!, name: div.name }))}
+                value={Array.isArray(schema?.workDivisionIds) ? schema.workDivisionIds : []}
                 onChange={() => {}}
                 readonly
               />
@@ -149,7 +137,7 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
               </label>
               <MultiSelect
                 options={roles.map(role => ({ id: role.id!, name: role.roleName }))}
-                value={schema?.roles || []}
+                value={Array.isArray(schema?.roleIds) ? schema.roleIds : []}
                 onChange={() => {}}
                 readonly
               />
@@ -195,7 +183,7 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
                         <tr key={index} className="border-b">
                           <td className="py-3 px-4">{index + 1}</td>
                           <td className="py-3 px-4">
-                            {roles.find(r => r.id === step.roleId)?.roleName}
+                            {step.role.roleName}
                           </td>
                           <td className="py-3 px-4">
                             {step.specificUserId 
@@ -204,11 +192,7 @@ export default function ViewApprovalSchemaPage({ params }: { params: { id: strin
                           </td>
                           {schema?.documentType === 'Purchase Request' && (
                             <td className="py-3 px-4">
-                              {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                                minimumFractionDigits: 0,
-                              }).format(step.budgetLimit) : '-'}
+                              {step.budgetLimit ? formatCurrency(step.budgetLimit) : '-'}
                             </td>
                           )}
                           <td className="py-3 px-4">{step.duration} days</td>

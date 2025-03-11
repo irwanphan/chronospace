@@ -21,6 +21,9 @@ export async function GET(
         },
         include: {
           approvalSteps: {
+            include: {
+              role: true
+            },
             orderBy: {
               order: 'asc'
             }
@@ -38,6 +41,8 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // console.log(schema);
 
     return NextResponse.json({ schema, divisions, roles, user });
   } catch (error) {

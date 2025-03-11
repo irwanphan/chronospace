@@ -21,12 +21,13 @@ interface ApprovalStepForm {
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
-interface ApiStep {
-  role: string;
+interface ApprovalStep {
+  id: string;
+  role: Role;
   specificUserId?: string;
-  limit?: number;
+  budgetLimit?: number;
   duration: number;
-  overtime: 'Notify and Wait' | 'Auto Decline';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
