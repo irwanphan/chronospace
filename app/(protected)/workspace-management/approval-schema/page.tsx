@@ -14,8 +14,6 @@ import Card from '@/components/ui/Card';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
-  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,8 +22,8 @@ export default function ApprovalSchemaPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentSchemas = schemas.slice(startIndex, endIndex);
-  
-  console.log('approval schemas', schemas)
+
+  console.log('schemas : ', schemas)
 
   useEffect(() => {
     const fetchSchemas = async () => {
@@ -43,53 +41,24 @@ export default function ApprovalSchemaPage() {
     fetchSchemas();
   }, []);
 
-  const getDivisionNames = (schema: ApprovalSchema) => {
-    if (!schema.workDivisionIds) return '';
-    
-    let divisionList: string[];
-    try {
-      // Handle berbagai format data
-      if (typeof schema.workDivisionIds === 'string') {
-        // Jika string dimulai dengan '[', berarti array dalam string
-        divisionList = schema.workDivisionIds.startsWith('[') 
-          ? JSON.parse(schema.workDivisionIds)
-          : [schema.workDivisionIds];
-      } else {
-        divisionList = schema.workDivisionIds;
-      }
-
-      return divisions
-        .filter(div => divisionList.includes(div.id || ''))
-        .map(div => div.name)
-        .join(', ');
-    } catch (error) {
-      console.error('Error parsing divisions:', error);
-      return schema.workDivisionIds.toString();  // Fallback: tampilkan data mentah
-    }
+  const getDivisionNames = (applicableWorkDivisions: WorkDivision[]) => {
+    if (!applicableWorkDivisions) return '';
+    const workDivisionList = applicableWorkDivisions.map(division => division.id);
+    const workDivisionNames = applicableWorkDivisions
+      .filter(division => workDivisionList.includes(division.id || ''))
+      .map(division => division.name)
+      .join(', ');
+    return workDivisionNames;
   };
 
-  const getRoleNames = (schema: ApprovalSchema) => {
-    if (!schema.roleIds) return '';
-    
-    let roleList: string[];
-    try {
-      // Coba parse jika dalam format JSON string
-      roleList = typeof schema.roleIds === 'string'
-        ? (schema.roleIds as string).startsWith('[')
-          ? JSON.parse(schema.roleIds as string)
-          : [schema.roleIds]
-        : schema.roleIds;
-    } catch {
-      // Fallback jika parsing gagal
-      roleList = typeof schema.roleIds === 'string' 
-        ? [schema.roleIds] 
-        : schema.roleIds;
-    }
-
-    return roles
-      .filter(role => roleList.includes(role.id || ''))
+  const getRoleNames = (applicableRoles: Role[]) => {
+    if (!applicableRoles) return '';
+    const roleList = applicableRoles.map(role => role.id);
+    const roleNames = applicableRoles
+      .filter(role => roleList.includes(role.id))
       .map(role => role.roleName)
       .join(', ');
+    return roleNames;
   };
 
   const refreshData = async () => {
@@ -98,8 +67,6 @@ export default function ApprovalSchemaPage() {
       const refreshData = await fetch('/api/workspace-management/approval-schemas');
       const data = await refreshData.json();
       setSchemas(data.schemas);
-      setDivisions(data.divisions);
-      setRoles(data.roles);
     } catch (error) {
       console.error('Failed to refresh data:', error);
       setError('Failed to refresh data');
@@ -173,13 +140,13 @@ export default function ApprovalSchemaPage() {
                 <div>
                   <span className="font-medium">Applicable Work Divisions:</span>
                   <p className="text-gray-600">
-                    {getDivisionNames(schema)}
+                    {getDivisionNames(schema.applicableWorkDivisions)}
                   </p>
                 </div>
                 <div>
                   <span className="font-medium">Applicable Roles:</span>
                   <p className="text-gray-600">
-                    {getRoleNames(schema)}
+                    {getRoleNames(schema.applicableRoles)}
                   </p>
                 </div>
                 {schema.description && (

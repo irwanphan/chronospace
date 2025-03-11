@@ -76,22 +76,36 @@ export async function POST(request: Request) {
 // GET endpoint jika diperlukan
 export async function GET() {
   try {
-    const approvalSchemas = await prisma.approvalSchema.findMany({
-      include: {
-        approvalSteps: {
-          include: {
-            role: true,
-          },
+    const [approvalSchemas, roles, workDivisions] = await Promise.all([
+      prisma.approvalSchema.findMany({
+        include: {
+          approvalSteps: {
+            include: {
+              role: true,
+            },
+          }
         },
-        workDivisions: true,
-        roles: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.role.findMany(),
+      prisma.workDivision.findMany()
+    ]);
 
-    return NextResponse.json({ approvalSchemas });
+    const transformedSchemas = approvalSchemas.map(schema => ({
+      ...schema,
+      applicableRoles: schema.roleIds ? 
+        roles.filter(role => 
+          JSON.parse(schema.roleIds || '[]').includes(role.id)
+        ) : [],
+      applicableWorkDivisions: schema.workDivisionIds ?
+        workDivisions.filter(div => 
+          JSON.parse(schema.workDivisionIds).includes(div.id)
+        ) : []
+    }));
+
+    return NextResponse.json({ approvalSchemas: transformedSchemas });
   } catch (error) {
     console.error('Failed to fetch schemas:', error);
     return NextResponse.json(

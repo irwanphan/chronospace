@@ -1,5 +1,6 @@
 import { Role } from "./role";
 import { User } from "./user";
+import { WorkDivision } from "./workDivision";
 export interface ApprovalStep {
   id?: string;
   schemaId: string;
@@ -26,6 +27,8 @@ export interface ApprovalSchema {
   description?: string;
   approvalSteps: ApprovalStep[];
   isActive: boolean;
+  applicableWorkDivisions: WorkDivision[];
+  applicableRoles: Role[];
   createdAt?: Date;
   updatedAt?: Date;
 } 
