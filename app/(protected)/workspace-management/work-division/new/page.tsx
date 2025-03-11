@@ -101,7 +101,7 @@ export default function NewWorkDivisionPage() {
           <div className="space-y-4">
             <div>
               <label className="block mb-1.5">
-                Division Code <span className="text-red-500">*</span>
+                Work Division Code <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -118,7 +118,7 @@ export default function NewWorkDivisionPage() {
 
             <div>
               <label className="block mb-1.5">
-                Division Name <span className="text-red-500">*</span>
+                Work Division Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -132,7 +132,7 @@ export default function NewWorkDivisionPage() {
 
             <div>
               <label className="block mb-1.5">
-                Division Description
+                Work Division Description
               </label>
               <RichTextEditor
                 value={formData.description}
@@ -143,7 +143,7 @@ export default function NewWorkDivisionPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block mb-1.5">
-                  Upper Division (Parent)
+                  Upper Work Division (Parent)
                 </label>
                 <select
                   value={formData.upperWorkDivisionId}
@@ -162,7 +162,7 @@ export default function NewWorkDivisionPage() {
               </div>
               <div>
                 <label className="block mb-1.5">
-                  Division Head
+                  Work Division Head
                 </label>
                 <select
                   value={formData.headId}

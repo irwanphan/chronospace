@@ -95,7 +95,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Division Code <span className="text-red-500">*</span>
+              Work Division Code <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -111,7 +111,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Division Name <span className="text-red-500">*</span>
+              Work Division Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -123,7 +123,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
+            <label className="block text-sm font-medium mb-1">Work Division Description</label>
             <RichTextEditor
               value={formData.description}
               onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
@@ -132,7 +132,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Upper Division</label>
+              <label className="block text-sm font-medium mb-1">Upper Work Division</label>
               <select
                 value={formData.upperWorkDivisionId}
                 onChange={(e) => setFormData(prev => ({ ...prev, upperWorkDivisionId: e.target.value }))}
@@ -148,7 +148,7 @@ export default function EditWorkDivisionPage({ params }: { params: { id: string 
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Division Head</label>
+              <label className="block text-sm font-medium mb-1">Work Division Head</label>
               <select
                 value={formData.headId}
                 onChange={(e) => setFormData(prev => ({ ...prev, headId: e.target.value }))}
