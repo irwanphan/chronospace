@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+// import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, ListChecks, Pencil, Plus, Trash } from 'lucide-react';
@@ -14,6 +14,7 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
+import { IconListCheck } from '@tabler/icons-react';
 
 interface FormData {
   code: string;
@@ -22,7 +23,7 @@ interface FormData {
   title: string;
   description: string;
   createdBy: string;
-  items: any[];
+  items: BudgetItem[];
   steps: ApprovalStepForm[];
 }
 
@@ -34,9 +35,41 @@ interface ApprovalStepForm {
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
+interface BudgetItem {
+  id: string;
+  description: string;
+  qty: number;
+  unit: string;
+  unitPrice: number;
+  vendor: {
+    vendorName: string;
+    vendorId: string;
+  };
+  isSubmitted?: boolean;
+  purchaseRequestId?: string;
+}
+
+interface PurchaseRequest {
+  id: string;
+  code: string;
+  budget: {
+    id: string; 
+    title: string;
+    projectId: string;
+    project: {
+      title: string;
+    };
+  };  
+  title: string;
+  description: string;
+  createdBy: string;
+  items: BudgetItem[];
+  approvalSteps: ApprovalStep[];
+}
+
 export default function EditRequestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -55,7 +88,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
     createdBy: '',
     createdAt: ''
   });
-  const [purchaseRequest, setPurchaseRequest] = useState<any>(null);
+  const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
@@ -63,7 +96,8 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [editingStep, setEditingStep] = useState<{ index: number; data: ApprovalStepForm } | null>(null);
 
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
-
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -154,6 +188,44 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
       }))
     }));
     setIsSchemaModalOpen(false);
+  };
+
+  // Handler untuk toggle select/unselect item
+  const handleToggleItem = (item: BudgetItem) => {
+    if (item.isSubmitted) {
+      setError(`Item already submitted in PR ${item.purchaseRequestId}`);
+      return;
+    }
+
+    // Check if item is already selected by comparing description and vendor
+    const isSelected = formData.items.some(selectedItem => 
+      selectedItem.description === item.description && 
+      selectedItem.vendor.vendorName === item.vendor.vendorName
+    );
+    
+    if (isSelected) {
+      // Remove item by matching description and vendor
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.filter(selectedItem => 
+          !(selectedItem.description === item.description && 
+            selectedItem.vendor.vendorName === item.vendor.vendorName)
+        )
+      }));
+      if (formData.items.length === 1) {
+        setSelectedVendor(null);
+      }
+    } else {
+      if (selectedVendor && item.vendor.vendorName !== selectedVendor) {
+        setError('Cannot select items from different vendors in one request');
+        return;
+      }
+      setFormData(prev => ({
+        ...prev,
+        items: [...prev.items, item]
+      }));
+      setSelectedVendor(item.vendor.vendorName);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -300,6 +372,15 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
                   </tbody>
                 </table>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setIsItemModalOpen(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <IconListCheck className="w-4 h-4" />
+                Manage Item List
+              </button>
 
               <h2 className="text-lg font-medium mt-6">Approval Steps</h2>
               <div className="mb-4 flex items-center gap-2">
@@ -456,6 +537,81 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
               </div>
             </div>
           ))}
+        </div>
+      </Modal>
+
+      <Modal 
+        isOpen={isItemModalOpen} 
+        onClose={() => setIsItemModalOpen(false)}
+        title="Select Budget Items"
+        maxWidth="2xl"
+      >
+        <div className="space-y-6">
+          {/* <h3 className="text-lg font-medium">Select Budget Items</h3> */}
+          
+          {formData.budgetId && (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Description</th>
+                    <th className="text-left p-2">Qty</th>
+                    <th className="text-left p-2">Unit</th>
+                    <th className="text-right p-2">Unit Price</th>
+                    <th className="text-left p-2">Vendor</th>
+                    <th className="text-center p-2">Select</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.items.map((item) => {
+                    const isSelected = formData.items.some(selectedItem => 
+                      selectedItem.description === item.description && 
+                      selectedItem.vendor.vendorName === item.vendor.vendorName
+                    );
+                    const isDisabled: boolean = Boolean(selectedVendor && item.vendor.vendorName !== selectedVendor);
+
+                    return (
+                      <tr key={item.id} className="border-b">
+                        <td className="p-2">{item.description}</td>
+                        <td className="p-2">{item.qty}</td>
+                        <td className="p-2">{item.unit}</td>
+                        <td className="p-2 text-right">
+                          {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
+                        </td>
+                        <td className="p-2">{item.vendor.vendorName}</td>
+                        <td className="p-2 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleItem(item)}
+                            disabled={isDisabled}
+                            className={`px-2 py-1 rounded ${
+                              isSelected 
+                                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                : isDisabled
+                                  ? 'bg-gray-300 cursor-not-allowed'
+                                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            }`}
+                          >
+                            {isSelected ? 'Selected' : 'Select'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setIsItemModalOpen(false)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </Modal>
     </div>
