@@ -23,10 +23,7 @@ interface BudgetItem {
   qty: number;
   unit: string;
   unitPrice: number;
-  vendor: {
-    vendorId: string;
-    vendorName: string;
-  };
+  vendorId: string;
 }
 
 export async function GET(
@@ -148,7 +145,7 @@ export async function PUT(
             qty: item.qty,
             unit: item.unit,
             unitPrice: item.unitPrice,
-            vendorId: item.vendor.vendorId,
+            vendorId: item.vendorId,
           }))
         },
         // Update approval steps

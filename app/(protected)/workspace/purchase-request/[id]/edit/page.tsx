@@ -101,8 +101,8 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
-  // console.log('selectedVendor', selectedVendor);
-  // console.log('selectedItems', selectedItems);
+  console.log('selectedVendor', selectedVendor);
+  console.log('selectedItems', selectedItems);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,7 +149,10 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
           //     vendorName: item.vendor?.vendorName
           //   }
           // })));
-          setSelectedVendor(data.purchaseRequest.items[0].vendor.vendorName);
+
+          if (data.purchaseRequest.items.length > 0) {
+            setSelectedVendor(data.purchaseRequest.items[0].vendor.vendorName);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -247,6 +250,8 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
       ...prev,
       items: selectedItems
     }));
+
+    console.log('formData', formData);
 
     try {
       const response = await fetch(`/api/workspace/purchase-requests/${params.id}`, {
@@ -581,7 +586,6 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
                 </thead>
                 <tbody>
                   {budget?.items.map((item: BudgetItem) => {
-                    console.log('item', item);
                     const isSelected = selectedItems.some(selectedItem => 
                       selectedItem.description === item.description && 
                       selectedItem.vendor.vendorName === item.vendor.vendorName
