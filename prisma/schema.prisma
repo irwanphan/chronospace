@@ -235,7 +235,7 @@ model Budget {
 model BudgetedItem {
   id                   String                @id @default(cuid())
   budgetId             String
-  budget               Budget                @relation(fields: [budgetId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  budget               Budget                @relation(fields: [budgetId], references: [id], onUpdate: Cascade)
   description          String
   qty                  Int
   unit                 String
@@ -296,7 +296,7 @@ model PurchaseRequestItem {
   purchaseRequestId String
   purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
   budgetItemId      String
-  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id], onDelete: Cascade)
+  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id], onUpdate: Cascade)
   description       String
   qty               Int
   unit              String

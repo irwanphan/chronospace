@@ -17,6 +17,18 @@ interface ApprovalStepUpdate {
   approvedBy: string | null;
 }
 
+interface BudgetItem {
+  id: string;
+  description: string;
+  qty: number;
+  unit: string;
+  unitPrice: number;
+  vendor: {
+    vendorId: string;
+    vendorName: string;
+  };
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -111,14 +123,16 @@ export async function PUT(
     }
 
     const body = await request.json();
-    // const { title, description, approvalSteps } = body;
 
-    // Delete existing approval steps
-    await prisma.purchaseRequestApproval.deleteMany({
-      where: { purchaseRequestId: params.id }
+    console.log('received body', body);
+
+    // Delete existing approval steps and items
+    await prisma.purchaseRequestItem.deleteMany({
+      where: {
+        purchaseRequestId: params.id
+      }
     });
 
-    // Update purchase request with new data
     const updatedRequest = await prisma.purchaseRequest.update({
       where: {
         id: params.id
@@ -126,10 +140,21 @@ export async function PUT(
       data: {
         title: body.title,
         description: body.description,
+        // Update items
+        items: {
+          create: body.items.map((item: BudgetItem) => ({
+            budgetItemId: item.id,
+            description: item.description,
+            qty: item.qty,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            vendorId: item.vendor.vendorId,
+          }))
+        },
+        // Update approval steps
         approvalSteps: {
           deleteMany: {},
-          createMany: {
-            data: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
+          create: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
               roleId: step.roleId,
               specificUserId: step.specificUserId,
               stepOrder: index + 1,
@@ -137,15 +162,25 @@ export async function PUT(
               budgetLimit: step.budgetLimit,
               duration: step.duration,
               overtimeAction: step.overtimeAction
-            }))
-          }
+          }))
         }
+      },
+      include: {
+        items: {
+          include: {
+            budgetItem: true
+          }
+        },
+        approvalSteps: true
       }
     });
 
     return NextResponse.json(updatedRequest);
   } catch (error) {
     console.error('Error updating request:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to update request' },
+      { status: 500 }
+    );
   }
 }

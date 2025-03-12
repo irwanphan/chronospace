@@ -14,6 +14,7 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
+import { Budget } from '@/types/budget';
 import { IconListCheck } from '@tabler/icons-react';
 
 interface FormData {
@@ -92,12 +93,16 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [roles, setRoles] = useState<Role[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
+  const [budget, setBudget] = useState<Budget | null>(null);
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<{ index: number; data: ApprovalStepForm } | null>(null);
 
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
+  // console.log('selectedVendor', selectedVendor);
+  // console.log('selectedItems', selectedItems);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,6 +114,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
           setRoles(data.roles);
           setUsers(data.users);
           setSchemas(data.schemas);
+          setBudget(data.purchaseRequest.budget);
           setHeaderInfo({
             code: data.purchaseRequest.code,
             role: data.purchaseRequest.user.userRoles[0].role.roleName,
@@ -132,6 +138,18 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
               overtimeAction: step.overtimeAction
             }))
           });
+          setSelectedItems(data.purchaseRequest.items);
+          // setSelectedItems(data.purchaseRequest.items.map((item: BudgetItem) => ({
+          //   id: item.id,
+          //   description: item.description,
+          //   qty: item.qty,
+          //   unit: item.unit,
+          //   unitPrice: item.unitPrice,
+          //   vendor: {
+          //     vendorName: item.vendor?.vendorName
+          //   }
+          // })));
+          setSelectedVendor(data.purchaseRequest.items[0].vendor.vendorName);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -198,21 +216,18 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
     }
 
     // Check if item is already selected by comparing description and vendor
-    const isSelected = formData.items.some(selectedItem => 
+    const isSelected = selectedItems.some(selectedItem => 
       selectedItem.description === item.description && 
       selectedItem.vendor.vendorName === item.vendor.vendorName
     );
     
     if (isSelected) {
       // Remove item by matching description and vendor
-      setFormData(prev => ({
-        ...prev,
-        items: prev.items.filter(selectedItem => 
-          !(selectedItem.description === item.description && 
-            selectedItem.vendor.vendorName === item.vendor.vendorName)
-        )
-      }));
-      if (formData.items.length === 1) {
+      setSelectedItems(prev => prev.filter(selectedItem => 
+        !(selectedItem.description === item.description && 
+          selectedItem.vendor.vendorName === item.vendor.vendorName)
+      ));
+      if (selectedItems.length === 1) {
         setSelectedVendor(null);
       }
     } else {
@@ -220,16 +235,19 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
         setError('Cannot select items from different vendors in one request');
         return;
       }
-      setFormData(prev => ({
-        ...prev,
-        items: [...prev.items, item]
-      }));
+      setSelectedItems(prev => [...prev, item]);
       setSelectedVendor(item.vendor.vendorName);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setFormData(prev => ({
+      ...prev,
+      items: selectedItems
+    }));
+
     try {
       const response = await fetch(`/api/workspace/purchase-requests/${params.id}`, {
         method: 'PUT',
@@ -355,7 +373,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
                     </tr>
                   </thead>
                   <tbody>
-                    {formData.items.map((item, index) => (
+                    {selectedItems.map((item, index) => (
                       <tr key={item.id} className="border-b">
                         <td className="p-2">{index + 1}</td>
                         <td className="p-2">{item.description}</td>
@@ -544,9 +562,8 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
         isOpen={isItemModalOpen} 
         onClose={() => setIsItemModalOpen(false)}
         title="Select Budget Items"
-        maxWidth="2xl"
       >
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-4xl overflow-y-auto">
           {/* <h3 className="text-lg font-medium">Select Budget Items</h3> */}
           
           {formData.budgetId && (
@@ -563,8 +580,9 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {formData.items.map((item) => {
-                    const isSelected = formData.items.some(selectedItem => 
+                  {budget?.items.map((item: BudgetItem) => {
+                    console.log('item', item);
+                    const isSelected = selectedItems.some(selectedItem => 
                       selectedItem.description === item.description && 
                       selectedItem.vendor.vendorName === item.vendor.vendorName
                     );

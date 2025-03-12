@@ -15,4 +15,17 @@ export interface Budget {
   project: Project;
   workDivision: WorkDivision;
   purchaseRequestStatus: string | null;
+  items: BudgetItem[];
+}
+
+export interface BudgetItem {
+  id: string;
+  description: string;
+  qty: number;
+  unit: string;
+  unitPrice: number;
+  vendor: {
+    vendorId: string;
+    vendorName: string;
+  };
 }
