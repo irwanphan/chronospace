@@ -15,6 +15,13 @@ export async function GET(
       },
     });
 
+    const workDivisions = await prisma.workDivision.findMany({
+      select: {
+        id: true,
+        name: true,
+      }
+    })
+
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found' },
@@ -22,7 +29,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ project });
+    return NextResponse.json({ project, workDivisions });
   } catch (error) {
     console.error('Error fetching project:', error);
     return NextResponse.json(
@@ -42,6 +49,7 @@ export async function PUT(
     const project = await prisma.project.update({
       where: { id: params.id },
       data: {
+        projectCode: body.projectCode,
         projectTitle: body.projectTitle,
         year: body.year,
         workDivisionId: body.workDivisionId,
