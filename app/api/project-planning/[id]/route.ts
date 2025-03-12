@@ -49,8 +49,8 @@ export async function PUT(
     const project = await prisma.project.update({
       where: { id: params.id },
       data: {
-        projectCode: body.projectCode,
-        projectTitle: body.projectTitle,
+        code: body.code,
+        title: body.title,
         year: body.year,
         workDivisionId: body.workDivisionId,
         status: body.status,

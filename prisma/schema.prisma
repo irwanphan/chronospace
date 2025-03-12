@@ -190,16 +190,14 @@ model UserRole {
 
 model Project {
   id             String       @id @default(cuid())
-  projectId      String       @unique
-  projectCode    String
-  projectTitle   String
+  code           String       @unique
+  title          String
   description    String?
   workDivisionId String
   workDivision   WorkDivision @relation(fields: [workDivisionId], references: [id])
   year           Int
   startDate      DateTime
   finishDate     DateTime
-  requestDate    DateTime
   status         String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

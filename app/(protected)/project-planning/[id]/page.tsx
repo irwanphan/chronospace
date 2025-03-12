@@ -12,14 +12,13 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
   const [projectStatus, setProjectStatus] = useState<string>('');
   const [formData, setFormData] = useState({
     workDivisionId: '',
-    projectId: '',
-    projectCode: '',
-    projectTitle: '',
+    code: '',
+    title: '',
     description: '',
-    requestDate: '',
     year: new Date().getFullYear(),
     startDate: '',
     finishDate: '',
+    createdAt: '',
     documents: [],
   });
 
@@ -33,14 +32,13 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
         setProjectStatus(data.project.status);
         setFormData({
           workDivisionId: data.project.workDivision.id || '',
-          projectId: data.project.projectId,
-          projectCode: data.project.projectCode,              
-          projectTitle: data.project.projectTitle,
+          code: data.project.code,              
+          title: data.project.title,
           description: data.project.description,
-          requestDate: formatISODate(data.project.requestDate),
           year: parseInt(data.project.year),
           startDate: formatISODate(data.project.startDate),
           finishDate: formatISODate(data.project.finishDate),
+          createdAt: formatISODate(data.project.createdAt),
           documents: data.project.documents || [],
         });
       } catch (error) {
@@ -61,8 +59,8 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
 
       <Card>
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
-          <div>ID: {formData.projectId}</div>
-          <div>Request Date: {formatDate(formData.requestDate)}</div>
+          <div>Code: <span className="font-bold">{formData.code}</span></div>
+          <div>Request Date: <span className="font-bold">{formatDate(formData.createdAt)}</span></div>
         </div>
       </Card>
 
@@ -84,7 +82,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">
                 Project Code <span className="text-red-500">*</span>
               </label>
@@ -94,7 +92,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
                 className="w-full px-4 py-2 border rounded-lg bg-white"
                 readOnly
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -102,7 +100,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
               </label>
               <input
                 type="text"
-                value={formData.projectTitle}
+                value={formData.title}
                 className="w-full px-4 py-2 border rounded-lg bg-white"
                 readOnly
               />

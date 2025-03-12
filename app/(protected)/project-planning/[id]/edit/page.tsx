@@ -15,11 +15,10 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   const [projectStatus, setProjectStatus] = useState('');
   const [formData, setFormData] = useState({
     workDivisionId: '',
-    projectId: '',
-    projectCode: '',
-    projectTitle: '',
+    code: '',
+    title: '',
     description: '',
-    requestDate: '',
+    createdAt: '',
     year: new Date().getFullYear(),
     startDate: '',
     finishDate: '',
@@ -37,11 +36,10 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         setProjectStatus(data.project.status);
         setFormData({
           workDivisionId: data.project.workDivisionId || '',
-          projectId: data.project.projectId,
-          projectCode: data.project.projectCode,              
-          projectTitle: data.project.projectTitle,
+          code: data.project.code,              
+          title: data.project.title,
           description: data.project.description,
-          requestDate: formatISODate(data.project.requestDate),
+          createdAt: formatISODate(data.project.createdAt),
           year: parseInt(data.project.year),
           startDate: formatISODate(data.project.startDate),
           finishDate: formatISODate(data.project.finishDate),
@@ -99,8 +97,8 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
 
       <Card>
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
-          <div>ID: {formData.projectId}</div>
-          <div>Request Date: {formatDate(formData.requestDate)}</div>
+          <div>Code: <span className="font-bold">{formData.code}</span></div>
+          <div>Request Date: <span className="font-bold">{formatDate(formData.createdAt)}</span></div>
         </div>
       </Card>
 
@@ -132,7 +130,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
               </select>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">
                 Project Code <span className="text-red-500">*</span>
               </label>
@@ -143,7 +141,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
                 className="w-full px-4 py-2 border rounded-lg"
                 required
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -151,8 +149,8 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
               </label>
               <input
                 type="text"
-                value={formData.projectTitle}
-                onChange={(e) => setFormData(prev => ({ ...prev, projectTitle: e.target.value }))}
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg"
                 required
               />

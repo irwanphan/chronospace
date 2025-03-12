@@ -29,15 +29,13 @@ export async function POST(request: Request) {
     
     const project = await prisma.project.create({
       data: {
-        projectId: body.projectId,
-        projectCode: body.projectCode,
-        projectTitle: body.projectTitle,
+        code: body.projectCode,
+        title: body.projectTitle,
         description: body.description || '', // Handle null/undefined
         workDivisionId: body.workDivisionId,
         year: parseInt(body.year),
         startDate: new Date(body.startDate),
         finishDate: new Date(body.finishDate),
-        requestDate: new Date(body.requestDate),
         status: 'Not Allocated', // Default status
       },
     });

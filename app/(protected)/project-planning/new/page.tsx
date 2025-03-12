@@ -26,7 +26,7 @@ export default function NewProjectPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [projectId, setProjectId] = useState<string>('');
+  const [projectCode, setProjectCode] = useState<string>('');
   const [requestDate, setRequestDate] = useState<string>('');
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState<FormData>({
@@ -38,8 +38,6 @@ export default function NewProjectPage() {
     startDate: '',
     finishDate: '',
   });
-
-  console.log(workDivisions);
 
   const fetchWorkDivisions = async () => {
     try {
@@ -59,7 +57,7 @@ export default function NewProjectPage() {
     fetchWorkDivisions();
     // Generate ID dan request date
     const prefix = 'PRJ';
-    setProjectId(generateId(prefix));
+    setProjectCode(generateId(prefix));
     setRequestDate(formatDate(new Date()));
   }, []);
 
@@ -77,8 +75,7 @@ export default function NewProjectPage() {
         },
         body: JSON.stringify({
           ...formData,
-          projectId, // ID yang di-generate
-          requestDate, // Tanggal request yang di-generate
+          projectCode,
         }),
       });
 
@@ -111,10 +108,10 @@ export default function NewProjectPage() {
       <Card>
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>
-            ID: {projectId}
+            Project Code: <span className="font-bold">{projectCode}</span>
           </div>
           <div>
-            Request Date: {requestDate}
+            Request Date: <span className="font-bold">{requestDate}</span>
           </div>
         </div>
       </Card>
@@ -143,7 +140,7 @@ export default function NewProjectPage() {
               </select>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-1.5">
                 Project Code <span className="text-red-500">*</span>
               </label>
@@ -154,7 +151,7 @@ export default function NewProjectPage() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block mb-1.5">
