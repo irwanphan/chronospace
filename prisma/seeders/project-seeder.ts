@@ -11,7 +11,7 @@ export async function projectSeeder() {
   await prisma.project.createMany({
     data: [
       {
-        projectId: 'PRJ-2025-001',
+        projectId: 'PRJ/2025/03/000001',
         projectCode: 'RND-25-001',
         projectTitle: 'System Development 2025',
         description: 'Development of new enterprise system',
@@ -23,7 +23,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-002',
+        projectId: 'PRJ/2025/03/000002',
         projectCode: 'FIN-25-001',
         projectTitle: 'Financial System Integration',
         description: 'Integration of financial systems across divisions',
@@ -35,7 +35,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-003',
+        projectId: 'PRJ/2025/03/000003',
         projectCode: 'OPS-25-001',
         projectTitle: 'Operations Improvement',
         description: 'Operational efficiency improvement project',
@@ -47,7 +47,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-004',
+        projectId: 'PRJ/2025/03/000004',
         projectCode: 'HRD-25-001',
         projectTitle: 'HR Management System',
         description: 'New HR management system implementation',
@@ -59,7 +59,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-005',
+        projectId: 'PRJ/2025/03/000005',
         projectCode: 'MKT-25-001',
         projectTitle: 'Digital Marketing Platform',
         description: 'Implementation of digital marketing platform',
@@ -71,7 +71,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-006',
+        projectId: 'PRJ/2025/03/000006',
         projectCode: 'ITE-25-002',
         projectTitle: 'Network Infrastructure Upgrade',
         description: 'Company-wide network infrastructure upgrade',
@@ -83,7 +83,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-007',
+        projectId: 'PRJ/2025/03/000007',
         projectCode: 'FIN-25-002',
         projectTitle: 'Budget Management System',
         description: 'Implementation of new budget management system',
@@ -95,7 +95,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-008',
+        projectId: 'PRJ/2025/03/000008',
         projectCode: 'OPS-25-002',
         projectTitle: 'Warehouse Automation',
         description: 'Automation of warehouse operations',
@@ -107,7 +107,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-009',
+        projectId: 'PRJ/2025/03/000009',
         projectCode: 'HRD-25-002',
         projectTitle: 'Training Management System',
         description: 'Employee training management system',
@@ -119,7 +119,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-010',
+        projectId: 'PRJ/2025/03/000010',
         projectCode: 'MKT-25-002',
         projectTitle: 'Customer Analytics Platform',
         description: 'Implementation of customer analytics platform',
@@ -131,7 +131,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-011',
+        projectId: 'PRJ/2025/03/000011',
         projectCode: 'ITE-25-003',
         projectTitle: 'Cloud Migration Project',
         description: 'Migration of systems to cloud infrastructure',
@@ -143,7 +143,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-012',
+        projectId: 'PRJ/2025/03/000012',
         projectCode: 'FIN-25-003',
         projectTitle: 'Accounting System Upgrade',
         description: 'Upgrade of existing accounting system',
@@ -155,7 +155,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-013',
+        projectId: 'PRJ/2025/03/000013',
         projectCode: 'OPS-25-003',
         projectTitle: 'Supply Chain Optimization',
         description: 'Supply chain management optimization project',
@@ -167,7 +167,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-014',
+        projectId: 'PRJ/2025/03/000014',
         projectCode: 'HRD-25-003',
         projectTitle: 'Performance Management System',
         description: 'Employee performance management system',
@@ -179,7 +179,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-015',
+        projectId: 'PRJ/2025/03/000015',
         projectCode: 'MKT-25-003',
         projectTitle: 'Social Media Integration',
         description: 'Integration of social media marketing platforms',
@@ -191,7 +191,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-016',
+        projectId: 'PRJ/2025/03/000016',
         projectCode: 'ITE-25-004',
         projectTitle: 'Cybersecurity Enhancement',
         description: 'Enhancement of cybersecurity measures',
@@ -203,7 +203,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-017',
+        projectId: 'PRJ/2025/03/000017',
         projectCode: 'FIN-25-004',
         projectTitle: 'Tax Management System',
         description: 'Implementation of tax management system',
@@ -215,7 +215,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-018',
+        projectId: 'PRJ/2025/03/000018',
         projectCode: 'OPS-25-004',
         projectTitle: 'Quality Management System',
         description: 'Implementation of quality management system',
@@ -227,7 +227,7 @@ export async function projectSeeder() {
         status: 'Allocated'
       },
       {
-        projectId: 'PRJ-2025-019',
+        projectId: 'PRJ/2025/03/000019',
         projectCode: 'HRD-25-004',
         projectTitle: 'Recruitment System',
         description: 'New recruitment management system',
@@ -239,7 +239,7 @@ export async function projectSeeder() {
         status: 'Not Allocated'
       },
       {
-        projectId: 'PRJ-2025-020',
+        projectId: 'PRJ/2025/03/000020',
         projectCode: 'MKT-25-004',
         projectTitle: 'E-commerce Integration',
         description: 'Integration with e-commerce platforms',

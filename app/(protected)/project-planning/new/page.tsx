@@ -8,9 +8,9 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 import { formatDate, generateId } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 
-interface Division {
+interface WorkDivision {
   id: string;
-  divisionName: string;
+  name: string;
 }
 interface FormData {
   projectCode: string;
@@ -28,7 +28,7 @@ export default function NewProjectPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [projectId, setProjectId] = useState<string>('');
   const [requestDate, setRequestDate] = useState<string>('');
-  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState<FormData>({
     projectCode: '',
     projectTitle: '',
@@ -39,22 +39,24 @@ export default function NewProjectPage() {
     finishDate: '',
   });
 
-  const fetchDivisions = async () => {
+  console.log(workDivisions);
+
+  const fetchWorkDivisions = async () => {
     try {
       const response = await fetch('/api/workspace-management/work-division');
-      if (!response.ok) throw new Error('Failed to fetch divisions');
+      if (!response.ok) throw new Error('Failed to fetch work divisions');
       
       const data = await response.json();
-      setDivisions(data.divisions || []);
+      setWorkDivisions(data.workDivisions || []);
     } catch (error) {
-      console.error('Error fetching divisions:', error);
+      console.error('Error fetching work divisions:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDivisions();
+    fetchWorkDivisions();
     // Generate ID dan request date
     const prefix = 'PRJ';
     setProjectId(generateId(prefix));
@@ -133,9 +135,9 @@ export default function NewProjectPage() {
                 required
               >
                 <option value="">Select Division</option>
-                {Array.isArray(divisions) && divisions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.divisionName}
+                {Array.isArray(workDivisions) && workDivisions.map((workDivision) => (
+                  <option key={workDivision.id} value={workDivision.id}>
+                    {workDivision.name}
                   </option>
                 ))}
               </select>
