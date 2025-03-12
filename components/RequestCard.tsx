@@ -29,7 +29,7 @@ interface RequestCardProps {
     specificUserIds: string[];
     roleIds: string[];
   };
-  approvers?: {
+  actors?: {
     specificUserId: string;
     roleId: string;
   };
@@ -53,7 +53,7 @@ export default function RequestCard({
   canCheck,
   canReview,
   reviewers,
-  approvers,
+  actors,
 }: RequestCardProps) {
 
   return (
@@ -151,15 +151,15 @@ export default function RequestCard({
               type="button"
               className={`px-4 py-2 border rounded-lg flex items-center gap-1 
               ${canReview && 
-                ( approvers?.specificUserId === currentUserId || 
-                  approvers?.roleId === currentUserRole) ? 
+                ( actors?.specificUserId === currentUserId || 
+                  actors?.roleId === currentUserRole) ? 
                   'bg-blue-600 text-white hover:bg-blue-700' : 
                   'bg-white hover:bg-gray-50'}`}
           >
             <ScanSearch className="w-5 h-5" />
               Check {canReview && 
-                ( approvers?.specificUserId === currentUserId || 
-                  approvers?.roleId === currentUserRole) && 
+                ( actors?.specificUserId === currentUserId || 
+                  actors?.roleId === currentUserRole) && 
                   '& Review'}
           </button>
         )}

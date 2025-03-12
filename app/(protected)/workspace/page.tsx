@@ -47,7 +47,7 @@ interface PurchaseRequest {
       finishDate: string;
     };
     workDivision: {
-      divisionName: string;
+      name: string;
     };
   };
   approvalSteps: Array<{
@@ -57,7 +57,7 @@ interface PurchaseRequest {
     specificUserIds: string[];
     roleIds: string[];
   };
-  approvers: {
+  actors: {
     specificUserId: string;
     roleId: string;
   };
@@ -278,7 +278,7 @@ export default function WorkspacePage() {
                 currentUserId={session?.user?.id || ''}
                 currentUserRole={session?.user?.roleId || ''}
                 submittedAt={formatDate(request.createdAt) || 'No submission date'}
-                workDivision={request.budget.workDivision.divisionName}
+                workDivision={request.budget.workDivision.name}
                 status={request.status}
                 title={request.title}
                 description={stripHtmlTags(request.description || '')}
@@ -291,7 +291,7 @@ export default function WorkspacePage() {
                 onCheck={() => router.push(`/workspace/purchase-request/${request.id}`)}
                 canReview={canReviewApproveRequest}
                 reviewers={request.viewers}
-                approvers={request.approvers}
+                actors={request.actors}
               />
             );
           })}

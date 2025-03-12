@@ -74,8 +74,8 @@ export async function GET() {
               workDivision: {
                 select: {
                   id: true,
-                  divisionName: true,
-                  divisionCode: true
+                  name: true,
+                  code: true
                 }
               },
               project: {
@@ -93,7 +93,7 @@ export async function GET() {
           },
           approvalSteps: {
             include: {
-              user: {
+              actor: {
                 select: {
                   name: true,
                   id: true
