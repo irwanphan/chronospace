@@ -11,8 +11,8 @@ export async function budgetSeeder() {
     await prisma.budget.create({
       data: {
         code: generateId('BUD'),
-        title: `Budget Plan for ${project.projectTitle}`,
-        description: `Budget allocation for ${project.projectTitle}`,
+        title: `Budget Plan for ${project.title}`,
+        description: `Budget allocation for ${project.title}`,
         projectId: project.id,
         year: project.year,
         startDate: project.startDate,

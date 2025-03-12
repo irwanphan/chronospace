@@ -1,6 +1,7 @@
 import { Role } from "./role";
 import { User } from "./user";
 import { WorkDivision } from "./workDivision";
+
 export interface ApprovalStep {
   id?: string;
   schemaId: string;

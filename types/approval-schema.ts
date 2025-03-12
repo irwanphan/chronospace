@@ -4,11 +4,14 @@ export interface ApprovalSchema {
   description: string;
   documentType: string;
   approvalSteps: {
-    role: string;
+    role: {
+      roleName: string;
+    };
+    roleId: string;
     specificUserId?: string;
     duration: number;
     overtimeAction: 'Notify and Wait' | 'Auto Decline';
-    limit?: number;
+    budgetLimit?: number;
     stepOrder: number;
   }[];
 } 

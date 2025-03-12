@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
+import { formatCurrency } from '@/lib/utils';
 
 interface AddStepModalProps {
   isOpen: boolean;
@@ -42,20 +43,21 @@ export default function AddStepModal({
   });
 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [selectedRoleLimit, setSelectedRoleLimit] = useState<number | null>(null);
 
   useEffect(() => {
     if (editData) {
       const role = roles.find(r => r.id === editData.roleId);
-      setSelectedRoleLimit(role?.budgetLimit || null);
-      setFormData(editData);
+      setFormData({
+        ...editData,
+        budgetLimit: role?.budgetLimit || undefined
+      });
     }
   }, [editData, roles]);
 
   useEffect(() => {
     if (formData.roleId) {
       const usersWithRole = users.filter(user => 
-        user.role?.includes(formData.roleId)
+        user.role?.id === formData.roleId
       );
       setFilteredUsers(usersWithRole);
     } else {
@@ -89,10 +91,9 @@ export default function AddStepModal({
 
   const handleRoleChange = (roleId: string) => {
     const role = roles.find(r => r.id === roleId);
-    setSelectedRoleLimit(role?.budgetLimit || 0);
     setFormData(prev => ({ 
       ...prev, 
-      roleId,
+      roleId: roleId,
       budgetLimit: role?.budgetLimit || undefined
     }));
   };
@@ -104,7 +105,7 @@ export default function AddStepModal({
       <div className="bg-white rounded-lg w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium">
-            {isEdit ? 'Edit Approval Step' : 'Add Approval Step'}
+            {isEdit ? 'Edit Reviewer' : 'Add Reviewer'}
           </h2>
           <button
             type="button"
@@ -166,12 +167,8 @@ export default function AddStepModal({
               </label>
               <input
                 type="text"
-                value={selectedRoleLimit 
-                  ? new Intl.NumberFormat('id-ID', {
-                      style: 'currency',
-                      currency: 'IDR',
-                      minimumFractionDigits: 0,
-                    }).format(selectedRoleLimit)
+                value={formData.budgetLimit 
+                  ? formatCurrency(formData.budgetLimit)
                   : ''}
                 readOnly
                 className="w-full px-4 py-2 border rounded-lg bg-gray-50"

@@ -48,9 +48,14 @@ export async function GET(
         },
         approvalSteps: {
           include: {
-            specificUserDetails: {
+            specificUser: {
               select: {
                 name: true
+              }
+            },
+            role: {
+              select: {
+                roleName: true
               }
             }
           }

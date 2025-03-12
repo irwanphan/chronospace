@@ -28,7 +28,11 @@ export const formatISODate = (date: string | Date | null): string => {
 };
 
 export const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('id-ID').format(amount);
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(amount);
 };
 
 export const getInitials = (name: string) => {

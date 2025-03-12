@@ -5,7 +5,7 @@ interface ApprovalStep {
   roleId: string;
   specificUserId?: string;
   stepOrder: number;
-  limit?: number;
+  budgetLimit?: number;
   duration: number;
   overtimeAction: string;
 }
@@ -44,13 +44,13 @@ export async function POST(request: Request) {
         },
         approvalSteps: {
           create: body.steps.map((step: ApprovalStep, index: number) => ({
-            role: step.roleId,
-            specificUser: step.specificUserId,
+            roleId: step.roleId,
+            specificUserId: step.specificUserId,
             stepOrder: index + 1,
             status: "Pending",
-            limit: step.limit,
+            budgetLimit: step.budgetLimit,
             duration: step.duration,
-            overtime: step.overtimeAction
+            overtimeAction: step.overtimeAction
           }))
         }
       },
@@ -81,8 +81,8 @@ export async function GET() {
               workDivision: {
                 select: {
                   id: true,
-                  divisionName: true,
-                  divisionCode: true
+                  name: true,
+                  code: true
                 }
               }
             }

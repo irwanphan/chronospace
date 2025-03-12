@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Pencil, Trash, ListChecks } from 'lucide-react';
+import { Plus, Pencil, Trash, ListChecks } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { formatDate, generateId } from '@/lib/utils';
+import { formatCurrency, formatDate, generateId } from '@/lib/utils';
 import AddStepModal from '@/components/AddStepModal';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
+import { IconListCheck } from '@tabler/icons-react';
 
 interface BudgetPlan {
   id: string;
@@ -21,8 +22,8 @@ interface BudgetPlan {
   description: string;
   projectId: string;
   project: {
-    projectCode: string;
-    projectTitle: string;
+    code: string;
+    title: string;
   };
   items: BudgetItem[];
 }
@@ -43,7 +44,7 @@ interface BudgetItem {
 interface ApprovalStepForm {
   roleId: string;
   specificUserId?: string;
-  limit?: number;
+  budgetLimit?: number;
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
@@ -72,7 +73,7 @@ export default function NewPurchaseRequestPage() {
   });
 
   const [requestInfo, setRequestInfo] = useState({
-    id: '',
+    code: '',
     requestDate: new Date(),
     requestor: '',
     role: '',
@@ -85,7 +86,7 @@ export default function NewPurchaseRequestPage() {
 
   useEffect(() => {
     setRequestInfo({
-      id: generateId('PR'),
+      code: generateId('PUR'),
       requestDate: new Date(),
       requestor: session?.user?.name || '',
       role: session?.user?.role || '',
@@ -134,9 +135,9 @@ export default function NewPurchaseRequestPage() {
       ...prev,
       steps: [...prev.steps, stepData].sort((a, b) => {
         // Sort by budget limit, undefined limits go last
-        if (a.limit === undefined) return 1;
-        if (b.limit === undefined) return -1;
-        return a.limit - b.limit;
+        if (a.budgetLimit === undefined) return 1;
+        if (b.budgetLimit === undefined) return -1;
+        return a.budgetLimit - b.budgetLimit;
       }),
     }));
   };
@@ -154,7 +155,7 @@ export default function NewPurchaseRequestPage() {
       data: {
         roleId: step.roleId,
         specificUserId: step.specificUserId,
-        limit: step.limit,
+        budgetLimit: step.budgetLimit,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
       },
@@ -164,23 +165,27 @@ export default function NewPurchaseRequestPage() {
   };
 
   const handleStepSubmit = (stepData: ApprovalStepForm) => {
+    const formattedStep = {
+      ...stepData,
+      budgetLimit: stepData.budgetLimit ? Number(stepData.budgetLimit) : undefined
+    };
+
     if (editingStep !== null) {
       // Edit existing step
       setFormData(prev => ({
         ...prev,
         steps: prev.steps.map((step, i) => 
-          i === editingStep.index ? stepData : step
+          i === editingStep.index ? formattedStep : step
         ).sort((a, b) => {
-          // Sort by budget limit, undefined limits go last
-          if (a.limit === undefined) return 1;
-          if (b.limit === undefined) return -1;
-          return a.limit - b.limit;
+          if (a.budgetLimit === undefined) return 1;
+          if (b.budgetLimit === undefined) return -1;
+          return a.budgetLimit - b.budgetLimit;
         })
       }));
       setEditingStep(null);
     } else {
       // Add new step
-      addStep(stepData);
+      addStep(formattedStep);
     }
     setIsAddStepModalOpen(false);
   };
@@ -189,11 +194,11 @@ export default function NewPurchaseRequestPage() {
     setFormData(prev => ({
       ...prev,
       steps: schema.approvalSteps.map(step => ({
-        roleId: step.role,
+        roleId: step.roleId,
         specificUserId: step.specificUserId,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
-        limit: step.limit
+        limit: step.budgetLimit
       }))
     }));
     setIsSchemaModalOpen(false);
@@ -212,14 +217,14 @@ export default function NewPurchaseRequestPage() {
         body: JSON.stringify({
           ...formData,
           items: selectedItems,
-          code: requestInfo.id,
+          code: requestInfo.code,
           createdBy: session?.user?.id || '',
           approvalSteps: formData.steps.map((step, index) => ({
             roleId: step.roleId,
             specificUserId: step.specificUserId,
             duration: step.duration,
             overtimeAction: step.overtimeAction,
-            limit: step.limit,
+            budgetLimit: step.budgetLimit,
             order: index + 1
           }))
         }),
@@ -277,7 +282,7 @@ export default function NewPurchaseRequestPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <div className="text-sm text-gray-500">
-                ID: <span className="font-semibold text-gray-900">{requestInfo.id}</span>
+                PR Code: <span className="font-semibold text-gray-900">{requestInfo.code}</span>
               </div>
               <div className="text-sm text-gray-500">
                 Requestor: <span className="font-semibold text-gray-900">{requestInfo.requestor}</span>
@@ -327,7 +332,7 @@ export default function NewPurchaseRequestPage() {
                   </label>
                   <input
                     type="text"
-                    value={budgetPlans.find(b => b.id === formData.budgetId)?.project?.projectTitle || ''}
+                    value={budgetPlans.find(b => b.id === formData.budgetId)?.project?.title || ''}
                     className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                     disabled
                   />
@@ -369,7 +374,7 @@ export default function NewPurchaseRequestPage() {
                       <th className="text-right p-2">Unit Price</th>
                       <th className="text-right p-2">Total Price</th>
                       <th className="text-left p-2">Vendor</th>
-                      <th></th>
+                      {/* <th></th> */}
                     </tr>
                   </thead>
                   <tbody>
@@ -393,7 +398,7 @@ export default function NewPurchaseRequestPage() {
                             {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
                           </td>
                           <td className="p-2">{item.vendor.vendorName}</td>
-                          <td className="p-2">
+                          {/* <td className="p-2">
                             <button
                               type="button"
                               onClick={() => {
@@ -403,7 +408,7 @@ export default function NewPurchaseRequestPage() {
                             >
                               <X className="w-4 h-4" />
                             </button>
-                          </td>
+                          </td> */}
                         </tr>
                       ))
                     )}
@@ -416,8 +421,8 @@ export default function NewPurchaseRequestPage() {
                 onClick={handleOpenItemModal}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
               >
-                <Plus className="w-4 h-4" />
-                Add Item
+                <IconListCheck className="w-4 h-4" />
+                Manage Item List
               </button>
 
               <hr className="my-6" />
@@ -449,7 +454,7 @@ export default function NewPurchaseRequestPage() {
                       <th className="text-left py-3 px-4">#</th>
                       <th className="text-left py-3 px-4">Role</th>
                       <th className="text-left py-3 px-4">Specific User</th>
-                      <th className="text-left py-3 px-4">Limit</th>
+                      <th className="text-left py-3 px-4">Budget Limit</th>
                       <th className="text-left py-3 px-4">Duration</th>
                       <th className="text-left py-3 px-4">Overtime</th>
                       <th className="text-left py-3 px-4 w-16"></th>
@@ -475,11 +480,7 @@ export default function NewPurchaseRequestPage() {
                               : 'Any user with role'}
                           </td>
                           <td className="py-3 px-4">
-                            {step.limit ? new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(step.limit) : '-'}
+                            {step.budgetLimit ? formatCurrency(step.budgetLimit) : '-'}
                           </td>
                           <td className="py-3 px-4">{step.duration} days</td>
                           <td className="py-3 px-4">
@@ -555,15 +556,11 @@ export default function NewPurchaseRequestPage() {
                   <div key={index} className="flex items-center gap-4 text-xs text-gray-600 group-hover:text-white transition-all duration-300">
                     <span className="font-medium">Step {index + 1}:</span>
                     <span className="font-medium">
-                      {roles.find(r => r.id === step.role)?.roleName}
+                      {step.role.roleName}
                     </span>
-                    {step.limit && (
+                    {step.budgetLimit && (
                       <span>
-                        {new Intl.NumberFormat('id-ID', {
-                          style: 'currency',
-                          currency: 'IDR',
-                          minimumFractionDigits: 0,
-                        }).format(step.limit)}
+                        {formatCurrency(step.budgetLimit)}
                       </span>
                     )}
                     <span>{step.duration}d</span>

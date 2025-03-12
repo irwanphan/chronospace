@@ -30,7 +30,7 @@ export async function GET(
         },
         approvalSteps: {
           include: {
-            specificUserDetails: {
+            specificUser: {
               select: {
                 name: true
               }
@@ -72,7 +72,7 @@ export async function GET(
         include: {
           approvalSteps: {
             orderBy: {
-              order: 'asc'
+              stepOrder: 'asc'
             }
           }
         },
