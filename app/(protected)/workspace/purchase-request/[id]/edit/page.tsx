@@ -102,8 +102,10 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
+  const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
   console.log('selectedVendor', selectedVendor);
   console.log('selectedItems', selectedItems);
+  console.log('availableItems', availableItems);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -140,6 +142,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
             }))
           });
           setSelectedItems(data.purchaseRequest.items);
+          setAvailableItems(data.availableItems);
           // setSelectedItems(data.purchaseRequest.items.map((item: BudgetItem) => ({
           //   id: item.id,
           //   description: item.description,
@@ -590,7 +593,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {budget?.items.map((item: BudgetItem) => {
+                  {availableItems.map((item: BudgetItem) => {
                     const isSelected = selectedItems.some(selectedItem => 
                       selectedItem.description === item.description && 
                       selectedItem.vendor.vendorName === item.vendor.vendorName

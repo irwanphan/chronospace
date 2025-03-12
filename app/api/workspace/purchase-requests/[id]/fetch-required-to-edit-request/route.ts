@@ -106,6 +106,7 @@ export async function GET(
     const availableItems = budget?.items.filter(item => 
       item.purchaseRequestItems.length === 0
     );
+    
 
     // return {
     //   id: budget.id,
@@ -121,7 +122,10 @@ export async function GET(
       roles,
       users,
       schemas,
-      availableItems
+      availableItems: [
+        ...(availableItems || []),
+        ...(purchaseRequest?.items || [])
+      ]
     });
   } catch (error) {
     console.error('Error:', error);
