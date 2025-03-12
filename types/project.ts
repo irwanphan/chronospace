@@ -9,4 +9,8 @@ export interface Project {
   startDate: string;
   finishDate: string;
   year: number;
+  workDivision: {
+    id: string;
+    name: string;
+  };
 }

@@ -4,7 +4,6 @@ import { Plus, Filter, Search } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import { Project } from '@/types/project';
-import { WorkDivision } from '@prisma/client';
 import ProjectActions from './components/ProjectActions';
 import { calculateProjectStats } from '@/lib/helpers';
 import StatsOverview from './components/StatsOverview';
@@ -15,7 +14,6 @@ import Card from '@/components/ui/Card';
 export default function ProjectPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     budgetAllocated: 0,
@@ -36,7 +34,6 @@ export default function ProjectPlanningPage() {
         if (response.ok) {
           const data = await response.json();
           setProjects(data.projects);
-          setWorkDivisions(data.workDivisions);
           setStats(calculateProjectStats(data.projects));
         }
       } catch (error) {
@@ -107,7 +104,7 @@ export default function ProjectPlanningPage() {
                 <td className="px-6 py-4 text-sm">{project.projectId}</td>
                 <td className="px-6 py-4 text-sm">{project.projectTitle}</td>
                 <td className="px-6 py-4 text-sm">{project.year}</td>
-                <td className="px-6 py-4 text-sm">{workDivisions.find(wd => wd.id === project.workDivisionId)?.divisionName}</td>
+                <td className="px-6 py-4 text-sm">{project.workDivision.name}</td>
                 <td className="px-6 py-4 text-sm">{project.status}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(project.finishDate)}</td>
@@ -119,7 +116,6 @@ export default function ProjectPlanningPage() {
                       const projectsRes = await fetch('/api/project-planning');
                       const projectsData = await projectsRes.json();
                       setProjects(projectsData.projects);
-                      setWorkDivisions(projectsData.workDivisions);
                       setStats(calculateProjectStats(projectsData.projects));
                     }} 
                   />

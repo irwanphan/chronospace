@@ -3,16 +3,16 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const [projects, workDivisions] = await Promise.all([
-      prisma.project.findMany({
-        orderBy: {
-          createdAt: 'desc'
-        }
-      }),
-      prisma.workDivision.findMany()
-    ]);
+    const projects = await prisma.project.findMany({
+      include: {
+        workDivision: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+    });
 
-    return NextResponse.json({ projects, workDivisions });
+    return NextResponse.json({ projects });
   } catch (error) {
     console.error('Error fetching projects:', error);
     return NextResponse.json(
