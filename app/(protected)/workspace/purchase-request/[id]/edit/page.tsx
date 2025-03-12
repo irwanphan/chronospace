@@ -71,6 +71,7 @@ interface PurchaseRequest {
 export default function EditRequestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   // const { data: session } = useSession();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -245,6 +246,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     setFormData(prev => ({
       ...prev,
@@ -268,6 +270,8 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
     } catch (error) {
       console.error('Error:', error);
       setError('Failed to update request');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -498,9 +502,10 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
               </Link>
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Update Request
+                {isSubmitting ? 'Updating...' : 'Update Request'}
               </button>
             </div>
           </form>
