@@ -14,7 +14,6 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
-import { Budget } from '@/types/budget';
 import { IconListCheck } from '@tabler/icons-react';
 
 interface FormData {
@@ -94,7 +93,6 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [roles, setRoles] = useState<Role[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
-  const [budget, setBudget] = useState<Budget | null>(null);
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState<{ index: number; data: ApprovalStepForm } | null>(null);
 
@@ -117,7 +115,6 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
           setRoles(data.roles);
           setUsers(data.users);
           setSchemas(data.schemas);
-          setBudget(data.purchaseRequest.budget);
           setHeaderInfo({
             code: data.purchaseRequest.code,
             role: data.purchaseRequest.user.userRoles[0].role.roleName,
@@ -253,7 +250,10 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
 
     setFormData(prev => ({
       ...prev,
-      items: selectedItems
+      items: selectedItems.map(item => ({
+        ...item,
+        budgetItemId: item.id
+      }))
     }));
 
     console.log('formData', formData);

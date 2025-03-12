@@ -24,6 +24,7 @@ interface BudgetItem {
   unit: string;
   unitPrice: number;
   vendorId: string;
+  budgetItemId: string;
 }
 
 export async function GET(
@@ -122,6 +123,7 @@ export async function PUT(
     const body = await request.json();
 
     console.log('received body', body);
+    console.log("Final items before updating:", body.items);
 
     const updatedRequest = await prisma.purchaseRequest.update({
       where: {
@@ -134,7 +136,7 @@ export async function PUT(
         items: {
           deleteMany: {},
           create: body.items.map((item: BudgetItem) => ({
-            budgetItemId: item.id,
+            budgetItemId: item.budgetItemId,
             description: item.description,
             qty: item.qty,
             unit: item.unit,
