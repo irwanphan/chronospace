@@ -206,7 +206,7 @@ export default function NewBudgetPage() {
         ...prev,
         projectId,
         workDivisionId: selectedProject.workDivision.id,
-        title: selectedProject.projectTitle,
+        title: selectedProject.title,
         description: selectedProject.description || '',
         startDate: formattedStartDate,
         finishDate: formattedFinishDate
@@ -250,7 +250,7 @@ export default function NewBudgetPage() {
                   <option value="">Select Project</option>
                   {projects.map((project) => (
                     <option key={project.id} value={project.id}>
-                      {project.projectTitle}
+                      {project.title}
                     </option>
                   ))}
                 </select>

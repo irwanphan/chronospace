@@ -10,7 +10,7 @@ export async function GET() {
         },
         select: {
           id: true,
-          projectTitle: true,
+          title: true,
           status: true,
           description: true,
           year: true,
@@ -24,7 +24,7 @@ export async function GET() {
           }
         },
         orderBy: {
-          projectTitle: 'asc'
+          title: 'asc'
         }
       }),
       prisma.vendor.findMany({

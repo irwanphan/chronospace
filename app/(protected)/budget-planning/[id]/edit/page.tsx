@@ -213,7 +213,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
                 </label>
                 <input
                   type="text"
-                  value={budgetPlan.project.projectTitle}
+                  value={budgetPlan.project.title}
                   className="w-full px-4 py-2 border rounded-lg bg-gray-50"
                   disabled
                 />
