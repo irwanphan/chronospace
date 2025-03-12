@@ -108,7 +108,7 @@ export default function NewProjectPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">New Project</h1>
       
-      <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+      <Card>
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>
             ID: {projectId}
@@ -117,7 +117,7 @@ export default function NewProjectPage() {
             Request Date: {requestDate}
           </div>
         </div>
-      </div>
+      </Card>
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">

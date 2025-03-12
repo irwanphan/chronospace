@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const [projects, vendors, workDivisions] = await Promise.all([
+    const [projects, vendors] = await Promise.all([
       prisma.project.findMany({
         where: {
           status: "Not Allocated"
@@ -11,15 +11,15 @@ export async function GET() {
         select: {
           id: true,
           projectTitle: true,
-          workDivisionId: true,
           status: true,
           description: true,
+          year: true,
           startDate: true,
           finishDate: true,
           workDivision: {
             select: {
               id: true,
-              divisionName: true
+              name: true
             }
           }
         },
@@ -36,22 +36,12 @@ export async function GET() {
         orderBy: {
           vendorName: 'asc'
         }
-      }),
-      prisma.workDivision.findMany({
-        select: {
-          id: true,
-          divisionName: true,
-        },
-        orderBy: {
-          divisionName: 'asc'
-        }
-      }),
+      })
     ]);
 
     return NextResponse.json({ 
       projects, 
       vendors, 
-      workDivisions,
       timestamp: new Date().toISOString() 
     });
   } catch (error) {

@@ -9,9 +9,11 @@ import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
 import { Budget } from '@/types/budget';
 import { Vendor } from '@/types/vendor';
+import { formatDate } from '@/lib/utils';
 
 interface FormData {
   projectId: string;
+  code: string;
   title: string;
   year: string;
   workDivisionId: string;
@@ -48,6 +50,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   });
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
+    code: '',
     title: '',
     year: '',
     workDivisionId: '',
@@ -58,7 +61,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   });
 
   // console.log('selectedItems', selectedItems);
-  // console.log('budgetPlan', budgetPlan)
+  console.log('budgetPlan', budgetPlan)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +76,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         setBudgetPlan(data);
         setFormData({
           projectId: data.projectId,
+          code: data.code,
           title: data.title,
           year: data.year.toString(),
           workDivisionId: data.workDivisionId,
@@ -193,6 +197,13 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
+        <Card>
+          <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
+            <div>Budget Code: {budgetPlan.code}</div>
+            <div>Request Date: {formatDate(budgetPlan.createdAt)}</div>
+          </div>
+        </Card>
+
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
@@ -214,7 +225,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
                 </label>
                 <input
                   type="text"
-                  value={budgetPlan.workDivision.divisionName}
+                  value={budgetPlan.workDivision.name}
                   className="w-full px-4 py-2 border rounded-lg bg-gray-50"
                   disabled
                 />
@@ -382,9 +393,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
         onClose={() => setIsAddItemOpen(false)}
         title="Add Budget Item"
       >
-        <div className="p-6 space-y-6">
-          <h3 className="text-lg font-medium">Add New Item</h3>
-        
+        <form onSubmit={handleAddItem}>
           <div className="space-y-4">
             <div>
               <label className="block mb-1.5">Description</label>
@@ -460,7 +469,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
               Add Item
             </button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

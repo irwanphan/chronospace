@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { stripHtmlTags } from '@/lib/utils';
+import { formatDate, stripHtmlTags } from '@/lib/utils';
 import { Vendor } from '@/types/vendor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
@@ -11,6 +11,7 @@ import { Budget } from '@/types/budget';
 
 interface FormData {
   projectId: string;
+  code: string;
   title: string;
   year: string;
   workDivisionId: string;
@@ -37,6 +38,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string>('');
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
+    code: '',
     title: '',
     year: '',
     workDivisionId: '',
@@ -58,6 +60,7 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
         setSelectedItems(data.items);
         setFormData({
           projectId: data.projectId,
+          code: data.code,
           title: data.title,
           year: data.year.toString(),
           workDivisionId: data.workDivisionId,
@@ -89,13 +92,20 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold mb-6">Edit Budget Plan</h1>
+      <h1 className="text-2xl font-semibold mb-6">View Budget Plan</h1>
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
           {error}
         </div>
       )}
+
+      <Card>
+        <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
+          <div>Budget Code: {budgetPlan.code}</div>
+          <div>Request Date: {formatDate(budgetPlan.createdAt)}</div>
+        </div>
+      </Card>
 
       <Card className="p-6">
         <form className="space-y-6">
@@ -114,11 +124,11 @@ export default function ViewBudgetPage({ params }: { params: { id: string } }) {
 
             <div>
               <label className="block mb-1.5">
-                Division <span className="text-red-500">*</span>
+                Work Division <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                value={budgetPlan.workDivision.divisionName}
+                value={budgetPlan.workDivision.name}
                 className="w-full px-4 py-2 border rounded-lg bg-white"
                 disabled
               />

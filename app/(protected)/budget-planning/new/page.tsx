@@ -6,13 +6,15 @@ import Link from 'next/link';
 import { Plus, X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Project } from '@/types/project';
-import { WorkDivision } from '@/types/workDivision';
 import { Vendor } from '@/types/vendor';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
+import { formatDate, generateId } from '@/lib/utils';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface FormData {
   projectId: string;
+  code: string;
   title: string;
   year: string;
   workDivisionId: string;
@@ -40,6 +42,7 @@ export default function NewBudgetPage() {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     projectId: '',
+    code: '',
     title: '',
     year: new Date().getFullYear().toString(),
     workDivisionId: '',
@@ -57,10 +60,10 @@ export default function NewBudgetPage() {
     vendor: ''
   });
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
-
-  console.log('projects : ', projects);
-
+  const [selectedWorkDivision, setSelectedWorkDivision] = useState<string>('');
+  const [budgetCode, setBudgetCode] = useState<string>('');
+  const [requestDate, setRequestDate] = useState<string>('');
+  
   const fetchData = async () => {
     try {
       const response = await fetch('/api/budget-planning/fetch-required-to-create-budget');
@@ -68,7 +71,6 @@ export default function NewBudgetPage() {
         const data = await response.json();
         setProjects(data.projects || []);
         setVendors(data.vendors || []);
-        setDivisions(data.workDivisions || []);
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -81,6 +83,9 @@ export default function NewBudgetPage() {
 
   useEffect(() => {
     fetchData();
+    const prefix = 'BUD';
+    setBudgetCode(generateId(prefix));
+    setRequestDate(formatDate(new Date()));
   }, []);
 
   useEffect(() => {
@@ -138,6 +143,7 @@ export default function NewBudgetPage() {
     try {
       const requestBody = {
         projectId: formData.projectId,
+        code: budgetCode,
         title: formData.title,
         description: formData.description || '',
         year: parseInt(formData.year),
@@ -145,7 +151,7 @@ export default function NewBudgetPage() {
         totalBudget: selectedItems.reduce((total, item) => total + (item.qty * item.unitPrice), 0),
         startDate: new Date(formData.startDate).toISOString(),
         finishDate: new Date(formData.finishDate).toISOString(),
-        status: "In Progress",
+        status: "Draft",
         items: selectedItems.map(item => ({
           description: item.description,
           qty: item.qty,
@@ -179,10 +185,10 @@ export default function NewBudgetPage() {
   const handleProjectChange = (projectId: string) => {
     const selectedProject = projects.find(p => p.id === projectId);
     if (selectedProject) {
-      console.log('Selected project dates:', {
-        start: selectedProject.startDate,
-        finish: selectedProject.finishDate
-      });
+      // console.log('Selected project dates:', {
+      //   start: selectedProject.startDate,
+      //   finish: selectedProject.finishDate
+      // });
 
       // Format dates properly
       const formattedStartDate = selectedProject.startDate ? 
@@ -190,15 +196,16 @@ export default function NewBudgetPage() {
       const formattedFinishDate = selectedProject.finishDate ? 
         new Date(selectedProject.finishDate).toISOString().split('T')[0] : '';
 
-      console.log('Formatted dates:', {
-        start: formattedStartDate,
-        finish: formattedFinishDate
-      });
+      // console.log('Formatted dates:', {
+      //   start: formattedStartDate,
+      //   finish: formattedFinishDate
+      // });
 
+      setSelectedWorkDivision(selectedProject.workDivision.name);
       setFormData(prev => ({
         ...prev,
         projectId,
-        workDivisionId: selectedProject.workDivisionId,
+        workDivisionId: selectedProject.workDivision.id,
         title: selectedProject.projectTitle,
         description: selectedProject.description || '',
         startDate: formattedStartDate,
@@ -207,9 +214,7 @@ export default function NewBudgetPage() {
     }
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
+  if (isLoading) return <LoadingSpin />
 
   return (
     <>
@@ -221,6 +226,13 @@ export default function NewBudgetPage() {
             {error}
           </div>
         )}
+
+        <Card>
+          <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
+            <div>Budget Code: {budgetCode}</div>
+            <div>Request Date: {requestDate}</div>
+          </div>
+        </Card>
 
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -251,10 +263,10 @@ export default function NewBudgetPage() {
 
               <div>
                 <label className="block mb-1.5">
-                  Division <span className="text-red-500">*</span>
+                  Work Division <span className="text-red-500">*</span>
                 </label>
-                <input type="hidden" name="workDivisionId" value={formData.workDivisionId} />
-                <input type="text" name="workDivisionId-show" disabled value={divisions.find(d => d.id === formData.workDivisionId)?.divisionName} 
+                <input type="hidden" name="workDivisionId" value={formData.workDivisionId} readOnly />
+                <input type="text" name="workDivisionId-show" disabled value={selectedWorkDivision} 
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
                 />
               </div>
