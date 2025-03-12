@@ -123,13 +123,6 @@ export async function PUT(
 
     console.log('received body', body);
 
-    // Delete existing approval steps and items
-    await prisma.purchaseRequestItem.deleteMany({
-      where: {
-        purchaseRequestId: params.id
-      }
-    });
-
     const updatedRequest = await prisma.purchaseRequest.update({
       where: {
         id: params.id
@@ -139,6 +132,7 @@ export async function PUT(
         description: body.description,
         // Update items
         items: {
+          deleteMany: {},
           create: body.items.map((item: BudgetItem) => ({
             budgetItemId: item.id,
             description: item.description,
