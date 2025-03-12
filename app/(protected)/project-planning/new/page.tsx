@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { formatDate, generateId } from '@/lib/utils';
+import { formatDate, formatISODate, generateId } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 
 interface WorkDivision {
@@ -35,8 +35,8 @@ export default function NewProjectPage() {
     description: '',
     workDivisionId: '',
     year: new Date().getFullYear().toString(),
-    startDate: '',
-    finishDate: '',
+    startDate: formatISODate(new Date()),
+    finishDate: formatISODate(new Date()),
   });
 
   const fetchWorkDivisions = async () => {
