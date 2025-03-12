@@ -198,7 +198,7 @@ export default function NewPurchaseRequestPage() {
         specificUserId: step.specificUserId,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
-        limit: step.budgetLimit
+        budgetLimit: step.budgetLimit
       }))
     }));
     setIsSchemaModalOpen(false);
