@@ -1,50 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash, ListChecks } from 'lucide-react';
-import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { RichTextEditor } from '@/components/RichTextEditor';
-import { formatDate, generateId } from '@/lib/utils';
+import Link from 'next/link';
+import { ChevronLeft, ListChecks, Pencil, Plus, Trash } from 'lucide-react';
+import { formatCurrency, formatDate } from '@/lib/utils';
+import Card from '@/components/ui/Card';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 import AddStepModal from '@/components/AddStepModal';
+import { Modal } from '@/components/ui/Modal';
+import { RichTextEditor } from '@/components/RichTextEditor';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
-import { ApprovalSchema } from '@/types/approval-schema';
-import { useSession } from 'next-auth/react';
-import { toast } from 'react-hot-toast';
-import Card from '@/components/ui/Card';
-import Modal from '@/components/Modal';
-import LoadingSpin from '@/components/ui/LoadingSpin';
-// import { PurchaseRequest } from '@prisma/client';
-import { IconListCheck } from '@tabler/icons-react';
+import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
 
-interface BudgetPlan {
-  id: string;
+interface FormData {
+  code: string;
+  budgetId: string;
+  projectId: string;
   title: string;
   description: string;
-  projectId: string;
-  project: {
-    projectCode: string;
-    projectTitle: string;
-  };
-  items: BudgetItem[];
+  createdBy: string;
+  items: any[];
+  steps: ApprovalStepForm[];
 }
 
-interface BudgetItem {
-  id: string;
-  description: string;
-  qty: number;
-  unit: string;
-  unitPrice: number;
-  vendor: {
-    vendorName: string;
-    vendorId: string;
-  };
-  isSubmitted?: boolean;
-  purchaseRequestId?: string;
-}
-
-// TODO: type is messed up, need to fix database schema
 interface ApprovalStepForm {
   roleId: string;
   specificUserId?: string;
@@ -52,64 +33,37 @@ interface ApprovalStepForm {
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
-// matching ApprovalStepForm with ApprovalStepForm, so that roleId is role
-interface ApprovalStepFormInitial {
-  role: string;
-  specificUserId?: string;
-  limit?: number;
-  duration: number;
-  overtimeAction: 'Notify and Wait' | 'Auto Decline';
-}
 
-export default function EditPurchaseRequestPage({ params }: { params: { id: string } }) {
+export default function EditRequestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [purchaseRequest, setPurchaseRequest] = useState<PurchaseRequest | null>(null);
-  const [budgetPlan, setBudgetPlan] = useState<BudgetPlan | null>(null);
-  const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
-  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
-  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
-  const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
-  const [formData, setFormData] = useState({
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>({
     code: '',
     budgetId: '',
     projectId: '',
     title: '',
-    createdBy: '',
     description: '',
-    items: [] as BudgetItem[],
-    steps: [] as ApprovalStepForm[],
+    createdBy: '',
+    items: [],
+    steps: []
   });
-
-  // console.log('budgetPlan : ', budgetPlan);
-  // console.log('purchaseRequest : ', purchaseRequest);
-
-  const [requestInfo, setRequestInfo] = useState({
-    id: '',
-    requestDate: new Date(),
-    requestor: '',
+  const [headerInfo, setHeaderInfo] = useState({
+    code: '',
     role: '',
-    description: ''
+    createdBy: '',
+    createdAt: ''
   });
+  const [purchaseRequest, setPurchaseRequest] = useState<any>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
+  const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
+  const [editingStep, setEditingStep] = useState<{ index: number; data: ApprovalStepForm } | null>(null);
 
-  // Hapus state yang tidak digunakan
-  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
-  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
 
-  useEffect(() => {
-    setRequestInfo({
-      id: generateId('PR'),
-      requestDate: new Date(),
-      requestor: session?.user?.name || '',
-      role: session?.user?.role || '',
-      description: ''
-    });
-  }, [session]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,28 +71,17 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
         const response = await fetch(`/api/workspace/purchase-requests/${params.id}/fetch-required-to-edit-request`);
         if (response.ok) {
           const data = await response.json();
-
-          console.log('data : ', data);
+          setPurchaseRequest(data.purchaseRequest);
           setRoles(data.roles);
           setUsers(data.users);
           setSchemas(data.schemas);
-          // setPurchaseRequest(data.purchaseRequest);
-          setBudgetPlan(data.purchaseRequest.budget);
+          setHeaderInfo({
+            code: data.purchaseRequest.code,
+            role: data.purchaseRequest.user.userRoles[0].role.roleName,
+            createdBy: data.purchaseRequest.user.name,
+            createdAt: data.purchaseRequest.createdAt
+          });
           
-          // Initialize selected items with existing items
-          setSelectedItems(data.purchaseRequest.items.map((item: BudgetItem) => ({
-            id: item.id,
-            description: item.description,
-            qty: item.qty,
-            unit: item.unit,
-            unitPrice: item.unitPrice,
-            vendor: {
-              vendorName: item.vendor?.vendorName
-            }
-          })));
-
-          setSelectedVendor(data.purchaseRequest.items[0].vendor.vendorName);
-
           setFormData({
             code: data.purchaseRequest.code,
             budgetId: data.purchaseRequest.budget.id,
@@ -147,10 +90,10 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
             createdBy: data.purchaseRequest.createdBy,
             description: data.purchaseRequest.description,
             items: data.purchaseRequest.items,
-            steps: data.purchaseRequest.approvalSteps.map((step: ApprovalStepFormInitial) => ({
-              roleId: step.role,
+            steps: data.purchaseRequest.approvalSteps.map((step: ApprovalStep) => ({
+              roleId: step.roleId,
               specificUserId: step.specificUserId,
-              budgetLimit: step.limit,
+              budgetLimit: step.budgetLimit,
               duration: step.duration,
               overtimeAction: step.overtimeAction
             }))
@@ -158,6 +101,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        setError('Failed to fetch data');
       } finally {
         setIsLoading(false);
       }
@@ -166,88 +110,47 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
     fetchData();
   }, [params.id]);
 
-  // Update project and items when budget is selected
-  const handleBudgetChange = (budgetId: string) => {
-    const selectedBudget = budgetPlan
-    console.log('Selected budget:', selectedBudget);
-    if (selectedBudget) {
-      setFormData(prev => ({
-        ...prev,
-        budgetId,
-        projectId: selectedBudget.projectId,
-        title: selectedBudget.title,
-        description: selectedBudget.description,
-        createdBy: session?.user?.id || '',
-      }));
-    }
-  };
-
-  const addStep = (stepData: ApprovalStepForm) => {
-    setFormData(prev => ({
-      ...prev,
-      steps: [...prev.steps, stepData].sort((a, b) => {
-        // Sort by budget limit, undefined limits go last
-        if (a.budgetLimit === undefined) return 1;
-        if (b.budgetLimit === undefined) return -1;
-        return a.budgetLimit - b.budgetLimit;
-      }),
-    }));
-  };
-
-  const removeStep = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      steps: prev.steps.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleEditStep = (index: number) => {
-    const step = formData.steps[index];
-    setEditingStep({
-      data: {
-        roleId: step.roleId,
-        specificUserId: step.specificUserId,
-        budgetLimit: step.budgetLimit,
-        duration: step.duration,
-        overtimeAction: step.overtimeAction,
-      },
-      index
-    });
-    setIsAddStepModalOpen(true);
-  };
-
   const handleStepSubmit = (stepData: ApprovalStepForm) => {
-    console.log('stepData : ', stepData);
     if (editingStep !== null) {
-      // Edit existing step
       setFormData(prev => ({
         ...prev,
         steps: prev.steps.map((step, i) => 
           i === editingStep.index ? stepData : step
-        ).sort((a, b) => {
-          // Sort by budget limit, undefined limits go last
-          if (a.budgetLimit === undefined) return 1;
-          if (b.budgetLimit === undefined) return -1;
-          return a.budgetLimit - b.budgetLimit;
-        })
+        )
       }));
       setEditingStep(null);
     } else {
-      // Add new step
-      addStep(stepData);
+      setFormData(prev => ({
+        ...prev,
+        steps: [...prev.steps, stepData]
+      }));
     }
     setIsAddStepModalOpen(false);
+  };
+
+  const handleEditStep = (index: number) => {
+    setEditingStep({ index, data: formData.steps[index] });
+    setIsAddStepModalOpen(true);
+  };
+
+  const handleDeleteStep = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      steps: prev.steps.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSelectSchema = (schema: ApprovalSchema) => {
     setFormData(prev => ({
       ...prev,
       steps: schema.approvalSteps.map(step => ({
-        roleId: step.role,
+        roleId: step.roleId,
         specificUserId: step.specificUserId,
         duration: step.duration,
         overtimeAction: step.overtimeAction,
-        budgetLimit: step.limit
+        budgetLimit: step.budgetLimit,
+        role: step.role,
+        specificUser: step.specificUser,
       }))
     }));
     setIsSchemaModalOpen(false);
@@ -255,148 +158,78 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
     try {
       const response = await fetch(`/api/workspace/purchase-requests/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          code: formData.code,
-          budgetId: formData.budgetId,
-          projectId: formData.projectId,
-          title: formData.title,
-          createdBy: session?.user?.id,
-          description: formData.description,
-          items: selectedItems.map(item => ({
-            budgetItemId: item.id,
-            description: item.description,
-            qty: item.qty,
-            unit: item.unit,
-            unitPrice: item.unitPrice,
-            vendorId: item.vendor.vendorId,
-            vendorName: item.vendor.vendorName
-          })),
-          approvalSteps: formData.steps.map((step, index) => ({
-            roleId: step.roleId,
-            specificUserId: step.specificUserId || null,
-            stepOrder: index + 1,
-            status: 'Pending',
-            budgetLimit: step.budgetLimit || null,
-            duration: step.duration,
-            overtimeAction: step.overtimeAction,
-            approvedAt: null,
-            approvedBy: null,
-            note: null
-          }))
-        }),
+        body: JSON.stringify(formData)
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update request');
-      }
+      if (!response.ok) throw new Error('Failed to update request');
 
-      router.push('/workspace');
-      router.refresh();
-      toast.success('Purchase request updated successfully');
+      router.push(`/workspace/purchase-request/${params.id}`);
     } catch (error) {
-      console.error('Error updating request:', error);
-      toast.error('Failed to update request');
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error:', error);
+      setError('Failed to update request');
     }
   };
 
-  // Handler untuk membuka modal (disederhanakan)
-  const handleOpenItemModal = () => {
-    setIsItemModalOpen(true);
-  };
-
-  // Handler untuk toggle select/unselect item
-  const handleToggleItem = (item: BudgetItem) => {
-    if (item.isSubmitted) {
-      toast.error(`Item already submitted in PR ${item.purchaseRequestId}`);
-      return;
-    }
-
-    // Check if item is already selected by comparing description and vendor
-    const isSelected = selectedItems.some(selectedItem => 
-      selectedItem.description === item.description && 
-      selectedItem.vendor.vendorName === item.vendor.vendorName
-    );
-    
-    if (isSelected) {
-      // Remove item by matching description and vendor
-      setSelectedItems(prev => prev.filter(selectedItem => 
-        !(selectedItem.description === item.description && 
-          selectedItem.vendor.vendorName === item.vendor.vendorName)
-      ));
-      if (selectedItems.length === 1) {
-        setSelectedVendor(null);
-      }
-    } else {
-      if (selectedVendor && item.vendor.vendorName !== selectedVendor) {
-        toast.error('Cannot select items from different vendors in one request');
-        return;
-      }
-      setSelectedItems(prev => [...prev, item]);
-      setSelectedVendor(item.vendor.vendorName);
-    }
-  };
-
-  if (isLoading) {
-    return <LoadingSpin />;
-  }
+  if (isLoading) return <LoadingSpin />;
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="text-2xl font-semibold mb-4">New Purchase Request</h1>
-      
-      <div className="space-y-8">
+    <div>
 
-        {/* Request Info Card */}
-        <Card className="p-6 mb-8">
+      <div className="space-y-8 max-w-4xl">
+        <h1 className="text-2xl font-semibold mb-4">Edit Purchase Request</h1>
+
+        {error && <div className="bg-red-500 text-white p-4 rounded-lg">{error}</div>}
+
+        <Card>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <div className="text-sm text-gray-500">
-                ID: <span className="font-semibold text-gray-900">{requestInfo.id}</span>
+                PR Code: <span className="font-semibold text-gray-900">{headerInfo.code}</span>
               </div>
               <div className="text-sm text-gray-500">
-                Requestor: <span className="font-semibold text-gray-900">{requestInfo.requestor}</span>
+                Requestor: <span className="font-semibold text-gray-900">{headerInfo.createdBy}</span>
               </div>
             </div>
             <div className="flex flex-col gap-2">
               <div className="text-sm text-gray-500">
-                Request Date: <span className="font-semibold text-gray-900">{formatDate(requestInfo.requestDate)}</span>
+                Request Date: <span className="font-semibold text-gray-900">
+                  {headerInfo.createdAt ? formatDate(new Date(headerInfo.createdAt)) : '-'}
+                </span>
               </div>
               <div className="text-sm text-gray-500">
-                Requestor Role: <span className="font-semibold text-gray-900">{requestInfo.role}</span>
+                Requestor Role: <span className="font-semibold text-gray-900">{headerInfo.role}</span>
               </div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <Card>
+          <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 
               <input type="hidden" name="requestCategory" value="Purchase Request" readOnly />
-
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Related Budget <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="text"
-                    value={formData.budgetId}
-                    onChange={(e) => handleBudgetChange(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg bg-white"
+                    type="hidden"
+                    value={purchaseRequest?.budget?.id || ''}
                     readOnly
+                  />
+                  <input
+                    type="text"
+                    value={purchaseRequest?.budget?.title || ''}
+                    className="w-full px-4 py-2 border rounded-lg bg-gray-100"
+                    disabled
                   />
                 </div>
 
@@ -406,7 +239,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                   </label>
                   <input
                     type="text"
-                    value={budgetPlan?.project?.projectTitle || ''}
+                    value={purchaseRequest?.budget?.project?.title || ''}
                     className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                     disabled
                   />
@@ -437,7 +270,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
               </div>
 
               <h2 className="text-lg font-medium mt-6 mb-4">Item List</h2>
-              <div className="overflow-x-auto mb-4">
+              <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
@@ -447,69 +280,35 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                       <th className="text-left p-2">Unit</th>
                       <th className="text-right p-2">Unit Price</th>
                       <th className="text-right p-2">Total Price</th>
-                      <th className="text-left p-2">Vendor</th>
-                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedItems.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="text-center py-4 text-gray-500">
-                          No items selected
+                    {formData.items.map((item, index) => (
+                      <tr key={item.id} className="border-b">
+                        <td className="p-2">{index + 1}</td>
+                        <td className="p-2">{item.description}</td>
+                        <td className="p-2">{item.qty}</td>
+                        <td className="p-2">{item.unit}</td>
+                        <td className="p-2 text-right">
+                          {formatCurrency(item.unitPrice)}
+                        </td>
+                        <td className="p-2 text-right">
+                          {formatCurrency(item.qty * item.unitPrice)}
                         </td>
                       </tr>
-                    ) : (
-                      selectedItems.map((item, index) => (
-                        <tr key={item.id} className="border-b">
-                          <td className="p-2">{index + 1}</td>
-                          <td className="p-2">{item.description}</td>
-                          <td className="p-2">{item.qty}</td>
-                          <td className="p-2">{item.unit}</td>
-                          <td className="p-2 text-right">
-                            {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
-                          </td>
-                          <td className="p-2 text-right">
-                            {new Intl.NumberFormat('id-ID').format(item.qty * item.unitPrice)}
-                          </td>
-                          <td className="p-2">{item.vendor.vendorName}</td>
-                          {/* <td className="p-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedItems(selectedItems.filter(i => i.id !== item.id));
-                              }}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </td> */}
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
 
-              <button
-                type="button"
-                onClick={handleOpenItemModal}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <IconListCheck className="w-4 h-4" />
-                Manage Item List
-              </button>
-
-              <hr className="my-6" />
-
-              <h2 className="text-lg font-medium">Approval Steps</h2>
-              <div className="flex items-center justify-start gap-2">
+              <h2 className="text-lg font-medium mt-6">Approval Steps</h2>
+              <div className="mb-4 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddStepModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                 >
-                  <Plus className="w-4 h-4" />
-                  Add Approver
+                  <Plus className="w-4 h-4" />Add Reviewer
                 </button>
                 <button
                   type="button"
@@ -528,16 +327,16 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                       <th className="text-left py-3 px-4">#</th>
                       <th className="text-left py-3 px-4">Role</th>
                       <th className="text-left py-3 px-4">Specific User</th>
-                      <th className="text-left py-3 px-4">Limit</th>
+                      <th className="text-left py-3 px-4">Budget Limit</th>
                       <th className="text-left py-3 px-4">Duration</th>
-                      <th className="text-left py-3 px-4">Overtime</th>
-                      <th className="text-left py-3 px-4 w-16"></th>
+                      <th className="text-left py-3 px-4">Overtime Action</th>
+                      <th className="text-left py-3 px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {formData.steps.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-4 text-gray-500">
+                        <td colSpan={7} className="text-center py-4 text-gray-500">
                           No steps added yet
                         </td>
                       </tr>
@@ -546,24 +345,18 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                         <tr key={index} className="border-b">
                           <td className="py-3 px-4">{index + 1}</td>
                           <td className="py-3 px-4">
-                            {roles?.find(r => r.id === step.roleId)?.roleName || 'Unknown Role'}
+                            {roles.find((r: Role) => r.id === step.roleId)?.roleName}
                           </td>
                           <td className="py-3 px-4">
-                            {step.specificUserId 
-                              ? users?.find(u => u.id === step.specificUserId)?.name || 'Unknown User'
-                              : 'Any user with role'}
+                            {step.specificUserId ? 
+                              users.find((u: User) => u.id === step.specificUserId)?.name : 
+                              'Any user with role'}
                           </td>
                           <td className="py-3 px-4">
-                            {step.budgetLimit ? new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(step.budgetLimit) : '-'}
+                            {step.budgetLimit ? formatCurrency(step.budgetLimit) : '-'}
                           </td>
                           <td className="py-3 px-4">{step.duration} days</td>
-                          <td className="py-3 px-4">
-                            {step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline'}
-                          </td>
+                          <td className="py-3 px-4">{step.overtimeAction}</td>
                           <td className="py-3 px-4">
                             <div className="flex gap-2">
                               <button
@@ -575,7 +368,7 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                               </button>
                               <button
                                 type="button"
-                                onClick={() => removeStep(index)}
+                                onClick={() => handleDeleteStep(index)}
                                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                               >
                                 <Trash className="w-4 h-4" />
@@ -592,31 +385,42 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
 
             <hr className="my-6" />
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2">
               <Link
-                href="/workspace"
-                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                href={`/workspace/purchase-request/${params.id}`}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
               >
-                Cancel
+                <ChevronLeft className="w-4 h-4" />Back
               </Link>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                Update Request
               </button>
             </div>
-
           </form>
         </Card>
       </div>
+      
+      <AddStepModal
+        isOpen={isAddStepModalOpen}
+        onClose={() => {
+          setIsAddStepModalOpen(false);
+          setEditingStep(null);
+        }}
+        onSubmit={handleStepSubmit}
+        roles={roles}
+        users={users}
+        documentType={'Purchase Request'}
+        editData={editingStep?.data}
+        isEdit={editingStep !== null}
+      />
 
       <Modal 
         isOpen={isSchemaModalOpen} 
         onClose={() => setIsSchemaModalOpen(false)}
         title="Select Approval Schema"
-        maxWidth="2xl"
       >
         <div className="space-y-4 max-h-[60vh] overflow-y-auto">
           {schemas?.map(schema => (
@@ -634,15 +438,15 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
                   <div key={index} className="flex items-center gap-4 text-xs text-gray-600 group-hover:text-white transition-all duration-300">
                     <span className="font-medium">Step {index + 1}:</span>
                     <span className="font-medium">
-                      {roles.find(r => r.id === step.role)?.roleName}
+                      {roles.find(r => r.id === step.roleId)?.roleName}
                     </span>
-                    {step.limit && (
+                    {step.budgetLimit && (
                       <span>
                         {new Intl.NumberFormat('id-ID', {
                           style: 'currency',
                           currency: 'IDR',
                           minimumFractionDigits: 0,
-                        }).format(step.limit)}
+                        }).format(step.budgetLimit)}
                       </span>
                     )}
                     <span>{step.duration}d</span>
@@ -652,95 +456,6 @@ export default function EditPurchaseRequestPage({ params }: { params: { id: stri
               </div>
             </div>
           ))}
-        </div>
-      </Modal>
-
-      <AddStepModal
-        isOpen={isAddStepModalOpen}
-        onClose={() => {
-          setIsAddStepModalOpen(false);
-          setEditingStep(null);
-        }}
-        onSubmit={handleStepSubmit}
-        roles={roles}
-        users={users}
-        documentType={'Purchase Request'}
-        editData={editingStep?.data}
-        isEdit={editingStep !== null}
-      />
-
-      <Modal 
-        isOpen={isItemModalOpen} 
-        onClose={() => setIsItemModalOpen(false)}
-        title="Select Budget Items"
-        maxWidth="2xl"
-      >
-        <div className="space-y-6">
-          {/* <h3 className="text-lg font-medium">Select Budget Items</h3> */}
-          
-          {formData.budgetId && (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Description</th>
-                    <th className="text-left p-2">Qty</th>
-                    <th className="text-left p-2">Unit</th>
-                    <th className="text-right p-2">Unit Price</th>
-                    <th className="text-left p-2">Vendor</th>
-                    <th className="text-center p-2">Select</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {budgetPlan?.items.map((item) => {
-                    const isSelected = selectedItems.some(selectedItem => 
-                      selectedItem.description === item.description && 
-                      selectedItem.vendor.vendorName === item.vendor.vendorName
-                    );
-                    const isDisabled: boolean = Boolean(selectedVendor && item.vendor.vendorName !== selectedVendor);
-
-                    return (
-                      <tr key={item.id} className="border-b">
-                        <td className="p-2">{item.description}</td>
-                        <td className="p-2">{item.qty}</td>
-                        <td className="p-2">{item.unit}</td>
-                        <td className="p-2 text-right">
-                          {new Intl.NumberFormat('id-ID').format(item.unitPrice)}
-                        </td>
-                        <td className="p-2">{item.vendor.vendorName}</td>
-                        <td className="p-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleItem(item)}
-                            disabled={isDisabled}
-                            className={`px-2 py-1 rounded ${
-                              isSelected 
-                                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                                : isDisabled
-                                  ? 'bg-gray-300 cursor-not-allowed'
-                                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-                            }`}
-                          >
-                            {isSelected ? 'Selected' : 'Select'}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setIsItemModalOpen(false)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-            >
-              Close
-            </button>
-          </div>
         </div>
       </Modal>
     </div>

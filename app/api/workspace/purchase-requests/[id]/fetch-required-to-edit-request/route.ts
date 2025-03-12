@@ -32,7 +32,14 @@ export async function GET(
           include: {
             specificUser: {
               select: {
+                id: true,
                 name: true
+              }
+            },
+            role: {
+              select: {
+                id: true,
+                roleName: true
               }
             }
           }

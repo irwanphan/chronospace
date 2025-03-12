@@ -111,7 +111,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, description, approvalSteps } = body;
+    // const { title, description, approvalSteps } = body;
 
     // Delete existing approval steps
     await prisma.purchaseRequestApproval.deleteMany({
@@ -119,45 +119,31 @@ export async function PUT(
     });
 
     // Update purchase request with new data
-    const updated = await prisma.purchaseRequest.update({
-      where: { id: params.id },
-      data: {
-        title,
-        description,
-        status: 'Updated',
-        approvalSteps: {
-          create: approvalSteps.map((step: ApprovalStepUpdate) => ({
-            role: step.roleId,
-            specificUser: step.specificUserId,
-            stepOrder: step.stepOrder,
-            status: 'Pending',
-            limit: step.budgetLimit,
-            duration: step.duration,
-            overtime: step.overtimeAction || 'Auto Decline', // TODO: overtimeAction return undefinedm saved as Auto Decline
-            comment: null,
-            approvedAt: null,
-            approvedBy: null
-          }))
-        },
-        histories: {
-          create: {
-            action: 'Updated',
-            actorId: session.user.id,
-            comment: 'Request details and approval steps updated'
-          }
-        }
+    const updatedRequest = await prisma.purchaseRequest.update({
+      where: {
+        id: params.id
       },
-      include: {
-        approvalSteps: true,
-        histories: {
-          include: {
-            actor: true
+      data: {
+        title: body.title,
+        description: body.description,
+        approvalSteps: {
+          deleteMany: {},
+          createMany: {
+            data: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
+              roleId: step.roleId,
+              specificUserId: step.specificUserId,
+              stepOrder: index + 1,
+              status: "Pending",
+              budgetLimit: step.budgetLimit,
+              duration: step.duration,
+              overtimeAction: step.overtimeAction
+            }))
           }
         }
       }
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(updatedRequest);
   } catch (error) {
     console.error('Error updating request:', error);
     return new NextResponse('Internal Server Error', { status: 500 });

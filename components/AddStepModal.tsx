@@ -57,7 +57,7 @@ export default function AddStepModal({
   useEffect(() => {
     if (formData.roleId) {
       const usersWithRole = users.filter(user => 
-        user.role?.id === formData.roleId
+        user.roleId === formData.roleId
       );
       setFilteredUsers(usersWithRole);
     } else {
