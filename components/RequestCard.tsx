@@ -56,8 +56,6 @@ export default function RequestCard({
   actors,
 }: RequestCardProps) {
 
-  console.log('actors', actors);
-
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">

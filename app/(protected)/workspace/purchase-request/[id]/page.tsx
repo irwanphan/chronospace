@@ -71,6 +71,7 @@ interface PurchaseRequest {
   };
 }
 type ApprovalStep = {
+  roleId: string;
   role: {
     id: string;
     roleName: string;
@@ -80,6 +81,7 @@ type ApprovalStep = {
   duration: number;
   overtimeAction: string;
   stepOrder: number;
+  specificUserId: string;
   specificUser: {
     id: string;
     name: string;
@@ -107,7 +109,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   console.log('purchaseRequest : ', purchaseRequest);
   // console.log('viewers : ', purchaseRequest?.viewers);
   // console.log('current user role : ', `role-${session?.user?.roleId}`);
-  // console.log('current step : ', currentStep);
+  console.log('current step : ', currentStep);
   // console.log('has access : ', hasAccess);
 
   useEffect(() => {
@@ -141,12 +143,12 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
     // }
 
     // Cek apakah user memiliki akses
-    if (currentStep.specificUser !== null) {
-      if (session.user.id === currentStep.specificUser.id) {
+    if (currentStep.specificUserId !== null) {
+      if (session.user.id === currentStep.specificUserId) {
         setCanReview(true);
       }
     } else {
-      if (session.user.roleId === currentStep.role.id) {
+      if (session.user.roleId === currentStep.roleId) {
         setCanReview(true);
       }
     }

@@ -8,8 +8,8 @@ export async function userSeeder() {
 
   const userData = [
     { id: 'cm71xui7r000asgprkai2jfkb', name: 'John CEO', email: 'ceo@example.com', password: hashedPassword, roleId: 'role-ceo', phone: '1234567890', workDivisionId: 'RND', employeeId: 'EMP001', residentId: 'RES001', nationality: 'ID', birthday: new Date('1980-01-01') },
-    { name: 'Alice CFO', email: 'cfo@example.com', password: hashedPassword, roleId: 'role-cfo', phone: '1234567891', workDivisionId: 'FIN', employeeId: 'EMP002', residentId: 'RES002', nationality: 'ID', birthday: new Date('1981-02-02') },
-    { name: 'Bob CTO', email: 'cto@example.com', password: hashedPassword, roleId: 'role-cto', phone: '1234567892', workDivisionId: 'ITE', employeeId: 'EMP003', residentId: 'RES003', nationality: 'ID', birthday: new Date('1982-03-03') },
+    { id: 'g239g84h9g49q28g9hq82g9hf', name: 'Alice CFO', email: 'cfo@example.com', password: hashedPassword, roleId: 'role-cfo', phone: '1234567891', workDivisionId: 'FIN', employeeId: 'EMP002', residentId: 'RES002', nationality: 'ID', birthday: new Date('1981-02-02') },
+    { id: '29ihvdiuw8r9bdjivue9289vh', name: 'Bob CTO', email: 'cto@example.com', password: hashedPassword, roleId: 'role-cto', phone: '1234567892', workDivisionId: 'ITE', employeeId: 'EMP003', residentId: 'RES003', nationality: 'ID', birthday: new Date('1982-03-03') },
     { name: 'Carol Finance', email: 'finance@example.com', password: hashedPassword, roleId: 'role-fs', phone: '1234567893', workDivisionId: 'FIN', employeeId: 'EMP004', residentId: 'RES004', nationality: 'ID', birthday: new Date('1983-04-04') },
     { name: 'Dave IT', email: 'it@example.com', password: hashedPassword, roleId: 'role-it', phone: '1234567894', workDivisionId: 'ITE', employeeId: 'EMP005', residentId: 'RES005', nationality: 'ID', birthday: new Date('1984-05-05') },
     { id: '289fhvr2gih9rg8ha9ih98a9f', name: 'Eve HR', email: 'hr@example.com', password: hashedPassword, roleId: 'role-hr', phone: '1234567895', workDivisionId: 'HRD', employeeId: 'EMP006', residentId: 'RES006', nationality: 'ID', birthday: new Date('1985-06-06') },
@@ -29,6 +29,14 @@ export async function userSeeder() {
       {
         userId: 'cm71xui7r000asgprkai2jfkb',
         roleId: 'role-ceo',
+      },
+      {
+        userId: 'g239g84h9g49q28g9hq82g9hf',
+        roleId: 'role-cfo',
+      },
+      {
+        userId: '29ihvdiuw8r9bdjivue9289vh',
+        roleId: 'role-cto',
       },
       {
         userId: 'fg71xui7r000asgpgraji935t',

@@ -81,11 +81,17 @@ export async function GET(
       ? purchaseRequest.approvalSteps.filter(step => step.status === 'Updated').sort((a, b) => a.stepOrder - b.stepOrder)[0]
       : purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
 
+    const viewers = await getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]);
+    const approvers = await getCurrentApprover(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]);
+
+    // console.log('viewers', viewers);
+    // console.log('approvers', approvers);
+
     const fixedPurchaseRequest = {
       ...purchaseRequest,
-      viewers: getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),
-      approvers: getCurrentApprover(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),
-      currentStep: currentStep
+      currentStep: currentStep,
+      viewers: viewers,
+      actors: approvers
     };
 
     return NextResponse.json({

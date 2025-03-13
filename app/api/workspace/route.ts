@@ -40,7 +40,7 @@ export const getViewers = async (steps: ApprovalStep[]) => {
     }
   });
 
-  console.log('Final result getViewers: ', result); // Debug
+  // console.log('Final result getViewers: ', result); // Debug
   return result;
 };
 
@@ -60,7 +60,7 @@ export const getCurrentApprover = async (steps: ApprovalStep[]) => {
     }
   }
 
-  console.log('Final result getCurrentApprover: ', result); // Debug
+  // console.log('Final result getCurrentApprover: ', result); // Debug
   return result;
 };
 
