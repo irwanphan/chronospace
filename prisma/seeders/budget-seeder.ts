@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export async function budgetSeeder() {
   // Get all allocated projects
@@ -9,8 +10,9 @@ export async function budgetSeeder() {
   for (const project of allocatedProjects) {
     await prisma.budget.create({
       data: {
-        title: `Budget Plan for ${project.projectTitle}`,
-        description: `Budget allocation for ${project.projectTitle}`,
+        code: generateId('BUD'),
+        title: `Budget Plan for ${project.title}`,
+        description: `Budget allocation for ${project.title}`,
         projectId: project.id,
         year: project.year,
         startDate: project.startDate,

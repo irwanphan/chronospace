@@ -48,9 +48,14 @@ export async function GET(
         },
         approvalSteps: {
           include: {
-            specificUserDetails: {
+            specificUser: {
               select: {
                 name: true
+              }
+            },
+            role: {
+              select: {
+                roleName: true
               }
             }
           }
@@ -76,11 +81,17 @@ export async function GET(
       ? purchaseRequest.approvalSteps.filter(step => step.status === 'Updated').sort((a, b) => a.stepOrder - b.stepOrder)[0]
       : purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
 
+    const viewers = await getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]);
+    const approvers = await getCurrentApprover(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]);
+
+    // console.log('viewers', viewers);
+    // console.log('approvers', approvers);
+
     const fixedPurchaseRequest = {
       ...purchaseRequest,
-      viewers: getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),
-      approvers: getCurrentApprover(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]),
-      currentStep: currentStep
+      currentStep: currentStep,
+      viewers: viewers,
+      actors: approvers
     };
 
     return NextResponse.json({
@@ -106,55 +117,69 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, description, approvalSteps } = body;
 
-    // Delete existing approval steps
-    await prisma.purchaseRequestApproval.deleteMany({
-      where: { purchaseRequestId: params.id }
+    // console.log('received body', body);
+    // console.log("Final items before updating:", body.items);
+
+    const itemList = await prisma.budgetedItem.findMany({
+      where: {
+        AND: [
+          { budgetId: body.budgetId },
+          { id: { in: body.itemsIdReference } }
+        ]
+      }
     });
-
-    // Update purchase request with new data
-    const updated = await prisma.purchaseRequest.update({
-      where: { id: params.id },
+    
+    const updatedRequest = await prisma.purchaseRequest.update({
+      where: {
+        id: params.id
+      },
       data: {
-        title,
-        description,
-        status: 'Updated',
-        approvalSteps: {
-          create: approvalSteps.map((step: ApprovalStepUpdate) => ({
-            role: step.roleId,
-            specificUser: step.specificUserId,
-            stepOrder: step.stepOrder,
-            status: 'Pending',
-            limit: step.budgetLimit,
-            duration: step.duration,
-            overtime: step.overtimeAction || 'Auto Decline', // TODO: overtimeAction return undefinedm saved as Auto Decline
-            comment: null,
-            approvedAt: null,
-            approvedBy: null
-          }))
+        title: body.title,
+        description: body.description,
+        items: {
+          deleteMany: {},
+          create: itemList.map((item) => ({
+            budgetItemId: item.id,
+            description: item.description,
+            qty: item.qty,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            vendorId: item.vendorId
+          })),
         },
-        histories: {
-          create: {
-            action: 'Updated',
-            actorId: session.user.id,
-            comment: 'Request details and approval steps updated'
-          }
+        approvalSteps: {
+          deleteMany: {},
+          create: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
+            roleId: step.roleId,
+            specificUserId: step.specificUserId,
+            stepOrder: index + 1,
+            status: "Pending",
+            budgetLimit: step.budgetLimit,
+            duration: step.duration,
+            overtimeAction: step.overtimeAction
+          }))
         }
       },
       include: {
-        approvalSteps: true,
-        histories: {
+        items: {
           include: {
-            actor: true
+            budgetItem: true
           }
-        }
+        },
+        approvalSteps: true
       }
     });
 
-    return NextResponse.json(updated);
+    // console.log('updatedRequest', updatedRequest);
+    // console.log('itemList', itemList);
+
+    return NextResponse.json(updatedRequest);
   } catch (error) {
     console.error('Error updating request:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to update request' },
+      { status: 500 }
+    );
   }
 }

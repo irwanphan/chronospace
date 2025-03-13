@@ -8,7 +8,8 @@ export async function GET() {
       prisma.budget.findMany({
         include: {
           project: true,
-          items: true
+          items: true,
+          workDivision: true
         },
         orderBy: {
           createdAt: 'desc'
@@ -36,14 +37,15 @@ export async function POST(request: Request) {
     const result = await prisma.$transaction(async (tx) => {
       const budget = await tx.budget.create({
         data: {
+          code: body.code,
           projectId: body.projectId,
-          title: body.title,
-          description: body.description,
-          year: body.year,
           workDivisionId: body.workDivisionId,
-          totalBudget: body.totalBudget,
+          title: body.title,
+          year: body.year,
           startDate: new Date(body.startDate),
           finishDate: new Date(body.finishDate),
+          description: body.description,
+          totalBudget: body.totalBudget,
           status: body.status,
           items: {
             create: body.items.map((item: { description: string; qty: number; unit: string; unitPrice: number; vendor: string }) => ({

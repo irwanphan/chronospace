@@ -13,20 +13,21 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 
-interface ApprovalStepForm {
-  roleId: string;
+interface ApprovalStep {
+  id: string;
+  role: Role;
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
-interface ApiStep {
-  role: string;
+interface StepFormData {
+  roleId: string;
   specificUserId?: string;
-  limit?: number;
+  budgetLimit?: number;
   duration: number;
-  overtime: 'Notify and Wait' | 'Auto Decline';
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
 }
 
 export default function EditApprovalSchemaPage({ params }: { params: { id: string } }) {
@@ -43,18 +44,16 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     description: '',
     workDivisions: [] as string[],
     roles: [] as string[],
-    approvalSteps: [] as ApprovalStepForm[],
+    approvalSteps: [] as ApprovalStep[],
   });
 
   const [isAddStepModalOpen, setIsAddStepModalOpen] = useState(false);
-  const [editingStep, setEditingStep] = useState<{ data: ApprovalStepForm; index: number } | null>(null);
+  const [editingStep, setEditingStep] = useState<{ data: ApprovalStep; index: number } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // console.log('Fetching schema with ID:', params.id);
         const response = await fetch(`/api/workspace-management/approval-schemas/${params.id}`);
-        // console.log('Response:', response);
         if (!response.ok) {
           throw new Error('Failed to fetch schema');
         }
@@ -67,45 +66,26 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
           name: schema.name || '',
           documentType: schema.documentType || '',
           description: schema.description || '',
-          workDivisions: schema.workDivisions || [],
-          roles: schema.roles || [],
+          workDivisions: schema.workDivisionIds ? JSON.parse(schema.workDivisionIds) : [],
+          roles: schema.roleIds ? JSON.parse(schema.roleIds) : [],
           approvalSteps: schema.approvalSteps || []
         });
 
         if (response.ok) {
-          // Parse divisions dan roles dari string menjadi array
-          const parsedDivisions = schema.divisions 
-            ? schema.divisions.startsWith('[') 
-              ? JSON.parse(schema.divisions)
-              : schema.divisions.split(',')
-            : [];
-
-          const parsedRoles = schema.roles
-            ? schema.roles.startsWith('[') 
-              ? JSON.parse(schema.roles)
-              : schema.roles.split(',')
-            : [];
-
-          // console.log('Parsed Roles:', parsedRoles);
-          // console.log('Parsed Divisions:', parsedDivisions);
-
           const formattedData = {
             name: schema.name || '',
             documentType: schema.documentType || '',
             description: schema.description || '',
-            workDivisions: parsedDivisions,
-            roles: parsedRoles,
+            workDivisions: schema.workDivisionIds ? JSON.parse(schema.workDivisionIds) : [],
+            roles: schema.roleIds ? JSON.parse(schema.roleIds) : [],
             approvalSteps: Array.isArray(schema.approvalSteps)
-              ? schema.approvalSteps.map((step: ApiStep) => ({
-                  roleId: step.role || '',
-                  specificUserId: step.specificUserId,
-                  budgetLimit: step.limit,
-                  duration: step.duration,
-                  overtimeAction: step.overtime
+              ? schema.approvalSteps.map((step: ApprovalStep) => ({
+                  ...step,
+                  role: step.role || '',
                 }))
               : []
           };
-          // console.log('Formatted Data:', formattedData);
+          console.log('Formatted Data:', formattedData);
           setFormData(formattedData);
         }
       } catch (error) {
@@ -141,15 +121,15 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
         name: formData.name,
         documentType: formData.documentType,
         description: formData.description || '',
-        workDivisions: JSON.stringify(formData.workDivisions),
-        roles: JSON.stringify(formData.roles),
+        workDivisionIds: JSON.stringify(formData.workDivisions),
+        roleIds: JSON.stringify(formData.roles),
         approvalSteps: formData.approvalSteps.map((step, index) => ({
-          role: step.roleId,
+          roleId: step.role.id,
           specificUserId: step.specificUserId || null,
           duration: step.duration,
           overtimeAction: step.overtimeAction === 'Notify and Wait' ? 'Notify and Wait' : 'Auto Decline',
-          limit: step.budgetLimit || null,
-          order: index + 1
+          budgetLimit: step.budgetLimit || null,
+          stepOrder: index + 1
         }))
       };
 
@@ -173,7 +153,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     }
   };
 
-  const handleAddStep = (stepData: ApprovalStepForm) => {
+  const handleAddStep = (stepData: ApprovalStep) => {
     setFormData(prev => ({
       ...prev,
       approvalSteps: [...prev.approvalSteps, stepData]
@@ -184,7 +164,8 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     const step = formData.approvalSteps[index];
     setEditingStep({
       data: {
-        roleId: step.roleId,
+        id: step.id,
+        role: step.role,
         specificUserId: step.specificUserId,
         budgetLimit: step.budgetLimit,
         duration: step.duration,
@@ -195,19 +176,26 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
     setIsAddStepModalOpen(true);
   };
 
-  const handleStepSubmit = (stepData: ApprovalStepForm) => {
+  const handleStepSubmit = (stepData: StepFormData) => {
+    const approvalStep: ApprovalStep = {
+      id: editingStep?.data.id || crypto.randomUUID(),
+      role: roles.find(r => r.id === stepData.roleId)!,
+      specificUserId: stepData.specificUserId,
+      budgetLimit: stepData.budgetLimit,
+      duration: stepData.duration,
+      overtimeAction: stepData.overtimeAction
+    };
+
     if (editingStep !== null) {
-      // Edit existing step
       setFormData(prev => ({
         ...prev,
         approvalSteps: prev.approvalSteps.map((step, i) => 
-          i === editingStep.index ? stepData : step
+          i === editingStep.index ? approvalStep : step
         )
       }));
       setEditingStep(null);
     } else {
-      // Add new step
-      handleAddStep(stepData);
+      handleAddStep(approvalStep);
     }
   };
 
@@ -252,7 +240,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                 Apply to Work Division <span className="text-red-500">*</span>
               </label>
               <MultiSelect
-                options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
+                options={divisions.map(div => ({ id: div.id!, name: div.name }))}
                 value={formData.workDivisions}
                 onChange={(value) => setFormData(prev => ({ ...prev, workDivisions: value }))}
                 placeholder="Select work divisions..."
@@ -322,7 +310,7 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
                         <tr key={index} className="border-b">
                           <td className="py-3 px-4">{index + 1}</td>
                           <td className="py-3 px-4">
-                            {roles.find(r => r.id === step.roleId)?.roleName}
+                            {step.role.roleName}
                           </td>
                           <td className="py-3 px-4">
                             {step.specificUserId 
@@ -398,7 +386,13 @@ export default function EditApprovalSchemaPage({ params }: { params: { id: strin
         roles={roles}
         users={users}
         documentType={formData.documentType}
-        editData={editingStep?.data}
+        editData={editingStep?.data ? {
+          roleId: editingStep.data.role.id,
+          specificUserId: editingStep.data.specificUserId,
+          budgetLimit: editingStep.data.budgetLimit,
+          duration: editingStep.data.duration,
+          overtimeAction: editingStep.data.overtimeAction
+        } : undefined}
         isEdit={editingStep !== null}
       />
     </div>

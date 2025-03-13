@@ -8,7 +8,7 @@ export async function GET() {
       prisma.workDivision.findMany({
         select: {
           id: true,
-          divisionName: true,
+          name: true,
         }
       }),
     ]);

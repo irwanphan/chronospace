@@ -9,18 +9,9 @@ export async function GET(
     const [ user, roles, workDivisions ] = await Promise.all([
       prisma.user.findUnique({
         where: { id: params.id },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          role: true,          // Ambil role
-          workDivision: true,  // Ambil workDivision
-          employeeId: true,
-          address: true,
-          residentId: true,
-          nationality: true,
-          birthday: true,
+        include: {
+          role: true,
+          workDivision: true,
         },
       }),
       prisma.role.findMany({
@@ -32,7 +23,7 @@ export async function GET(
       prisma.workDivision.findMany({
         select: {
           id: true,
-          divisionName: true,
+          name: true,
         },
       }), 
     ]);
@@ -45,9 +36,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      ...user,
-      roleId: user.role,             // Map ke roleId
-      workDivisionId: user.workDivision,  // Map ke workDivisionId
+      user,
       roles,
       workDivisions
     });
@@ -73,8 +62,8 @@ export async function PUT(
         name: body.name,
         email: body.email,
         phone: body.phone,
-        role: body.roleId,             // ganti roleId menjadi role
-        workDivision: body.workDivisionId,  // ganti workDivisionId menjadi workDivision
+        roleId: body.roleId,             // ganti roleId menjadi role
+        workDivisionId: body.workDivisionId,  // ganti workDivisionId menjadi workDivision
         employeeId: body.employeeId,
         address: body.address,
         residentId: body.residentId,
@@ -114,8 +103,8 @@ export async function DELETE(
     const prApprovals = await prisma.purchaseRequestApproval.findMany({
       where: { 
         OR: [
-          { approvedBy: params.id },
-          { specificUser: params.id }
+          { actorId: params.id },
+          { specificUserId: params.id }
         ]
       }
     });
@@ -141,7 +130,7 @@ export async function DELETE(
 
     // Check if user is division head
     const divisions = await prisma.workDivision.findMany({
-      where: { divisionHead: params.id }
+      where: { headId: params.id }
     });
 
     if (divisions.length > 0) {

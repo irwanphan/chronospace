@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { WorkDivision } from '@/types/workDivision';
-import { User } from '@/types/user';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 
@@ -12,11 +11,12 @@ export default function ViewWorkDivisionPage({ params }: { params: { id: string 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{
-    divisionCode?: string;
+    code?: string;
     general?: string;
   }>({});
-  const [division, setDivision] = useState<WorkDivision>();
-  const [divisionHeadUser, setDivisionHeadUser] = useState<string>('');
+  const [workDivision, setWorkDivision] = useState<WorkDivision>();
+
+  // console.log('workDivision : ', workDivision);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,9 +26,7 @@ export default function ViewWorkDivisionPage({ params }: { params: { id: string 
         if (!response.ok) throw new Error('Failed to fetch data');
         
         const data = await response.json();
-        setDivision(data.division);
-        const headUser = data.users.find((user: User) => user.id === data.division.divisionHead);
-        setDivisionHeadUser(headUser?.name || 'Not assigned');
+        setWorkDivision(data.workDivision);
       } catch (error) {
         console.error('Error fetching data:', error);
         setErrors({ general: 'Failed to load data' });
@@ -56,55 +54,55 @@ export default function ViewWorkDivisionPage({ params }: { params: { id: string 
         <form className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Division Code <span className="text-red-500">*</span>
+              Work Division Code <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={division?.divisionCode}
+              value={workDivision?.code}
               className={`w-full px-4 py-2 border rounded-lg`}
               readOnly
             />
-            {errors.divisionCode && (
-              <p className="mt-1 text-sm text-red-600">{errors.divisionCode}</p>
+            {errors.code && (
+              <p className="mt-1 text-sm text-red-600">{errors.code}</p>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Division Name <span className="text-red-500">*</span>
+              Work Division Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={division?.divisionName}
+              value={workDivision?.name}
               className="w-full px-4 py-2 border rounded-lg"
               readOnly
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
+            <label className="block text-sm font-medium mb-1">Work Division Description</label>
             <div 
               className="w-full px-4 py-2 border rounded-lg"
-              dangerouslySetInnerHTML={{ __html: division?.description || '' }}
+              dangerouslySetInnerHTML={{ __html: workDivision?.description || '' }}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Upper Division</label>
+              <label className="block text-sm font-medium mb-1">Upper Work Division</label>
               <input
                 type="text"
-                value={division?.upperDivision}
+                value={workDivision?.upperWorkDivision?.name || '-'}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 readOnly
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Division Head</label>
+              <label className="block text-sm font-medium mb-1">Work Division Head</label>
               <input
                 type="text"
-                value={divisionHeadUser}
+                value={workDivision?.head?.name || '-'}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 readOnly
               />

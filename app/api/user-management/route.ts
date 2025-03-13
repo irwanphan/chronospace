@@ -1,54 +1,37 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-
+import { Role, WorkDivision } from '@prisma/client';
 interface UserPost {
   email: string;
   password: string;
   fullName: string;
   phone: string;
-  role: string;
-  workDivision: string;
+  roleId: string;
+  workDivisionId: string;
   employeeId: string;
   address: string;
   residentId: string;
   nationality: string;
   birthday: string;
   avatar?: File;
+  role: Role;
+  workDivision: WorkDivision;
 }
 
 export async function GET() {
   try {
-    const [users, roles] = await Promise.all([
-      prisma.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          workDivision: true,
-          employeeId: true,
-          lastLogin: true,
-          createdAt: true,
-          image: true,
-          userRoles: {
-            select: {
-              roleId: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      }),
-      prisma.role.findMany({
-      select: {
-        id: true,
-        roleName: true,
+    const users = await prisma.user.findMany({
+      include: {
+        role: true,
+        workDivision: true,
       },
-    }),
-  ]);
-    return NextResponse.json({ users, roles });
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json({ users });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(
@@ -92,8 +75,8 @@ export async function POST(request: Request) {
         password: hashedPassword,
         name: body.fullName,
         phone: body.phone,
-        role: body.role,
-        workDivision: body.workDivision,
+        roleId: body.roleId,
+        workDivisionId: body.workDivisionId,
         employeeId: body.employeeId,
         address: body.address,
         residentId: body.residentId,

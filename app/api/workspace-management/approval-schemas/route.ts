@@ -2,12 +2,12 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 interface RequestStep {
-  role: string;
+  roleId: string;
   specificUserId?: string;
   budgetLimit?: number;
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
-  order: number;
+  stepOrder: number;  
 }
 
 export async function POST(request: Request) {
@@ -28,32 +28,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid approval steps' }, { status: 400 });
     }
 
-    // Parse workDivisions dan roles jika dalam bentuk string
-    // const workDivisions = typeof body.workDivisions === 'string' 
-    //   ? JSON.parse(body.workDivisions) 
-    //   : body.workDivisions;
-
-    // const roles = typeof body.roles === 'string'
-    //   ? JSON.parse(body.roles)
-    //   : body.roles;
-
     // Format data sebelum create
     const formattedData = {
       name: body.name,
       documentType: body.documentType,
       description: body.description || '',
-      // divisions: Array.isArray(workDivisions) ? workDivisions.join(',') : workDivisions,
-      // roles: Array.isArray(roles) ? roles.join(',') : roles,
-      divisions: body.workDivisions,
-      roles: body.roles,
+      workDivisionIds: body.workDivisions,
+      roleIds: body.roles,
       approvalSteps: {
         create: body.approvalSteps.map((step: RequestStep) => ({
-          role: step.role,
+          roleId: step.roleId,
           specificUserId: step.specificUserId,
           duration: step.duration,
           overtimeAction: step.overtimeAction,
           limit: step.budgetLimit,
-          order: step.order
+          stepOrder: step.stepOrder
         }))
       }
     };
@@ -87,20 +76,36 @@ export async function POST(request: Request) {
 // GET endpoint jika diperlukan
 export async function GET() {
   try {
-    const [ schemas, divisions, roles ] = await Promise.all([
+    const [approvalSchemas, roles, workDivisions] = await Promise.all([
       prisma.approvalSchema.findMany({
         include: {
-          approvalSteps: true,
+          approvalSteps: {
+            include: {
+              role: true,
+            },
+          }
         },
         orderBy: {
           createdAt: 'desc',
         },
       }),
-      prisma.workDivision.findMany(),
       prisma.role.findMany(),
+      prisma.workDivision.findMany()
     ]);
 
-    return NextResponse.json({ schemas, divisions, roles });
+    const transformedSchemas = approvalSchemas.map(schema => ({
+      ...schema,
+      applicableRoles: schema.roleIds ? 
+        roles.filter(role => 
+          JSON.parse(schema.roleIds || '[]').includes(role.id)
+        ) : [],
+      applicableWorkDivisions: schema.workDivisionIds ?
+        workDivisions.filter(div => 
+          JSON.parse(schema.workDivisionIds).includes(div.id)
+        ) : []
+    }));
+
+    return NextResponse.json({ approvalSchemas: transformedSchemas });
   } catch (error) {
     console.error('Failed to fetch schemas:', error);
     return NextResponse.json(

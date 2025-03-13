@@ -5,12 +5,12 @@ import Link from 'next/link';
 
 import { X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { formatDate, generateId } from '@/lib/utils';
+import { formatDate, formatISODate, generateId } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 
-interface Division {
+interface WorkDivision {
   id: string;
-  divisionName: string;
+  name: string;
 }
 interface FormData {
   projectCode: string;
@@ -26,38 +26,38 @@ export default function NewProjectPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [projectId, setProjectId] = useState<string>('');
+  const [projectCode, setProjectCode] = useState<string>('');
   const [requestDate, setRequestDate] = useState<string>('');
-  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [formData, setFormData] = useState<FormData>({
     projectCode: '',
     projectTitle: '',
     description: '',
     workDivisionId: '',
     year: new Date().getFullYear().toString(),
-    startDate: '',
-    finishDate: '',
+    startDate: formatISODate(new Date()),
+    finishDate: formatISODate(new Date()),
   });
 
-  const fetchDivisions = async () => {
+  const fetchWorkDivisions = async () => {
     try {
       const response = await fetch('/api/workspace-management/work-division');
-      if (!response.ok) throw new Error('Failed to fetch divisions');
+      if (!response.ok) throw new Error('Failed to fetch work divisions');
       
       const data = await response.json();
-      setDivisions(data.divisions || []);
+      setWorkDivisions(data.workDivisions || []);
     } catch (error) {
-      console.error('Error fetching divisions:', error);
+      console.error('Error fetching work divisions:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDivisions();
+    fetchWorkDivisions();
     // Generate ID dan request date
     const prefix = 'PRJ';
-    setProjectId(generateId(prefix));
+    setProjectCode(generateId(prefix));
     setRequestDate(formatDate(new Date()));
   }, []);
 
@@ -75,8 +75,7 @@ export default function NewProjectPage() {
         },
         body: JSON.stringify({
           ...formData,
-          projectId, // ID yang di-generate
-          requestDate, // Tanggal request yang di-generate
+          projectCode,
         }),
       });
 
@@ -106,16 +105,16 @@ export default function NewProjectPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">New Project</h1>
       
-      <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+      <Card>
         <div className="flex justify-between items-center text-sm text-gray-600 mb-6">
           <div>
-            ID: {projectId}
+            Project Code: <span className="font-bold">{projectCode}</span>
           </div>
           <div>
-            Request Date: {requestDate}
+            Request Date: <span className="font-bold">{requestDate}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -133,15 +132,15 @@ export default function NewProjectPage() {
                 required
               >
                 <option value="">Select Division</option>
-                {Array.isArray(divisions) && divisions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.divisionName}
+                {Array.isArray(workDivisions) && workDivisions.map((workDivision) => (
+                  <option key={workDivision.id} value={workDivision.id}>
+                    {workDivision.name}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-1.5">
                 Project Code <span className="text-red-500">*</span>
               </label>
@@ -152,7 +151,7 @@ export default function NewProjectPage() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block mb-1.5">

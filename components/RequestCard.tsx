@@ -29,7 +29,7 @@ interface RequestCardProps {
     specificUserIds: string[];
     roleIds: string[];
   };
-  approvers?: {
+  actors?: {
     specificUserId: string;
     roleId: string;
   };
@@ -53,9 +53,13 @@ export default function RequestCard({
   canCheck,
   canReview,
   reviewers,
-  approvers,
+  actors,
 }: RequestCardProps) {
 
+  console.log('actors: ', actors);
+  console.log('actors?.roleId === currentUserRole: ', actors?.roleId === currentUserRole);
+  console.log('canReview: ', canReview);
+  
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -144,22 +148,22 @@ export default function RequestCard({
 
       <div className="flex items-center gap-2 justify-end">
         {/* if any of the reviewers is current users */}
-        { canCheck && 
-          ( reviewers?.specificUserIds.includes(currentUserId) || reviewers?.roleIds.includes(currentUserRole) || requestor.id === currentUserId) && (
+        { canCheck && reviewers &&
+          ( reviewers.specificUserIds.includes(currentUserId) || reviewers.roleIds.includes(currentUserRole) || requestor.id === currentUserId) && (
             <button 
               onClick={onCheck}
               type="button"
               className={`px-4 py-2 border rounded-lg flex items-center gap-1 
               ${canReview && 
-                ( approvers?.specificUserId === currentUserId || 
-                  approvers?.roleId === currentUserRole) ? 
+                ( actors?.specificUserId === currentUserId || 
+                  actors?.roleId === currentUserRole) ? 
                   'bg-blue-600 text-white hover:bg-blue-700' : 
                   'bg-white hover:bg-gray-50'}`}
           >
             <ScanSearch className="w-5 h-5" />
-              Check {canReview && 
-                ( approvers?.specificUserId === currentUserId || 
-                  approvers?.roleId === currentUserRole) && 
+              Check {canReview && actors &&
+                ( actors.specificUserId === currentUserId || 
+                  actors.roleId === currentUserRole) && 
                   '& Review'}
           </button>
         )}

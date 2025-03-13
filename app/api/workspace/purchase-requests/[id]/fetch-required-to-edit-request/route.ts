@@ -15,7 +15,7 @@ export async function GET(
         items: {
           include: {
             vendor: true,
-            budgetItem: true,
+            // budgetItem: true,
           }
         },
         budget: {
@@ -30,9 +30,16 @@ export async function GET(
         },
         approvalSteps: {
           include: {
-            specificUserDetails: {
+            specificUser: {
               select: {
+                id: true,
                 name: true
+              }
+            },
+            role: {
+              select: {
+                id: true,
+                roleName: true
               }
             }
           }
@@ -72,7 +79,7 @@ export async function GET(
         include: {
           approvalSteps: {
             orderBy: {
-              order: 'asc'
+              stepOrder: 'asc'
             }
           }
         },
@@ -82,11 +89,44 @@ export async function GET(
       })
     ]);
 
+    const budget = await prisma.budget.findUnique({
+      where: {
+        id: purchaseRequest?.budget.id
+      },
+      include: {
+        project: true,
+        items: {
+          include: {
+            purchaseRequestItems: true,
+            vendor: true
+          }
+        }
+      }
+    });
+
+    // Filter items yang:
+    // 1. Belum ada di purchase request lain
+    // 2. Atau sudah ada di purchase request ini
+    const availableItems = budget?.items.filter(item => 
+      item.purchaseRequestItems.length === 0 || // belum digunakan di PR manapun
+      item.purchaseRequestItems.some(pri => pri.purchaseRequestId === params.id) // atau digunakan di PR ini
+    );
+
+    // return {
+    //   id: budget.id,
+    //   title: budget.title,
+    //   description: budget.description,
+    //   projectId: budget.projectId,
+    //   project: budget.project,
+    //   items: availableItems // Hanya tampilkan items yang available
+    // };
+
     return NextResponse.json({
       purchaseRequest: fixedPurchaseRequest,
       roles,
       users,
-      schemas
+      schemas,
+      availableItems: availableItems || []
     });
   } catch (error) {
     console.error('Error:', error);

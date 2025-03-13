@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Search, Filter, Plus } from 'lucide-react';
 import DivisionActions from './components/DivisionActions';
 import { WorkDivision } from '@/types/workDivision';
-import { User } from '@/types/user';
 import { stripHtmlTags } from '@/lib/utils';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
@@ -12,39 +11,36 @@ import Card from '@/components/ui/Card';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentDivisions = divisions.slice(startIndex, endIndex);
-
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/workspace-management/work-division');
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await response.json();
-      setDivisions(data.divisions);
-      setUsers(data.users);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      setError('Failed to load data');
-      setDivisions([]);
-      setUsers([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const currentDivisions = divisions?.slice(startIndex, endIndex) || [];
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/workspace-management/work-division');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        setDivisions(data.workDivisions || []);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        setError('Failed to load data');
+        setDivisions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchData();
   }, []);
+
 
   if (isLoading) return <LoadingSpin />
 
@@ -110,21 +106,21 @@ export default function WorkDivisionPage() {
               currentDivisions.map((division, index) => (
                 <tr key={division.id} className="border-b hover:bg-blue-50">
                   <td className="py-3 px-4">{startIndex + index + 1}</td>
-                  <td className="py-3 px-4">{division.divisionCode}</td>
-                  <td className="py-3 px-4">{division.divisionName}</td>
+                  <td className="py-3 px-4">{division.code}</td>
+                  <td className="py-3 px-4">{division.name}</td>
                   <td className="py-3 px-4">
                     {stripHtmlTags(division.description)}
                   </td>
                   <td className="py-3 px-4">
-                    {users.find(user => user.id === division.divisionHead)?.name || '-'}
+                    {division.head?.name || '-'}
                   </td>
                   <td className="py-3 px-4">
                     <DivisionActions 
-                      divisionId={division.id} 
+                      workDivisionId={division.id} 
                       onDelete={async () => {
                         const divisionsRes = await fetch('/api/workspace-management/work-division');
                         const divisionsData = await divisionsRes.json();
-                        setDivisions(divisionsData.divisions);
+                        setDivisions(divisionsData.workDivisions);
                       }} 
                     />
                   </td>

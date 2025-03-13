@@ -55,7 +55,7 @@ export async function PUT(
         roleCode: body.roleCode,
         roleName: body.roleName,
         description: body.description,
-        approvalLimit: body.approvalLimit,
+        budgetLimit: body.budgetLimit,
       },
     });
     return NextResponse.json(role);
@@ -75,7 +75,7 @@ export async function DELETE(
   try {
     // Check if role is being used in any purchase request approval
     const purchaseRequestApprovalsWithRole = await prisma.purchaseRequestApproval.findMany({
-      where: { role: params.id }
+      where: { roleId: params.id }
     });
 
     if (purchaseRequestApprovalsWithRole.length > 0) {  
@@ -87,7 +87,7 @@ export async function DELETE(
 
     // Check if role is being used in any approval step
     const approvalStepsWithRole = await prisma.approvalStep.findMany({
-      where: { role: params.id }
+      where: { roleId: params.id }
     });
 
     if (approvalStepsWithRole.length > 0) {
@@ -99,7 +99,7 @@ export async function DELETE(
 
     // Check if role is being used by any user
     const usersWithRole = await prisma.user.findMany({
-      where: { role: params.id }
+      where: { roleId: params.id }
     });
 
     if (usersWithRole.length > 0) {

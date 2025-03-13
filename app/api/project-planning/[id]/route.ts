@@ -6,14 +6,21 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const [project, divisions] = await Promise.all([
-      prisma.project.findUnique({
-        where: { 
-          id: params.id 
-        },
-      }),
-      prisma.workDivision.findMany()
-    ]);
+    const project = await prisma.project.findUnique({
+      where: { 
+        id: params.id 
+      },
+      include: {
+        workDivision: true,
+      },
+    });
+
+    const workDivisions = await prisma.workDivision.findMany({
+      select: {
+        id: true,
+        name: true,
+      }
+    })
 
     if (!project) {
       return NextResponse.json(
@@ -22,7 +29,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ project, divisions });
+    return NextResponse.json({ project, workDivisions });
   } catch (error) {
     console.error('Error fetching project:', error);
     return NextResponse.json(
@@ -42,7 +49,8 @@ export async function PUT(
     const project = await prisma.project.update({
       where: { id: params.id },
       data: {
-        projectTitle: body.projectTitle,
+        code: body.code,
+        title: body.title,
         year: body.year,
         workDivisionId: body.workDivisionId,
         status: body.status,

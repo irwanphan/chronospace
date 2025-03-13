@@ -44,30 +44,35 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  password      String
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  userRoles     UserRole[]
-  role          String
-  phone         String
-  workDivision  String
-  employeeId    String @unique
-  address       String?
-  residentId    String @unique
-  nationality   String
-  birthday      DateTime
-  lastLogin     DateTime?
-  createdAt     DateTime  @default(now())
-  access        UserAccess?
-  purchaseRequests PurchaseRequest[]
+  id                       String                    @id @default(cuid())
+  name                     String
+  email                    String                    @unique
+  password                 String
+  emailVerified            DateTime?
+  image                    String?
+  accounts                 Account[]
+  sessions                 Session[]
+  userRoles                UserRole[]
+  roleId                   String
+  role                     Role                      @relation(fields: [roleId], references: [id])
+  phone                    String
+  workDivisionId           String
+  workDivision             WorkDivision              @relation("workDivisionUsers", fields: [workDivisionId], references: [id])
+  employeeId               String                    @unique
+  address                  String?
+  residentId               String                    @unique
+  nationality              String
+  birthday                 DateTime
+  lastLogin                DateTime?
+  createdAt                DateTime                  @default(now())
+  access                   UserAccess?
+  purchaseRequests         PurchaseRequest[]
   purchaseRequestApprovals PurchaseRequestApproval[]
-  specificUserDetails PurchaseRequestApproval[] @relation("SpecificUser")
+  specificUserDetails      PurchaseRequestApproval[] @relation("SpecificUser")
   purchaseRequestHistories PurchaseRequestHistory[]
+  workDivisionHeadOf       WorkDivision[]            @relation("workDivisionHead")
+  specificUser             ApprovalStep[]            @relation("SpecificUser")
+
   @@map("users")
 }
 
@@ -77,259 +82,270 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-
   @@map("verification_tokens")
 }
 
 model Vendor {
-  id        String   @id @default(cuid())
-  vendorCode String  @unique
-  vendorName String
-  address   String?
-  phone     String
-  email     String  @unique
-  documents String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  budgetedItems BudgetedItem[]
+  id                   String                @id @default(cuid())
+  vendorCode           String                @unique
+  vendorName           String
+  address              String?
+  phone                String
+  email                String                @unique
+  documents            String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  budgetedItems        BudgetedItem[]
   purchaseRequestItems PurchaseRequestItem[]
 
   @@map("vendors")
 }
 
 model Role {
-  id            String   @id @default(cuid())
-  roleCode      String   @unique
-  roleName      String
-  description   String?
-  upperLevel    String?
-  approvalLimit Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userRoles     UserRole[]
+  id                       String                    @id @default(cuid())
+  roleCode                 String                    @unique
+  roleName                 String
+  description              String?
+  upperLevel               String?
+  budgetLimit              Float?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  userRoles                UserRole[]
+  purchaseRequestApprovals PurchaseRequestApproval[]
+  approvalSteps            ApprovalStep[]
+  user                     User[]
+  approvalSchemas          ApprovalSchema[]          @relation("ApprovalSchemaRoles")
 
   @@map("roles")
 }
 
 model WorkDivision {
-  id            String   @id @default(cuid())
-  divisionCode  String   @unique
-  divisionName  String
-  description   String?
-  upperDivision String?
-  divisionHead  String?
-  budgets       Budget[]
-  projects      Project[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                  String           @id @default(cuid())
+  code                String           @unique
+  name                String
+  description         String?
+  upperWorkDivisionId String?
+  upperWorkDivision   WorkDivision?    @relation("upperWorkDivision", fields: [upperWorkDivisionId], references: [id])
+  subDivisions        WorkDivision[]   @relation("upperWorkDivision")
+  headId              String?
+  head                User?            @relation("workDivisionHead", fields: [headId], references: [id])
+  budgets             Budget[]
+  projects            Project[]
+  user                User[]           @relation("workDivisionUsers")
+  approvalSchemas     ApprovalSchema[] @relation("ApprovalSchemaWorkDivisions")
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
   @@map("work_divisions")
 }
 
 model ApprovalSchema {
-  id            String   @id @default(cuid())
-  name          String
-  description   String?
-  documentType  String
-  approvalSteps ApprovalStep[]
-  divisions     String   // Array of division codes
-  roles         String? 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  documentType    String
+  approvalSteps   ApprovalStep[]
+  workDivisionIds String // Array of division codes
+  workDivisions   WorkDivision[] @relation("ApprovalSchemaWorkDivisions")
+  roleIds         String?
+  roles           Role[]         @relation("ApprovalSchemaRoles")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  @@map("approval_schemas")
   @@index([name])
+  @@map("approval_schemas")
 }
 
 model ApprovalStep {
-  id              String   @id @default(cuid())
-  schemaId        String
-  schema          ApprovalSchema @relation(fields: [schemaId], references: [id], onUpdate: Cascade)
-  role            String
-  specificUserId  String?
-  duration        Int
-  overtimeAction  String
-  limit           Float?
-  order           Int
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String         @id @default(cuid())
+  schemaId       String
+  schema         ApprovalSchema @relation(fields: [schemaId], references: [id], onUpdate: Cascade)
+  roleId         String
+  role           Role           @relation(fields: [roleId], references: [id], onUpdate: Cascade)
+  specificUserId String?
+  specificUser   User?          @relation("SpecificUser", fields: [specificUserId], references: [id])
+  duration       Int
+  overtimeAction String
+  budgetLimit    Float?
+  stepOrder      Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  @@map("approval_steps")
   @@index([schemaId])
+  @@map("approval_steps")
 }
 
 model UserRole {
   id        String   @id @default(cuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onUpdate: Cascade)
   roleId    String
+  role      Role     @relation(fields: [roleId], references: [id], onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onUpdate: Cascade)
-  role      Role     @relation(fields: [roleId], references: [id], onUpdate: Cascade)
 
   @@unique([userId, roleId])
   @@map("user_roles")
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  projectId   String   @unique
-  projectCode String
-  projectTitle String
-  description String?
+  id             String       @id @default(cuid())
+  code           String       @unique
+  title          String
+  description    String?
   workDivisionId String
   workDivision   WorkDivision @relation(fields: [workDivisionId], references: [id])
-  year        Int
-  startDate   DateTime
-  finishDate  DateTime
-  requestDate DateTime
-  status      String
-  budget      Budget?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  year           Int
+  startDate      DateTime
+  finishDate     DateTime
+  status         String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  budget         Budget?
 
-  @@map("projects")
   @@index([workDivisionId])
+  @@map("projects")
 }
 
 model Budget {
-  id            String   @id @default(cuid())
-  projectId     String   @unique
-  title         String
-  description   String?
-  year          Int
-  workDivisionId String
-  workDivision   WorkDivision @relation(fields: [workDivisionId], references: [id])
-  totalBudget   Float
-  startDate     DateTime
-  finishDate    DateTime
-  status        String   // e.g., "In Progress", "Completed", "Delayed"
+  id                    String            @id @default(cuid())
+  code                  String            @unique
+  projectId             String            @unique
+  project               Project           @relation(fields: [projectId], references: [id], onUpdate: Cascade)
+  title                 String
+  description           String?
+  year                  Int
+  workDivisionId        String
+  workDivision          WorkDivision      @relation(fields: [workDivisionId], references: [id])
+  totalBudget           Float
+  startDate             DateTime
+  finishDate            DateTime
+  status                String // e.g., "In Progress", "Completed", "Delayed"
   purchaseRequestStatus String? // e.g., "Submitted", "Not Submitted"
-  project       Project  @relation(fields: [projectId], references: [id], onUpdate: Cascade)
-  items         BudgetedItem[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  PurchaseRequest PurchaseRequest[]
+  items                 BudgetedItem[]
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  PurchaseRequest       PurchaseRequest[]
 
-  @@map("budgets")
   @@index([projectId])
   @@index([workDivisionId])
+  @@map("budgets")
 }
 
 model BudgetedItem {
-  id          String   @id @default(cuid())
-  budgetId    String
-  description String
-  qty         Int
-  unit        String
-  unitPrice   Float
-  vendorId    String
-  vendor      Vendor   @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
-  budget      Budget   @relation(fields: [budgetId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id                   String                @id @default(cuid())
+  budgetId             String
+  budget               Budget                @relation(fields: [budgetId], references: [id], onUpdate: Cascade)
+  description          String
+  qty                  Int
+  unit                 String
+  unitPrice            Float
+  vendorId             String
+  vendor               Vendor                @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
   purchaseRequestItems PurchaseRequestItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
-  @@map("budgeted_items")
   @@index([budgetId])
+  @@map("budgeted_items")
 }
 
 model UserAccess {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
   // Menu Access
-  menuAccess Json    @default("{}")
-  
+  menuAccess Json @default("{}")
+
   // Activity Access
   activityAccess Json @default("{}")
-  
+
   // Workspace Access
   workspaceAccess Json @default("{}")
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("user_accesses")
   @@index([userId])
+  @@map("user_accesses")
 }
 
 model PurchaseRequest {
-  id              String                    @id @default(cuid())
-  code            String                    @unique
-  budgetId        String
-  title           String
-  description     String?
-  status          String                    // e.g., "Draft", "Submitted", "Approved", "Rejected"
-  createdBy       String
-  user            User                      @relation(fields: [createdBy], references: [id])
-  items           PurchaseRequestItem[]
-  approvalSteps   PurchaseRequestApproval[]
-  budget          Budget                    @relation(fields: [budgetId], references: [id])
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
-  histories       PurchaseRequestHistory[]
+  id            String                    @id @default(cuid())
+  code          String                    @unique
+  budgetId      String
+  budget        Budget                    @relation(fields: [budgetId], references: [id])
+  title         String
+  description   String?
+  status        String // e.g., "Draft", "Submitted", "Approved", "Rejected"
+  createdBy     String
+  user          User                      @relation(fields: [createdBy], references: [id])
+  items         PurchaseRequestItem[]
+  approvalSteps PurchaseRequestApproval[]
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  histories     PurchaseRequestHistory[]
 
-  @@map("purchase_requests")
   @@index([budgetId])
+  @@map("purchase_requests")
 }
 
 model PurchaseRequestItem {
   id                String          @id @default(cuid())
   purchaseRequestId String
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
   budgetItemId      String
+  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id], onUpdate: Cascade)
   description       String
   qty               Int
   unit              String
   unitPrice         Float
   vendorId          String
   vendor            Vendor          @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
-  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
-  budgetItem        BudgetedItem    @relation(fields: [budgetItemId], references: [id], onDelete: Cascade)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
-  @@map("purchase_request_items")
   @@index([purchaseRequestId])
   @@index([budgetItemId])
+  @@map("purchase_request_items")
 }
 
 model PurchaseRequestApproval {
   id                String          @id @default(cuid())
   purchaseRequestId String
-  role             String
-  specificUser     String?
-  specificUserDetails User? @relation("SpecificUser", fields: [specificUser], references: [id])
-  stepOrder        Int
-  status           String          // e.g., "Pending", "Approved", "Rejected"
-  limit            Int?            // budget limit that can be approved by the selected role
-  duration         Int             // actual duration in days
-  overtime         String          // overtime action
-  comment          String?
-  approvedAt       DateTime?       // waktu approval/reject
-  approvedBy       String?         // optional field
-  user             User?           @relation(fields: [approvedBy], references: [id])  // make relation optional
-  purchaseRequest  PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
+  roleId            String
+  role              Role            @relation(fields: [roleId], references: [id], onUpdate: Cascade)
+  specificUserId    String?
+  specificUser      User?           @relation("SpecificUser", fields: [specificUserId], references: [id])
+  stepOrder         Int
+  status            String // e.g., "Pending", "Approved", "Rejected"
+  budgetLimit       Float? // budget limit that can be approved by the selected role
+  duration          Int // actual duration in days
+  overtimeAction    String // overtime action
+  comment           String?
+  actedAt           DateTime? // waktu approval/reject
+  actorId           String? // optional field
+  actor             User?           @relation(fields: [actorId], references: [id]) // make relation optional
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
-  @@map("purchase_request_approvals")
-  @@index([purchaseRequestId])
   @@unique([purchaseRequestId, stepOrder])
+  @@index([purchaseRequestId])
+  @@map("purchase_request_approvals")
 }
 
 model PurchaseRequestHistory {
   id                String          @id @default(cuid())
   purchaseRequestId String
-  action           String          // e.g., "SUBMITTED", "APPROVED", "DECLINED"
-  actorId          String          // user yang melakukan action
-  comment          String?         // optional comment
-  createdAt        DateTime        @default(now())
-  
-  actor            User            @relation(fields: [actorId], references: [id])
-  purchaseRequest  PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onUpdate: Cascade)
+  action            String // e.g., "SUBMITTED", "APPROVED", "DECLINED"
+  actorId           String // user yang melakukan action
+  actor             User            @relation(fields: [actorId], references: [id])
+  comment           String? // optional comment
+  createdAt         DateTime        @default(now())
 
-  @@map("purchase_request_histories")
   @@index([purchaseRequestId])
+  @@map("purchase_request_histories")
 }

@@ -19,7 +19,7 @@ export async function purchaseRequestSeeder() {
     include: {
       approvalSteps: {
         orderBy: {
-          order: 'asc'
+          stepOrder: 'asc'
         }
       }
     }
@@ -71,18 +71,18 @@ export async function purchaseRequestSeeder() {
       // Create approval steps
       const approvalSteps = approvalSchema.approvalSteps.map(step => ({
         purchaseRequestId: pr.id,
-        role: step.role,
-        specificUser: step.specificUserId,
-        stepOrder: step.order,
-        status: step.order < 3 ? 'Approved' : getRandomApprovalStatus(),
-        limit: step.limit ? Number(step.limit) : null,
+        roleId: step.roleId,
+        specificUserId: step.specificUserId,
+        stepOrder: step.stepOrder,
+        status: step.stepOrder < 3 ? 'Approved' : getRandomApprovalStatus(),
+        budgetLimit: step.budgetLimit ? Number(step.budgetLimit) : null,
         duration: step.duration,
-        overtime: step.overtimeAction,
-        comment: step.order < 3 ? 
-          `Approved by ${step.role}` : 
+        overtimeAction: step.overtimeAction,
+        comment: step.stepOrder < 3 ? 
+          `Approved by ${step.roleId}` : 
           getRandomComment(),
-        approvedAt: step.order < 3 ? new Date() : null,
-        approvedBy: step.order < 3 ? 
+        actedAt: step.stepOrder < 3 ? new Date() : null,
+        actorId: step.stepOrder < 3 ? 
           (step.specificUserId || 'fg71xui7r000asgpgraji935t') : 
           null
       }));

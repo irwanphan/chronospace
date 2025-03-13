@@ -1,10 +1,15 @@
+import { User } from "./user";
+
 export interface WorkDivision {
   id: string;
-  divisionCode: string;
-  divisionName: string;
+  code: string;
+  name: string;
   description: string;
-  upperDivision?: string; // Parent division ID
-  divisionHead?: string;  // Role ID of division head
+  upperWorkDivisionId?: string; // Parent division ID
+  headId?: string;  // Role ID of division head
   createdAt?: Date;
   updatedAt?: Date;
+  head?: User;
+  upperWorkDivision?: WorkDivision;
+  subDivisions?: WorkDivision[];
 } 

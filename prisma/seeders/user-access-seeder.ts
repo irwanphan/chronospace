@@ -45,6 +45,88 @@ export async function userAccessSeeder() {
         }
       },
       {
+        userId: 'g239g84h9g49q28g9hq82g9hf', // cfo user id
+        menuAccess: {
+          timeline: true,
+          workspace: true,
+          projectPlanning: true,
+          budgetPlanning: true,
+          userManagement: true,
+          workspaceManagement: true
+        },
+        activityAccess: {
+          createProject: true,
+          editProject: true,
+          deleteProject: false,
+          createBudget: true,
+          editBudget: true,
+          deleteBudget: false,
+          createWorkDivision: true,
+          editWorkDivision: true,
+          deleteWorkDivision: false,
+          createRole: true,
+          editRole: true,
+          deleteRole: false,
+          createVendor: true,
+          editVendor: true,
+          deleteVendor: false,
+          createApprovalSchema: true,
+          editApprovalSchema: true,
+          deleteApprovalSchema: false,
+          createUser: true,
+          editUser: true,
+          deleteUser: false,
+          manageUserAccess: false
+        },
+        workspaceAccess: {
+          createPurchaseRequest: true,
+          viewPurchaseRequest: true,
+          editPurchaseRequest: true,
+          reviewApprovePurchaseRequest: false
+        }
+      },
+      {
+        userId: '29ihvdiuw8r9bdjivue9289vh', // cto user id
+        menuAccess: {
+          timeline: true,
+          workspace: true,
+          projectPlanning: true,
+          budgetPlanning: true,
+          userManagement: true,
+          workspaceManagement: true
+        },
+        activityAccess: {
+          createProject: true,  
+          editProject: true,
+          deleteProject: false,
+          createBudget: true,
+          editBudget: true,
+          deleteBudget: false,
+          createWorkDivision: true, 
+          editWorkDivision: true,
+          deleteWorkDivision: false,
+          createRole: true,
+          editRole: true,
+          deleteRole: false,
+          createVendor: true,
+          editVendor: true,
+          deleteVendor: false,
+          createApprovalSchema: true,
+          editApprovalSchema: true,
+          deleteApprovalSchema: false,
+          createUser: true,
+          editUser: true,
+          deleteUser: false,
+          manageUserAccess: false
+        },
+        workspaceAccess: {
+          createPurchaseRequest: true,
+          viewPurchaseRequest: true,
+          editPurchaseRequest: true,
+          reviewApprovePurchaseRequest: false
+        }
+      },
+      {
         userId: 'fg71xui7r000asgpgraji935t', // staff user id
         menuAccess: {
           timeline: true,

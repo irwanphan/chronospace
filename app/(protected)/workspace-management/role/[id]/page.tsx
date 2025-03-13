@@ -83,11 +83,11 @@ export default function ViewRolePage({ params }: { params: { id: string } }) {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Approval Limit <span className="text-red-500">*</span>
+              Budget Limit <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={role.approvalLimit}
+              value={role.budgetLimit}
               className="w-full px-4 py-2 border rounded-lg"
               readOnly
             />

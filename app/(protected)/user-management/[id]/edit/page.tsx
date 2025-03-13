@@ -13,7 +13,7 @@ interface Role {
 
 interface Division {
   id: string;
-  divisionName: string;
+  name: string;
 }
 
 export default function EditUserPage({ params }: { params: { id: string } }) {
@@ -50,16 +50,16 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         
         const data = await response.json();
         setFormData({
-          name: data.name,
-          email: data.email,
-          phone: data.phone || '',
-          roleId: data.roleId,
-          workDivisionId: data.workDivisionId,
-          employeeId: data.employeeId,
-          address: data.address || '',
-          residentId: data.residentId,
-          nationality: data.nationality,
-          birthday: new Date(data.birthday).toISOString().split('T')[0],
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone || '',
+          roleId: data.user.roleId,
+          workDivisionId: data.user.workDivisionId,
+          employeeId: data.user.employeeId,
+          address: data.user.address || '',
+          residentId: data.user.residentId,
+          nationality: data.user.nationality,
+          birthday: new Date(data.user.birthday).toISOString().split('T')[0],
           password: '',
           confirmPassword: '',
         });
@@ -197,7 +197,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
               >
                 <option value="">Select Division</option>
                 {divisions.map(division => (
-                  <option key={division.id} value={division.id}>{division.divisionName}</option>
+                  <option key={division.id} value={division.id}>{division.name}</option>
                 ))}
               </select>
             </div>

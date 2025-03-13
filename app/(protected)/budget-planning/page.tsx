@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react';
 import { Plus, Filter, Search } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { Budget } from '@/types/budget';
-import { WorkDivision } from '@/types/workDivision';
 import BudgetActions from './components/BudgetActions';
 import { calculateBudgetStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
@@ -17,7 +16,6 @@ import Card from '@/components/ui/Card';
 export default function BudgetPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
   const [stats, setStats] = useState({
     totalBudget: 0,
     totalPlans: 0,
@@ -45,7 +43,6 @@ export default function BudgetPlanningPage() {
         if (response.ok) {
           const data = await response.json();
           setBudgets(data.budgets);
-          setDivisions(data.divisions);
           setStats(calculateBudgetStats(data.budgets));
         }
       } catch (error) {
@@ -109,8 +106,7 @@ export default function BudgetPlanningPage() {
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">#</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Title</th>
-              {/* <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Year</th> */}
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Division</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Work Division</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Total Budget</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Start Date</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Finish Date</th>
@@ -123,8 +119,7 @@ export default function BudgetPlanningPage() {
               <tr key={budget.id} className="hover:bg-blue-50">
                 <td className="px-6 py-4 text-sm">{startIndex + index + 1}</td>
                 <td className="px-6 py-4 text-sm">{budget.title}</td>
-                {/* <td className="px-6 py-4 text-sm">{budget.year}</td> */}
-                <td className="px-6 py-4 text-sm">{divisions.find(d => d.id === budget.workDivisionId)?.divisionName}</td>
+                <td className="px-6 py-4 text-sm">{budget.workDivision.name}</td>
                 <td className="px-6 py-4 text-sm">{formatCurrency(budget.totalBudget)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.startDate)}</td>
                 <td className="px-6 py-4 text-sm">{formatDate(budget.finishDate)}</td>
@@ -139,7 +134,6 @@ export default function BudgetPlanningPage() {
                       const response = await fetch('/api/budget-planning');
                       const data = await response.json();
                       setBudgets(data.budgets);
-                      setDivisions(data.divisions);
                       setStats(calculateBudgetStats(data.budgets));
                     }} 
                   />

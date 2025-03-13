@@ -36,12 +36,19 @@ export async function GET() {
 
     const [roles, users, schemas] = await Promise.all([
       prisma.role.findMany(),
-      prisma.user.findMany(),
+      prisma.user.findMany({
+        include: {
+          role: true
+        }
+      }),
       prisma.approvalSchema.findMany({
         include: {
           approvalSteps: {
+            include: {
+              role: true
+            },
             orderBy: {
-              order: 'asc'
+              stepOrder: 'asc'
             }
           }
         },

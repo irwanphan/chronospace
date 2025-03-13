@@ -6,7 +6,7 @@ import { Search, Filter, Plus } from 'lucide-react';
 import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
 import { WorkDivision } from '@/types/workDivision';
 import { Role } from '@/types/role';
-import { stripHtmlTags } from '@/lib/utils';
+import { stripHtmlTags, formatCurrency } from '@/lib/utils';
 import SchemaActions from './components/SchemaActions';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Pagination from '@/components/Pagination';
@@ -14,8 +14,6 @@ import Card from '@/components/ui/Card';
 
 export default function ApprovalSchemaPage() {
   const [schemas, setSchemas] = useState<ApprovalSchema[]>([]);
-  const [divisions, setDivisions] = useState<WorkDivision[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,72 +23,42 @@ export default function ApprovalSchemaPage() {
   const endIndex = startIndex + itemsPerPage;
   const currentSchemas = schemas.slice(startIndex, endIndex);
 
-  const fetchSchemas = async () => {
-    try {
-      const response = await fetch('/api/workspace-management/approval-schemas');
-      if (!response.ok) throw new Error('Failed to fetch schemas');
-      const data = await response.json();
-      setSchemas(data.schemas || []);
-      setDivisions(data.divisions);
-      setRoles(data.roles);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch schemas:', error);
-      setError('Failed to load approval schemas');
-    }
-  };
+  console.log('schemas : ', schemas)
 
   useEffect(() => {
+    const fetchSchemas = async () => {
+      try {
+        const response = await fetch('/api/workspace-management/approval-schemas');
+        if (!response.ok) throw new Error('Failed to fetch schemas');
+        const data = await response.json();
+        setSchemas(data.approvalSchemas || []);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch schemas:', error);
+        setError('Failed to load approval schemas');
+      }
+    };
     fetchSchemas();
   }, []);
 
-  const getDivisionNames = (schema: ApprovalSchema) => {
-    if (!schema.divisions) return '';
-    
-    let divisionList: string[];
-    try {
-      // Handle berbagai format data
-      if (typeof schema.divisions === 'string') {
-        // Jika string dimulai dengan '[', berarti array dalam string
-        divisionList = schema.divisions.startsWith('[') 
-          ? JSON.parse(schema.divisions)
-          : [schema.divisions];
-      } else {
-        divisionList = schema.divisions;
-      }
-
-      return divisions
-        .filter(div => divisionList.includes(div.id || ''))
-        .map(div => div.divisionName)
-        .join(', ');
-    } catch (error) {
-      console.error('Error parsing divisions:', error);
-      return schema.divisions.toString();  // Fallback: tampilkan data mentah
-    }
+  const getDivisionNames = (applicableWorkDivisions: WorkDivision[]) => {
+    if (!applicableWorkDivisions) return '';
+    const workDivisionList = applicableWorkDivisions.map(division => division.id);
+    const workDivisionNames = applicableWorkDivisions
+      .filter(division => workDivisionList.includes(division.id || ''))
+      .map(division => division.name)
+      .join(', ');
+    return workDivisionNames;
   };
 
-  const getRoleNames = (schema: ApprovalSchema) => {
-    if (!schema.roles) return '';
-    
-    let roleList: string[];
-    try {
-      // Coba parse jika dalam format JSON string
-      roleList = typeof schema.roles === 'string'
-        ? (schema.roles as string).startsWith('[')
-          ? JSON.parse(schema.roles as string)
-          : [schema.roles]
-        : schema.roles;
-    } catch {
-      // Fallback jika parsing gagal
-      roleList = typeof schema.roles === 'string' 
-        ? [schema.roles] 
-        : schema.roles;
-    }
-
-    return roles
-      .filter(role => roleList.includes(role.id || ''))
+  const getRoleNames = (applicableRoles: Role[]) => {
+    if (!applicableRoles) return '';
+    const roleList = applicableRoles.map(role => role.id);
+    const roleNames = applicableRoles
+      .filter(role => roleList.includes(role.id))
       .map(role => role.roleName)
       .join(', ');
+    return roleNames;
   };
 
   const refreshData = async () => {
@@ -99,8 +67,6 @@ export default function ApprovalSchemaPage() {
       const refreshData = await fetch('/api/workspace-management/approval-schemas');
       const data = await refreshData.json();
       setSchemas(data.schemas);
-      setDivisions(data.divisions);
-      setRoles(data.roles);
     } catch (error) {
       console.error('Failed to refresh data:', error);
       setError('Failed to refresh data');
@@ -174,13 +140,13 @@ export default function ApprovalSchemaPage() {
                 <div>
                   <span className="font-medium">Applicable Work Divisions:</span>
                   <p className="text-gray-600">
-                    {getDivisionNames(schema)}
+                    {getDivisionNames(schema.applicableWorkDivisions)}
                   </p>
                 </div>
                 <div>
                   <span className="font-medium">Applicable Roles:</span>
                   <p className="text-gray-600">
-                    {getRoleNames(schema)}
+                    {getRoleNames(schema.applicableRoles)}
                   </p>
                 </div>
                 {schema.description && (
@@ -198,15 +164,11 @@ export default function ApprovalSchemaPage() {
                     <div key={step.id} className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">Step {index + 1}:</span>
                       <span>
-                        {roles.find(r => r.id === step.role)?.roleName}
+                        {step.role.roleName}
                       </span>
-                      {step.limit && (
+                      {step.budgetLimit && (
                         <span className="text-gray-500">
-                          {new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                          }).format(step.limit)}
+                          {formatCurrency(step.budgetLimit)}
                         </span>
                       )}
                       <span>{step.duration}d</span>

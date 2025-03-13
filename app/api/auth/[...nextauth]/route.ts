@@ -77,7 +77,7 @@ export const authOptions: AuthOptions = {
           }
         });
 
-        // console.log("Found user:", user); // Debug log
+        console.log("Found user:", user); // Debug log
 
         if (!user) {
           // console.log("No user found for email:", credentials.email); // Debug log
@@ -136,7 +136,7 @@ export const authOptions: AuthOptions = {
       user: User | AdapterUser | null;
     }) {
       if (user) {
-        token.role = (user as CustomUser).role;
+        token.roleId = (user as CustomUser).roleId;
       }
       return token;
     },
@@ -147,9 +147,9 @@ export const authOptions: AuthOptions = {
         });
 
         session.user.id = token.sub;
-        session.user.role = token.role as string;
-        session.user.roleId = (await prisma.user.findUnique({
-          where: { id: token.sub },
+        session.user.roleId = token.roleId as string;
+        session.user.role = (await prisma.role.findUnique({
+          where: { id: token.roleId as string },
           include: {
             userRoles: {
               include: {
@@ -157,7 +157,7 @@ export const authOptions: AuthOptions = {
               }
             }
           }
-        }))?.userRoles[0]?.roleId || '';
+        }))?.roleName || '';
         session.user.access = {
           menuAccess: (userAccess?.menuAccess as unknown as MenuAccess) || {
             timeline: false,

@@ -8,8 +8,8 @@ import Card from '@/components/ui/Card';
 
 interface WorkDivision {
   id: string;
-  divisionCode: string;
-  divisionName: string;
+  code: string;
+  name: string;
 }
 
 interface User {
@@ -24,11 +24,11 @@ export default function NewWorkDivisionPage() {
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState({
-    divisionCode: '',
-    divisionName: '',
+    code: '',
+    name: '',
     description: '',
-    upperDivision: '',
-    divisionHead: '',
+    upperWorkDivisionId: '',
+    headId: '',
   });
   const [errors, setErrors] = useState<{
     divisionCode?: string;
@@ -101,12 +101,12 @@ export default function NewWorkDivisionPage() {
           <div className="space-y-4">
             <div>
               <label className="block mb-1.5">
-                Division Code <span className="text-red-500">*</span>
+                Work Division Code <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                value={formData.divisionCode}
-                onChange={(e) => setFormData(prev => ({ ...prev, divisionCode: e.target.value }))}
+                value={formData.code}
+                onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.divisionCode ? 'border-red-500' : ''}`}
                 placeholder="HR"
                 required
@@ -118,12 +118,12 @@ export default function NewWorkDivisionPage() {
 
             <div>
               <label className="block mb-1.5">
-                Division Name <span className="text-red-500">*</span>
+                Work Division Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                value={formData.divisionName}
-                onChange={(e) => setFormData(prev => ({ ...prev, divisionName: e.target.value }))}
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Human Resources"
                 required
@@ -132,7 +132,7 @@ export default function NewWorkDivisionPage() {
 
             <div>
               <label className="block mb-1.5">
-                Division Description
+                Work Division Description
               </label>
               <RichTextEditor
                 value={formData.description}
@@ -143,30 +143,30 @@ export default function NewWorkDivisionPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block mb-1.5">
-                  Upper Division (Parent)
+                  Upper Work Division (Parent)
                 </label>
                 <select
-                  value={formData.upperDivision}
-                  onChange={(e) => setFormData(prev => ({ ...prev, upperDivision: e.target.value }))}
+                  value={formData.upperWorkDivisionId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, upperWorkDivisionId: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 >
                   <option value="">-</option>
                   {workDivisions
-                    .filter(division => division.divisionCode !== formData.divisionCode)
+                    .filter(division => division.code !== formData.code)
                     .map((workDivision) => (
                       <option key={workDivision.id} value={workDivision.id}>
-                        {workDivision.divisionName}
+                        {workDivision.name}
                       </option>
                     ))}
                 </select>
               </div>
               <div>
                 <label className="block mb-1.5">
-                  Division Head
+                  Work Division Head
                 </label>
                 <select
-                  value={formData.divisionHead}
-                  onChange={(e) => setFormData(prev => ({ ...prev, divisionHead: e.target.value }))}
+                  value={formData.headId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, headId: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                 >
                   <option value="">-</option>

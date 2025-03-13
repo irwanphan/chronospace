@@ -4,7 +4,7 @@ export interface Role {
   roleName: string;
   description: string;
   upperLevel?: string; // Parent role ID
-  approvalLimit: number;
+  budgetLimit: number;
   createdAt?: Date;
   updatedAt?: Date;
 } 

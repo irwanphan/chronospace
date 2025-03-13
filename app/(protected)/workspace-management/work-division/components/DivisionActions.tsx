@@ -6,11 +6,11 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import { useRouter } from 'next/navigation';
 
 interface DivisionActionsProps {
-  divisionId: string;
+  workDivisionId: string;
   onDelete: () => void;
 }
 
-export default function DivisionActions({ divisionId, onDelete }: DivisionActionsProps) {
+export default function DivisionActions({ workDivisionId, onDelete }: DivisionActionsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function DivisionActions({ divisionId, onDelete }: DivisionAction
     if (!confirm('Are you sure you want to delete this work division?')) return;
 
     try {
-      const response = await fetch(`/api/workspace-management/work-division/${divisionId}`, {
+      const response = await fetch(`/api/workspace-management/work-division/${workDivisionId}`, {
         method: 'DELETE',
       });
 
@@ -43,7 +43,7 @@ export default function DivisionActions({ divisionId, onDelete }: DivisionAction
   return (
     <div className="relative flex items-center gap-2 transition-all duration-300" ref={dropdownRef}>
       <Link
-        href={`/workspace-management/work-division/${divisionId}`}
+        href={`/workspace-management/work-division/${workDivisionId}`}
         className="p-1 cursor-pointer w-6 h-6 hover:text-blue-500 rounded-full"
       >
         <Eye className="w-4 h-4" />
@@ -61,7 +61,7 @@ export default function DivisionActions({ divisionId, onDelete }: DivisionAction
           <button
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/workspace-management/work-division/${divisionId}/edit`);
+              router.push(`/workspace-management/work-division/${workDivisionId}/edit`);
               setShowDropdown(false);
             }}
             className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"

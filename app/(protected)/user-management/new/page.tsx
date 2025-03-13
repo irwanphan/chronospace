@@ -13,8 +13,8 @@ interface FormData {
   fullName: string;
   email: string;
   phone: string;
-  role: string;
-  workDivision: string;
+  roleId: string;
+  workDivisionId: string;
   employeeId: string;
   address: string;
   residentId: string;
@@ -33,8 +33,8 @@ export default function NewUserPage() {
     fullName: '',
     email: '',
     phone: '',
-    role: '',
-    workDivision: '',
+    roleId: '',
+    workDivisionId: '',
     employeeId: '',
     address: '',
     residentId: '',
@@ -46,14 +46,13 @@ export default function NewUserPage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
 
-  const fetchData = async () => {
-    const response = await fetch('/api/user-management/fetch-roles-divisions');
-    const data = await response.json();
-    setRoles(data.roles);
-    setWorkDivisions(data.workDivisions);
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/user-management/fetch-roles-divisions');
+      const data = await response.json();
+      setRoles(data.roles);
+      setWorkDivisions(data.workDivisions);
+    };
     fetchData();
   }, []);
 
@@ -161,8 +160,8 @@ export default function NewUserPage() {
               Role <span className="text-red-500">*</span>
             </label>
             <select
-              value={formData.role}
-              onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
+              value={formData.roleId}
+              onChange={(e) => setFormData(prev => ({ ...prev, roleId: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               required
             >
@@ -178,14 +177,14 @@ export default function NewUserPage() {
               Work Division <span className="text-red-500">*</span>
             </label>
             <select
-              value={formData.workDivision}
-              onChange={(e) => setFormData(prev => ({ ...prev, workDivision: e.target.value }))}
+              value={formData.workDivisionId}
+              onChange={(e) => setFormData(prev => ({ ...prev, workDivisionId: e.target.value }))}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
               required
             >
               <option value="">Select Division</option>
               {workDivisions.map(workDivision => (
-                <option key={workDivision.id} value={workDivision.id}>{workDivision.divisionName}</option>
+                <option key={workDivision.id} value={workDivision.id}>{workDivision.name}</option>
               ))}
             </select>
           </div>

@@ -23,7 +23,7 @@ export async function GET() {
         id: true,
         roleName: true,
         description: true,
-        approvalLimit: true,
+        budgetLimit: true,
       },
       orderBy: {
         roleName: 'asc',
