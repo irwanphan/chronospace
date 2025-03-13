@@ -158,13 +158,20 @@ export default function RequestCard({
                 ( actors?.specificUserId === currentUserId || 
                   actors?.roleId === currentUserRole) ? 
                   'bg-blue-600 text-white hover:bg-blue-700' : 
-                  'bg-white hover:bg-gray-50'}`}
+                  'bg-white hover:bg-gray-50'}
+              ${status === "Revision" && requestor.id === currentUserId &&
+                  'bg-yellow-600 text-white hover:bg-yellow-700'}
+              `}
           >
             <ScanSearch className="w-5 h-5" />
               Check {canReview && actors &&
                 ( actors.specificUserId === currentUserId || 
                   actors.roleId === currentUserRole) && 
                   '& Review'}
+                {
+                  status === "Revision" && requestor.id === currentUserId &&
+                  '& Revision'
+                }
           </button>
         )}
       </div>
