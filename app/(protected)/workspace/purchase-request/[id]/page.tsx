@@ -601,7 +601,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
 function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHistory[] }) {
   return (
-    <div className="rounded-lg p-6 mb-6 border border-gray-200 bg-white">
+    <Card>
       <h2 className="text-lg font-medium mb-4">Request History</h2>
       <div className="space-y-2">
         {histories.map((history) => (
@@ -617,6 +617,6 @@ function PurchaseRequestHistory({ histories }: { histories: PurchaseRequestHisto
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 } 

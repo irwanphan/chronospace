@@ -107,7 +107,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
-  // console.log('selectedVendor', selectedVendor);
+  console.log('selectedVendor', selectedVendor);
   // console.log('selectedItems', selectedItems);
   // console.log('availableItems', availableItems);
 
@@ -234,7 +234,6 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
           setSelectedVendor(null);
         }
 
-        // update formData itemsIdReference
         setFormData(prevForm => ({
           ...prevForm,
           itemsIdReference: newItems.map(item => item.budgetItemId || item.id)
@@ -242,6 +241,11 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
         return newItems;
       });
     } else {
+      // Set vendor saat menambah item baru
+      if (!selectedVendor) {
+        setSelectedVendor(item.vendor.vendorName);
+      }
+      
       setSelectedItems(prev => {
         const newItems = [...prev, {
           ...item,
