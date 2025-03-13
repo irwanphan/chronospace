@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { stepOrder, approvedBy, comment } = body;
+    const { stepOrder, actorId, comment } = body;
 
     // Update dalam transaksi
     const result = await prisma.$transaction(async (tx) => {
@@ -21,8 +21,8 @@ export async function POST(
         },
         data: {
           status: 'Approved',
-          approvedBy,
-          approvedAt: new Date()
+          actorId,
+          actedAt: new Date()
         }
       });
 
@@ -31,7 +31,7 @@ export async function POST(
         data: {
           purchaseRequestId: params.id,
           action: 'Approved',
-          actorId: approvedBy,
+          actorId,
           comment
         }
       });

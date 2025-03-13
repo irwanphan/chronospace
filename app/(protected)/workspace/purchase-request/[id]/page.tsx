@@ -185,7 +185,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         },
         body: JSON.stringify({
           stepOrder: currentStep?.stepOrder,
-          approvedBy: session?.user?.id,
+          actorId: session?.user?.id,
           comment: declineComment || 'no comment',
           type: type
         })
@@ -222,7 +222,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
         },
         body: JSON.stringify({
           stepOrder: currentStep?.stepOrder,
-          approvedBy: session?.user?.id
+          actorId: session?.user?.id
         })
       });
 
