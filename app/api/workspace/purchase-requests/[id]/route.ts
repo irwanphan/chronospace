@@ -17,16 +17,6 @@ interface ApprovalStepUpdate {
   approvedBy: string | null;
 }
 
-interface BudgetItem {
-  id: string;
-  description: string;
-  qty: number;
-  unit: string;
-  unitPrice: number;
-  vendorId: string;
-  budgetItemId: string;
-}
-
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -122,9 +112,18 @@ export async function PUT(
 
     const body = await request.json();
 
-    console.log('received body', body);
-    console.log("Final items before updating:", body.items);
+    // console.log('received body', body);
+    // console.log("Final items before updating:", body.items);
 
+    const itemList = await prisma.budgetedItem.findMany({
+      where: {
+        AND: [
+          { budgetId: body.budgetId },
+          { id: { in: body.itemsIdReference } }
+        ]
+      }
+    });
+    
     const updatedRequest = await prisma.purchaseRequest.update({
       where: {
         id: params.id
@@ -132,29 +131,27 @@ export async function PUT(
       data: {
         title: body.title,
         description: body.description,
-        // Update items
         items: {
           deleteMany: {},
-          create: body.items.map((item: BudgetItem) => ({
-            budgetItemId: item.budgetItemId,
+          create: itemList.map((item) => ({
+            budgetItemId: item.id,
             description: item.description,
             qty: item.qty,
             unit: item.unit,
             unitPrice: item.unitPrice,
-            vendorId: item.vendorId,
-          }))
+            vendorId: item.vendorId
+          })),
         },
-        // Update approval steps
         approvalSteps: {
           deleteMany: {},
           create: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
-              roleId: step.roleId,
-              specificUserId: step.specificUserId,
-              stepOrder: index + 1,
-              status: "Pending",
-              budgetLimit: step.budgetLimit,
-              duration: step.duration,
-              overtimeAction: step.overtimeAction
+            roleId: step.roleId,
+            specificUserId: step.specificUserId,
+            stepOrder: index + 1,
+            status: "Pending",
+            budgetLimit: step.budgetLimit,
+            duration: step.duration,
+            overtimeAction: step.overtimeAction
           }))
         }
       },
@@ -167,6 +164,9 @@ export async function PUT(
         approvalSteps: true
       }
     });
+
+    // console.log('updatedRequest', updatedRequest);
+    // console.log('itemList', itemList);
 
     return NextResponse.json(updatedRequest);
   } catch (error) {

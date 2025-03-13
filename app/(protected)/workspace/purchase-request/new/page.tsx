@@ -15,6 +15,7 @@ import { toast } from 'react-hot-toast';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
 import { IconListCheck } from '@tabler/icons-react';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface BudgetPlan {
   id: string;
@@ -52,6 +53,7 @@ interface ApprovalStepForm {
 export default function NewPurchaseRequestPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budgetPlans, setBudgetPlans] = useState<BudgetPlan[]>([]);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
@@ -83,6 +85,7 @@ export default function NewPurchaseRequestPage() {
   // Hapus state yang tidak digunakan
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  console.log('selectedItems', selectedItems);
 
   useEffect(() => {
     setRequestInfo({
@@ -94,23 +97,24 @@ export default function NewPurchaseRequestPage() {
     });
   }, [session]);
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch('/api/workspace/purchase-requests/fetch-roles-schemas-users-availablebudgets');
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetched schemas:', data.schemas); // Debug log
-        setRoles(data.roles);
-        setUsers(data.users);
-        setSchemas(data.schemas);
-        setBudgetPlans(data.availableBudgets);
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/workspace/purchase-requests/fetch-roles-schemas-users-availablebudgets');
+        if (response.ok) {
+          const data = await response.json();
+          // console.log('Fetched schemas:', data.schemas); // Debug log
+          setRoles(data.roles);
+          setUsers(data.users);
+          setSchemas(data.schemas);
+          setBudgetPlans(data.availableBudgets);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchData();
   }, []);
 
@@ -270,6 +274,8 @@ export default function NewPurchaseRequestPage() {
       setSelectedVendor(item.vendor.vendorName);
     }
   };
+
+  if (isLoading) return <LoadingSpin />;
 
   return (
     <div className="max-w-4xl">

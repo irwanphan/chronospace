@@ -290,7 +290,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       </Card>
 
       <Card>
-        <form>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="space-y-6">
             <h2 className="text-xl font-semibold mb-4">Request Information</h2>
 

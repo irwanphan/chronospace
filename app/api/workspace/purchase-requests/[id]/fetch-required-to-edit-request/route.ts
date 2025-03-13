@@ -15,7 +15,7 @@ export async function GET(
         items: {
           include: {
             vendor: true,
-            budgetItem: true,
+            // budgetItem: true,
           }
         },
         budget: {
@@ -103,10 +103,14 @@ export async function GET(
         }
       }
     });
+
+    // Filter items yang:
+    // 1. Belum ada di purchase request lain
+    // 2. Atau sudah ada di purchase request ini
     const availableItems = budget?.items.filter(item => 
-      item.purchaseRequestItems.length === 0
+      item.purchaseRequestItems.length === 0 || // belum digunakan di PR manapun
+      item.purchaseRequestItems.some(pri => pri.purchaseRequestId === params.id) // atau digunakan di PR ini
     );
-    
 
     // return {
     //   id: budget.id,
@@ -122,10 +126,7 @@ export async function GET(
       roles,
       users,
       schemas,
-      availableItems: [
-        ...(availableItems || []),
-        ...(purchaseRequest?.items || [])
-      ]
+      availableItems: availableItems || []
     });
   } catch (error) {
     console.error('Error:', error);

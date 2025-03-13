@@ -23,7 +23,8 @@ interface FormData {
   title: string;
   description: string;
   createdBy: string;
-  items: BudgetItem[];
+  // items: BudgetItem[];
+  itemsIdReference: string[];
   steps: ApprovalStepForm[];
 }
 
@@ -37,6 +38,7 @@ interface ApprovalStepForm {
 
 interface BudgetItem {
   id: string;
+  budgetItemId: string;
   description: string;
   qty: number;
   unit: string;
@@ -47,6 +49,9 @@ interface BudgetItem {
   };
   isSubmitted?: boolean;
   purchaseRequestId?: string;
+  budgetItem: {
+    id: string;
+  }
 }
 
 interface PurchaseRequest {
@@ -80,7 +85,8 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
     title: '',
     description: '',
     createdBy: '',
-    items: [],
+    itemsIdReference: [],
+    // items: [],
     steps: []
   });
   const [headerInfo, setHeaderInfo] = useState({
@@ -101,9 +107,9 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
-  console.log('selectedVendor', selectedVendor);
-  console.log('selectedItems', selectedItems);
-  console.log('availableItems', availableItems);
+  // console.log('selectedVendor', selectedVendor);
+  // console.log('selectedItems', selectedItems);
+  // console.log('availableItems', availableItems);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -129,7 +135,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
             title: data.purchaseRequest.title,
             createdBy: data.purchaseRequest.createdBy,
             description: data.purchaseRequest.description,
-            items: data.purchaseRequest.items,
+            itemsIdReference: data.purchaseRequest.items.map((item: BudgetItem) => item.id),
             steps: data.purchaseRequest.approvalSteps.map((step: ApprovalStep) => ({
               roleId: step.roleId,
               specificUserId: step.specificUserId,
@@ -138,19 +144,11 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
               overtimeAction: step.overtimeAction
             }))
           });
+          // initialize selectedItems and availableItems
           setSelectedItems(data.purchaseRequest.items);
           setAvailableItems(data.availableItems);
-          // setSelectedItems(data.purchaseRequest.items.map((item: BudgetItem) => ({
-          //   id: item.id,
-          //   description: item.description,
-          //   qty: item.qty,
-          //   unit: item.unit,
-          //   unitPrice: item.unitPrice,
-          //   vendor: {
-          //     vendorName: item.vendor?.vendorName
-          //   }
-          // })));
 
+          // initialize selectedVendor if there are items
           if (data.purchaseRequest.items.length > 0) {
             setSelectedVendor(data.purchaseRequest.items[0].vendor.vendorName);
           }
@@ -219,44 +217,49 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
       return;
     }
 
-    // Check if item is already selected by comparing description and vendor
     const isSelected = selectedItems.some(selectedItem => 
       selectedItem.description === item.description && 
       selectedItem.vendor.vendorName === item.vendor.vendorName
     );
     
     if (isSelected) {
-      // Remove item by matching description and vendor
-      setSelectedItems(prev => prev.filter(selectedItem => 
-        !(selectedItem.description === item.description && 
-          selectedItem.vendor.vendorName === item.vendor.vendorName)
-      ));
-      if (selectedItems.length === 1) {
-        setSelectedVendor(null);
-      }
+      setSelectedItems(prev => {
+        const newItems = prev.filter(selectedItem => 
+          !(selectedItem.description === item.description && 
+            selectedItem.vendor.vendorName === item.vendor.vendorName)
+        );
+        
+        // Reset selectedVendor jika tidak ada item yang dipilih
+        if (newItems.length === 0) {
+          setSelectedVendor(null);
+        }
+
+        // update formData itemsIdReference
+        setFormData(prevForm => ({
+          ...prevForm,
+          itemsIdReference: newItems.map(item => item.budgetItemId || item.id)
+        }));
+        return newItems;
+      });
     } else {
-      if (selectedVendor && item.vendor.vendorName !== selectedVendor) {
-        setError('Cannot select items from different vendors in one request');
-        return;
-      }
-      setSelectedItems(prev => [...prev, item]);
-      setSelectedVendor(item.vendor.vendorName);
+      setSelectedItems(prev => {
+        const newItems = [...prev, {
+          ...item,
+          budgetItemId: item.id
+        }];
+        setFormData(prevForm => ({
+          ...prevForm,
+          itemsIdReference: newItems.map(item => item.budgetItemId || item.id)
+        }));
+        return newItems;
+      });
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    setFormData(prev => ({
-      ...prev,
-      items: selectedItems.map(item => ({
-        ...item,
-        budgetItemId: item.id
-      }))
-    }));
-
-    console.log('formData', formData);
+    // console.log('formData', formData);
 
     try {
       const response = await fetch(`/api/workspace/purchase-requests/${params.id}`, {
@@ -268,12 +271,11 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
       });
 
       if (!response.ok) throw new Error('Failed to update request');
-
-      router.push(`/workspace/purchase-request/${params.id}`);
     } catch (error) {
       console.error('Error:', error);
       setError('Failed to update request');
     } finally {
+      router.push(`/workspace/purchase-request/${params.id}`);
       setIsSubmitting(false);
     }
   };
@@ -282,7 +284,6 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
 
   return (
     <div>
-
       <div className="space-y-8 max-w-4xl">
         <h1 className="text-2xl font-semibold mb-4">Edit Purchase Request</h1>
 
