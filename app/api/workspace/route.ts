@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 
 export interface ApprovalStep {
   id: string;
-  role: string;
+  roleId: string;
   status: string;
   purchaseRequestId: string;
-  specificUser: string | null;
+  specificUserId: string | null;
   createdAt: Date;
   updatedAt: Date;
   order: number;
@@ -18,7 +18,7 @@ export interface ApprovalStep {
   } | null;
 }
 
-export const getViewers = (steps: ApprovalStep[]) => {
+export const getViewers = async (steps: ApprovalStep[]) => {
   const result = {
     specificUserIds: [] as string[],
     roleIds: [] as string[]
@@ -31,20 +31,20 @@ export const getViewers = (steps: ApprovalStep[]) => {
   sortedSteps.forEach(step => {
     // console.log('Processing step:', step); // Debug
     // Jika ada specificUser, tambahkan ke specificUserIds
-    if (step.specificUser && step.specificUser !== 'NULL') {
-      result.specificUserIds.push(step.specificUser);
+    if (step.specificUserId && step.specificUserId !== 'NULL') {
+      result.specificUserIds.push(step.specificUserId);
     }
-    // Jika tidak ada specificUser, tambahkan role
-    else {
-      result.roleIds.push(step.role);
+    // Jika tidak ada specificUser, tambahkan roleId
+    else if (step.roleId) {
+      result.roleIds.push(step.roleId);
     }
   });
 
-  // console.log('Final result:', result); // Debug
+  console.log('Final result getViewers: ', result); // Debug
   return result;
 };
 
-export const getCurrentApprover = (steps: ApprovalStep[]) => {
+export const getCurrentApprover = async (steps: ApprovalStep[]) => {
   const result = {
     specificUserId: '',
     roleId: ''
@@ -53,13 +53,14 @@ export const getCurrentApprover = (steps: ApprovalStep[]) => {
   const currentStep = steps.find(step => step.status === 'Updated' || step.status === 'Pending');
 
   if (currentStep) {
-    if (currentStep.specificUser && currentStep.specificUser !== 'NULL') {
-      result.specificUserId = currentStep.specificUser;
+    if (currentStep.specificUserId && currentStep.specificUserId !== 'NULL') {
+      result.specificUserId = currentStep.specificUserId;
     } else {
-      result.roleId = currentStep.role;
+      result.roleId = currentStep.roleId;
     }
   }
 
+  console.log('Final result getCurrentApprover: ', result); // Debug
   return result;
 };
 
@@ -144,15 +145,15 @@ export async function GET() {
     // //   });
     // // });
 
-    const fixedPurchaseRequests = purchaseRequests.map(request => {
-      const viewers = getViewers(request.approvalSteps as unknown as ApprovalStep[]);
-      const approvers = getCurrentApprover(request.approvalSteps as unknown as ApprovalStep[]);
+    const fixedPurchaseRequests = await Promise.all(purchaseRequests.map(async (request) => {
+      const viewers = await getViewers(request.approvalSteps as unknown as ApprovalStep[]);
+      const approvers = await getCurrentApprover(request.approvalSteps as unknown as ApprovalStep[]);
       return {
         ...request,
         viewers,
         approvers
       };
-    });
+    }));
 
     return NextResponse.json({ 
       purchaseRequests: fixedPurchaseRequests
