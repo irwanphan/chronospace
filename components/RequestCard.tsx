@@ -56,7 +56,6 @@ export default function RequestCard({
   actors,
 }: RequestCardProps) {
 
-  console.log('reviewers', reviewers);
   console.log('actors', actors);
 
   return (

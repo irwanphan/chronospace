@@ -151,7 +151,7 @@ export async function GET() {
       return {
         ...request,
         viewers,
-        approvers
+        actors: approvers
       };
     }));
 
