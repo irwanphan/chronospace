@@ -90,7 +90,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      <Card className="mb-8 overflow-hidden">
+      <Card className="mb-8">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
