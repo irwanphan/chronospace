@@ -14,7 +14,7 @@ export async function GET() {
     const availableProjects = await prisma.project.findMany({
       where: {
         id: {
-          notIn: budgetedProjectIds.map((b: { projectId: string }) => b.projectId)
+          notIn: budgetedProjectIds.map((b) => b.projectId)
         },
         status: {
           not: 'Allocated'
@@ -22,8 +22,8 @@ export async function GET() {
       },
       select: {
         id: true,
-        projectTitle: true,
-        projectCode: true,
+        title: true,
+        code: true,
         status: true,
         workDivisionId: true
       }

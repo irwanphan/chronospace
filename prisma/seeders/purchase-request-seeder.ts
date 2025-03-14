@@ -1,7 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { generateId } from "@/lib/utils";
-import { BudgetedItem } from "@/types/budget";
-import { ApprovalStep } from "@/types/approval-schema";
+
+interface BudgetedItem {
+  id: string;
+  description: string;
+  qty: number;
+  unit: string;
+  unitPrice: number;
+  vendorId: string;
+}
 
 export async function purchaseRequestSeeder() {
   // Get approval schema for Purchase Request
@@ -33,7 +40,7 @@ export async function purchaseRequestSeeder() {
 
   for (const budget of budgets) {
     // Group items by vendor
-    const itemsByVendor = budget.items.reduce((acc: Record<string, BudgetedItem[]>, item: BudgetedItem) => {
+    const itemsByVendor = budget.items.reduce((acc, item) => {
       if (!acc[item.vendorId]) {
         acc[item.vendorId] = [];
       }
@@ -42,7 +49,7 @@ export async function purchaseRequestSeeder() {
     }, {} as Record<string, BudgetedItem[]>);
 
     // For each vendor group, create a separate PR
-    for (const [vendorId, vendorItems] of Object.entries(itemsByVendor) as [string, BudgetedItem[]][]) {
+    for (const [vendorId, vendorItems] of Object.entries(itemsByVendor)) {
       // Skip if vendor has less than 2 items (optional)
       if (vendorItems.length < 2) continue;
 
@@ -56,13 +63,13 @@ export async function purchaseRequestSeeder() {
           status: 'Pending',
           createdBy: 'fg71xui7r000asgpgraji935t',
           items: {
-            create: generatePRItems(vendorItems as BudgetedItem[])
+            create: generatePRItems(vendorItems)
           }
         }
       });
 
       // Create approval steps
-      const approvalSteps = approvalSchema.approvalSteps.map((step: ApprovalStep) => ({
+      const approvalSteps = approvalSchema.approvalSteps.map(step => ({
         purchaseRequestId: pr.id,
         roleId: step.roleId,
         specificUserId: step.specificUserId,

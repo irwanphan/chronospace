@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ApprovalStep } from "@/types/approval-schema";
 import { NextResponse } from "next/server";
-import { PurchaseRequest } from "@/types/purchase-request";
 import { getViewers, getCurrentApprover } from "@/lib/helpers";
 
 export async function GET() {
@@ -48,7 +47,7 @@ export async function GET() {
       }),
     ]);
 
-    const fixedPurchaseRequests = await Promise.all(purchaseRequests.map(async (request: PurchaseRequest) => {
+    const fixedPurchaseRequests = await Promise.all(purchaseRequests.map(async (request) => {
       const viewers = await getViewers(request.approvalSteps as unknown as ApprovalStep[]);
       const approvers = await getCurrentApprover(request.approvalSteps as unknown as ApprovalStep[]);
       return {

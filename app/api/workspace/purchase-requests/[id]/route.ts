@@ -4,7 +4,6 @@ import { getViewers, getCurrentApprover } from '@/lib/helpers';
 import { ApprovalStep } from '@/types/approval-schema';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
-import { BudgetedItem } from '@/types/budget';
 
 interface ApprovalStepUpdate {
   roleId: string;
@@ -146,7 +145,7 @@ export async function PUT(
         description: body.description,
         items: {
           deleteMany: {},
-            create: itemList.map((item: BudgetedItem) => ({
+            create: itemList.map((item) => ({
             budgetItemId: item.id,
             description: item.description,
             qty: item.qty,

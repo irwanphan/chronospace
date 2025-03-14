@@ -62,6 +62,8 @@ model User {
   address                  String?
   residentId               String                    @unique
   nationality              String
+  gender                   String                    @default("Unknown")
+  birthplace               String?
   birthday                 DateTime
   lastLogin                DateTime?
   createdAt                DateTime                  @default(now())

@@ -2,13 +2,6 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getViewers, getCurrentApprover } from '@/lib/helpers';
 import { ApprovalStep } from '@/types/approval-schema';
-import { BudgetedItem } from '@/types/budget';
-import { PurchaseRequestItem } from '@/types/purchase-request';
-
-interface PurchaseRequestApprovalStep {
-  status: string;
-  stepOrder: number;
-}
 
 export async function GET(
   request: Request,
@@ -70,8 +63,8 @@ export async function GET(
     });
 
     const currentStep = purchaseRequest?.status === 'Updated' 
-      ? purchaseRequest.approvalSteps.filter((step: PurchaseRequestApprovalStep) => step.status === 'Updated').sort((a: PurchaseRequestApprovalStep, b: PurchaseRequestApprovalStep) => a.stepOrder - b.stepOrder)[0]
-      : purchaseRequest?.approvalSteps.filter((step: PurchaseRequestApprovalStep) => step.status === 'Pending').sort((a: PurchaseRequestApprovalStep, b: PurchaseRequestApprovalStep) => a.stepOrder - b.stepOrder)[0];
+      ? purchaseRequest.approvalSteps.filter(step => step.status === 'Updated').sort((a, b) => a.stepOrder - b.stepOrder)[0]
+      : purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
 
     const fixedPurchaseRequest = {
       ...purchaseRequest,
@@ -115,9 +108,9 @@ export async function GET(
     // Filter items yang:
     // 1. Belum ada di purchase request lain
     // 2. Atau sudah ada di purchase request ini
-    const availableItems = budget?.items.filter((item: BudgetedItem) => 
+    const availableItems = budget?.items.filter(item => 
       item.purchaseRequestItems.length === 0 || // belum digunakan di PR manapun
-      item.purchaseRequestItems.some((pri: PurchaseRequestItem) => pri.purchaseRequestId === params.id) // atau digunakan di PR ini
+      item.purchaseRequestItems.some(pri => pri.purchaseRequestId === params.id) // atau digunakan di PR ini
     );
 
     // return {

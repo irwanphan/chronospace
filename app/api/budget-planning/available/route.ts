@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { BudgetedItem } from '@/types/budget';
-import { Budget } from '@/types/budget';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -19,9 +17,9 @@ export async function GET() {
       }
     });
 
-    const availableBudgets = budgets.map((budget: Budget) => {
+    const availableBudgets = budgets.map((budget) => {
       // Filter items yang belum memiliki PR
-      const availableItems = budget.items.filter((item: BudgetedItem) => 
+      const availableItems = budget.items.filter((item) => 
         item.purchaseRequestItems.length === 0
       );
 
@@ -32,7 +30,7 @@ export async function GET() {
         project: budget.project,
         items: availableItems // Hanya tampilkan items yang available
       };
-    }).filter((budget: Budget) => budget.items.length > 0); // Hanya budget yang masih punya items
+    }).filter((budget) => budget.items.length > 0); // Hanya budget yang masih punya items
 
     return NextResponse.json(availableBudgets);
   } catch (error) {
