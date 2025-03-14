@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import { Role, WorkDivision } from '@prisma/client';
+import { Role } from '@/types/role';
+import { WorkDivision } from '@/types/work-division';
+
 interface UserPost {
   email: string;
   password: string;

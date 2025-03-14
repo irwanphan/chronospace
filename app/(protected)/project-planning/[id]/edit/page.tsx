@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDate, formatISODate } from '@/lib/utils';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { WorkDivision } from '@prisma/client';
+import { WorkDivision } from '@/types/work-division';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 

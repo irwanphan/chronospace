@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BudgetedItem } from '@prisma/client';
+import { BudgetItem } from '@/types/budget';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch specific budget
@@ -90,12 +90,12 @@ export async function PUT(
           description: body.description,
           items: {
             createMany: {
-              data: body.items.map((item: BudgetedItem) => ({
+              data: body.items.map((item: BudgetItem) => ({
                 description: item.description,
                 qty: Number(item.qty),
                 unit: item.unit,
                 unitPrice: Number(item.unitPrice),
-                vendorId: item.vendorId,
+                vendorId: item.vendor.vendorId,
               }))
             }
           }
