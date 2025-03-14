@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BudgetItem } from '@/types/budget';
+import { BudgetedItem } from '@/types/budget';
 import { Budget } from '@/types/budget';
 import { NextResponse } from 'next/server';
 
@@ -21,7 +21,7 @@ export async function GET() {
 
     const availableBudgets = budgets.map((budget: Budget) => {
       // Filter items yang belum memiliki PR
-      const availableItems = budget.items.filter((item: BudgetItem) => 
+      const availableItems = budget.items.filter((item: BudgetedItem) => 
         item.purchaseRequestItems.length === 0
       );
 

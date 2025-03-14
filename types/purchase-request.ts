@@ -18,8 +18,14 @@ export interface PurchaseRequest {
 
 export interface PurchaseRequestItem {
   id: string;
+  purchaseRequestId: string;
   description: string;
   qty: number;
   unit: string;
   unitPrice: number;
+  vendorId: string;
+  vendor: {
+    vendorId: string;
+    vendorName: string;
+  };
 }

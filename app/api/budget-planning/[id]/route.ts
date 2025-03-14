@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BudgetItem } from '@/types/budget';
+import { BudgetedItem } from '@/types/budget';
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
@@ -91,7 +91,7 @@ export async function PUT(
           description: body.description,
           items: {
             createMany: {
-              data: body.items.map((item: BudgetItem) => ({
+              data: body.items.map((item: BudgetedItem) => ({
                 description: item.description,
                 qty: Number(item.qty),
                 unit: item.unit,

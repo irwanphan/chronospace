@@ -6,6 +6,7 @@ export interface Budget {
   id: string;
   code: string;
   title: string;
+  description: string;
   year: number;
   totalBudget: number;
   startDate: string;
@@ -17,15 +18,16 @@ export interface Budget {
   workDivisionId: string;
   workDivision: WorkDivision;
   purchaseRequestStatus: string | null;
-  items: BudgetItem[];
+  items: BudgetedItem[];
 }
 
-export interface BudgetItem {
+export interface BudgetedItem {
   id: string;
   description: string;
   qty: number;
   unit: string;
   unitPrice: number;
+  vendorId: string;
   vendor: {
     vendorId: string;
     vendorName: string;

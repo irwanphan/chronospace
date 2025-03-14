@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-
+import { ApprovalSchema } from '@/types/approval-schema';
+import { Role } from '@/types/role';
+import { WorkDivision } from '@/types/work-division';
 interface RequestStep {
   roleId: string;
   specificUserId?: string;
@@ -93,15 +95,15 @@ export async function GET() {
       prisma.workDivision.findMany()
     ]);
 
-    const transformedSchemas = approvalSchemas.map(schema => ({
+    const transformedSchemas = approvalSchemas.map((schema: ApprovalSchema) => ({
       ...schema,
       applicableRoles: schema.roleIds ? 
-        roles.filter(role => 
-          JSON.parse(schema.roleIds || '[]').includes(role.id)
+        roles.filter((role: Role) => 
+          (Array.isArray(schema.roleIds) ? schema.roleIds : JSON.parse(schema.roleIds || '[]')).includes(role.id)
         ) : [],
       applicableWorkDivisions: schema.workDivisionIds ?
-        workDivisions.filter(div => 
-          JSON.parse(schema.workDivisionIds).includes(div.id)
+        workDivisions.filter((div: WorkDivision) => 
+          (Array.isArray(schema.workDivisionIds) ? schema.workDivisionIds : JSON.parse(schema.workDivisionIds || '[]')).includes(div.id)
         ) : []
     }));
 
