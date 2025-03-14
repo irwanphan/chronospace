@@ -18,14 +18,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  content,
 }: {
   children: React.ReactNode;
+  content?: React.ReactNode;
 }) {
   return (
     <html lang="en" className={`${montserrat.variable}`}>
       <body className={`font-montserrat`}>
         <AuthProvider>
           {children}
+          {content}
         </AuthProvider>
       </body>
     </html>

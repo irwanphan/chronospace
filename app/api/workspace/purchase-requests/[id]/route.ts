@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getViewers, getCurrentApprover, ApprovalStep } from '@/app/api/workspace/route';
+import { getViewers, getCurrentApprover } from '@/lib/helpers';
+import { ApprovalStep } from '@/types/approval-schema';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 

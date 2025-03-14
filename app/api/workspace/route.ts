@@ -9,7 +9,6 @@ export async function GET() {
     const [purchaseRequests] = await Promise.all([
       prisma.purchaseRequest.findMany({
         include: {
-          // items: true,
           budget: {
             include: {
               workDivision: {
@@ -48,42 +47,6 @@ export async function GET() {
         }
       }),
     ]);
-
-    // const getCurrentStep = (steps: ApprovalStep[]) => {
-    //   // Sort steps by order
-    //   const sortedSteps = steps.sort((a, b) => a.order - b.order);
-    //   // Find first PENDING step
-    //   for (const step of sortedSteps) {
-    //     if (step.status === "PENDING") {
-    //       return step;
-    //     }
-    //   }
-    //   return null;
-    // };
-
-    // const getSpecificUser = (steps: ApprovalStep | ApprovalStep[]) => {
-    //   if (Array.isArray(steps)) {
-    //     return steps.filter(step => step.specificUserId !== null);
-    //   } else {
-    //     return steps.specificUserId !== null;
-    //   }
-    // };
-    // const getRoles = (param: ApprovalStep[] | ApprovalStep) => {
-    //   const role = Array.isArray(param) ? param.map(step => step.role) : param.role;
-    //   return role;
-    // };
-
-    // // const listOfViewers = purchaseRequests.map(request => {
-    // //   const currentStep = getCurrentStep(request.approvalSteps);
-      
-    // //   const currentStepSpecificUser = getSpecificUser(request.approvalSteps);
-    // //   const currentStepRole = getRoles(currentStep);
-
-    // //   return checkIfSpecificUser.map(step => {
-    // //     console.log('approver', step.role);
-    // //     return step.role;
-    // //   });
-    // // });
 
     const fixedPurchaseRequests = await Promise.all(purchaseRequests.map(async (request: PurchaseRequest) => {
       const viewers = await getViewers(request.approvalSteps as unknown as ApprovalStep[]);
