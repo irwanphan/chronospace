@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { PurchaseRequest } from '@/types/purchase-request';
+import { User } from '@/types/user';
 
 interface ApprovalStep {
   roleId: string;
@@ -101,9 +103,9 @@ export async function GET() {
       })
     ]);
 
-    const purchaseRequests = purchaseRequestsRes.map(request => ({
+    const purchaseRequests = purchaseRequestsRes.map((request: PurchaseRequest) => ({
       ...request,
-      requestorName: users.find(user => user.id === request.createdBy)?.name || 'Unknown'
+      requestorName: users.find((user: User) => user.id === request.createdBy)?.name || 'Unknown'
     }));
 
     return NextResponse.json(purchaseRequests);

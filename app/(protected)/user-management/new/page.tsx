@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { X, Camera } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 import { Role } from '@/types/role';
 import Card from '@/components/ui/Card';
 

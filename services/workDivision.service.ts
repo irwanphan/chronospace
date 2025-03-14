@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 
 export const WorkDivisionService = {
   async create(data: Omit<WorkDivision, 'id' | 'createdAt' | 'updatedAt'>) {

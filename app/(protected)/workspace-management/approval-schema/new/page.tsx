@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Trash, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 import { Role } from '@/types/role';
 import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';

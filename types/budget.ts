@@ -1,5 +1,5 @@
 import { Project } from "@/types/project";
-import { WorkDivision } from "@/types/workDivision";
+import { WorkDivision } from "@/types/work-division";
 
 export interface Budget {
   id: string;

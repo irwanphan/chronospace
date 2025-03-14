@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Filter, Plus } from 'lucide-react';
 import DivisionActions from './components/DivisionActions';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 import { stripHtmlTags } from '@/lib/utils';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';

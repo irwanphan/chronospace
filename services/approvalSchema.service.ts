@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
+import { ApprovalSchema, ApprovalStep } from '@/types/approval-schema';
 
 export const ApprovalSchemaService = {
   async create(data: Omit<ApprovalSchema, 'id' | 'createdAt' | 'updatedAt'>) {

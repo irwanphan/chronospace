@@ -13,7 +13,7 @@ import { Modal } from '@/components/ui/Modal';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
-import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
+import { ApprovalSchema, ApprovalStep } from '@/types/approval-schema';
 import { IconListCheck } from '@tabler/icons-react';
 
 interface FormData {
