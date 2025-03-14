@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { BudgetedItem } from '@/types/budget';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 // GET: Fetch specific budget
 export async function GET(
@@ -59,7 +59,7 @@ export async function PUT(
     console.log('Received data:', body);
 
     // Use transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx: PrismaClient) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Delete purchase request items yang terkait dengan budgeted items
       await tx.purchaseRequestItem.deleteMany({
         where: {
@@ -146,7 +146,7 @@ export async function DELETE(
     }
 
     // Hapus dalam transaction untuk memastikan konsistensi
-    await prisma.$transaction(async (tx: PrismaClient) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Hapus purchase request items yang terkait dengan budgeted items
       await tx.purchaseRequestItem.deleteMany({
         where: {

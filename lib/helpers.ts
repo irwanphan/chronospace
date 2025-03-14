@@ -141,7 +141,7 @@ export const getViewers = async (steps: ApprovalStep[]) => {
   };
 
   // Sort steps by order
-  const sortedSteps = steps.sort((a, b) => a.order - b.order);
+  const sortedSteps = steps.sort((a, b) => a.stepOrder - b.stepOrder);
   
   // Cek setiap step
   sortedSteps.forEach(step => {

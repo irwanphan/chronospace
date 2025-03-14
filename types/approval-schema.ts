@@ -5,7 +5,7 @@ import { WorkDivision } from "./work-division";
 export interface ApprovalStep {
   id?: string;
   schemaId: string;
-  order: number;
+  stepOrder: number;
   status: string;
   roleId: string;
   role: Role;
