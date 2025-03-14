@@ -203,7 +203,7 @@ export default function NewApprovalSchemaPage() {
                 Apply to Work Division <span className="text-red-500">*</span>
               </label>
               <MultiSelect
-                options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
+                options={divisions.map(div => ({ id: div.id!, name: div.name }))}
                 value={formData.workDivisions}
                 onChange={(value) => setFormData(prev => ({ ...prev, workDivisions: value }))}
                 placeholder="Select work divisions..."
