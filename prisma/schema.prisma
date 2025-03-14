@@ -63,6 +63,7 @@ model User {
   residentId               String                    @unique
   nationality              String
   gender                   String                    @default("Unknown")
+  isActive                 Boolean                   @default(true)
   birthplace               String?
   birthday                 DateTime
   lastLogin                DateTime?
