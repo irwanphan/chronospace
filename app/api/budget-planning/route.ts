@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 
 // GET: Fetch all budgets
 export async function GET() {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Received request body:', body);
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const budget = await tx.budget.create({
         data: {
           code: body.code,

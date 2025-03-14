@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getViewers, getCurrentApprover, ApprovalStep } from '@/app/api/workspace/route';
+import { getViewers, getCurrentApprover } from '@/lib/helpers';
+import { ApprovalStep } from '@/types/approval-schema';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 interface ApprovalStepUpdate {
   roleId: string;
@@ -15,6 +16,11 @@ interface ApprovalStepUpdate {
   comment: string | null;
   approvedAt: Date | null;
   approvedBy: string | null;
+}
+
+interface PurchaseRequestApprovalStep {
+  status: string;
+  stepOrder: number;
 }
 
 export async function GET(
@@ -78,8 +84,8 @@ export async function GET(
     });
 
     const currentStep = purchaseRequest?.status === 'Updated' 
-      ? purchaseRequest.approvalSteps.filter(step => step.status === 'Updated').sort((a, b) => a.stepOrder - b.stepOrder)[0]
-      : purchaseRequest?.approvalSteps.filter(step => step.status === 'Pending').sort((a, b) => a.stepOrder - b.stepOrder)[0];
+      ? purchaseRequest.approvalSteps.filter((step: PurchaseRequestApprovalStep) => step.status === 'Updated').sort((a: PurchaseRequestApprovalStep, b: PurchaseRequestApprovalStep) => a.stepOrder - b.stepOrder)[0]
+      : purchaseRequest?.approvalSteps.filter((step: PurchaseRequestApprovalStep) => step.status === 'Pending').sort((a: PurchaseRequestApprovalStep, b: PurchaseRequestApprovalStep) => a.stepOrder - b.stepOrder)[0];
 
     const viewers = await getViewers(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]);
     const approvers = await getCurrentApprover(purchaseRequest?.approvalSteps as unknown as ApprovalStep[]);
@@ -139,7 +145,7 @@ export async function PUT(
         description: body.description,
         items: {
           deleteMany: {},
-          create: itemList.map((item) => ({
+            create: itemList.map((item) => ({
             budgetItemId: item.id,
             description: item.description,
             qty: item.qty,

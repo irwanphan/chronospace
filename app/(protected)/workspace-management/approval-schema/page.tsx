@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import { Search, Filter, Plus } from 'lucide-react';
-import { ApprovalSchema, ApprovalStep } from '@/types/approvalSchema';
-import { WorkDivision } from '@/types/workDivision';
+import { ApprovalSchema, ApprovalStep } from '@/types/approval-schema';
+import { WorkDivision } from '@/types/work-division';
 import { Role } from '@/types/role';
 import { stripHtmlTags, formatCurrency } from '@/lib/utils';
 import SchemaActions from './components/SchemaActions';

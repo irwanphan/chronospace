@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { X, Plus, Trash, Pencil } from 'lucide-react';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 import { Role } from '@/types/role';
 import { User } from '@/types/user';
 import MultiSelect from '@/components/MultiSelect';

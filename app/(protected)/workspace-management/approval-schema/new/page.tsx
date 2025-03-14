@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Trash, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 import { Role } from '@/types/role';
 import MultiSelect from '@/components/MultiSelect';
 import AddStepModal from '@/components/AddStepModal';
@@ -203,7 +203,7 @@ export default function NewApprovalSchemaPage() {
                 Apply to Work Division <span className="text-red-500">*</span>
               </label>
               <MultiSelect
-                options={divisions.map(div => ({ id: div.id!, name: div.divisionName }))}
+                options={divisions.map(div => ({ id: div.id!, name: div.name }))}
                 value={formData.workDivisions}
                 onChange={(value) => setFormData(prev => ({ ...prev, workDivisions: value }))}
                 placeholder="Select work divisions..."

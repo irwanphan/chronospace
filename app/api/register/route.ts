@@ -27,6 +27,24 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword,
         name,
+        phone: '',
+        employeeId: '',
+        residentId: '',
+        nationality: '',
+        birthday: new Date(),
+        birthplace: '',
+        gender: '',
+        address: '',
+        role: {
+          connect: {
+            id: '1',
+          },
+        },
+        workDivision: {
+          connect: {
+            id: '1',
+          },
+        },
       },
     });
 

@@ -101,9 +101,9 @@ export async function GET() {
       })
     ]);
 
-    const purchaseRequests = purchaseRequestsRes.map(request => ({
+    const purchaseRequests = purchaseRequestsRes.map((request) => ({
       ...request,
-      requestorName: users.find(user => user.id === request.createdBy)?.name || 'Unknown'
+      requestorName: users.find((user) => user.id === request.createdBy)?.name || 'Unknown'
     }));
 
     return NextResponse.json(purchaseRequests);

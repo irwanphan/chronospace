@@ -17,9 +17,9 @@ export async function GET() {
       }
     });
 
-    const availableBudgets = budgets.map(budget => {
+    const availableBudgets = budgets.map((budget) => {
       // Filter items yang belum memiliki PR
-      const availableItems = budget.items.filter(item => 
+      const availableItems = budget.items.filter((item) => 
         item.purchaseRequestItems.length === 0
       );
 
@@ -30,7 +30,7 @@ export async function GET() {
         project: budget.project,
         items: availableItems // Hanya tampilkan items yang available
       };
-    }).filter(budget => budget.items.length > 0); // Hanya budget yang masih punya items
+    }).filter((budget) => budget.items.length > 0); // Hanya budget yang masih punya items
 
     return NextResponse.json(availableBudgets);
   } catch (error) {

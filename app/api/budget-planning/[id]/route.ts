@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
-import { BudgetedItem } from '@prisma/client';
+import { BudgetedItem } from '@/types/budget';
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 
 // GET: Fetch specific budget
 export async function GET(
@@ -58,7 +59,7 @@ export async function PUT(
     console.log('Received data:', body);
 
     // Use transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Delete purchase request items yang terkait dengan budgeted items
       await tx.purchaseRequestItem.deleteMany({
         where: {
@@ -95,7 +96,7 @@ export async function PUT(
                 qty: Number(item.qty),
                 unit: item.unit,
                 unitPrice: Number(item.unitPrice),
-                vendorId: item.vendorId,
+                vendorId: item.vendor.vendorId,
               }))
             }
           }
@@ -135,7 +136,7 @@ export async function DELETE(
     });
 
     if (purchaseRequests.length > 0) {
-      const prCodes = purchaseRequests.map(pr => pr.code).join(', ');
+      const prCodes = purchaseRequests.map((pr: { code: string }) => pr.code).join(', ');
       return NextResponse.json(
         { 
           error: `Cannot delete budget because it is being used in purchase request(s): ${prCodes}. Please delete the purchase requests first if possible. Contact your administrator for further assistance.` 
@@ -145,7 +146,7 @@ export async function DELETE(
     }
 
     // Hapus dalam transaction untuk memastikan konsistensi
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Hapus purchase request items yang terkait dengan budgeted items
       await tx.purchaseRequestItem.deleteMany({
         where: {

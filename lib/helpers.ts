@@ -1,6 +1,7 @@
 import { Budget } from '@/types/budget';
 import { Project } from '@/types/project';
-import { PurchaseRequest } from '@prisma/client';
+import { PurchaseRequest } from '@/types/purchase-request';
+import { ApprovalStep } from '@/types/approval-schema';
 
 export const calculateProjectStats = (projects: Project[]) => {
   const allocated = projects.filter((p: Project) => p.status === 'Allocated').length;
@@ -131,4 +132,50 @@ export const calculateRequestStats = (requests: PurchaseRequest[]) => {
     staleRequestsChange,
     completedRequestsChange
   };
+};
+
+export const getViewers = async (steps: ApprovalStep[]) => {
+  const result = {
+    specificUserIds: [] as string[],
+    roleIds: [] as string[]
+  };
+
+  // Sort steps by order
+  const sortedSteps = steps.sort((a, b) => a.stepOrder - b.stepOrder);
+  
+  // Cek setiap step
+  sortedSteps.forEach(step => {
+    // console.log('Processing step:', step); // Debug
+    // Jika ada specificUser, tambahkan ke specificUserIds
+    if (step.specificUserId && step.specificUserId !== 'NULL') {
+      result.specificUserIds.push(step.specificUserId);
+    }
+    // Jika tidak ada specificUser, tambahkan roleId
+    else if (step.roleId) {
+      result.roleIds.push(step.roleId);
+    }
+  });
+
+  // console.log('Final result getViewers: ', result); // Debug
+  return result;
+};
+
+export const getCurrentApprover = async (steps: ApprovalStep[]) => {
+  const result = {
+    specificUserId: '',
+    roleId: ''
+  };
+  
+  const currentStep = steps.find(step => step.status === 'Updated' || step.status === 'Pending');
+
+  if (currentStep) {
+    if (currentStep.specificUserId && currentStep.specificUserId !== 'NULL') {
+      result.specificUserId = currentStep.specificUserId;
+    } else {
+      result.roleId = currentStep.roleId;
+    }
+  }
+
+  // console.log('Final result getCurrentApprover: ', result); // Debug
+  return result;
 };

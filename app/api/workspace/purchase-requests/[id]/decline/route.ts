@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 export async function POST(
   request: Request,
@@ -10,7 +11,7 @@ export async function POST(
     const { stepOrder, actorId, comment, type } = body;
 
     // Update dalam transaksi
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Update approval step
       const newStatus = type === 'revision' ? 'Revision' : 'Declined';
       const updatedStep = await tx.purchaseRequestApproval.update({

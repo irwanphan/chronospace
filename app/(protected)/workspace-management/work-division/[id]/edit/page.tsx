@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 
 import { User } from '@/types/user';
-import { WorkDivision } from '@/types/workDivision';
+import { WorkDivision } from '@/types/work-division';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 

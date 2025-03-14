@@ -1,22 +1,35 @@
+import { Role } from "./role";
+import { User } from "./user";
+import { WorkDivision } from "./work-division";
+
+export interface ApprovalStep {
+  id?: string;
+  schemaId: string;
+  stepOrder: number;
+  status: string;
+  roleId: string;
+  role: Role;
+  specificUserId?: string;
+  specificUser?: User;
+  budgetLimit?: number;
+  duration: number; // dalam jam
+  overtimeAction: 'Notify and Wait' | 'Auto Decline';
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface ApprovalSchema {
-  id: string;
+  id?: string;
   name: string;
-  description: string;
   documentType: string;
-  approvalSteps: {
-    role: {
-      id: string;
-      roleName: string;
-    };
-    roleId: string;
-    specificUserId?: string;
-    specificUser: {
-      id: string;
-      name: string;
-    };
-    duration: number;
-    overtimeAction: 'Notify and Wait' | 'Auto Decline';
-    budgetLimit?: number;
-    stepOrder: number;
-  }[];
+  workDivisionIds: string | string[];  // Menyimpan division codes
+  roleIds: string | string[];
+  title: string;
+  description?: string;
+  approvalSteps: ApprovalStep[];
+  isActive: boolean;
+  applicableWorkDivisions: WorkDivision[];
+  applicableRoles: Role[];
+  createdAt?: Date;
+  updatedAt?: Date;
 } 

@@ -93,15 +93,15 @@ export async function GET() {
       prisma.workDivision.findMany()
     ]);
 
-    const transformedSchemas = approvalSchemas.map(schema => ({
+    const transformedSchemas = approvalSchemas.map((schema) => ({
       ...schema,
       applicableRoles: schema.roleIds ? 
-        roles.filter(role => 
-          JSON.parse(schema.roleIds || '[]').includes(role.id)
+        roles.filter((role) => 
+          (Array.isArray(schema.roleIds) ? schema.roleIds : JSON.parse(schema.roleIds || '[]')).includes(role.id)
         ) : [],
       applicableWorkDivisions: schema.workDivisionIds ?
-        workDivisions.filter(div => 
-          JSON.parse(schema.workDivisionIds).includes(div.id)
+        workDivisions.filter((div) => 
+          (Array.isArray(schema.workDivisionIds) ? schema.workDivisionIds : JSON.parse(schema.workDivisionIds || '[]')).includes(div.id)
         ) : []
     }));
 

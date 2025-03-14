@@ -16,16 +16,21 @@ export const metadata: Metadata = {
   },
 };
 
+interface LayoutProps {
+  children: React.ReactNode;
+  content: React.ReactNode;
+}
+
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+  content,
+}: LayoutProps) {
   return (
     <html lang="en" className={`${montserrat.variable}`}>
       <body className={`font-montserrat`}>
         <AuthProvider>
           {children}
+          {content}
         </AuthProvider>
       </body>
     </html>
