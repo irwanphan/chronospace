@@ -12,7 +12,15 @@ export const metadata: Metadata = {
   title: "Chronospace",
   description: "Administrative Workspace",
   icons: {
-    icon: '/logo.svg',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 
@@ -27,6 +35,11 @@ export default function RootLayout({
 }: LayoutProps) {
   return (
     <html lang="en" className={`${montserrat.variable}`}>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
+      </head>
       <body className={`font-montserrat`}>
         <AuthProvider>
           {children}

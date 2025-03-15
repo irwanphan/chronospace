@@ -202,9 +202,10 @@ export const authOptions: AuthOptions = {
       return session;
     },
     async redirect(
+      // TODO: if have landing config, to whatever page it is configurated to land
       // { url, baseUrl }: { url: string; baseUrl: string }
     ) {
-      return '/timeline';
+      return '/workspace';
     }
   },
   session: {

@@ -86,12 +86,12 @@ const Sidebar = () => {
           onClick={toggleSidebar}
           className="w-full h-full flex items-center px-4"
         >
-          <div className="w-6 h-6 flex-shrink-0">
+          <div className="w-8 h-8 flex-shrink-0">
             <Image
               src="/logo.svg"
               alt="ChronoSpace Logo"
-              width={32}
-              height={32}
+              width={40}
+              height={40}
             />
           </div>
           <span className={cn(
