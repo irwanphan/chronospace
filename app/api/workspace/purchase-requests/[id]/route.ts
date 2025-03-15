@@ -5,6 +5,8 @@ import { ApprovalStep } from '@/types/approval-schema';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
+export const revalidate = 0
+
 interface ApprovalStepUpdate {
   roleId: string;
   specificUserId: string | null;

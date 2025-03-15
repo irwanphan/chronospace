@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const revalidate = 0
+
 interface ApprovalStep {
   roleId: string;
   specificUserId?: string;
@@ -22,7 +24,7 @@ interface RequestItem {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log('Received request body:', body);
+    // console.log('Received request body:', body);
 
     const result = await prisma.purchaseRequest.create({
       data: {

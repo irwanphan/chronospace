@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { RoleService } from '@/services/role.service';
 import { prisma } from '@/lib/prisma';
 
+export const revalidate = 0
+
 export async function POST(req: Request) {
   try {
     const data = await req.json();

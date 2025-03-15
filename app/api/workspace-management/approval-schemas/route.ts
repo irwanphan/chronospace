@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+export const revalidate = 0
+
 interface RequestStep {
   roleId: string;
   specificUserId?: string;

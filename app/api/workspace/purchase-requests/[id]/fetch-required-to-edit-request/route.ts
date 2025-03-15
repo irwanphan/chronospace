@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getViewers, getCurrentApprover } from '@/lib/helpers';
 import { ApprovalStep } from '@/types/approval-schema';
 
+export const revalidate = 0
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }

@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt';
 import { Role } from '@/types/role';
 import { WorkDivision } from '@/types/work-division';
 
+export const revalidate = 0
+
 interface UserPost {
   email: string;
   password: string;

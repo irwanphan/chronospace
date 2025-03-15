@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { VendorService } from '@/services/vendor.service';
 
+export const revalidate = 0
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

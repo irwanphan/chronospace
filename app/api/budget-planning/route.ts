@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
-// GET: Fetch all budgets
+export const revalidate = 0
+
 export async function GET() {
   try {
     const [budgets, divisions] = await Promise.all([

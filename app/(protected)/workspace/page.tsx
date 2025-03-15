@@ -165,7 +165,7 @@ export default function WorkspacePage() {
     };
   }, []);
 
-  console.log('Purchase Requests:', purchaseRequests);
+  // console.log('Purchase Requests:', purchaseRequests);
   if (isLoading) return <LoadingSpin />
 
   return (

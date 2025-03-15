@@ -3,6 +3,8 @@ import { ApprovalStep } from "@/types/approval-schema";
 import { NextResponse } from "next/server";
 import { getViewers, getCurrentApprover } from "@/lib/helpers";
 
+export const revalidate = 0
+
 export async function GET() {
   try {
     const [purchaseRequests] = await Promise.all([

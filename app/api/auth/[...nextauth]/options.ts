@@ -77,7 +77,7 @@ export const authOptions: AuthOptions = {
           }
         });
 
-        console.log("Found user:", user); // Debug log
+        // console.log("Found user:", user); // Debug log
 
         if (!user) {
           // console.log("No user found for email:", credentials.email); // Debug log
