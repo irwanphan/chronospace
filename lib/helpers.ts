@@ -63,17 +63,17 @@ export const calculateRequestStats = (requests: PurchaseRequest[]) => {
   }).length;
 
   // Stale requests (past project finish date and not completed/rejected)
-  // const staleRequests = requests.filter(req => {
-  //   const finishDate = new Date(req.budget.project.finishDate);
-  //   return finishDate < now && 
-  //          req.status !== 'Completed' && 
-  //          req.status !== 'Rejected';
-  // }).length;
-  const staleRequests = 0
+  const staleRequests = requests.filter(req => {
+    const finishDate = new Date(req.budget.project.finishDate);
+    return finishDate < now && 
+           req.status !== 'Approved' && 
+           req.status !== 'Rejected';
+  }).length;
+  // const staleRequests = 0
 
   // Completed requests
   const completedRequests = requests.filter(req => 
-    req.status === 'Completed'
+    req.status === 'Approved'
   ).length;
 
   // Calculate changes

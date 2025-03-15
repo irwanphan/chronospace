@@ -3,6 +3,8 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { IconBrandGoogle, IconBrandFacebook } from "@tabler/icons-react";
+import Image from 'next/image';
+import Card from "@/components/ui/Card";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -23,12 +25,23 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-2">Welcome!</h1>
-            <p className="text-gray-600">Enter your credentials to access your account</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+
+        <div className="flex items-center mb-6">
+          <Image
+            src="/logo.svg"
+            alt="ChronoSpace Logo"
+            width={48}
+            height={48}
+            className="w-20 h-20 mr-1"
+          />
+          <div className="flex flex-col w-auto">
+            <h1 className="text-5xl font-bold text-blue-600">ChronoSpace</h1>
+            <p className="text-xs text-blue-600">Streamline Your Projects, Budgets & Approvals in One Place</p>
           </div>
+        </div>
+
+        <Card className="w-full max-w-md">
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -75,35 +88,36 @@ export default function LoginPage() {
               Login
             </button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-3">
-              <button type="button" className="w-12 p-2 border border-gray-300 rounded-md flex justify-center hover:bg-gray-50">
-                <IconBrandGoogle size={20} />
-              </button>
-              <button type="button" className="w-12 p-2 border border-gray-300 rounded-md flex justify-center hover:bg-gray-50">
-                <IconBrandFacebook size={20} />
-              </button>
-            </div>
-
-            <p className="text-center text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
-              <a
-                href="/register"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Sign up
-              </a>
-            </p>
           </form>
-        </div>
+          {/* <p className="text-center text-sm text-gray-600 my-4">
+            Don&apos;t have an account?{' '}
+            <a
+              href="/register"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Sign up
+            </a>
+          </p> */}
+
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+          <div className="flex justify-center gap-3 my-4">
+            <button type="button" disabled className="w-12 p-2 border border-gray-300 rounded-md flex justify-center hover:bg-gray-50">
+              <IconBrandGoogle size={20} />
+            </button>
+            <button type="button" disabled className="w-12 p-2 border border-gray-300 rounded-md flex justify-center hover:bg-gray-50">
+              <IconBrandFacebook size={20} />
+            </button>
+          </div>
+          <small className="text-red-500 block text-center">currently unavailable</small>
+
+        </Card>
       </div>
     </div>
   );
