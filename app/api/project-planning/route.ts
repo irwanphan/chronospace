@@ -27,27 +27,93 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log('Received data:', body); // Debug log
-    
-    const project = await prisma.project.create({
-      data: {
-        code: body.projectCode,
-        title: body.projectTitle,
-        description: body.description || '', // Handle null/undefined
-        workDivisionId: body.workDivisionId,
-        year: parseInt(body.year),
-        startDate: new Date(body.startDate),
-        finishDate: new Date(body.finishDate),
-        status: 'Not Allocated', // Default status
-      },
+    const { 
+      code, 
+      title, 
+      description, 
+      workDivisionId, 
+      year, 
+      startDate, 
+      finishDate, 
+      userId 
+    } = body;
+
+    // Validasi data yang diterima
+    if (!code || !title || !workDivisionId || !year || !startDate || !finishDate || !userId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Gunakan transaction untuk memastikan data konsisten
+    const result = await prisma.$transaction(async (tx) => {
+      // Buat project baru
+      const newProject = await tx.project.create({
+        data: {
+          code,
+          title,
+          description: description || '',
+          workDivisionId,
+          year: Number(year),
+          startDate: new Date(startDate),
+          finishDate: new Date(finishDate),
+          status: 'Not Allocated',
+          createdBy: userId,
+        },
+      });
+
+      // Buat history project
+      const projectHistory = await tx.projectHistory.create({
+        data: {
+          projectId: newProject.id,
+          projectCode: newProject.code,
+          action: 'CREATE',
+          userId,
+          changes: {
+            code,
+            title,
+            description,
+            workDivisionId,
+            year,
+            startDate,
+            finishDate,
+          },
+          timestamp: new Date(),
+        },
+      });
+
+      // Buat activity history
+      const activityHistory = await tx.activityHistory.create({
+        data: {
+          userId,
+          entityType: 'PROJECT',
+          entityId: newProject.id,
+          entityCode: newProject.code,
+          action: 'CREATE',
+          details: {
+            code,
+            title,
+            description,
+            workDivisionId,
+            year,
+            startDate,
+            finishDate,
+          },
+          timestamp: new Date(),
+        },
+      });
+
+      return { newProject, projectHistory, activityHistory };
     });
 
-    return NextResponse.json(project);
+    return NextResponse.json({
+      message: 'Project created successfully',
+      project: result.newProject,
+      history: result.projectHistory,
+    });
   } catch (error) {
-    // Log detailed error
     console.error('Detailed error:', error);
-    
-    // Return more specific error message
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create project' },
       { status: 500 }

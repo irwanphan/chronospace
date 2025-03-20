@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 import { X } from 'lucide-react';
@@ -24,6 +25,7 @@ interface FormData {
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [projectCode, setProjectCode] = useState<string>('');
@@ -66,7 +68,14 @@ export default function NewProjectPage() {
     setIsSubmitting(true);
 
     try {
-      console.log('Submitting data:', formData); // Debug log
+      if (!session?.user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      // Pastikan semua field required terisi
+      if (!projectCode || !formData.projectTitle || !formData.workDivisionId || !formData.year) {
+        throw new Error('Please fill all required fields');
+      }
 
       const response = await fetch('/api/project-planning', {
         method: 'POST',
@@ -74,8 +83,14 @@ export default function NewProjectPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          projectCode,
+          code: projectCode,
+          title: formData.projectTitle,
+          description: formData.description || '',
+          workDivisionId: formData.workDivisionId,
+          year: Number(formData.year),
+          startDate: formData.startDate,
+          finishDate: formData.finishDate,
+          userId: session.user.id,
         }),
       });
 
@@ -83,9 +98,6 @@ export default function NewProjectPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to create project');
       }
-
-      const result = await response.json();
-      console.log('Success:', result); // Debug log
 
       router.push('/project-planning');
       router.refresh();
