@@ -120,7 +120,7 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-gray-600">
                   <Building2 className="w-4 h-4" />
-                  <span>TURBIN</span>
+                  <span>{userData.workDivision.name}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin className="w-4 h-4" />
