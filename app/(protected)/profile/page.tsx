@@ -2,16 +2,31 @@
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { Mail, Building2, MapPin, Link as LinkIcon } from 'lucide-react';
-import { getInitials } from '@/lib/utils';
+import { formatDate, getInitials } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import Card from '@/components/ui/Card';
+import { useEffect, useState } from 'react';
+import { User } from '@/types/user';
+import Link from 'next/link';
+
+interface ActivityHistory {
+  id: string;
+  userId: string;
+  action: string;
+  timestamp: string;
+  details: string;
+  entityType: string;
+  entityId: string;
+  entityCode: string;
+}
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const userName = session?.user?.name || "Guest";
   const userImage = session?.user?.image;
   const userRole = session?.user?.role || "User";
-
+  const [activityHistories, setActivityHistories] = useState<ActivityHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   // Dummy data untuk activity
   const activityData = {
     totalContributions: 1274,
@@ -20,6 +35,56 @@ export default function ProfilePage() {
       Math.floor(Math.random() * 5)
     ),
   };
+
+  const [userData, setUserData] = useState<User>({
+    id: '',
+    name: '',
+    email: '',
+    image: '',
+    roleId: '',
+    workDivisionId: '',
+    lastLogin: '',
+    createdAt: '',
+    role: {
+      id: '',
+      roleName: '',
+      roleCode: '',
+      description: '',
+      budgetLimit: 0,
+    },
+    workDivision: {
+      id: '',
+      code: '',
+      name: '',
+      description: '',
+    },
+  });
+
+  console.log('userData : ', userData);
+  console.log('activityHistories : ', activityHistories);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`/api/profile/${session?.user.id}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+
+        const data = await response.json();
+        setActivityHistories(data.user.activityHistories);
+        setUserData(data.user);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [session?.user.id]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -90,16 +155,49 @@ export default function ProfilePage() {
               {/* Recent Activity */}
               <div className="mt-8">
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((_, index) => (
-                    <div key={index} className="border-b pb-4">
-                      <p className="text-sm text-gray-600">
-                        Created purchase request <span className="font-medium text-blue-600">PR-2024-{index + 1}</span>
-                      </p>
-                      <p className="text-xs text-gray-500">2 days ago</p>
-                    </div>
+                <ul className="space-y-2">
+                  {activityHistories.map((history) => (
+                    <li key={history.id} className="border-b pb-2">
+                      {history.action === "CREATE" && "Created "}
+                      <span> 
+                        {history.entityType === "PROJECT" && 
+                          <Link href={`/projects/${history.entityCode}`}>
+                            <span className="font-semibold">Project</span>
+                            <span className="text-gray-600"> {history.entityCode}</span>
+                          </Link>
+                        }
+                        {history.entityType === "PURCHASE_REQUEST" && 
+                          <Link href={`/purchase-requests/${history.entityCode}`}>
+                            <span className="font-semibold">Purchase Request</span>
+                            <span className="text-gray-600"> {history.entityCode}</span>
+                          </Link>
+                        }
+                        {history.entityType === "WORK_DIVISION" && 
+                          <Link href={`/work-divisions/${history.entityCode}`}>
+                            <span className="font-semibold">Work Division</span>
+                            <span className="text-gray-600"> {history.entityCode}</span>
+                          </Link>
+                        }
+                        {history.entityType === "APPROVAL_SCHEMA" && 
+                          <Link href={`/approval-schemas/${history.entityCode}`}>
+                            <span className="font-semibold">Approval Schema</span>
+                            <span className="text-gray-600"> {history.entityCode}</span>
+                          </Link>
+                        }
+                        {history.entityType === "APPROVAL_STEP" && 
+                          <Link href={`/approval-steps/${history.entityCode}`}>
+                            <span className="font-semibold">Approval Step</span>
+                            <span className="text-gray-600"> {history.entityCode}</span>
+                          </Link>
+                        }
+                      </span>
+                      <span> on </span>
+                      <span className="font-semibold">{formatDate(history.timestamp)}</span>
+                    
+                      
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             </div>
           </Card>
