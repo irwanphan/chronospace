@@ -161,32 +161,26 @@ export default function ProfilePage() {
                       {history.action === "CREATE" && "Created "}
                       <span> 
                         {history.entityType === "PROJECT" && 
-                          <Link href={`/projects/${history.entityCode}`}>
+                          <Link href={`/project-planning/${history.entityId}`}>
                             <span className="font-semibold">Project</span>
                             <span className="text-gray-600"> {history.entityCode}</span>
                           </Link>
                         }
                         {history.entityType === "PURCHASE_REQUEST" && 
-                          <Link href={`/purchase-requests/${history.entityCode}`}>
+                          <Link href={`/workspace/purchase-request/${history.entityId}`}>
                             <span className="font-semibold">Purchase Request</span>
                             <span className="text-gray-600"> {history.entityCode}</span>
                           </Link>
                         }
                         {history.entityType === "WORK_DIVISION" && 
-                          <Link href={`/work-divisions/${history.entityCode}`}>
+                          <Link href={`/workspace-management/work-divisions/${history.entityId}`}>
                             <span className="font-semibold">Work Division</span>
                             <span className="text-gray-600"> {history.entityCode}</span>
                           </Link>
                         }
                         {history.entityType === "APPROVAL_SCHEMA" && 
-                          <Link href={`/approval-schemas/${history.entityCode}`}>
+                          <Link href={`/workspace-management/approval-schemas/${history.entityId}`}>
                             <span className="font-semibold">Approval Schema</span>
-                            <span className="text-gray-600"> {history.entityCode}</span>
-                          </Link>
-                        }
-                        {history.entityType === "APPROVAL_STEP" && 
-                          <Link href={`/approval-steps/${history.entityCode}`}>
-                            <span className="font-semibold">Approval Step</span>
                             <span className="text-gray-600"> {history.entityCode}</span>
                           </Link>
                         }
