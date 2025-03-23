@@ -161,27 +161,23 @@ export default function ProfilePage() {
                       {history.action === "CREATE" && "Created "}
                       <span> 
                         {history.entityType === "PROJECT" && 
-                          <Link href={`/project-planning/${history.entityId}`}>
-                            <span className="font-semibold">Project</span>
-                            <span className="text-gray-600"> {history.entityCode}</span>
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/project-planning/${history.entityId}`}>
+                            <span className="font-semibold">Project {history.entityCode}</span>
                           </Link>
                         }
                         {history.entityType === "PURCHASE_REQUEST" && 
-                          <Link href={`/workspace/purchase-request/${history.entityId}`}>
-                            <span className="font-semibold">Purchase Request</span>
-                            <span className="text-gray-600"> {history.entityCode}</span>
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/workspace/purchase-request/${history.entityId}`}>
+                            <span className="font-semibold">Purchase Request {history.entityCode}</span>
                           </Link>
                         }
                         {history.entityType === "WORK_DIVISION" && 
-                          <Link href={`/workspace-management/work-divisions/${history.entityId}`}>
-                            <span className="font-semibold">Work Division</span>
-                            <span className="text-gray-600"> {history.entityCode}</span>
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/workspace-management/work-divisions/${history.entityId}`}>
+                            <span className="font-semibold">Work Division {history.entityCode}</span>
                           </Link>
                         }
                         {history.entityType === "APPROVAL_SCHEMA" && 
-                          <Link href={`/workspace-management/approval-schemas/${history.entityId}`}>
-                            <span className="font-semibold">Approval Schema</span>
-                            <span className="text-gray-600"> {history.entityCode}</span>
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/workspace-management/approval-schemas/${history.entityId}`}>
+                            <span className="font-semibold">Approval Schema {history.entityCode}</span>
                           </Link>
                         }
                       </span>
