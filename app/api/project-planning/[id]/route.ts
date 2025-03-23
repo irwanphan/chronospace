@@ -17,6 +17,15 @@ export async function GET(
       },
     });
 
+    const projectHistory = await prisma.projectHistory.findMany({
+      where: {
+        projectId: params.id
+      },
+      include: {
+        user: true
+      }
+    })
+
     const workDivisions = await prisma.workDivision.findMany({
       select: {
         id: true,
@@ -31,7 +40,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ project, workDivisions });
+    return NextResponse.json({ project, workDivisions, projectHistory });
   } catch (error) {
     console.error('Error fetching project:', error);
     return NextResponse.json(

@@ -6,10 +6,22 @@ import { formatDate, formatISODate, stripHtmlTags } from '@/lib/utils';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 
+interface ProjectHistory {
+  id: string;
+  projectId: string;
+  action: string;
+  details: string;
+  timestamp: string;
+  user: {
+    name: string;
+  }
+}
+
 export default function ViewProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [projectStatus, setProjectStatus] = useState<string>('');
+  const [projectHistory, setProjectHistory] = useState<ProjectHistory[]>([]);
   const [formData, setFormData] = useState({
     workDivisionId: '',
     code: '',
@@ -30,6 +42,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
 
         const data = await response.json();
         setProjectStatus(data.project.status);
+        setProjectHistory(data.projectHistory);
         setFormData({
           workDivisionId: data.project.workDivision.id || '',
           code: data.project.code,              
@@ -168,7 +181,7 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => router.push('/project-planning')}
+              onClick={() => router.back()}
               className="px-4 py-2 border rounded-lg hover:bg-gray-50"
             >
               Back
@@ -188,6 +201,21 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
             </div>
           )}
         </form>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold">Project History</h2>
+        <ul className="mt-4 list-disc list-inside text-sm text-gray-600">
+          {projectHistory.map((history) => (
+            <li key={history.id}>
+              {history.action === "CREATE" && "Project Created"}
+              <span> by </span>
+              <span className="font-semibold">{history.user.name}</span>
+              <span> on </span>
+              <span className="font-semibold">{formatDate(history.timestamp)}</span>
+            </li>
+          ))}
+        </ul>
       </Card>
     </div>
   );
