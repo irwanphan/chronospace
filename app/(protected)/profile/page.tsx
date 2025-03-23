@@ -3,7 +3,6 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { Mail, Building2, MapPin, Link as LinkIcon } from 'lucide-react';
 import { formatDate, getInitials } from '@/lib/utils';
-import Avatar from '@/components/ui/Avatar';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
 import { User } from '@/types/user';
@@ -94,19 +93,21 @@ export default function ProfilePage() {
           <div className="sticky top-24">
             {/* Profile Picture & Basic Info */}
             <div className="mb-6">
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100">
               {userImage ? (
                 <Image
                   src={userImage}
                   alt={userName}
-                  width={296}
-                  height={296}
-                  className="rounded-full"
+                  width={32}
+                  height={32}
+                  className="object-cover"
                 />
               ) : (
-                <div className="w-[296px] h-[296px]">
-                  <Avatar>{getInitials(userName)}</Avatar>
+                <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl">
+                  {getInitials(userName)}
                 </div>
               )}
+            </div>
               <h1 className="text-2xl font-bold mt-4">{userName}</h1>
               <h2 className="text-xl text-gray-600 font-light">{userRole}</h2>
             </div>
