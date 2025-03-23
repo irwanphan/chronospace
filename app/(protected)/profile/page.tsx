@@ -1,12 +1,13 @@
 'use client';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Mail, Building2, MapPin, Link as LinkIcon } from 'lucide-react';
+import { Mail, Building2, MapPin, Link as LinkIcon, Pencil } from 'lucide-react';
 import { formatDate, getInitials } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
 import { User } from '@/types/user';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface ActivityHistory {
   id: string;
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const userRole = session?.user?.role || "User";
   const [activityHistories, setActivityHistories] = useState<ActivityHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
   // Dummy data untuk activity
   const activityData = {
     totalContributions: 1274,
@@ -136,6 +138,15 @@ export default function ProfilePage() {
                   <a href="#" className="text-blue-600 hover:underline">https://yourwebsite.com</a>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-8">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
+                onClick={() => router.push(`/user-management/${session?.user.id}/edit?ref=profile`)}
+              >
+                <Pencil className="w-4 h-4" />
+                Edit Profile
+              </button>
             </div>
           </div>
         </div>
