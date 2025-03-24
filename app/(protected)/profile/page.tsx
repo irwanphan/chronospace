@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { User } from '@/types/user';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface ActivityHistory {
   id: string;
@@ -83,9 +84,7 @@ export default function ProfilePage() {
     fetchData();
   }, [session?.user.id]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading) return <LoadingSpin/>
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

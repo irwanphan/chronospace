@@ -6,12 +6,14 @@ import { IconBrandGoogle, IconBrandFacebook } from "@tabler/icons-react";
 import Image from 'next/image';
 import Card from "@/components/ui/Card";
 import Logo from "@/public/logo.svg";
+import LoadingSpin from "@/components/ui/LoadingSpin";
 
 const ChronoSpaceLogo = () => (
   <Image src={Logo} alt="ChronoSpace Logo" width={80} height={80} />
 );
 
 export default function LoginPage() {
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,8 +31,11 @@ export default function LoginPage() {
       console.error("Login failed:", error);
     } finally {
       setIsSubmitting(false);
+      setIsLoading(true);
     }
   };
+
+  if (isLoading) return <LoadingSpin/>
 
   return (
     <div className="min-h-screen flex">
