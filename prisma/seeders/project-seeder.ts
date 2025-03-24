@@ -8,6 +8,12 @@ import { prisma } from "@/lib/prisma";
 // Cancelled: Project is cancelled
 
 export async function projectSeeder() {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: 'staff@example.com'
+    }
+  });
+
   await prisma.project.createMany({
     data: [
       {
@@ -18,6 +24,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-01-01'),
         finishDate: new Date('2025-12-31'),
+        createdAt: new Date('2024-12-20'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -28,6 +36,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-02-01'),
         finishDate: new Date('2025-06-30'),
+        createdAt: new Date('2024-12-20'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -39,6 +49,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-03-01'),
         finishDate: new Date('2025-08-31'),
         createdAt: new Date('2024-12-20'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -50,6 +61,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-01-15'),
         finishDate: new Date('2025-07-15'),
         createdAt: new Date('2024-12-05'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -60,6 +72,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-02-15'),
         finishDate: new Date('2025-05-15'),
+        createdAt: new Date('2024-12-05'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -70,6 +84,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-04-01'),
         finishDate: new Date('2025-09-30'),
+        createdAt: new Date('2024-12-05'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -81,6 +97,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-03-15'),
         finishDate: new Date('2025-08-15'),
         createdAt: new Date('2024-12-18'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -92,6 +109,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-05-01'),
         finishDate: new Date('2025-10-31'),
         createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -102,6 +120,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-02-01'),
         finishDate: new Date('2025-07-31'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -112,6 +132,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-03-01'),
         finishDate: new Date('2025-06-30'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -122,6 +144,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-06-01'),
         finishDate: new Date('2025-11-30'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -132,6 +156,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-04-01'),
         finishDate: new Date('2025-09-30'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -142,6 +168,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-07-01'),
         finishDate: new Date('2025-12-31'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -152,6 +180,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-03-15'),
         finishDate: new Date('2025-08-15'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -162,6 +192,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-04-01'),
         finishDate: new Date('2025-07-31'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -172,6 +204,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-08-01'),
         finishDate: new Date('2025-12-31'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -182,6 +216,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-05-01'),
         finishDate: new Date('2025-10-31'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -192,6 +228,8 @@ export async function projectSeeder() {
         year: 2025,
         startDate: new Date('2025-09-01'),
         finishDate: new Date('2025-12-31'),
+        createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Allocated'
       },
       {
@@ -203,6 +241,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-06-01'),
         finishDate: new Date('2025-11-30'),
         createdAt: new Date('2024-12-25'),
+        createdBy: user?.id,
         status: 'Not Allocated'
       },
       {
@@ -214,6 +253,7 @@ export async function projectSeeder() {
         startDate: new Date('2025-07-01'),
         finishDate: new Date('2025-12-31'),
         createdAt: new Date('2024-12-28'),
+        createdBy: user?.id,
         status: 'Allocated'
       }
     ]
