@@ -91,7 +91,7 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column - User Info */}
         <div className="md:col-span-1">
-          <div className="sticky top-24">
+          <div className="sticky top-32">
             {/* Profile Picture & Basic Info */}
             <div className="mb-6">
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100">
