@@ -5,12 +5,19 @@ import { useState } from "react";
 import { IconBrandGoogle, IconBrandFacebook } from "@tabler/icons-react";
 import Image from 'next/image';
 import Card from "@/components/ui/Card";
+import Logo from "@/public/logo.svg";
+
+const ChronoSpaceLogo = () => (
+  <Image src={Logo} alt="ChronoSpace Logo" width={80} height={80} />
+);
 
 export default function LoginPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       await signIn("credentials", {
         email,
@@ -20,6 +27,8 @@ export default function LoginPage() {
       });
     } catch (error) {
       console.error("Login failed:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -27,17 +36,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       <div className="flex-1 flex flex-col items-center justify-center p-4">
 
-        <div className="flex items-center mb-6">
-          <Image
-            src="/logo.svg"
-            alt="ChronoSpace Logo"
-            width={48}
-            height={48}
-            className="w-20 h-20 mr-1"
-          />
-          <div className="flex flex-col w-auto">
-            <h1 className="text-5xl font-bold text-blue-600">ChronoSpace</h1>
-            <p className="text-xs text-blue-600">Streamline Your Projects, Budgets & Approvals in One Place</p>
+        <div className="flex items-center justify-center mb-8 text-blue-600">
+          <ChronoSpaceLogo />
+          <div className="flex flex-col">
+            <h1 className="text-5xl font-bold">ChronoSpace</h1>
+            <p className="text-xs">Streamline Your Projects, Budgets & Approvals in One Place</p>
           </div>
         </div>
 
@@ -84,8 +87,9 @@ export default function LoginPage() {
             <button
               type="submit"
               className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              disabled={isSubmitting}
             >
-              Login
+              {isSubmitting ? 'Logging in...' : 'Login'}
             </button>
 
           </form>
