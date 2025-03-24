@@ -1,8 +1,8 @@
 'use client';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Mail, Building2, MapPin, Link as LinkIcon, Pencil } from 'lucide-react';
-import { formatDate, getInitials } from '@/lib/utils';
+import { Mail, IdCard, MapPin, Phone, Pencil } from 'lucide-react';
+import { formatDate, getInitials, stripHtmlTags } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
 import { User } from '@/types/user';
@@ -73,7 +73,7 @@ export default function ProfilePage() {
 
         const data = await response.json();
         setActivityHistories(data.user.activityHistories);
-        setUserData(data.user);
+        setUserData(data.user); 
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -115,26 +115,27 @@ export default function ProfilePage() {
 
             {/* Bio & Details */}
             <div className="prose prose-sm">
+              {/* TODO: Add bio / about me */}
               <p className="text-gray-600 mb-4">
                 Frontend Developer passionate about creating beautiful and functional user interfaces.
               </p>
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-gray-600">
-                  <Building2 className="w-4 h-4" />
-                  <span>{userData.workDivision.name}</span>
+                  <IdCard className="w-4 h-4" />
+                  <span>{userData.workDivision.name || '-'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin className="w-4 h-4" />
-                  <span>Jakarta, Indonesia</span>
+                  <span>{stripHtmlTags(userData.address || '-')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Mail className="w-4 h-4" />
-                  <span>{session?.user?.email}</span>
+                  <span>{session?.user?.email || '-'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                  <LinkIcon className="w-4 h-4" />
-                  <a href="#" className="text-blue-600 hover:underline">https://yourwebsite.com</a>
+                  <Phone className="w-4 h-4" />
+                  <span>{userData.phone || '-'}</span>
                 </div>
               </div>
             </div>
