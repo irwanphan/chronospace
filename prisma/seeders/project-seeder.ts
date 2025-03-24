@@ -257,5 +257,25 @@ export async function projectSeeder() {
         timestamp: new Date('2024-12-20'),
       }
     });
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: user?.id || 'unknown ninja',
+        entityType: 'PROJECT',
+        entityId: project.id,
+        entityCode: project.code,
+        action: 'CREATE',
+        details: {
+          code: project.code,
+          title: project.title,
+          description: project.description,
+          workDivisionId: project.workDivisionId,
+          year: project.year,
+          startDate: project.startDate,
+          finishDate: project.finishDate,
+        },
+        timestamp: new Date(),
+      },
+    });
   }
 }
