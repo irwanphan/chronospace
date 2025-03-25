@@ -19,6 +19,7 @@ interface MenuAccess {
   budgetPlanning: boolean;
   userManagement: boolean;
   workspaceManagement: boolean;
+  documents: boolean;
 }
 
 interface ActivityAccess {
@@ -165,7 +166,8 @@ export const authOptions: AuthOptions = {
             projectPlanning: false,
             budgetPlanning: false,
             userManagement: false,
-            workspaceManagement: false
+            workspaceManagement: false,
+            documents: false
           },
           activityAccess: (userAccess?.activityAccess as unknown as ActivityAccess) || {
             createProject: false,

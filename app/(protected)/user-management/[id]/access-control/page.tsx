@@ -12,7 +12,8 @@ const MENU_ACCESS_ORDER = [
   'projectPlanning',
   'budgetPlanning',
   'userManagement',
-  'workspaceManagement'
+  'workspaceManagement',
+  'documents'
 ] as const;
 
 const ACTIVITY_ACCESS_ORDER = [

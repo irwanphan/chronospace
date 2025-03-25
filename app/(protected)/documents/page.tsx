@@ -39,7 +39,7 @@ export default function DocumentPage() {
 
   const fetchDocuments = async () => {
     try {
-      const response = await fetch('/api/workspace-management/documents');
+      const response = await fetch('/api/documents');
       if (!response.ok) throw new Error('Failed to fetch documents');
       const data = await response.json();
       setDocuments(data.documents);
@@ -129,8 +129,8 @@ export default function DocumentPage() {
                     {doc.fileType === 'PDF' && (
                       <a
                         href={doc.isOrphan ? 
-                          `/workspace-management/documents/view?url=${encodeURIComponent(doc.fileUrl)}` :
-                          `/workspace-management/documents/${doc.id}`
+                          `/documents/view?url=${encodeURIComponent(doc.fileUrl)}` :
+                          `/documents/${doc.id}`
                         }
                         className="text-blue-600 hover:underline flex items-center gap-1"
                       >

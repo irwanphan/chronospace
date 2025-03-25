@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
-import { IconBriefcaseFilled, IconCoins, IconId, IconLayoutDashboardFilled, IconStack2Filled, IconSubtask } from '@tabler/icons-react';
+import { IconBriefcaseFilled, IconCoins, IconFile, IconId, IconLayoutDashboardFilled, IconStack2Filled, IconSubtask } from '@tabler/icons-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -17,6 +17,7 @@ const Sidebar = () => {
     projectPlanning: true,
     budgetPlanning: true,
     userManagement: true,
+    documents: true,
     workspaceManagement: true
   };
 
@@ -73,6 +74,12 @@ const Sidebar = () => {
       href: '/workspace-management',
       icon: IconSubtask,
       show: userAccess.workspaceManagement
+    },
+    {
+      name: 'Documents',
+      href: '/documents',
+      icon: IconFile,
+      show: userAccess.documents
     }
   ].filter(item => item.show);
 

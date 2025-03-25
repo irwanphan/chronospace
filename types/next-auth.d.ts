@@ -17,6 +17,7 @@ declare module "next-auth" {
           budgetPlanning: boolean;
           userManagement: boolean;
           workspaceManagement: boolean;
+          documents: boolean;
         },
         activityAccess: {
           createProject: boolean;

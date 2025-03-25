@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { IconBuildingSkyscraper, IconFile, IconIdBadge2, IconSchema, IconUsersGroup } from '@tabler/icons-react';
+import { IconBuildingSkyscraper, IconIdBadge2, IconSchema, IconUsersGroup } from '@tabler/icons-react';
 
 const subNavigation = [
   {
@@ -25,11 +25,6 @@ const subNavigation = [
     href: '/workspace-management/approval-schema',
     icon: IconSchema
   },
-  {
-    name: 'Documents',
-    href: '/workspace-management/documents',
-    icon: IconFile
-  }
 ];
 
 export default function WorkspaceManagementLayout({

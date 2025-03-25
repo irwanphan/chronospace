@@ -5,6 +5,7 @@ export interface MenuAccess {
   budgetPlanning: boolean;
   userManagement: boolean;
   workspaceManagement: boolean;
+  documents: boolean;
 }
 
 export interface ActivityAccess {

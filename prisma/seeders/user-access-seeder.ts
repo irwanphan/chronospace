@@ -11,7 +11,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,
@@ -52,7 +53,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,
@@ -93,7 +95,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,  
@@ -134,7 +137,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,
@@ -175,7 +179,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,
@@ -216,7 +221,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true, 
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,
@@ -257,7 +263,8 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,
@@ -298,7 +305,7 @@ export async function userAccessSeeder() {
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true
+          workspaceManagement: true 
         },
         activityAccess: {
           createProject: true,  
