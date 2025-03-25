@@ -13,3 +13,22 @@ export interface Project {
     name: string;
   };
 }
+
+export interface ProjectHistory {
+  id: string;
+  projectId: string;
+  action: string;
+  details: string;
+  timestamp: string;
+  user: {
+    name: string;
+  }
+}
+
+export interface ProjectDocument {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  uploadedAt: Date;
+}

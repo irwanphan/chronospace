@@ -5,17 +5,8 @@ import { useRouter } from 'next/navigation';
 import { formatDate, formatISODate, stripHtmlTags } from '@/lib/utils';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
-
-interface ProjectHistory {
-  id: string;
-  projectId: string;
-  action: string;
-  details: string;
-  timestamp: string;
-  user: {
-    name: string;
-  }
-}
+import { FileText, Download } from 'lucide-react';
+import { ProjectHistory, ProjectDocument } from '@/types/project';
 
 export default function ViewProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -170,8 +161,29 @@ export default function ViewProjectPage({ params }: { params: { id: string } }) 
               <label className="block text-sm font-medium mb-1">
                 Supporting Documents
               </label>
-              <div className="mt-2 text-sm text-gray-500">
-                No document uploaded
+              <div className="mt-2">
+                {formData.documents && formData.documents.length > 0 ? (
+                  <div className="space-y-2">
+                    {formData.documents.map((doc: ProjectDocument) => (
+                      <div key={doc.id} className="flex items-center gap-2 text-sm">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                        <a
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center gap-2"
+                        >
+                          {doc.fileName}
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    No document uploaded
+                  </div>
+                )}
               </div>
             </div>
           </div>

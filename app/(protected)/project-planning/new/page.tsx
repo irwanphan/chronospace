@@ -8,6 +8,7 @@ import { X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { formatDate, formatISODate, generateId } from '@/lib/utils';
 import Card from '@/components/ui/Card';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface WorkDivision {
   id: string;
@@ -40,6 +41,7 @@ export default function NewProjectPage() {
     startDate: formatISODate(new Date()),
     finishDate: formatISODate(new Date()),
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const fetchWorkDivisions = async () => {
     try {
@@ -72,26 +74,37 @@ export default function NewProjectPage() {
         throw new Error('User not authenticated');
       }
 
-      // Pastikan semua field required terisi
+      // Validasi form
       if (!projectCode || !formData.projectTitle || !formData.workDivisionId || !formData.year) {
         throw new Error('Please fill all required fields');
       }
 
+      // Siapkan data project dan file
+      const projectData = {
+        code: projectCode,
+        title: formData.projectTitle,
+        description: formData.description || '',
+        workDivisionId: formData.workDivisionId,
+        year: Number(formData.year),
+        startDate: formData.startDate,
+        finishDate: formData.finishDate,
+        userId: session.user.id,
+        file: selectedFile || null, // Tambahkan file ke data yang akan dikirim
+      };
+
+      // Kirim data menggunakan FormData
+      const formDataToSend = new FormData();
+      formDataToSend.append('projectData', JSON.stringify(projectData));
+      if (selectedFile) {
+        // Pastikan file yang dipilih valid
+        if (selectedFile instanceof File) {
+          formDataToSend.append('file', selectedFile);
+        }
+      }
+
       const response = await fetch('/api/project-planning', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code: projectCode,
-          title: formData.projectTitle,
-          description: formData.description || '',
-          workDivisionId: formData.workDivisionId,
-          year: Number(formData.year),
-          startDate: formData.startDate,
-          finishDate: formData.finishDate,
-          userId: session.user.id,
-        }),
+        body: formDataToSend,
       });
 
       if (!response.ok) {
@@ -102,16 +115,22 @@ export default function NewProjectPage() {
       router.push('/project-planning');
       router.refresh();
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error('Error:', error);
       alert(error instanceof Error ? error.message : 'Failed to create project');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  // Fungsi handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  if (isLoading) return <LoadingSpin />
 
   return (
     <div className="space-y-8">
@@ -236,13 +255,23 @@ export default function NewProjectPage() {
                 Supporting Documents
               </label>
               <div className="border rounded-lg p-4">
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Upload Document
-                </button>
-                <p className="text-sm text-gray-500 mt-2">No document uploaded</p>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx"
+                  />
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                  >
+                    Upload Document
+                  </button>
+                </label>
+                <p className="text-sm text-gray-500 mt-2">
+                  {selectedFile ? selectedFile.name : 'No document uploaded'}
+                </p>
               </div>
             </div>
           </div>

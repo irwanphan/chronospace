@@ -78,6 +78,7 @@ model User {
   activityHistories        ActivityHistory[]
   projects                 Project[]                 @relation("createdProjects")
   projectHistories         ProjectHistory[]          @relation("projectHistories")
+  documents                ProjectDocument[]
 
   @@map("users")
 }
@@ -211,10 +212,26 @@ model Project {
   createdBy      String?
   createdByUser  User?         @relation("createdProjects", fields: [createdBy], references: [id])
   history        ProjectHistory[]
+  documents      ProjectDocument[]
 
   @@index([workDivisionId])
   @@index([createdBy])
   @@map("projects")
+}
+
+model ProjectDocument {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  fileName    String
+  fileUrl     String
+  fileType    String
+  uploadedBy  String
+  user        User     @relation(fields: [uploadedBy], references: [id])
+  uploadedAt  DateTime @default(now())
+
+  @@index([projectId])
+  @@map("project_documents")
 }
 
 model ProjectHistory {
