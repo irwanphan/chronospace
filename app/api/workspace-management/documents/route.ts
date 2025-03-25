@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { list } from '@vercel/blob';
 
 export async function GET() {
   try {
-    // Ambil semua dokumen beserta relasinya
-    const documents = await prisma.projectDocument.findMany({
+    // 1. Ambil semua file dari Vercel Blob
+    const { blobs } = await list();
+
+    // 2. Ambil semua dokumen dari database
+    const dbDocuments = await prisma.projectDocument.findMany({
       include: {
         user: {
           select: {
@@ -19,31 +23,35 @@ export async function GET() {
           },
         },
       },
-      orderBy: {
-        uploadedAt: 'desc',
-      },
     });
 
-    // Format data untuk response
-    const formattedDocuments = documents.map(doc => ({
-      id: doc.id,
-      fileName: doc.fileName,
-      fileUrl: doc.fileUrl,
-      fileType: doc.fileType,
-      uploadedAt: doc.uploadedAt,
-      uploadedBy: doc.user.name,
-      usages: [
-        {
+    // 3. Map dokumen dari blob dengan data dari database
+    const documents = blobs.map(blob => {
+      const dbDoc = dbDocuments.find(doc => doc.fileUrl === blob.url);
+      
+      return {
+        id: dbDoc?.id || blob.url,
+        fileName: blob.pathname.split('/').pop() || 'Unknown',
+        fileUrl: blob.url,
+        fileType: blob.pathname.split('.').pop()?.toUpperCase() || 'Unknown',
+        uploadedAt: dbDoc?.uploadedAt || blob.uploadedAt,
+        size: blob.size,
+        uploadedBy: dbDoc?.user.name || '-',
+        usages: dbDoc ? [{
           entityType: 'PROJECT',
-          entityId: doc.project.id,
-          entityCode: doc.project.code,
-          entityTitle: doc.project.title,
-        },
-        // Tambahkan logic untuk budget dan purchase request jika ada
-      ].filter(usage => usage.entityId), // Filter out null usages
-    }));
+          entityId: dbDoc.project.id,
+          entityCode: dbDoc.project.code,
+          entityTitle: dbDoc.project.title,
+        }].filter(usage => usage.entityId) : [],
+        isOrphan: !dbDoc, // Flag untuk file yang tidak terhubung ke database
+      };
+    });
 
-    return NextResponse.json({ documents: formattedDocuments });
+    return NextResponse.json({ 
+      documents,
+      total: documents.length,
+      orphanCount: documents.filter(d => d.isOrphan).length
+    });
   } catch (error) {
     console.error('Error fetching documents:', error);
     return NextResponse.json(
@@ -51,4 +59,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
