@@ -10,7 +10,7 @@ export async function GET() {
     // 2. Ambil semua dokumen dari database
     const dbDocuments = await prisma.projectDocument.findMany({
       include: {
-        user: {
+        uploader: {
           select: {
             name: true,
           },
@@ -36,7 +36,7 @@ export async function GET() {
         fileType: blob.pathname.split('.').pop()?.toUpperCase() || 'Unknown',
         uploadedAt: dbDoc?.uploadedAt || blob.uploadedAt,
         size: blob.size,
-        uploadedBy: dbDoc?.user.name || '-',
+        uploadedBy: dbDoc?.uploader.name || '-',
         usages: dbDoc ? [{
           entityType: 'PROJECT',
           entityId: dbDoc.project.id,

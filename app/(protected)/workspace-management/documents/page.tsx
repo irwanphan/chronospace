@@ -125,8 +125,19 @@ export default function DocumentPage() {
                       className="text-blue-600 hover:underline flex items-center gap-1"
                     >
                       <Download className="w-4 h-4" />
-                      {/* Download */}
                     </a>
+                    {doc.fileType === 'PDF' && (
+                      <a
+                        href={doc.isOrphan ? 
+                          `/workspace-management/documents/view?url=${encodeURIComponent(doc.fileUrl)}` :
+                          `/workspace-management/documents/${doc.id}`
+                        }
+                        className="text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Sign
+                      </a>
+                    )}
                     {doc.isOrphan && (
                       <button
                         // onClick={() => handleDelete(doc.id)}
