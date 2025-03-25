@@ -9,8 +9,8 @@ import Button from '@/components/ui/Button';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save } from 'lucide-react';
 
-// Set worker for react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
 export default function DocumentViewerPage() {
   const searchParams = useSearchParams();
@@ -21,6 +21,12 @@ export default function DocumentViewerPage() {
   const canvasRef = useRef<Canvas | null>(null);
   const signatureRef = useRef<Canvas | null>(null);
   const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('Loading PDF from URL:', fileUrl);
+    console.log('PDF.js worker source:', pdfjs.GlobalWorkerOptions.workerSrc);
+  }, [fileUrl]);
 
   useEffect(() => {
     if (!isCanvasInitialized) {
@@ -40,7 +46,14 @@ export default function DocumentViewerPage() {
   }, [isCanvasInitialized]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    console.log('PDF loaded successfully with', numPages, 'pages');
     setNumPages(numPages);
+    setError(null); // Clear any previous errors
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error('Error loading PDF:', error);
+    setError(`Error loading PDF: ${error.message}`);
   };
 
   const initializeCanvas = () => {
@@ -57,12 +70,16 @@ export default function DocumentViewerPage() {
       isDrawingMode: true,
       width: 300,
       height: 150,
+      backgroundColor: '#ffffff'
     });
     signatureRef.current = signatureCanvas;
 
     // Initialize PDF canvas
     const pdfCanvas = new Canvas('pdfCanvas', {
-      selection: false,
+      selection: true,
+      width: 800,
+      height: 1200,
+      backgroundColor: 'transparent'
     });
     canvasRef.current = pdfCanvas;
 
@@ -155,26 +172,36 @@ export default function DocumentViewerPage() {
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <Card className="p-4">
-            <Document
-              file={fileUrl}
-              onLoadSuccess={onDocumentLoadSuccess}
-              loading={<LoadingSpin />}
-            >
-              <Page
-                pageNumber={currentPage}
-                scale={scale}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                canvasRef={(canvas) => {
-                  if (canvas && canvasRef.current) {
-                    canvasRef.current.setDimensions({
-                      width: canvas.width,
-                      height: canvas.height,
-                    });
-                  }
-                }}
-              />
-            </Document>
+            {error ? (
+              <div className="text-red-600">Error loading PDF: {error}</div>
+            ) : (
+              <Document
+                file={fileUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={<LoadingSpin />}
+              >
+                <Page
+                  pageNumber={currentPage}
+                  scale={scale}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  canvasRef={(canvas) => {
+                    if (canvas && canvasRef.current) {
+                      const dimensions = {
+                        width: canvas.width || 800,
+                        height: canvas.height || 1200
+                      };
+                      try {
+                        canvasRef.current.setDimensions(dimensions);
+                      } catch (error) {
+                        console.error('Error setting canvas dimensions:', error);
+                      }
+                    }
+                  }}
+                />
+              </Document>
+            )}
             <canvas id="pdfCanvas" style={{ position: 'absolute', top: 0, left: 0 }} />
           </Card>
         </div>
