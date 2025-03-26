@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Canvas, Image as FabricImage } from 'fabric';
+import { fabric } from 'fabric';
 import { Document, Page, pdfjs } from 'react-pdf';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save } from 'lucide-react';
+import { PDFDocumentProxy } from 'pdfjs-dist';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
@@ -18,23 +19,57 @@ export default function DocumentViewerPage() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [scale, setScale] = useState(1.5);
-  const canvasRef = useRef<Canvas | null>(null);
-  const signatureRef = useRef<Canvas | null>(null);
+  const canvasRef = useRef<fabric.Canvas | null>(null);
+  const signatureRef = useRef<fabric.Canvas | null>(null);
   const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
 
   useEffect(() => {
-    console.log('Loading PDF from URL:', fileUrl);
-    console.log('PDF.js worker source:', pdfjs.GlobalWorkerOptions.workerSrc);
-  }, [fileUrl]);
+    const initCanvas = () => {
+      try {
+        // Initialize signature pad
+        const signatureElement = document.getElementById('signatureCanvas') as HTMLCanvasElement;
+        if (signatureElement) {
+          const rect = signatureElement.getBoundingClientRect();
+          const signatureCanvas = new fabric.Canvas('signatureCanvas', {
+            isDrawingMode: true,
+            width: rect.width,
+            height: rect.height,
+            backgroundColor: '#ffffff'
+          });
 
-  useEffect(() => {
+          signatureRef.current = signatureCanvas;
+          if (signatureCanvas.freeDrawingBrush) {
+            signatureCanvas.freeDrawingBrush.color = '#000000';
+            signatureCanvas.freeDrawingBrush.width = 2;
+          }
+        }
+
+        // Initialize PDF canvas
+        const pdfElement = document.getElementById('pdfCanvas') as HTMLCanvasElement;
+        if (pdfElement) {
+          const pdfCanvas = new fabric.Canvas('pdfCanvas', {
+            selection: true,
+            backgroundColor: 'transparent'
+          });
+          canvasRef.current = pdfCanvas;
+        }
+
+        setIsCanvasInitialized(true);
+      } catch (error) {
+        console.error('Error initializing canvas:', error);
+        setError('Failed to initialize canvas');
+      }
+    };
+
     if (!isCanvasInitialized) {
-      initializeCanvas();
-      setIsCanvasInitialized(true);
+      // Delay initialization to ensure DOM is ready
+      const timer = setTimeout(initCanvas, 100);
+      return () => clearTimeout(timer);
     }
 
-    // Cleanup function
     return () => {
       if (signatureRef.current) {
         signatureRef.current.dispose();
@@ -45,10 +80,54 @@ export default function DocumentViewerPage() {
     };
   }, [isCanvasInitialized]);
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    console.log('PDF loaded successfully with', numPages, 'pages');
-    setNumPages(numPages);
-    setError(null); // Clear any previous errors
+  const clearSignature = () => {
+    if (signatureRef.current) {
+      signatureRef.current.clear();
+      signatureRef.current.backgroundColor = '#ffffff';
+      signatureRef.current.renderAll();
+    }
+  };
+
+  const addSignatureToPdf = () => {
+    if (!signatureRef.current || !canvasRef.current) return;
+
+    const signatureData = signatureRef.current.toDataURL({
+      format: 'png',
+      multiplier: 1,
+      quality: 1,
+      enableRetinaScaling: false
+    });
+
+    fabric.Image.fromURL(signatureData, (img) => {
+      if (!canvasRef.current) return;
+
+      img.scale(0.5);
+      img.set({
+        left: 100,
+        top: 100,
+        hasControls: true,
+        hasBorders: true,
+        lockUniScaling: true
+      });
+
+      canvasRef.current.add(img);
+      canvasRef.current.renderAll();
+      clearSignature();
+    });
+  };
+
+  const onDocumentLoadSuccess = async (pdf: PDFDocumentProxy) => {
+    setPdfDoc(pdf);
+    setNumPages(pdf.numPages);
+    setCurrentPage(1);
+    
+    try {
+      await loadPdfPage(1);
+      initializeCanvas();
+    } catch (err) {
+      console.error('Error initializing PDF:', err);
+      setError('Failed to initialize PDF viewer');
+    }
   };
 
   const onDocumentLoadError = (error: Error) => {
@@ -56,126 +135,76 @@ export default function DocumentViewerPage() {
     setError(`Error loading PDF: ${error.message}`);
   };
 
-  const initializeCanvas = () => {
-    // Cleanup existing canvases if they exist
-    if (signatureRef.current) {
-      signatureRef.current.dispose();
-    }
-    if (canvasRef.current) {
-      canvasRef.current.dispose();
-    }
-
-    // Initialize signature pad with proper dimensions
-    const signatureElement = document.getElementById('signatureCanvas');
-    if (signatureElement) {
-      const rect = signatureElement.getBoundingClientRect();
-      const signatureCanvas = new Canvas('signatureCanvas', {
-        isDrawingMode: true,
-        width: rect.width,
-        height: rect.height,
-        backgroundColor: '#ffffff'
-      });
-      
-      signatureRef.current = signatureCanvas;
-
-      // Set drawing properties
-      if (signatureCanvas.freeDrawingBrush) {
-        signatureCanvas.freeDrawingBrush.color = '#000000';
-        signatureCanvas.freeDrawingBrush.width = 2;
-      }
-
-      // Make canvas responsive
-      window.addEventListener('resize', () => {
-        const rect = signatureElement.getBoundingClientRect();
-        signatureCanvas.setDimensions({
-          width: rect.width,
-          height: rect.height
-        });
-      });
-    }
-
-    // Initialize PDF canvas
-    const pdfCanvas = new Canvas('pdfCanvas', {
-      selection: true,
-      width: 800,
-      height: 1200,
-      backgroundColor: 'transparent'
-    });
-    canvasRef.current = pdfCanvas;
-
-    // Enable object movement on PDF canvas
-    pdfCanvas.on('object:moving', (e) => {
-      const obj = e.target;
-      if (obj) {
-        // Keep objects within canvas bounds
-        const bound = obj.getBoundingRect();
-        if (bound.top < 0) {
-          obj.top = 0;
-        }
-        if (bound.left < 0) {
-          obj.left = 0;
-        }
-        if (bound.top + bound.height > pdfCanvas.height) {
-          obj.top = pdfCanvas.height - bound.height;
-        }
-        if (bound.left + bound.width > pdfCanvas.width) {
-          obj.left = pdfCanvas.width - bound.width;
-        }
-      }
-    });
-  };
-
-  const clearSignature = () => {
-    if (signatureRef.current) {
-      signatureRef.current.clear();
-    }
-  };
-
-  const addSignatureToPdf = () => {
-    if (!signatureRef.current || !canvasRef.current) return;
-
-    const signature = signatureRef.current.toDataURL({
-      format: 'png',
-      multiplier: 1,
-      quality: 1,
-      enableRetinaScaling: false,
-    });
-
-    const img = new FabricImage(signature);
-    img.scale(0.5);
-    canvasRef.current?.add(img);
-    img.setCoords();
-  };
-
   const saveSignedPdf = async () => {
     if (!canvasRef.current || !fileUrl) return;
-
-    const signedPdfDataUrl = canvasRef.current.toDataURL({
-      format: 'png',
-      multiplier: 1,
-      quality: 1,
-      enableRetinaScaling: false,
-    });
-
+    
     try {
+      setIsSaving(true);
+      const signedPdfDataUrl = canvasRef.current.toDataURL({
+        format: 'png',
+        multiplier: 1,
+        quality: 1,
+        enableRetinaScaling: false,
+      });
+
       const response = await fetch('/api/documents/sign', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fileUrl,
+          fileUrl: fileUrl,
           signedPdfData: signedPdfDataUrl,
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to save signed document');
-      
-      // Redirect back to documents list
-      window.location.href = '/documents';
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(errorText || 'Failed to save signed document');
+      }
+
+      const result = await response.json();
+      console.log('Success:', result);
+
+      window.location.replace('/documents');
     } catch (error) {
       console.error('Error saving signed document:', error);
+      alert('Failed to save signed document. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const loadPdfPage = async (pageNum: number) => {
+    try {
+      if (!pdfDoc) return;
+      
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale });
+      
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const context = canvas.getContext();
+      if (!context) return;
+      
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+
+    } catch (err) {
+      console.error('Error loading PDF page:', err);
+      setError('Failed to load PDF page');
+    }
+  };
+
+  const initializeCanvas = () => {
+    // Implementation of initializeCanvas method
   };
 
   if (!fileUrl) return <div>No document URL provided</div>;
@@ -197,9 +226,9 @@ export default function DocumentViewerPage() {
               <option value={2}>200%</option>
             </select>
           </div>
-          <Button onClick={saveSignedPdf}>
+          <Button onClick={saveSignedPdf} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
-            Save Signed Document
+            {isSaving ? 'Saving...' : 'Save Signed Document'}
           </Button>
         </div>
       </div>

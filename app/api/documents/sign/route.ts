@@ -1,41 +1,68 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { put } from '@vercel/blob';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import { put, list } from '@vercel/blob';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
+    // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { documentId, signedPdfData } = await request.json();
+    const body = await request.json();
+    const { fileUrl, signedPdfData } = body;
 
-    // Get the original document
-    const originalDoc = await prisma.projectDocument.findUnique({
-      where: { id: documentId },
-    });
+    // List semua file di blob storage
+    const { blobs } = await list();
+    
+    // Cari blob yang URL-nya sama persis
+    const foundBlob = blobs.find(blob => blob.url === fileUrl);
+    console.log('Found blob:', foundBlob);
 
-    if (!originalDoc) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    if (!foundBlob) {
+      return NextResponse.json(
+        { 
+          error: 'Document not found in blob storage',
+          searchedUrl: fileUrl,
+        }, 
+        { status: 404 }
+      );
     }
 
-    // Convert base64 to blob and upload
+    // Get or create document
+    let doc = await prisma.document.findFirst({
+      where: { fileUrl: foundBlob.url }
+    });
+
+    if (!doc) {
+      // Create new document
+      doc = await prisma.document.create({
+        data: {
+          fileName: foundBlob.pathname,
+          fileUrl: foundBlob.url,
+          fileType: 'pdf',
+          uploadedBy: session.user.id,
+        }
+      });
+      console.log('Created new document:', doc);
+    }
+
+    // Process signature
     const base64Data = signedPdfData.split(',')[1];
     const buffer = Buffer.from(base64Data, 'base64');
+    const fileNameBlob = doc.fileName.replace('.pdf', '_signed.pdf');
     
-    // Upload signed version
-    const fileName = originalDoc.fileName.replace('.pdf', '_signed.pdf');
-    const blob = await put(fileName, buffer, {
+    const blob = await put(fileNameBlob, buffer, {
       access: 'public',
       contentType: 'application/pdf',
     });
 
-    // Update document record
-    const updatedDoc = await prisma.projectDocument.update({
-      where: { id: documentId },
+    // Update document
+    const updatedDoc = await prisma.document.update({
+      where: { id: doc.id },
       data: {
         signedFileUrl: blob.url,
         signedAt: new Date(),
@@ -43,11 +70,15 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(updatedDoc);
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Document signed successfully',
+      document: updatedDoc
+    });
   } catch (error) {
-    console.error('Error signing document:', error);
+    console.error('Error in sign API:', error);
     return NextResponse.json(
-      { error: 'Failed to sign document' },
+      { error: 'Failed to process document' },
       { status: 500 }
     );
   }
