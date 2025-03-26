@@ -50,6 +50,23 @@ export default function DocumentPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+    
+    try {
+      const response = await fetch(`/api/documents/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete document');
+      
+      // Refresh documents list
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to delete document');
+    }
+  };
+
   if (isLoading) return <LoadingSpin />;
 
   return (
@@ -140,7 +157,7 @@ export default function DocumentPage() {
                     )}
                     {doc.isOrphan && (
                       <button
-                        // onClick={() => handleDelete(doc.id)}
+                        onClick={() => handleDelete(doc.id)}
                         className="text-red-600 hover:underline flex items-center gap-1"
                       >
                         <Trash2 className="w-4 h-4" />
