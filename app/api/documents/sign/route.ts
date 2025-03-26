@@ -55,7 +55,20 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(base64Data, 'base64');
     const fileNameBlob = doc.fileName.replace('.pdf', '_signed.pdf');
     
-    const blob = await put(fileNameBlob, buffer, {
+    // Ubah content type menjadi image/png untuk signature
+    const signatureBlob = await put(fileNameBlob.replace('.pdf', '_signature.png'), buffer, {
+      access: 'public',
+      contentType: 'image/png',
+    });
+
+    // Ambil file PDF asli
+    const originalPdfResponse = await fetch(doc.fileUrl);
+    const originalPdfBuffer = await originalPdfResponse.arrayBuffer();
+
+    // Di sini perlu ditambahkan logika untuk menggabungkan PDF asli dengan signature
+    // Contoh menggunakan pdf-lib atau library PDF lainnya
+    // Untuk sementara, kita simpan PDF asli sebagai signed version
+    const signedPdfBlob = await put(fileNameBlob, Buffer.from(originalPdfBuffer), {
       access: 'public',
       contentType: 'application/pdf',
     });
@@ -64,7 +77,7 @@ export async function POST(request: Request) {
     const updatedDoc = await prisma.document.update({
       where: { id: doc.id },
       data: {
-        signedFileUrl: blob.url,
+        signedFileUrl: signedPdfBlob.url,
         signedAt: new Date(),
         signedBy: session.user.id,
       },

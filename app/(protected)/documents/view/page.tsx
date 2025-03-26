@@ -159,15 +159,13 @@ export default function DocumentViewerPage() {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', errorText);
-        throw new Error(errorText || 'Failed to save signed document');
+        const errorData = await response.text();
+        throw new Error(errorData || 'Failed to save signed document');
       }
 
-      const result = await response.json();
-      console.log('Success:', result);
-
-      window.location.replace('/documents');
+      // Gunakan window.location.href untuk navigasi sederhana
+      window.location.href = '/documents';
+      
     } catch (error) {
       console.error('Error saving signed document:', error);
       alert('Failed to save signed document. Please try again.');
