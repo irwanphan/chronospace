@@ -231,10 +231,10 @@ export default function DocumentViewerPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2">
-          <Card className="p-4 overflow-hidden">
-            <div className="relative" style={{ minHeight: '800px' }}>
+      <div className="grid grid-cols-4 gap-6">
+        <div className="col-span-3">
+          <Card className="overflow-auto hover:bg-gray-300">
+            <div className="" style={{ minHeight: '800px' }}>
               {error ? (
                 <div className="text-red-600">Error loading PDF: {error}</div>
               ) : (
@@ -251,18 +251,27 @@ export default function DocumentViewerPage() {
                     renderAnnotationLayer={false}
                     canvasRef={(canvas) => {
                       if (canvas && canvasRef.current) {
+                        // Gunakan ukuran asli dari PDF canvas
+                        const actualWidth = canvas.width;
+                        const actualHeight = canvas.height;
+
                         const dimensions = {
-                          width: canvas.width || 800,
-                          height: canvas.height || 1200
+                          width: actualWidth * 0.5, // Bagi 2 untuk mengatasi scaling
+                          height: actualHeight * 0.5
                         };
+
                         try {
                           canvasRef.current.setDimensions(dimensions);
-                          // Sesuaikan ukuran container
+                          
+                          // Sesuaikan container
                           const container = canvas.parentElement;
                           if (container) {
                             container.style.width = `${dimensions.width}px`;
                             container.style.height = `${dimensions.height}px`;
                           }
+
+                          // Set scale canvas
+                          canvasRef.current.setZoom(0.5); // Set zoom ke 0.5 untuk menyesuaikan ukuran
                         } catch (error) {
                           console.error('Error setting canvas dimensions:', error);
                         }
