@@ -50,11 +50,11 @@ export default function DocumentPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (fileUrl: string) => {
     if (!confirm('Are you sure you want to delete this document?')) return;
     
     try {
-      const response = await fetch(`/api/documents/${id}`, {
+      const response = await fetch(`/api/documents/${encodeURIComponent(fileUrl)}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete document');
@@ -157,11 +157,10 @@ export default function DocumentPage() {
                     )}
                     {doc.isOrphan && (
                       <button
-                        onClick={() => handleDelete(doc.id)}
+                        onClick={() => handleDelete(doc.fileUrl)}
                         className="text-red-600 hover:underline flex items-center gap-1"
                       >
                         <Trash2 className="w-4 h-4" />
-                        {/* Delete */}
                       </button>
                     )}
                   </div>
