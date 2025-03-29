@@ -6,6 +6,7 @@ export async function GET() {
   try {
     // 1. Ambil semua file dari Vercel Blob
     const { blobs } = await list();
+    console.log(blobs);
 
     // 2. Ambil semua dokumen dari database
     const dbDocuments = await prisma.projectDocument.findMany({

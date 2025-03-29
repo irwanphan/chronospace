@@ -10,6 +10,7 @@ interface Document {
   id: string;
   fileName: string;
   fileUrl: string;
+  downloadUrl: string;
   fileType: string;
   uploadedAt: Date;
   size: number;
@@ -149,7 +150,7 @@ export default function DocumentPage() {
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <a
-                        href={doc.fileUrl}
+                        href={doc.downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline flex items-center gap-1"
