@@ -202,11 +202,30 @@ export default function PDFViewer() {
     try {
       setIsSaving(true);
       
-      // Dapatkan data tanda tangan dalam format PNG
-      const signedPdfDataUrl = canvasRef.current.toDataURL({
-        format: 'png',
-        multiplier: 2, // Tingkatkan kualitas
-        quality: 1
+      // Dapatkan semua objek dari canvas
+      const objects = canvasRef.current.getObjects();
+      if (objects.length === 0) {
+        throw new Error('No signature found');
+      }
+
+      // Dapatkan data posisi dan ukuran dari setiap objek
+      const signatures = objects.map(obj => {
+        const scaled = {
+          left: obj.left! / canvasRef.current!.width!,
+          top: obj.top! / canvasRef.current!.height!,
+          width: (obj.width! * obj.scaleX!) / canvasRef.current!.width!,
+          height: (obj.height! * obj.scaleY!) / canvasRef.current!.height!,
+        };
+
+        return {
+          dataUrl: obj.toDataURL({
+            format: 'png',
+            multiplier: 2,
+            quality: 1
+          }),
+          position: scaled,
+          page: currentPage
+        };
       });
 
       const response = await fetch('/api/documents/sign', {
@@ -216,7 +235,7 @@ export default function PDFViewer() {
         },
         body: JSON.stringify({
           fileUrl: fileUrl,
-          signedPdfData: signedPdfDataUrl,
+          signatures: signatures,
         }),
       });
 
@@ -225,7 +244,6 @@ export default function PDFViewer() {
         throw new Error(errorText || 'Failed to save signed document');
       }
 
-      // Redirect setelah berhasil
       window.location.href = '/documents';
     } catch (error) {
       console.error('Error saving signed document:', error);
