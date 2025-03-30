@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { fabric } from 'fabric';
@@ -27,6 +27,7 @@ export default function PDFViewer() {
   const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
   const [pageWidth, setPageWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [fabricObjects, setFabricObjects] = useState<{ [key: number]: fabric.Object[] }>({});
 
   useEffect(() => {
     const fetchPdf = async () => {
@@ -151,44 +152,61 @@ export default function PDFViewer() {
     }
   };
 
-  const addSignatureToPdf = () => {
-    if (!signatureRef.current || !canvasRef.current) return;
+  // Simpan objek fabric untuk halaman saat ini
+  const saveCurrentPageObjects = useCallback(() => {
+    if (canvasRef.current) {
+      const objects = canvasRef.current.getObjects();
+      setFabricObjects(prev => ({
+        ...prev,
+        [currentPage]: objects
+      }));
+    }
+  }, [currentPage]);
 
-    const signatureData = signatureRef.current.toDataURL({
-      format: 'png',
-      multiplier: 1,
-      quality: 1,
-      enableRetinaScaling: false
-    });
-
-    fabric.Image.fromURL(signatureData, (img) => {
-      if (!canvasRef.current) return;
-
-      img.scale(0.5);
-      img.set({
-        left: 100,
-        top: 100,
-        hasControls: true,
-        hasBorders: true,
-        lockUniScaling: true
+  // Restore objek fabric saat pergantian halaman
+  const restorePageObjects = useCallback(() => {
+    if (canvasRef.current && fabricObjects[currentPage]) {
+      canvasRef.current.clear();
+      fabricObjects[currentPage].forEach(obj => {
+        canvasRef.current?.add(obj);
       });
-
-      canvasRef.current.add(img);
       canvasRef.current.renderAll();
-      clearSignature();
-    });
+    }
+  }, [currentPage, fabricObjects]);
+
+  // Handle pergantian halaman
+  const handlePageChange = (newPage: number) => {
+    // Simpan objek halaman saat ini
+    saveCurrentPageObjects();
+    
+    // Ganti halaman
+    setCurrentPage(newPage);
+    
+    // Reset dan inisialisasi ulang canvas
+    if (canvasRef.current) {
+      canvasRef.current.clear();
+    }
   };
 
+  // Restore objek setelah halaman diload
+  useEffect(() => {
+    if (!loading) {
+      restorePageObjects();
+    }
+  }, [loading, restorePageObjects]);
+
+  // Fungsi untuk menyimpan dokumen
   const saveSignedPdf = async () => {
     if (!canvasRef.current || !fileUrl) return;
     
     try {
       setIsSaving(true);
+      
+      // Dapatkan data tanda tangan dalam format PNG
       const signedPdfDataUrl = canvasRef.current.toDataURL({
         format: 'png',
-        multiplier: 1,
-        quality: 1,
-        enableRetinaScaling: false,
+        multiplier: 2, // Tingkatkan kualitas
+        quality: 1
       });
 
       const response = await fetch('/api/documents/sign', {
@@ -207,6 +225,7 @@ export default function PDFViewer() {
         throw new Error(errorText || 'Failed to save signed document');
       }
 
+      // Redirect setelah berhasil
       window.location.href = '/documents';
     } catch (error) {
       console.error('Error saving signed document:', error);
@@ -214,6 +233,38 @@ export default function PDFViewer() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Fungsi untuk menambahkan tanda tangan ke dokumen
+  const addSignatureToPdf = () => {
+    if (!signatureRef.current || !canvasRef.current) return;
+
+    const signatureData = signatureRef.current.toDataURL({
+      format: 'png',
+      quality: 1,
+      multiplier: 2
+    });
+
+    fabric.Image.fromURL(signatureData, (img) => {
+      if (!canvasRef.current) return;
+
+      img.scale(0.5);
+      img.set({
+        left: 100,
+        top: 100,
+        hasControls: true,
+        hasBorders: true,
+        lockUniScaling: true
+      });
+
+      canvasRef.current.add(img);
+      canvasRef.current.renderAll();
+      
+      // Simpan objek setelah menambahkan tanda tangan
+      saveCurrentPageObjects();
+      
+      clearSignature();
+    });
   };
 
   if (loading) {
@@ -329,13 +380,13 @@ export default function PDFViewer() {
       {numPages > 1 && (
         <div className="flex justify-center items-center gap-4">
           <Button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage <= 1}
           >
             Previous
           </Button>
           <Button
-            onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))}
+            onClick={() => handlePageChange(Math.min(numPages, currentPage + 1))}
             disabled={currentPage >= numPages}
           >
             Next
