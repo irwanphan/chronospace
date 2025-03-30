@@ -72,8 +72,9 @@ export async function POST(request: Request) {
     // Serialize dan simpan PDF
     try {
       const signedPdfBytes = await pdfDoc.save();
+      const signedPdfBuffer = Buffer.from(signedPdfBytes);
 
-      const { url } = await put(newFileName, signedPdfBytes, {
+      const { url } = await put(newFileName, signedPdfBuffer, {
         access: 'public',
         contentType: 'application/pdf'
       });
