@@ -21,7 +21,7 @@ export default function PDFViewer() {
   const [error, setError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [scale, setScale] = useState(1.5);
+  const [scale, setScale] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const signatureRef = useRef<fabric.Canvas | null>(null);
@@ -156,15 +156,14 @@ export default function PDFViewer() {
   };
 
   const handlePageRenderSuccess = useCallback((page: PDFPageProxy) => {
-    const viewport = page.getViewport({ scale: 1 });
-    const scale = 0.8;
+    const viewport = page.getViewport({ scale });
+    setPdfDimensions({
+      width: viewport.width,
+      height: viewport.height
+    });
     
-    const width = viewport.width * scale;
-    const height = viewport.height * scale;
-
-    setPdfDimensions({ width, height });
-    initPdfCanvas(width, height);
-  }, [initPdfCanvas]);
+    initPdfCanvas(viewport.width, viewport.height);
+  }, [scale, initPdfCanvas]);
 
   const clearSignature = useCallback(() => {
     if (signatureRef.current) {
@@ -306,13 +305,15 @@ export default function PDFViewer() {
 
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
-          <Card className="p-4 bg-white hover:bg-gray-300">
+          <Card className="bg-white hover:bg-gray-300">
             <div 
               ref={containerRef}
-              className="relative flex justify-center"
+              className="relative flex justify-center overflow-x-auto"
               style={{ 
                 width: pdfDimensions.width || 'auto',
-                height: pdfDimensions.height || 'auto'
+                height: pdfDimensions.height || 'auto',
+                maxWidth: '100%',
+                // maxHeight: '80vh'
               }}
             >
               {pdfData ? (
@@ -323,13 +324,12 @@ export default function PDFViewer() {
                 >
                   <div className="relative">
                     <Page
-                      key={currentPage}
+                      key={`${currentPage}-${scale}`}
                       pageNumber={currentPage}
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
                       onRenderSuccess={handlePageRenderSuccess}
-                      width={pdfDimensions.width}
-                      height={pdfDimensions.height}
+                      scale={scale}
                     />
                     <div 
                       style={{ 
