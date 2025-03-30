@@ -16,15 +16,17 @@ export default function PDFViewer() {
   const searchParams = useSearchParams();
   const fileUrl = searchParams.get('url');
   const [pdfData, setPdfData] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [numPages, setNumPages] = useState<number | null>(null);
+  const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [scale, setScale] = useState(1.5);
   const [isSaving, setIsSaving] = useState(false);
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const signatureRef = useRef<fabric.Canvas | null>(null);
   const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
+  const [pageWidth, setPageWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPdf = async () => {
@@ -112,9 +114,33 @@ export default function PDFViewer() {
     };
   }, [isCanvasInitialized]);
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setCurrentPage(1);
+  useEffect(() => {
+    setPageWidth(window.innerWidth);
+    const handleResize = () => setPageWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      // Cleanup canvas
+      if (canvasRef.current) {
+        canvasRef.current.dispose();
+      }
+    };
+  }, []);
+
+  // Inisialisasi canvas setelah PDF dirender
+  const initializeCanvas = (width: number, height: number) => {
+    // Hapus canvas lama jika ada
+    if (canvasRef.current) {
+      canvasRef.current.dispose();
+    }
+
+    // Buat canvas baru
+    const canvas = new fabric.Canvas('pdfCanvas', {
+      width,
+      height,
+      backgroundColor: 'transparent'
+    });
+    canvasRef.current = canvas;
   };
 
   const clearSignature = () => {
@@ -190,7 +216,7 @@ export default function PDFViewer() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpin />;
   }
 
@@ -203,6 +229,10 @@ export default function PDFViewer() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Document Viewer</h1>
         <div className="flex items-center gap-4">
+          <div className="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">
+            <span>{currentPage}</span>
+            <span className="text-gray-400"> / {numPages}</span>
+          </div>
           <div className="flex items-center gap-2">
             <label>Zoom:</label>
             <select
@@ -217,7 +247,7 @@ export default function PDFViewer() {
           </div>
           <Button onClick={saveSignedPdf}
             disabled={isSaving}
-            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save Signed Document'}
@@ -227,63 +257,50 @@ export default function PDFViewer() {
 
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
-          <Card className="overflow-auto hover:bg-gray-300">
-            <div className="relative">
+          <Card className="p-4 bg-white">
+            <div 
+              ref={containerRef}
+              className="flex justify-center items-start relative"
+            >
               {pdfData ? (
                 <Document
                   file={pdfData}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                  onLoadError={(error) => setError(error.message)}
+                  onLoadSuccess={({ numPages }) => setNumPages(numPages)}
                   loading={<LoadingSpin />}
                 >
                   <Page
+                    key={`page-${currentPage}`}
                     pageNumber={currentPage}
-                    scale={scale}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
-                    canvasRef={(canvas) => {
-                      if (canvas && canvasRef.current) {
-                        const actualWidth = canvas.width;
-                        const actualHeight = canvas.height;
-
-                        const dimensions = {
-                          width: actualWidth * 0.5,
-                          height: actualHeight * 0.5
-                        };
-
-                        try {
-                          canvasRef.current.setDimensions(dimensions);
-                          
-                          const container = canvas.parentElement;
-                          if (container) {
-                            container.style.width = `${dimensions.width}px`;
-                            container.style.height = `${dimensions.height}px`;
-                          }
-                        } catch (error) {
-                          console.error('Error setting canvas dimensions:', error);
-                        }
-                      }
+                    onLoadSuccess={(page) => {
+                      setIsLoading(false);
+                      // Inisialisasi canvas dengan ukuran halaman PDF
+                      const viewport = page.getViewport({ scale: 1 });
+                      initializeCanvas(viewport.width * 0.5, viewport.height * 0.5);
                     }}
+                    width={Math.max(pageWidth * 0.5, 390)}
                   />
                 </Document>
               ) : (
                 <div>No PDF data available</div>
               )}
-              <canvas 
-                id="pdfCanvas" 
+              <div 
                 style={{ 
-                  position: 'absolute', 
-                  top: 0, 
+                  position: 'absolute',
+                  top: 0,
                   left: 0,
                   pointerEvents: 'none'
-                }} 
-              />
+                }}
+              >
+                <canvas id="pdfCanvas" />
+              </div>
             </div>
           </Card>
         </div>
 
         <div className="col-span-1">
-          <Card className="p-4 space-y-4">
+          <Card className="p-4 space-y-4 bg-white">
             <h2 className="text-lg font-semibold">Digital Signature</h2>
             <div className="border rounded p-2 bg-white">
               <canvas 
@@ -309,17 +326,14 @@ export default function PDFViewer() {
         </div>
       </div>
 
-      {numPages && numPages > 1 && (
-        <div className="flex justify-center gap-4 mt-4">
+      {numPages > 1 && (
+        <div className="flex justify-center items-center gap-4">
           <Button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage <= 1}
           >
             Previous
           </Button>
-          <span className="py-2">
-            Page {currentPage} of {numPages}
-          </span>
           <Button
             onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))}
             disabled={currentPage >= numPages}
