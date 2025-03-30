@@ -74,9 +74,9 @@ const pageConfigs: Record<string, { title: string; breadcrumbs: string[] }> = {
     title: 'Workspace Management',
     breadcrumbs: ['Home', 'Workspace Management', 'Approval Schema']
   },
-  '/workspace-management/documents': {
-    title: 'Workspace Management',
-    breadcrumbs: ['Home', 'Workspace Management', 'Documents']
+  '/documents': {
+    title: 'Document Management',
+    breadcrumbs: ['Home', 'Document Management']
   },
 };
 

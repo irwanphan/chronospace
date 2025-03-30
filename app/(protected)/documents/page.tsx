@@ -86,7 +86,7 @@ export default function DocumentPage() {
     
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">Document Management</h1>
+          <h1 className="text-2xl font-semibold">Uploaded Documents</h1>
           <div className="text-sm text-gray-500">
             Total Files: {documents.length} | 
             Unused Files: {documents.filter(d => d.isOrphan).length}

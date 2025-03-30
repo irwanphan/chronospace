@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
-import { IconBriefcaseFilled, IconCoins, IconFile, IconId, IconLayoutDashboardFilled, IconStack2Filled, IconSubtask } from '@tabler/icons-react';
+import { IconBrandMinecraft, IconBriefcaseFilled, IconCoins, IconId, IconLayoutDashboardFilled, IconStack2Filled, IconSubtask } from '@tabler/icons-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -78,7 +78,7 @@ const Sidebar = () => {
     {
       name: 'Documents',
       href: '/documents',
-      icon: IconFile,
+      icon: IconBrandMinecraft,
       show: userAccess.documents
     }
   ].filter(item => item.show);
