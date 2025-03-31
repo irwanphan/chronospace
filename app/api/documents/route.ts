@@ -34,6 +34,7 @@ export async function GET() {
         id: dbDoc?.id || blob.url,
         fileName: blob.pathname.split('/').pop() || 'Unknown',
         fileUrl: blob.url,
+        downloadUrl: blob.downloadUrl,
         fileType: blob.pathname.split('.').pop()?.toUpperCase() || 'Unknown',
         uploadedAt: dbDoc?.uploadedAt || blob.uploadedAt,
         size: blob.size,
