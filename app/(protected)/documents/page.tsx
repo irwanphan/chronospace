@@ -168,7 +168,7 @@ export default function DocumentPage() {
             <thead>
               <tr className="border-b">
                 <th className="px-4 py-2 text-left">Document Name</th>
-                <th className="px-4 py-2 text-left">Type</th>
+                {/* <th className="px-4 py-2 text-left">Type</th> */}
                 <th className="px-4 py-2 text-left">Size</th>
                 <th className="px-4 py-2 text-left">Uploaded By</th>
                 <th className="px-4 py-2 text-left">Upload Date</th>
@@ -182,11 +182,11 @@ export default function DocumentPage() {
                 <tr key={doc.id} className={`border-b hover:bg-blue-50 ${doc.isOrphan ? 'bg-gray-100' : ''}`}>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-gray-500" />
-                      {doc.fileName}
+                      <FileText className="w-4 h-4 text-gray-500 self-start"/>
+                      <p className="text-sm">{doc.fileName}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-2">{doc.fileType}</td>
+                  {/* <td className="px-4 py-2">{doc.fileType}</td> */}
                   <td className="px-4 py-2">{formatBytes(doc.size)}</td>
                   <td className="px-4 py-2">{doc.uploader.name}</td>
                   <td className="px-4 py-2">{formatDate(doc.uploadedAt)}</td>
@@ -239,7 +239,7 @@ export default function DocumentPage() {
                           Sign
                         </a>
                       )}
-                      {doc.isOrphan && (
+                      {/* {doc.isOrphan && ( */}
                         <button
                           onClick={() => handleDelete(doc.fileUrl)}
                           disabled={deletingFileUrl === doc.fileUrl}
@@ -253,7 +253,7 @@ export default function DocumentPage() {
                             <Trash2 className="w-4 h-4" />
                           )}
                         </button>
-                      )}
+                      {/* )} */}
                     </div>
                   </td>
                 </tr>
