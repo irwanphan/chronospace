@@ -15,6 +15,9 @@ interface Document {
   uploadedAt: Date;
   size: number;
   uploadedBy: string;
+  uploader: {
+    name: string;
+  };
   usages: {
     entityType: string;
     entityId: string;
@@ -185,7 +188,7 @@ export default function DocumentPage() {
                   </td>
                   <td className="px-4 py-2">{doc.fileType}</td>
                   <td className="px-4 py-2">{formatBytes(doc.size)}</td>
-                  <td className="px-4 py-2">{doc.uploadedBy}</td>
+                  <td className="px-4 py-2">{doc.uploader.name}</td>
                   <td className="px-4 py-2">{formatDate(doc.uploadedAt)}</td>
                   {/* <td className="px-4 py-2">
                     {doc.isOrphan ? (

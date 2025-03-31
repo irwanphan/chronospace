@@ -24,11 +24,12 @@ export async function POST(request: Request) {
       contentType: 'application/pdf'
     });
 
-    // Simpan ke database
+    // Simpan ke database dengan informasi uploader
     const document = await prisma.document.create({
       data: {
         fileName: file.name,
         fileUrl: url,
+        uploadedAt: new Date(),
         uploader: {
           connect: {
             id: session.user.id

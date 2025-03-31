@@ -6,24 +6,24 @@ export async function GET() {
   try {
     // 1. Ambil semua file dari Vercel Blob
     const { blobs } = await list();
-    console.log(blobs);
+    // console.log(blobs);
 
     // 2. Ambil semua dokumen dari database
-    const dbDocuments = await prisma.projectDocument.findMany({
+    const dbDocuments = await prisma.document.findMany({
       include: {
         uploader: {
           select: {
             name: true,
-          },
+          }
         },
         project: {
           select: {
             id: true,
             code: true,
             title: true,
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     // 3. Map dokumen dari blob dengan data dari database
@@ -37,14 +37,16 @@ export async function GET() {
         fileType: blob.pathname.split('.').pop()?.toUpperCase() || 'Unknown',
         uploadedAt: dbDoc?.uploadedAt || blob.uploadedAt,
         size: blob.size,
-        uploadedBy: dbDoc?.uploader.name || '-',
-        usages: dbDoc ? [{
+        uploader: {
+          name: dbDoc?.uploader?.name || '-'
+        },
+        usages: dbDoc?.project ? [{
           entityType: 'PROJECT',
           entityId: dbDoc.project.id,
           entityCode: dbDoc.project.code,
           entityTitle: dbDoc.project.title,
-        }].filter(usage => usage.entityId) : [],
-        isOrphan: !dbDoc, // Flag untuk file yang tidak terhubung ke database
+        }] : [],
+        isOrphan: !dbDoc
       };
     });
 
