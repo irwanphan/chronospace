@@ -8,20 +8,12 @@ import RequestCard from '@/components/RequestCard';
 import CreateRequestFAB from '@/components/CreateRequestFAB';
 import { formatDate, stripHtmlTags } from '@/lib/utils';
 import { WorkspaceAccess } from '@/types/access-control';
-import { Session } from 'next-auth';
+import type { Session } from 'next-auth';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import WorkspaceStats from './components/WorkspaceStats';
 import { calculateRequestStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
 import { Grid2X2, List } from 'lucide-react';
-
-interface CustomSession extends Session {
-  user: {
-    access: {
-      workspaceAccess: WorkspaceAccess;
-    };
-  } & Session['user'];
-}
 
 interface PurchaseRequest {
   id: string;
@@ -66,23 +58,32 @@ interface PurchaseRequest {
 type FilterType = 'in-queue' | 'stale' | 'approved' | 'all';
 
 export default function WorkspacePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Early return for loading state
+  if (status === 'loading') {
+    return <LoadingSpin />;
+  }
+
+  // Early return for unauthenticated state
+  if (status === 'unauthenticated') {
+    router.push('/login');
+    return null;
+  }
+
+  // If we reach here, we're authenticated
+  return <WorkspaceContent session={session} />;
+}
+
+function WorkspaceContent({ session }: { session: Session | null }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([]);
-  const { data: session, status } = useSession() as { 
-    data: CustomSession | null, 
-    status: 'loading' | 'authenticated' | 'unauthenticated' 
-  };
-  const defaultAccess: WorkspaceAccess = {
-    createPurchaseRequest: false,
-    viewPurchaseRequest: false,
-    editPurchaseRequest: false,
-    reviewApprovePurchaseRequest: false
-  };
-  const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
-  const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
-  const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
+  const [displayAsList, setDisplayAsList] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('in-queue');
   const [stats, setStats] = useState({
     allRequests: 0,
     newRequests: 0,
@@ -94,11 +95,19 @@ export default function WorkspacePage() {
     completedRequestsChange: 0
   });
 
-  const [displayAsList, setDisplayAsList] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = displayAsList ? 10 : 6;
+  const defaultAccess: WorkspaceAccess = {
+    createPurchaseRequest: false,
+    viewPurchaseRequest: false,
+    editPurchaseRequest: false,
+    reviewApprovePurchaseRequest: false,
+    signDocument: false
+  };
 
-  const [activeFilter, setActiveFilter] = useState<FilterType>('in-queue');
+  const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
+  const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
+  const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
+
+  const itemsPerPage = displayAsList ? 10 : 6;
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
@@ -134,7 +143,6 @@ export default function WorkspacePage() {
   const endIndex = startIndex + itemsPerPage;
   const currentPurchaseRequests = filteredRequests.slice(startIndex, endIndex);
 
-  // console.log('Display as list:', displayAsList);
   useEffect(() => {
     let mounted = true;
 
@@ -165,7 +173,6 @@ export default function WorkspacePage() {
     };
   }, []);
 
-  // console.log('Purchase Requests:', purchaseRequests);
   if (isLoading) return <LoadingSpin />
 
   return (

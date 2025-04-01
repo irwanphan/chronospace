@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { formatDate } from '@/lib/utils';
 import { FileText, Download, ExternalLink, Trash2, Upload, X } from 'lucide-react';
 import { IconFileSearch } from '@tabler/icons-react';
@@ -35,6 +36,7 @@ const entityRoutes = {
 } as const;
 
 export default function DocumentPage() {
+  const { data: session } = useSession();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingFileUrl, setDeletingFileUrl] = useState<string | null>(null);
@@ -154,13 +156,15 @@ export default function DocumentPage() {
               Total Files: {documents.length} | 
               Unused Files: {documents.filter(d => d.isOrphan).length}
             </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              Upload Document
-            </button>
+            {session?.user?.access.activityAccess.uploadDocument && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Document
+              </button>
+            )}
           </div>
         </div>
 
@@ -220,14 +224,16 @@ export default function DocumentPage() {
                   </td>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
-                      <a
-                        href={doc.downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline flex items-center gap-1"
-                      >
-                        <Download className="w-4 h-4" />
-                      </a>
+                      {session?.user?.access.activityAccess.downloadDocument && (
+                        <a
+                          href={doc.downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center gap-1"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      )}
                       {doc.fileType === 'PDF' && (
                         <a
                           href={
@@ -242,6 +248,7 @@ export default function DocumentPage() {
                         </a>
                       )}
                       {/* {doc.isOrphan && ( */}
+                      {session?.user?.access.activityAccess.deleteDocument && (
                         <button
                           onClick={() => handleDelete(doc.fileUrl)}
                           disabled={deletingFileUrl === doc.fileUrl}
@@ -255,7 +262,7 @@ export default function DocumentPage() {
                             <Trash2 className="w-4 h-4" />
                           )}
                         </button>
-                      {/* )} */}
+                      )}
                     </div>
                   </td>
                 </tr>
