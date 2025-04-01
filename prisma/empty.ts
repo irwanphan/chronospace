@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 async function main() {
   // Clear existing data
+  await prisma.document.deleteMany();
   await prisma.approvalStep.deleteMany();
   await prisma.approvalSchema.deleteMany();
   await prisma.activityHistory.deleteMany();

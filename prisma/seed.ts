@@ -12,6 +12,7 @@ import { purchaseRequestSeeder } from './seeders/purchase-request-seeder';
 
 async function main() {
   // Clear existing data
+  await prisma.document.deleteMany();
   await prisma.approvalStep.deleteMany();
   await prisma.approvalSchema.deleteMany();
   await prisma.activityHistory.deleteMany();
