@@ -2,20 +2,24 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { fabric } from 'fabric';
+import { Document, Page, pdfjs } from 'react-pdf';
+import type { PDFPageProxy } from 'pdfjs-dist';
+
+import { formatDate } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
-import type { PDFPageProxy } from 'pdfjs-dist';
-import { useSession } from 'next-auth/react';
-import { formatDate } from '@/lib/utils';
+import { IconChevronLeft } from '@tabler/icons-react';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
 export default function PDFViewer() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { data: session } = useSession();
   const fileUrl = searchParams.get('url');
   const [pdfData, setPdfData] = useState<string | null>(null);
@@ -402,7 +406,12 @@ export default function PDFViewer() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Document Viewer</h1>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" className="px-1" onClick={() => router.back()}>
+            <IconChevronLeft className="w-4 h-4" stroke={4} />
+          </Button>
+          <h1 className="text-2xl font-semibold">Document Viewer</h1>
+        </div>
         <div className="flex items-center gap-4">
           <div className="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">
             <span>{currentPage}</span>
