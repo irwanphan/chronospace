@@ -4,6 +4,41 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import { put } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { PDFDocument } from 'pdf-lib';
+import { sign } from 'pdf-signer';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
+
+import signpdf from 'node-signpdf';
+import { SignPdfOptions } from 'node-signpdf';
+
+async function addSignaturePlaceholder(pdfBuffer: Buffer): Promise<Buffer> {
+  const pdfDoc = await PDFDocument.load(pdfBuffer);
+
+  const form = pdfDoc.getForm();
+  const [page] = pdfDoc.getPages();
+
+  const signature = form.createSignature('Signature1');
+  signature.addToPage(page, {
+    x: 50,
+    y: 50,
+    width: 200,
+    height: 50,
+  });
+
+  const modifiedPdf = await pdfDoc.save();
+  return Buffer.from(modifiedPdf);
+}
+
+function digitallySign(pdfBuffer: Buffer): Buffer {
+  const p12Path = join(process.cwd(), 'certificates', 'certificate.p12');
+  const p12Buffer = readFileSync(p12Path);
+
+  const signedPdf = signpdf.sign(pdfBuffer, p12Buffer, {
+    passphrase: process.env.P12_PASSPHRASE || '',
+  } as SignPdfOptions);
+
+  return signedPdf;
+}
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +52,11 @@ export async function POST(request: Request) {
     if (!fileUrl || !signatures?.length) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
+
+    // Generate nama file yang lebih pendek
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2, 8);
+    const fileName = `signed_${timestamp}_${randomId}.pdf`;
 
     // Download dan load PDF asli
     const originalPdfResponse = await fetch(fileUrl);
@@ -43,7 +83,6 @@ export async function POST(request: Request) {
         const page = pages[pageIndex];
         const { width: pageWidth, height: pageHeight } = page.getSize();
 
-        // Hitung posisi absolut
         const position = {
           x: pageWidth * signature.position.left,
           y: pageHeight * (1 - signature.position.top - signature.position.height),
@@ -51,60 +90,48 @@ export async function POST(request: Request) {
           height: pageHeight * signature.position.height
         };
 
-        // Tambahkan signature ke halaman
-        page.drawImage(signatureImage, {
-          x: position.x,
-          y: position.y,
-          width: position.width,
-          height: position.height
-        });
+        page.drawImage(signatureImage, position);
       } catch (signatureError) {
         console.error('Error processing signature:', signatureError);
         continue;
       }
     }
 
-    // Generate nama file yang unik
-    const timestamp = Date.now();
-    const originalFileName = decodeURIComponent(fileUrl.split('/').pop() || 'document');
-    const newFileName = originalFileName.replace('.pdf', `_signed_${timestamp}.pdf`);
+    // Simpan PDF dengan tanda tangan visual
+    const pdfWithSignatureBytes = await pdfDoc.save();
+    const pdfBuffer = Buffer.from(pdfWithSignatureBytes);
 
-    // Serialize dan simpan PDF
     try {
-      const signedPdfBytes = await pdfDoc.save();
-      const signedPdfBuffer = Buffer.from(signedPdfBytes);
+      // Coba tanda tangani secara digital
+      const p12Path = join(process.cwd(), 'certificates', 'certificate.p12');
+      if (!existsSync(p12Path)) {
+        // Jika tidak ada sertifikat, langsung upload versi dengan tanda tangan visual
+        return await uploadSignedPdf(pdfBuffer, fileName, session.user);
+      }
+      
+      // const p12Buffer = readFileSync(p12Path);
+      // const signedPdfBytes = await sign(
+      //   pdfBuffer,
+      //   p12Buffer,
+      //   process.env.P12_PASSPHRASE || '',
+      //   {
+      //     reason: 'Document Signing',
+      //     email: session.user.email || undefined,
+      //     location: 'Digital Signature',
+      //     signerName: session.user.name || 'Unknown'
+      //   }
+      // );
+      const pdfWithPlaceholder = await addSignaturePlaceholder(pdfBuffer);
+      const signedPdfBytes = digitallySign(pdfWithPlaceholder);
 
-      const { url } = await put(newFileName, signedPdfBuffer, {
-        access: 'public',
-        contentType: 'application/pdf'
-      });
 
-      // Simpan ke database sesuai dengan schema Prisma
-      const signedDoc = await prisma.document.create({
-        data: {
-          fileName: newFileName,
-          fileUrl: url,
-          signedFileUrl: url, // URL file yang sudah ditandatangani
-          signedAt: new Date(), // Waktu penandatanganan
-          uploader: {
-            connect: {
-              id: session.user.id
-            }
-          },
-          signedByUser: {
-            connect: {
-              id: session.user.id
-            }
-          }
-        }
-      });
 
-      return NextResponse.json({ success: true, document: signedDoc });
-    } catch (saveError) {
-      console.error('Error saving signed document:', saveError);
-      return new NextResponse('Failed to save signed document', { status: 500 });
+      return await uploadSignedPdf(signedPdfBytes, fileName, session.user);
+    } catch (signError) {
+      console.error('Digital signing error:', signError);
+      // Jika digital signing gagal, gunakan versi dengan tanda tangan visual saja
+      return await uploadSignedPdf(pdfBuffer, fileName, session.user);
     }
-
   } catch (error) {
     console.error('Error in /api/documents/sign:', error);
     return new NextResponse(
@@ -115,4 +142,32 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+async function uploadSignedPdf(pdfBytes: Buffer, fileName: string, user: any) {
+  const { url } = await put(fileName, pdfBytes, {
+    access: 'public',
+    contentType: 'application/pdf'
+  });
+
+  const signedDoc = await prisma.document.create({
+    data: {
+      fileName,
+      fileUrl: url,
+      signedFileUrl: url,
+      signedAt: new Date(),
+      uploader: {
+        connect: {
+          id: user.id
+        }
+      },
+      signedByUser: {
+        connect: {
+          id: user.id
+        }
+      }
+    }
+  });
+
+  return NextResponse.json({ success: true, document: signedDoc });
 } 

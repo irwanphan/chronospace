@@ -7,14 +7,15 @@ import { fabric } from 'fabric';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import LoadingSpin from '@/components/ui/LoadingSpin';
-import { Save } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
 import type { PDFPageProxy } from 'pdfjs-dist';
-
+import { useSession } from 'next-auth/react';
 // pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
 export default function PDFViewer() {
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const fileUrl = searchParams.get('url');
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [loading, setIsLoading] = useState(true);
@@ -29,8 +30,12 @@ export default function PDFViewer() {
   // const [pageWidth, setPageWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   // const [fabricObjects, setFabricObjects] = useState<{ [key: number]: fabric.Object[] }>({});
-  const [pdfDimensions, setPdfDimensions] = useState({ width: 0, height: 0 });
   const [isSignaturePadReady, setIsSignaturePadReady] = useState(false);
+  const [renderAttempts, setRenderAttempts] = useState(0);
+  const maxRenderAttempts = 3;
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [documentKey, setDocumentKey] = useState(Date.now()); // Untuk force re-render
+  const [activeSignature, setActiveSignature] = useState<fabric.Group | null>(null);
 
   useEffect(() => {
     const fetchPdf = async () => {
@@ -157,11 +162,6 @@ export default function PDFViewer() {
 
   const handlePageRenderSuccess = useCallback((page: PDFPageProxy) => {
     const viewport = page.getViewport({ scale });
-    setPdfDimensions({
-      width: viewport.width,
-      height: viewport.height
-    });
-    
     initPdfCanvas(viewport.width, viewport.height);
   }, [scale, initPdfCanvas]);
 
@@ -173,8 +173,20 @@ export default function PDFViewer() {
     }
   }, []);
 
+  const removeActiveSignature = useCallback(() => {
+    if (!canvasRef.current || !activeSignature) return;
+    
+    canvasRef.current.remove(activeSignature);
+    canvasRef.current.renderAll();
+    setActiveSignature(null);
+  }, [activeSignature]);
+
   const addSignatureToPdf = () => {
     if (!signatureRef.current || !canvasRef.current) return;
+
+    // Ensure white background before getting data URL
+    // signatureRef.current.backgroundColor = '#ffffff';
+    signatureRef.current.renderAll();
 
     const signatureData = signatureRef.current.toDataURL({
       format: 'png',
@@ -192,23 +204,62 @@ export default function PDFViewer() {
         maxHeight / img.height!
       );
 
-      img.set({
+      const scaledWidth = img.width! * scale;
+      const scaledHeight = img.height! * scale;
+      const padding = 20;
+
+      const signatureGroup = new fabric.Group([], {
         left: canvasRef.current.width! * 0.1,
         top: canvasRef.current.height! * 0.1,
-        scaleX: scale,
-        scaleY: scale,
-        hasControls: true,
-        hasBorders: true,
-        lockUniScaling: true,
-        cornerStyle: 'circle',
-        cornerColor: '#2563eb',
-        cornerSize: 8,
-        transparentCorners: false,
-        padding: 5
+        originX: 'left',
+        originY: 'top'
       });
 
-      canvasRef.current.add(img);
-      canvasRef.current.setActiveObject(img);
+      const border = new fabric.Rect({
+        width: scaledWidth + (padding * 2),
+        height: scaledHeight + (padding * 2) + 30,
+        fill: 'transparent',
+        stroke: '#000000',
+        strokeWidth: 1,
+        rx: 16,
+        ry: 16,
+        left: 0,
+        top: 0
+      });
+
+      img.set({
+        scaleX: scale,
+        scaleY: scale,
+        left: padding,
+        top: padding,
+        originX: 'left',
+        originY: 'top'
+      });
+
+      const signerName = new fabric.Text(session?.user?.name || 'Unknown', {
+        fontSize: 12,
+        fontFamily: 'Arial',
+        top: scaledHeight + (padding * 1.5),
+        left: (scaledWidth + (padding * 2)) / 2,
+        originX: 'center',
+        originY: 'top'
+      });
+
+      signatureGroup.addWithUpdate(border);
+      signatureGroup.addWithUpdate(img);
+      signatureGroup.addWithUpdate(signerName);
+
+      signatureGroup.on('selected', () => {
+        setActiveSignature(signatureGroup);
+      });
+
+      signatureGroup.on('deselected', () => {
+        setActiveSignature(null);
+      });
+
+      canvasRef.current.add(signatureGroup);
+      canvasRef.current.setActiveObject(signatureGroup);
+      setActiveSignature(signatureGroup);
       canvasRef.current.renderAll();
       clearSignature();
     });
@@ -264,6 +315,93 @@ export default function PDFViewer() {
     }
   };
 
+  const retryRender = useCallback(() => {
+    if (renderAttempts < maxRenderAttempts) {
+      setRenderAttempts(prev => prev + 1);
+      setPdfData(null);
+      setTimeout(() => {
+        if (fileUrl) {
+          fetchPdf(fileUrl);
+        }
+      }, 1000);
+    }
+  }, [renderAttempts, fileUrl]);
+
+  // Fungsi untuk reset document viewer
+  const resetViewer = useCallback(() => {
+    if (pdfData) {
+      URL.revokeObjectURL(pdfData);
+    }
+    setPdfData(null);
+    setDocumentKey(Date.now());
+    setIsLoading(true);
+    if (loadingTimeout) {
+      clearTimeout(loadingTimeout);
+    }
+  }, [pdfData, loadingTimeout]);
+
+  // Fungsi untuk menangani timeout
+  const handleLoadingTimeout = useCallback(() => {
+    console.log('Loading timeout, retrying...');
+    resetViewer();
+    if (fileUrl) {
+      fetchPdf(fileUrl);
+    }
+  }, [fileUrl, resetViewer]);
+
+  // Modifikasi fetchPdf
+  const fetchPdf = useCallback(async (url: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Set timeout untuk loading
+      const timeout = setTimeout(() => {
+        if (loading) {
+          handleLoadingTimeout();
+        }
+      }, 10000); // 10 detik timeout
+      
+      setLoadingTimeout(timeout);
+
+      const response = await fetch(`${url}?download=1&t=${Date.now()}`); // Tambah timestamp untuk avoid cache
+      if (!response.ok) throw new Error('Failed to fetch PDF');
+      
+      const blob = await response.blob();
+      const dataUrl = URL.createObjectURL(blob);
+      setPdfData(dataUrl);
+      setError(null);
+      
+      // Clear timeout jika berhasil
+      clearTimeout(timeout);
+      setLoadingTimeout(null);
+    } catch (err) {
+      console.error('Error fetching PDF:', err);
+      setError('Failed to load PDF');
+      resetViewer();
+    }
+  }, [handleLoadingTimeout, loading, resetViewer]);
+
+  const handleLoadError = useCallback(() => {
+    console.error('PDF failed to load');
+    retryRender();
+  }, [retryRender]);
+
+  // Tambahkan event listener untuk keyboard
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (activeSignature) {
+          removeActiveSignature();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeSignature, removeActiveSignature]);
+
   if (loading) {
     return <LoadingSpin />;
   }
@@ -293,6 +431,15 @@ export default function PDFViewer() {
               <option value={2}>200%</option>
             </select>
           </div>
+          {activeSignature && (
+            <button
+              onClick={removeActiveSignature}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Remove Signature
+            </button>
+          )}
           <Button onClick={saveSignedPdf}
             disabled={isSaving}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
@@ -306,21 +453,30 @@ export default function PDFViewer() {
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <Card className="bg-white hover:bg-gray-300">
-            <div 
-              ref={containerRef}
-              className="relative flex justify-center overflow-x-auto"
-              style={{ 
-                width: pdfDimensions.width || 'auto',
-                height: pdfDimensions.height || 'auto',
-                maxWidth: '100%',
-                // maxHeight: '80vh'
-              }}
-            >
+            <div ref={containerRef} className="relative flex justify-center overflow-x-auto">
               {pdfData ? (
                 <Document
+                  key={documentKey} // Force re-render when key changes
                   file={pdfData}
                   onLoadSuccess={onDocumentLoadSuccess}
-                  loading={<LoadingSpin />}
+                  onLoadError={(error) => {
+                    console.error('Load error:', error);
+                    resetViewer();
+                  }}
+                  loading={
+                    <div className="flex flex-col items-center justify-center p-8">
+                      <LoadingSpin />
+                      <p className="mt-4 text-sm text-gray-600">
+                        Loading document...
+                      </p>
+                      <button
+                        onClick={resetViewer}
+                        className="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        Click here if loading takes too long
+                      </button>
+                    </div>
+                  }
                 >
                   <div className="relative">
                     <Page
@@ -352,7 +508,18 @@ export default function PDFViewer() {
                   </div>
                 </Document>
               ) : (
-                <div>No PDF data available</div>
+                <div className="flex flex-col items-center justify-center p-8">
+                  {loading ? (
+                    <>
+                      <LoadingSpin />
+                      <p className="mt-4 text-sm text-gray-600">
+                        Preparing document...
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-gray-600">No PDF data available</p>
+                  )}
+                </div>
               )}
             </div>
           </Card>

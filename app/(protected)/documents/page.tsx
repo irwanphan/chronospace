@@ -229,9 +229,11 @@ export default function DocumentPage() {
                       </a>
                       {doc.fileType === 'PDF' && (
                         <a
-                          href={doc.isOrphan ? 
-                            `/documents/view?url=${encodeURIComponent(doc.fileUrl)}` :
-                            `/documents/${doc.id}`
+                          href={
+                            // doc.isOrphan ? 
+                            `/documents/view?url=${encodeURIComponent(doc.fileUrl)}` 
+                            // :
+                            // `/documents/${doc.id}`
                           }
                           className="text-blue-600 hover:underline flex items-center gap-1"
                         >
