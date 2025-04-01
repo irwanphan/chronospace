@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import Card from '@/components/ui/Card';
 
 export default function CreateDocumentPage() {
   const router = useRouter();
@@ -50,65 +51,68 @@ export default function CreateDocumentPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="space-y-8">
       <h1 className="text-2xl font-semibold mb-6">Create New Document</h1>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Document Title
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
+      <Card className="p-6">
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Content
-          </label>
-          <RichTextEditor
-            value={formData.content}
-            onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
-            placeholder="Enter document content..."
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              Document Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
 
-        <div>
-          <label htmlFor="footer" className="block text-sm font-medium text-gray-700 mb-1">
-            Footer
-          </label>
-          <input
-            type="text"
-            id="footer"
-            value={formData.footer}
-            onChange={(e) => setFormData(prev => ({ ...prev, footer: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Content
+            </label>
+            <RichTextEditor
+              value={formData.content}
+              onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+              placeholder="Enter document content..."
+            />
+          </div>
 
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Creating...' : 'Create Document'}
-          </button>
-        </div>
-      </form>
+          <div>
+            <label htmlFor="footer" className="block text-sm font-medium text-gray-700 mb-1">
+              Footer
+            </label>
+            <input
+              type="text"
+              id="footer"
+              value={formData.footer}
+              onChange={(e) => setFormData(prev => ({ ...prev, footer: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Document'}
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 
