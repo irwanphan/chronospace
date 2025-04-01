@@ -10,6 +10,7 @@ import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
 import type { PDFPageProxy } from 'pdfjs-dist';
 import { useSession } from 'next-auth/react';
+import { formatDate } from '@/lib/utils';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
@@ -202,7 +203,7 @@ export default function PDFViewer() {
 
       const scaledWidth = img.width! * scale;
       const scaledHeight = img.height! * scale;
-      const padding = 20;
+      const padding = 12;
 
       const signatureGroup = new fabric.Group([], {
         left: canvasRef.current.width! * 0.1,
@@ -215,7 +216,7 @@ export default function PDFViewer() {
         width: scaledWidth + (padding * 2),
         height: scaledHeight + (padding * 2) + 30,
         fill: 'transparent',
-        stroke: '#000000',
+        stroke: '#cdcdde',
         strokeWidth: 1,
         rx: 16,
         ry: 16,
@@ -229,13 +230,22 @@ export default function PDFViewer() {
         left: padding,
         top: padding,
         originX: 'left',
-        originY: 'top'
+        originY: 'top',
       });
 
       const signerName = new fabric.Text(session?.user?.name || 'Unknown', {
-        fontSize: 12,
-        fontFamily: 'Arial',
-        top: scaledHeight + (padding * 1.5),
+        fontSize: 16,
+        fontFamily: 'Montserrat',
+        top: scaledHeight + (padding * 2),
+        left: (scaledWidth + (padding * 2)) / 2,
+        originX: 'center',
+        originY: 'top'
+      });
+
+      const signerTextInfo = new fabric.Text(`Digitally signed on ${formatDate(new Date())} by`, {
+        fontSize: 8,
+        fontFamily: 'Montserrat',
+        top: scaledHeight + (padding * 1.2),
         left: (scaledWidth + (padding * 2)) / 2,
         originX: 'center',
         originY: 'top'
@@ -244,7 +254,7 @@ export default function PDFViewer() {
       signatureGroup.addWithUpdate(border);
       signatureGroup.addWithUpdate(img);
       signatureGroup.addWithUpdate(signerName);
-
+      signatureGroup.addWithUpdate(signerTextInfo);
       signatureGroup.on('selected', () => {
         setActiveSignature(signatureGroup);
       });
