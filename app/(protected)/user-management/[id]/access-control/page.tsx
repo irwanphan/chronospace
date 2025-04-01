@@ -41,13 +41,18 @@ const ACTIVITY_ACCESS_ORDER = [
   'changePassword',
   'changeOtherUserPassword',
   'manageUserAccess',
+  'createDocument',
+  'uploadDocument',
+  'deleteDocument',
+  'downloadDocument'
 ] as const;
 
 const WORKSPACE_ACCESS_ORDER = [
   'createPurchaseRequest',
   'viewPurchaseRequest',
   'editPurchaseRequest',
-  'reviewApprovePurchaseRequest'
+  'reviewApprovePurchaseRequest',
+  'signDocument'
 ] as const;
 
 const createDefaultAccess = (): AccessControl => ({

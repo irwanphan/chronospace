@@ -78,8 +78,16 @@ export default withAuth(
         return NextResponse.redirect(new URL('/forbidden', req.url));
       }
     }
+
+    if (req.nextUrl.pathname.startsWith('/documents')) {
+      if (req.nextUrl.pathname.includes('/view') && !activityAccess.viewDocument) {
+        return NextResponse.redirect(new URL('/forbidden', req.url));
+      }
+    }
+
     return NextResponse.next();
   },
+  
   {
     callbacks: {
       authorized: () => true,

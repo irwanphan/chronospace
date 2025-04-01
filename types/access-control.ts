@@ -39,6 +39,11 @@ export interface ActivityAccess {
   changePassword: boolean;
   changeOtherUserPassword: boolean;
   manageUserAccess: boolean;
+
+  createDocument: boolean;
+  uploadDocument: boolean;
+  deleteDocument: boolean;
+  downloadDocument: boolean;
 }
 
 export interface WorkspaceAccess {
@@ -46,6 +51,7 @@ export interface WorkspaceAccess {
   viewPurchaseRequest: boolean;
   editPurchaseRequest: boolean;
   reviewApprovePurchaseRequest: boolean;
+  signDocument: boolean;
 }
 
 export interface AccessControl {
