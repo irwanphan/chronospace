@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Download, ExternalLink, Trash2, Upload, X } from 'lucide-react';
-import Card from '@/components/ui/Card';
 import { formatDate } from '@/lib/utils';
+import { FileText, Download, ExternalLink, Trash2, Upload, X } from 'lucide-react';
+import { IconFileSearch } from '@tabler/icons-react';
+import Card from '@/components/ui/Card';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface Document {
@@ -237,8 +238,7 @@ export default function DocumentPage() {
                           }
                           className="text-blue-600 hover:underline flex items-center gap-1"
                         >
-                          <FileText className="w-4 h-4" />
-                          Sign
+                          <IconFileSearch className="w-4 h-4" />
                         </a>
                       )}
                       {/* {doc.isOrphan && ( */}
