@@ -10,7 +10,7 @@ import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
 import type { PDFPageProxy } from 'pdfjs-dist';
 import { useSession } from 'next-auth/react';
-// pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
 export default function PDFViewer() {
@@ -27,12 +27,8 @@ export default function PDFViewer() {
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const signatureRef = useRef<fabric.Canvas | null>(null);
   const canvasInitialized = useRef(false);
-  // const [pageWidth, setPageWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  // const [fabricObjects, setFabricObjects] = useState<{ [key: number]: fabric.Object[] }>({});
   const [isSignaturePadReady, setIsSignaturePadReady] = useState(false);
-  const [renderAttempts, setRenderAttempts] = useState(0);
-  const maxRenderAttempts = 3;
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [documentKey, setDocumentKey] = useState(Date.now()); // Untuk force re-render
   const [activeSignature, setActiveSignature] = useState<fabric.Group | null>(null);
@@ -315,18 +311,6 @@ export default function PDFViewer() {
     }
   };
 
-  const retryRender = useCallback(() => {
-    if (renderAttempts < maxRenderAttempts) {
-      setRenderAttempts(prev => prev + 1);
-      setPdfData(null);
-      setTimeout(() => {
-        if (fileUrl) {
-          fetchPdf(fileUrl);
-        }
-      }, 1000);
-    }
-  }, [renderAttempts, fileUrl]);
-
   // Fungsi untuk reset document viewer
   const resetViewer = useCallback(() => {
     if (pdfData) {
@@ -380,11 +364,6 @@ export default function PDFViewer() {
       resetViewer();
     }
   }, [handleLoadingTimeout, loading, resetViewer]);
-
-  const handleLoadError = useCallback(() => {
-    console.error('PDF failed to load');
-    retryRender();
-  }, [retryRender]);
 
   // Tambahkan event listener untuk keyboard
   useEffect(() => {

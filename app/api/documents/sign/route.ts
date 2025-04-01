@@ -4,21 +4,24 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import { put } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { PDFDocument } from 'pdf-lib';
-import { sign } from 'pdf-signer';
+
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 import signpdf from 'node-signpdf';
-import { SignPdfOptions } from 'node-signpdf';
+import { Session } from 'next-auth';
+
+type SignPdfOptions = {
+  passphrase: string;
+};
 
 async function addSignaturePlaceholder(pdfBuffer: Buffer): Promise<Buffer> {
   const pdfDoc = await PDFDocument.load(pdfBuffer);
-
   const form = pdfDoc.getForm();
   const [page] = pdfDoc.getPages();
 
-  const signature = form.createSignature('Signature1');
-  signature.addToPage(page, {
+  const textField = form.createTextField('Signature1');
+  textField.addToPage(page, {
     x: 50,
     y: 50,
     width: 200,
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function uploadSignedPdf(pdfBytes: Buffer, fileName: string, user: any) {
+async function uploadSignedPdf(pdfBytes: Buffer, fileName: string, user: Session['user']) {
   const { url } = await put(fileName, pdfBytes, {
     access: 'public',
     contentType: 'application/pdf'
