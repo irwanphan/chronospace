@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { FileText, Download, ExternalLink, Trash2, Upload, X } from 'lucide-react';
-import { IconFileSearch } from '@tabler/icons-react';
+import { IconFilePencil, IconFileSearch } from '@tabler/icons-react';
 import Card from '@/components/ui/Card';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 
@@ -36,6 +37,7 @@ const entityRoutes = {
 } as const;
 
 export default function DocumentPage() {
+  const router = useRouter();
   const { data: session } = useSession();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,6 +159,15 @@ export default function DocumentPage() {
               <span className="text-gray-500"> | </span>
               Unused Files: {documents.filter(d => d.isOrphan).length}
             </div>
+            {session?.user?.access.activityAccess.createDocument && (
+              <button
+                onClick={() => router.push('/documents/create')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+              >
+                <IconFilePencil className="w-4 h-4" />
+                Create Document
+              </button>
+            )}
             {session?.user?.access.activityAccess.uploadDocument && (
               <button
                 onClick={() => setIsModalOpen(true)}
