@@ -36,13 +36,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: true,
-          manageUserAccess: true
+          manageUserAccess: true,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: false,
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
-          reviewApprovePurchaseRequest: true
+          reviewApprovePurchaseRequest: true,
+          signDocument: true
         }
       },
       {
@@ -78,13 +83,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: true,
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
-          reviewApprovePurchaseRequest: false
+          reviewApprovePurchaseRequest: false,
+          signDocument: true
         }
       },
       {
@@ -120,13 +130,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: true,
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
-          reviewApprovePurchaseRequest: false
+          reviewApprovePurchaseRequest: false,
+          signDocument: true
         }
       },
       {
@@ -162,13 +177,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: true,
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: false,
+          signDocument: true
         }
       },
       {
@@ -204,13 +224,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: true, 
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
-          reviewApprovePurchaseRequest: true
+          reviewApprovePurchaseRequest: true,
+          signDocument: true
         }
       },
       {
@@ -246,13 +271,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: false,
           viewPurchaseRequest: true,
           editPurchaseRequest: false,
-          reviewApprovePurchaseRequest: true
+          reviewApprovePurchaseRequest: true,
+          signDocument: true
         }
       },
       {
@@ -288,13 +318,18 @@ export async function userAccessSeeder() {
           createUser: true,
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: false,
           viewPurchaseRequest: true,
           editPurchaseRequest: false,
-          reviewApprovePurchaseRequest: true
+          reviewApprovePurchaseRequest: true,
+          signDocument: true
         }
       },
       {
@@ -329,13 +364,18 @@ export async function userAccessSeeder() {
           createUser: true, 
           editUser: true,
           deleteUser: false,
-          manageUserAccess: false
+          manageUserAccess: false,
+          createDocument: true,
+          uploadDocument: true,
+          deleteDocument: true,
+          downloadDocument: true,
         },
         workspaceAccess: {
           createPurchaseRequest: false,
           viewPurchaseRequest: true,
           editPurchaseRequest: false,
-          reviewApprovePurchaseRequest: true
+          reviewApprovePurchaseRequest: true,
+          signDocument: true
         }
       }
     ]

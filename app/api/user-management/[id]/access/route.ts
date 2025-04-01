@@ -43,7 +43,10 @@ export async function GET(
 ) {
   try {
     const userAccess = await prisma.userAccess.findUnique({
-      where: { userId: params.id }
+      where: { userId: params.id },
+      include: {
+        user: true
+      }
     });
 
     // Jika tidak ada access, kembalikan default values
