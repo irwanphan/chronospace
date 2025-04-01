@@ -75,6 +75,10 @@ export default function PDFViewer() {
   useEffect(() => {
     let signaturePad: fabric.Canvas | null = null;
 
+    if (!session?.user?.access.workspaceAccess.signDocument) {
+      return;
+    }
+
     const initSignaturePad = () => {
       try {
         if (signatureRef.current) {
@@ -112,7 +116,7 @@ export default function PDFViewer() {
         }
       }
     };
-  }, []);
+  }, [session]);
 
   const initPdfCanvas = useCallback((width: number, height: number) => {
     if (canvasInitialized.current || !width || !height) return;
@@ -438,18 +442,20 @@ export default function PDFViewer() {
               Remove Signature
             </button>
           )}
-          <Button onClick={saveSignedPdf}
-            disabled={isSaving}
-            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Signed Document'}
-          </Button>
+          {session?.user?.access.workspaceAccess.signDocument && (
+            <Button onClick={saveSignedPdf}
+              disabled={isSaving}
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? 'Saving...' : 'Save Signed Document'}
+            </Button>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2">
+        <div className={`${session?.user?.access.workspaceAccess.signDocument ? 'col-span-2' : 'col-span-3'}`}>
           <Card className="bg-white hover:bg-gray-300">
             <div ref={containerRef} className="relative flex justify-center overflow-x-auto">
               {pdfData ? (
@@ -523,37 +529,39 @@ export default function PDFViewer() {
           </Card>
         </div>
 
-        <div className="col-span-1">
-          <Card className="p-4 space-y-4 bg-white">
-            <h2 className="text-lg font-semibold">Digital Signature</h2>
-            <div className="border rounded p-2 bg-white">
-              <canvas 
-                id="signatureCanvas"
-                style={{
-                  width: '100%',
-                  height: '200px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.375rem',
-                  touchAction: 'none'
-                }}
-              />
-            </div>
-            <div className="flex justify-between gap-2">
-              <Button 
-                onClick={clearSignature}
-                disabled={!isSignaturePadReady}
-              >
-                Clear
-              </Button>
-              <Button 
-                onClick={addSignatureToPdf}
-                disabled={!isSignaturePadReady}
-              >
-                Add to Document
-              </Button>
-            </div>
-          </Card>
-        </div>
+        {session?.user?.access.workspaceAccess.signDocument && (
+          <div className="col-span-1">
+            <Card className="p-4 space-y-4 bg-white">
+              <h2 className="text-lg font-semibold">Digital Signature</h2>
+              <div className="border rounded p-2 bg-white">
+                <canvas 
+                  id="signatureCanvas"
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '0.375rem',
+                    touchAction: 'none'
+                  }}
+                />
+              </div>
+              <div className="flex justify-between gap-2">
+                <Button 
+                  onClick={clearSignature}
+                  disabled={!isSignaturePadReady}
+                >
+                  Clear
+                </Button>
+                <Button 
+                  onClick={addSignatureToPdf}
+                  disabled={!isSignaturePadReady}
+                >
+                  Add to Document
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
 
       {numPages > 1 && (
