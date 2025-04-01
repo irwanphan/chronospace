@@ -151,9 +151,10 @@ export default function DocumentPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Uploaded Documents</h1>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-500">
-              Total Files: {documents.length} | 
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-500 px-4 h-10 flex items-center justify-center border border-gray-300 rounded-md gap-2 hover:border-blue-600 hover:text-blue-600 transition-all duration-300">
+              Total Files: {documents.length}
+              <span className="text-gray-500"> | </span>
               Unused Files: {documents.filter(d => d.isOrphan).length}
             </div>
             {session?.user?.access.activityAccess.uploadDocument && (
