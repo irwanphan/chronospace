@@ -45,11 +45,18 @@ interface ActivityAccess {
   editUser: boolean;
   deleteUser: boolean;
   manageUserAccess: boolean;
+  createDocument: boolean;
+  uploadDocument: boolean;
+  deleteDocument: boolean;
+  downloadDocument: boolean;
 }
 
 interface WorkspaceAccess {
   createPurchaseRequest: boolean;
   reviewApprovePurchaseRequest: boolean;
+  viewPurchaseRequest: boolean;
+  editPurchaseRequest: boolean;
+  signDocument: boolean;
 }
 
 export const authOptions: AuthOptions = {
@@ -192,12 +199,17 @@ export const authOptions: AuthOptions = {
             editUser: false,
             deleteUser: false,
             manageUserAccess: false,
+            createDocument: false,
+            uploadDocument: false,
+            deleteDocument: false,
+            downloadDocument: false
           },
           workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
             createPurchaseRequest: false,
             reviewApprovePurchaseRequest: false,
             viewPurchaseRequest: false,
-            editPurchaseRequest: false
+            editPurchaseRequest: false,
+            signDocument: false
           }
         };
       }
