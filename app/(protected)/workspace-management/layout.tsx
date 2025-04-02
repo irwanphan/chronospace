@@ -24,7 +24,7 @@ const subNavigation = [
     name: 'Approval Schema',
     href: '/workspace-management/approval-schema',
     icon: IconSchema
-  }
+  },
 ];
 
 export default function WorkspaceManagementLayout({

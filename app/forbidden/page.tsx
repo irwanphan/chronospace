@@ -1,7 +1,26 @@
-import Link from 'next/link';
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { ShieldX, ArrowLeft } from 'lucide-react';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 export default function ForbiddenPage() {
+  const router = useRouter();
+  const { status } = useSession();
+
+  if (status === 'loading') {
+    return <LoadingSpin />;
+  }
+
+  const handleBackClick = () => {
+    if (status === 'authenticated') {
+      router.push('/workspace');
+    } else {
+      router.push('/login');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
@@ -17,13 +36,13 @@ export default function ForbiddenPage() {
           You don&apos;t have permission to access this page.
         </p>
 
-        <Link 
-          href="/"
+        <button 
+          onClick={handleBackClick}
           className="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           Back to Home
-        </Link>
+        </button>
       </div>
     </div>
   );

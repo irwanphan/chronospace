@@ -9,12 +9,14 @@ export async function GET(
 ) {
   try {
     const project = await prisma.project.findUnique({
-      where: { 
-        id: params.id 
-      },
+      where: { id: params.id },
       include: {
         workDivision: true,
-      },
+        documents: true,
+        history: {
+          orderBy: { timestamp: 'desc' }
+        }
+      }
     });
 
     const projectHistory = await prisma.projectHistory.findMany({

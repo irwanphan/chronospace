@@ -1,13 +1,14 @@
 'use client';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Mail, Building2, MapPin, Link as LinkIcon, Pencil } from 'lucide-react';
-import { formatDate, getInitials } from '@/lib/utils';
+import { Mail, IdCard, MapPin, Phone, Pencil } from 'lucide-react';
+import { formatDate, getInitials, stripHtmlTags } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
 import { User } from '@/types/user';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import LoadingSpin from '@/components/ui/LoadingSpin';
 
 interface ActivityHistory {
   id: string;
@@ -72,7 +73,7 @@ export default function ProfilePage() {
 
         const data = await response.json();
         setActivityHistories(data.user.activityHistories);
-        setUserData(data.user);
+        setUserData(data.user); 
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -83,16 +84,14 @@ export default function ProfilePage() {
     fetchData();
   }, [session?.user.id]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading) return <LoadingSpin/>
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column - User Info */}
         <div className="md:col-span-1">
-          <div className="sticky top-24">
+          <div className="sticky top-32">
             {/* Profile Picture & Basic Info */}
             <div className="mb-6">
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100">
@@ -116,26 +115,27 @@ export default function ProfilePage() {
 
             {/* Bio & Details */}
             <div className="prose prose-sm">
+              {/* TODO: Add bio / about me */}
               <p className="text-gray-600 mb-4">
                 Frontend Developer passionate about creating beautiful and functional user interfaces.
               </p>
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-gray-600">
-                  <Building2 className="w-4 h-4" />
-                  <span>{userData.workDivision.name}</span>
+                  <IdCard className="w-4 h-4" />
+                  <span>{userData.workDivision.name || '-'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin className="w-4 h-4" />
-                  <span>Jakarta, Indonesia</span>
+                  <span>{stripHtmlTags(userData.address || '-')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Mail className="w-4 h-4" />
-                  <span>{session?.user?.email}</span>
+                  <span>{session?.user?.email || '-'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                  <LinkIcon className="w-4 h-4" />
-                  <a href="#" className="text-blue-600 hover:underline">https://yourwebsite.com</a>
+                  <Phone className="w-4 h-4" />
+                  <span>{userData.phone || '-'}</span>
                 </div>
               </div>
             </div>

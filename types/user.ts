@@ -9,6 +9,8 @@ export interface User {
   workDivisionId: string;
   lastLogin: string;
   createdAt: string;
+  address?: string;
+  phone?: string;
   image?: string;
   role: Role;
   workDivision: WorkDivision;

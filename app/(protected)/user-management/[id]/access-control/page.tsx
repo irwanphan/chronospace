@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { AccessControl, MenuAccess, ActivityAccess, WorkspaceAccess } from '@/types/access-control';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import { IconChevronLeft } from '@tabler/icons-react';
 
 const MENU_ACCESS_ORDER = [
   'timeline',
@@ -12,7 +14,8 @@ const MENU_ACCESS_ORDER = [
   'projectPlanning',
   'budgetPlanning',
   'userManagement',
-  'workspaceManagement'
+  'workspaceManagement',
+  'documents'
 ] as const;
 
 const ACTIVITY_ACCESS_ORDER = [
@@ -40,13 +43,18 @@ const ACTIVITY_ACCESS_ORDER = [
   'changePassword',
   'changeOtherUserPassword',
   'manageUserAccess',
+  'createDocument',
+  'uploadDocument',
+  'deleteDocument',
+  'downloadDocument'
 ] as const;
 
 const WORKSPACE_ACCESS_ORDER = [
   'createPurchaseRequest',
   'viewPurchaseRequest',
   'editPurchaseRequest',
-  'reviewApprovePurchaseRequest'
+  'reviewApprovePurchaseRequest',
+  'signDocument'
 ] as const;
 
 const createDefaultAccess = (): AccessControl => ({
@@ -67,7 +75,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
   const router = useRouter();
   const [access, setAccess] = useState<AccessControl>(createDefaultAccess());
   const [isLoading, setIsLoading] = useState(true);
-
+  const [username, setUsername] = useState<string>('');
   useEffect(() => {
     const fetchUserAccess = async () => {
       try {
@@ -75,6 +83,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
         if (!response.ok) throw new Error('Failed to fetch access');
         const data = await response.json();
         setAccess(data);
+        setUsername(data.user.name);
       } catch (error) {
         console.error('Error fetching access:', error);
       } finally {
@@ -144,7 +153,15 @@ export default function UserAccessControlPage({ params }: { params: { id: string
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">User Access Control</h1>
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" className="px-1 self-start" onClick={() => router.back()}>
+          <IconChevronLeft className="w-4 h-4" stroke={4} />
+        </Button>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold">User Access Control</h1>
+          <p className="text-gray-700">{username}</p>
+        </div>
+      </div>
       
       <Card className="p-6 space-y-6">
         {/* Menu Access */}

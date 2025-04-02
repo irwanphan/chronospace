@@ -78,6 +78,10 @@ model User {
   activityHistories        ActivityHistory[]
   projects                 Project[]                 @relation("createdProjects")
   projectHistories         ProjectHistory[]          @relation("projectHistories")
+  uploadedDocuments        ProjectDocument[]           @relation("UploadedDocuments")
+  signedDocuments          ProjectDocument[]           @relation("SignedDocuments")
+  userDocuments            Document[]                  @relation("UserDocuments")
+  userSignedDocuments      Document[]                  @relation("UserSignedDocuments")
 
   @@map("users")
 }
@@ -211,10 +215,34 @@ model Project {
   createdBy      String?
   createdByUser  User?         @relation("createdProjects", fields: [createdBy], references: [id])
   history        ProjectHistory[]
+  documents      ProjectDocument[]
+  userDocuments  Document[]
 
   @@index([workDivisionId])
   @@index([createdBy])
   @@map("projects")
+}
+
+model ProjectDocument {
+  id          String    @id @default(cuid())
+  fileName    String
+  fileUrl     String
+  fileType    String?
+  uploadedAt  DateTime  @default(now())
+  uploadedBy  String
+  uploader    User      @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
+  project     Project   @relation(fields: [projectId], references: [id])
+  projectId   String
+  
+  // Digital signature fields
+  signedFileUrl String?
+  signedAt      DateTime?
+  signedBy      String?
+  signedByUser  User?     @relation("SignedDocuments", fields: [signedBy], references: [id])
+
+  @@index([projectId])
+  @@index([uploadedBy])
+  @@index([signedBy])
 }
 
 model ProjectHistory {
@@ -392,5 +420,30 @@ model ActivityHistory {
   @@index([entityType, entityId])
   @@index([timestamp])
   @@map("activity_histories")
+}
+
+model Document {
+  id            String    @id @default(cuid())
+  fileName      String
+  fileUrl       String
+  fileType      String?
+  uploadedAt    DateTime  @default(now())
+  uploadedBy    String
+  uploader      User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
+  
+  // Digital signature fields
+  signedFileUrl String?
+  signedAt      DateTime?
+  signedBy      String?
+  signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
+
+  // Optional project reference
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id])
+
+  @@index([uploadedBy])
+  @@index([signedBy])
+  @@index([projectId])
+  @@map("documents")
 }
 

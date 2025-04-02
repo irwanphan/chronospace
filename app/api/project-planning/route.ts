@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 
 export const revalidate = 0
 
@@ -26,7 +27,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
+    const projectDataStr = formData.get('projectData');
+    const file = formData.get('file') as File | null;
+
+    if (!projectDataStr) {
+      return NextResponse.json(
+        { error: 'Project data is required' },
+        { status: 400 }
+      );
+    }
+
     const { 
       code, 
       title, 
@@ -36,7 +47,7 @@ export async function POST(request: Request) {
       startDate, 
       finishDate, 
       userId 
-    } = body;
+    } = JSON.parse(projectDataStr as string);
 
     // Validasi data yang diterima
     if (!code || !title || !workDivisionId || !year || !startDate || !finishDate || !userId) {
@@ -63,6 +74,47 @@ export async function POST(request: Request) {
         },
       });
 
+      // Upload file jika ada
+      let projectDocument = null;
+      if (file) {
+        try {
+          const fileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const bytes = await file.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+
+          // Upload ke Vercel Blob
+          const blob = await put(fileName, buffer, {
+            access: 'public',
+            contentType: file.type || 'application/octet-stream'
+          });
+
+          // Log untuk debugging
+          console.log('File uploaded to blob:', blob);
+
+          try {
+            // Simpan dokumen ke database
+            projectDocument = await tx.projectDocument.create({
+              data: {
+                projectId: newProject.id,
+                fileName: fileName,
+                fileUrl: blob.url,
+                fileType: file.type || 'application/octet-stream',
+                uploadedBy: userId,
+              },
+            });
+            console.log('Document created:', projectDocument);
+          } catch (dbError) {
+            console.error('Database error:', dbError);
+            // Hapus file dari blob jika gagal menyimpan ke database
+            // Implementasikan delete dari blob di sini jika perlu
+            throw new Error('Failed to save document to database');
+          }
+        } catch (uploadError) {
+          console.error('File upload error:', uploadError);
+          throw new Error('Failed to process file upload');
+        }
+      }
+
       // Buat history project
       const projectHistory = await tx.projectHistory.create({
         data: {
@@ -78,6 +130,7 @@ export async function POST(request: Request) {
             year,
             startDate,
             finishDate,
+            documentUrl: projectDocument?.fileUrl, // Tambahkan URL dokumen ke history
           },
           timestamp: new Date(),
         },
@@ -99,18 +152,20 @@ export async function POST(request: Request) {
             year,
             startDate,
             finishDate,
+            documentUrl: projectDocument?.fileUrl, // Tambahkan URL dokumen ke activity
           },
           timestamp: new Date(),
         },
       });
 
-      return { newProject, projectHistory, activityHistory };
+      return { newProject, projectHistory, activityHistory, projectDocument };
     });
 
     return NextResponse.json({
       message: 'Project created successfully',
       project: result.newProject,
       history: result.projectHistory,
+      document: result.projectDocument,
     });
   } catch (error) {
     console.error('Detailed error:', error);

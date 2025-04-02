@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
@@ -18,6 +18,7 @@ interface Division {
 
 export default function EditUserPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{
     email?: string;
@@ -79,6 +80,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    const referer = searchParams.get('ref');
 
     try {
       const response = await fetch(`/api/user-management/${params.id}`, {
@@ -104,7 +106,11 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         return;
       }
 
-      router.push('/user-management');
+      if (referer === 'profile') {
+        router.push(`/profile?id=${params.id}`);
+      } else {
+        router.push('/user-management');
+      }
     } catch (error) {
       console.error('Error updating user:', error);
       setErrors({ general: 'Failed to update user' });

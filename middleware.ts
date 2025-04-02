@@ -22,7 +22,7 @@ export default withAuth(
     }
 
     const access = await accessResponse.json();
-    const { activityAccess } = access;
+    const { activityAccess, menuAccess } = access;
 
     // Cek akses specific route
     if (req.nextUrl.pathname.startsWith('/workspace-management')) {
@@ -78,8 +78,16 @@ export default withAuth(
         return NextResponse.redirect(new URL('/forbidden', req.url));
       }
     }
+
+    if (req.nextUrl.pathname.startsWith('/documents')) {
+      if (req.nextUrl.pathname.includes('/view') && !menuAccess.documents) {
+        return NextResponse.redirect(new URL('/forbidden', req.url));
+      }
+    }
+
     return NextResponse.next();
   },
+  
   {
     callbacks: {
       authorized: () => true,

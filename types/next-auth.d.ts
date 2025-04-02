@@ -17,6 +17,7 @@ declare module "next-auth" {
           budgetPlanning: boolean;
           userManagement: boolean;
           workspaceManagement: boolean;
+          documents: boolean;
         },
         activityAccess: {
           createProject: boolean;
@@ -41,10 +42,17 @@ declare module "next-auth" {
           editUser: boolean;
           deleteUser: boolean;
           manageUserAccess: boolean;
+          createDocument: boolean;
+          uploadDocument: boolean;
+          deleteDocument: boolean;
+          downloadDocument: boolean;
         },
         workspaceAccess: {
           createPurchaseRequest: boolean;
+          viewPurchaseRequest: boolean;
+          editPurchaseRequest: boolean;
           reviewApprovePurchaseRequest: boolean;
+          signDocument: boolean;
         };
       };
     } & DefaultSession["user"];

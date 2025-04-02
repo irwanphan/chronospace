@@ -23,7 +23,7 @@ export default function ApprovalSchemaPage() {
   const endIndex = startIndex + itemsPerPage;
   const currentSchemas = schemas.slice(startIndex, endIndex);
 
-  console.log('schemas : ', schemas)
+  // console.log('schemas : ', schemas)
 
   useEffect(() => {
     const fetchSchemas = async () => {

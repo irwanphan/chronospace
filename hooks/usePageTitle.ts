@@ -74,7 +74,10 @@ const pageConfigs: Record<string, { title: string; breadcrumbs: string[] }> = {
     title: 'Workspace Management',
     breadcrumbs: ['Home', 'Workspace Management', 'Approval Schema']
   },
-  
+  '/documents': {
+    title: 'Document Management',
+    breadcrumbs: ['Home', 'Document Management']
+  },
 };
 
 export function usePageTitle() {
