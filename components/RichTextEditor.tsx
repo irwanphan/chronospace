@@ -12,16 +12,17 @@ interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
 }
 
-export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
   return (
     <div className="border rounded-lg overflow-hidden">
       <ReactQuill
         theme="snow"
         value={value}
         onChange={onChange}
-        className="
+        className={`
           [&_.ql-toolbar.ql-snow]:border-0
           [&_.ql-toolbar.ql-snow]:bg-blue-50 
           [&_.ql-toolbar.ql-snow]:border-b
@@ -31,7 +32,8 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           [&_.ql-editor]:leading-relaxed
           [&_.ql-editor]:text-gray-500
           [&_.ql-editor]:h-20
-        "
+          ${className}
+        `}
         modules={{
           toolbar: [
             ['bold', 'italic', 'underline'],
