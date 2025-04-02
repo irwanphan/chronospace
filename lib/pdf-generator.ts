@@ -1,10 +1,19 @@
 import { jsPDF } from 'jspdf';
-import DOMPurify from 'isomorphic-dompurify';
 
 interface PDFContent {
   title: string;
   content: string;
   footer?: string;
+}
+
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+    .replace(/&amp;/g, '&') // Replace &amp; with &
+    .replace(/&lt;/g, '<') // Replace &lt; with <
+    .replace(/&gt;/g, '>') // Replace &gt; with >
+    .trim(); // Remove leading/trailing whitespace
 }
 
 export async function generatePDF({ title, content, footer }: PDFContent): Promise<Buffer> {
@@ -16,10 +25,8 @@ export async function generatePDF({ title, content, footer }: PDFContent): Promi
   
   // Add content
   doc.setFontSize(12);
-  const sanitizedContent = DOMPurify.sanitize(content);
-  const textContent = sanitizedContent.replace(/<[^>]*>/g, '');
-  
-  const splitText = doc.splitTextToSize(textContent, 170);
+  const cleanContent = sanitizeHtml(content);
+  const splitText = doc.splitTextToSize(cleanContent, 170);
   doc.text(splitText, 20, 40);
   
   // Add footer if provided
