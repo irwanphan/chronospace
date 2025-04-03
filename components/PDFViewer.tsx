@@ -436,7 +436,7 @@ export default function PDFViewer() {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-start gap-3">
           {activeSignature && (
             <button
               onClick={removeActiveSignature}

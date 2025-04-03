@@ -68,21 +68,21 @@ export default function CertificateStatus() {
   const isValid = certificate.isActive && !isExpired && !isRevoked;
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
+    <div className={`flex flex-col h-10 items-center justify-center px-3 text-center rounded-lg border ${isValid ? 'border-green-600' : 'border-red-500'}`}>
+      <div className="flex items-center">
         {isValid ? (
-          <div className="flex items-center gap-2 text-green-600">
-            <ShieldCheck className="w-4 h-4" />
+          <div className="text-[12px] flex items-center gap-1 text-green-600">
+            <ShieldCheck className="w-3 h-3" />
             Active Certificate
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-red-500">
-            <ShieldAlert className="w-4 h-4" />
+          <div className="text-[12px] flex items-center gap-1 text-red-500">
+            <ShieldAlert className="w-3 h-3" />
             {isExpired ? 'Expired Certificate' : isRevoked ? 'Revoked Certificate' : 'Inactive Certificate'}
           </div>
         )}
       </div>
-      <div className="text-xs text-gray-500">
+      <div className="text-[10px] text-gray-500">
         Expires: {formatDate(new Date(certificate.expiresAt))}
       </div>
     </div>
