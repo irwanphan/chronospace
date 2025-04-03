@@ -119,8 +119,8 @@ const Sidebar = () => {
               key={item.name}
               href={item.href}
               className={cn(
-                "min-h-11 flex items-center w-full transition-colors py-2",
-                isCollapsed ? "px-4" : "px-4",
+                "min-h-11 flex items-center w-full transition-colors px-4 py-3",
+                isCollapsed ? "h-11" : "h-auto",
                 isActive 
                   ? "bg-blue-50 text-blue-600" 
                   : "text-gray-700 hover:bg-gray-100"
