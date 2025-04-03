@@ -82,6 +82,7 @@ model User {
   signedDocuments          ProjectDocument[]           @relation("SignedDocuments")
   userDocuments            Document[]                  @relation("UserDocuments")
   userSignedDocuments      Document[]                  @relation("UserSignedDocuments")
+  certificates             UserCertificate[]
 
   @@map("users")
 }
@@ -240,6 +241,7 @@ model ProjectDocument {
   signedBy      String?
   signedByUser  User?     @relation("SignedDocuments", fields: [signedBy], references: [id])
 
+  @@map("project_documents")
   @@index([projectId])
   @@index([uploadedBy])
   @@index([signedBy])
@@ -445,5 +447,23 @@ model Document {
   @@index([signedBy])
   @@index([projectId])
   @@map("documents")
+}
+
+model UserCertificate {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  serialNumber  String    @unique
+  p12cert       Bytes     // Store the P12 certificate
+  password      String    // Encrypted password for the P12
+  issuedAt     DateTime  @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  revocationReason String?
+  isActive     Boolean   @default(true)
+
+  @@index([userId])
+  @@index([serialNumber])
+  @@map("user_certificates")
 }
 
