@@ -31,6 +31,7 @@
     "pdf-lib": "^1.17.1",
     "pdf-signer": "^1.1.4",
     "pdfjs-dist": "^4.8.69",
+    "puppeteer": "^24.5.0",
     "react": "^18",
     "react-dom": "^18",
     "react-google-recaptcha-v3": "^1.10.1",
