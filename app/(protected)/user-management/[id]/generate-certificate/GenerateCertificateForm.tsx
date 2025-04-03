@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function GenerateCertificateForm({ userId, userName, userEmail, hasActiveCertificate }: Props) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -47,6 +49,9 @@ export default function GenerateCertificateForm({ userId, userName, userEmail, h
         password: data.certificate.password,
       });
 
+      // Refresh the page to update certificate status
+      router.refresh();
+
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to generate certificate');
     } finally {
@@ -75,6 +80,9 @@ export default function GenerateCertificateForm({ userId, userName, userEmail, h
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+
+    // Navigate back to document viewer
+    // router.push('/documents');
   };
 
   return (

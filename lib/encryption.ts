@@ -4,7 +4,11 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const SALT_LENGTH = 16;
 const TAG_LENGTH = 16;
-const KEY = process.env.ENCRYPTION_KEY || randomBytes(32); // 32 bytes for AES-256
+
+// Convert base64 key to buffer or generate random key
+const KEY = process.env.ENCRYPTION_KEY 
+  ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
+  : randomBytes(32); // 32 bytes for AES-256
 
 export async function encrypt(text: string): Promise<string> {
   const iv = randomBytes(IV_LENGTH);

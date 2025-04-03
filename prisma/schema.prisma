@@ -83,6 +83,7 @@ model User {
   userDocuments            Document[]                  @relation("UserDocuments")
   userSignedDocuments      Document[]                  @relation("UserSignedDocuments")
   certificates             UserCertificate[]
+  documentSignatures       DocumentSignature[]
 
   @@map("users")
 }
@@ -426,6 +427,8 @@ model ActivityHistory {
 
 model Document {
   id            String    @id @default(cuid())
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id])
   fileName      String
   fileUrl       String
   fileType      String?
@@ -439,14 +442,28 @@ model Document {
   signedBy      String?
   signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
 
-  // Optional project reference
-  projectId     String?
-  project       Project?  @relation(fields: [projectId], references: [id])
+  // Multiple signatures
+  signatures    DocumentSignature[]
 
+  @@map("documents")
+  @@index([projectId])
   @@index([uploadedBy])
   @@index([signedBy])
-  @@index([projectId])
-  @@map("documents")
+}
+
+model DocumentSignature {
+  id            String    @id @default(cuid())
+  documentId    String
+  document      Document  @relation(fields: [documentId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  signedAt      DateTime
+  signedFileUrl String
+  order         Int       @default(0)
+
+  @@map("document_signatures")
+  @@index([documentId])
+  @@index([userId])
 }
 
 model UserCertificate {
