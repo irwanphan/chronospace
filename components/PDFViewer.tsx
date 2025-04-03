@@ -15,6 +15,7 @@ import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
 import { IconChevronLeft } from '@tabler/icons-react';
 import SignaturesList from '@/components/SignaturesList';
+import CertificateStatus from './CertificateStatus';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
@@ -416,24 +417,26 @@ export default function PDFViewer() {
             <IconChevronLeft className="w-4 h-4" stroke={4} />
           </Button>
           <h1 className="text-2xl font-semibold">Document Viewer</h1>
+          <div className="flex items-center gap-4 ml-6">
+            <div className="bg-gray-900 text-white rounded-md px-3 py-1 text-sm font-medium">
+              <span>{currentPage}</span>
+              <span className="text-gray-400"> / {numPages}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <label>Zoom:</label>
+              <select
+                value={scale}
+                onChange={(e) => setScale(Number(e.target.value))}
+                className="border rounded px-2 py-1"
+              >
+                <option value={1}>100%</option>
+                <option value={1.5}>150%</option>
+                <option value={2}>200%</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">
-            <span>{currentPage}</span>
-            <span className="text-gray-400"> / {numPages}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <label>Zoom:</label>
-            <select
-              value={scale}
-              onChange={(e) => setScale(Number(e.target.value))}
-              className="border rounded px-2 py-1"
-            >
-              <option value={1}>100%</option>
-              <option value={1.5}>150%</option>
-              <option value={2}>200%</option>
-            </select>
-          </div>
           {activeSignature && (
             <button
               onClick={removeActiveSignature}
@@ -443,6 +446,7 @@ export default function PDFViewer() {
               Remove Signature
             </button>
           )}
+          <CertificateStatus />
           {session?.user?.access.workspaceAccess.signDocument && (
             <Button onClick={saveSignedPdf}
               disabled={isSaving}
