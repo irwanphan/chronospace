@@ -17,7 +17,7 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg">
       <ReactQuill
         theme="snow"
         value={value}
@@ -26,6 +26,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           [&_.ql-toolbar.ql-snow]:border-0
           [&_.ql-toolbar.ql-snow]:bg-blue-50 
           [&_.ql-toolbar.ql-snow]:border-b
+          [&_.ql-toolbar.ql-snow]:rounded-t-lg
           [&_.ql-toolbar.ql-snow]:border-gray-200
           [&_.ql-container.ql-snow]:border-0
           [&_.ql-editor]:text-base
@@ -38,6 +39,11 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           toolbar: [
             ['bold', 'italic', 'underline'],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'align': [] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'size': [] }],
             ['clean']
           ]
         }}
