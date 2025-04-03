@@ -41,6 +41,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,
@@ -88,6 +89,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: true,
@@ -135,6 +137,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: true,
@@ -182,6 +185,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: true,
@@ -229,6 +233,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: true, 
@@ -276,6 +281,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,
@@ -323,6 +329,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,
@@ -369,6 +376,7 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
+          generateCertificate: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,

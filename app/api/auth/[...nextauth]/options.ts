@@ -49,6 +49,7 @@ interface ActivityAccess {
   uploadDocument: boolean;
   deleteDocument: boolean;
   downloadDocument: boolean;
+  generateCertificate: boolean;
 }
 
 interface WorkspaceAccess {
@@ -202,7 +203,8 @@ export const authOptions: AuthOptions = {
             createDocument: false,
             uploadDocument: false,
             deleteDocument: false,
-            downloadDocument: false
+            downloadDocument: false,
+            generateCertificate: false
           },
           workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
             createPurchaseRequest: false,
