@@ -119,7 +119,7 @@ const Sidebar = () => {
               key={item.name}
               href={item.href}
               className={cn(
-                "h-11 flex items-center w-full transition-colors",
+                "min-h-11 flex items-center w-full transition-colors py-2",
                 isCollapsed ? "px-4" : "px-4",
                 isActive 
                   ? "bg-blue-50 text-blue-600" 
@@ -133,7 +133,7 @@ const Sidebar = () => {
                 )} />
               </div>
               <span className={cn(
-                "ml-3 transition-all duration-300 flex-shrink-0",
+                "ml-3 transition-all duration-300 leading-tight",
                 isCollapsed ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
               )}>
                 {item.name}
