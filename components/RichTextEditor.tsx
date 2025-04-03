@@ -17,7 +17,7 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg group">
       <ReactQuill
         theme="snow"
         value={value}

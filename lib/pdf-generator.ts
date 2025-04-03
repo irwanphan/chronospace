@@ -48,6 +48,8 @@ function parseQuillContent(html: string): TextSegment[] {
             segments.push(...processNode(child, { type: 'bullet', index: listContext.index + 1 }));
           }
         }
+        // Add extra line break after list
+        segments.push({ text: '\n\n', bold: false, italic: false, underline: false });
         return segments;
       }
 
@@ -58,6 +60,8 @@ function parseQuillContent(html: string): TextSegment[] {
             segments.push(...processNode(child, { type: 'number', index: listContext.index + 1 }));
           }
         }
+        // Add extra line break after list
+        segments.push({ text: '\n\n', bold: false, italic: false, underline: false });
         return segments;
       }
 
@@ -77,7 +81,17 @@ function parseQuillContent(html: string): TextSegment[] {
           isListItem: true,
           listType: listContext.type,
           listIndex: listContext.index
-        }, ...childSegments];
+        }, ...childSegments, { text: '\n', bold: false, italic: false, underline: false }];
+      }
+
+      // Handle paragraphs
+      if (element.tagName === 'P') {
+        const childSegments: TextSegment[] = [];
+        for (const child of node.childNodes) {
+          childSegments.push(...processNode(child, listContext));
+        }
+        // Add double line break after paragraph
+        return [...childSegments, { text: '\n\n', bold: false, italic: false, underline: false }];
       }
 
       const childSegments: TextSegment[] = [];
@@ -116,9 +130,6 @@ export async function generatePDF({ title, content, footer }: PDFContent): Promi
   const segments = parseQuillContent(content);
   let currentText = '';
   let currentStyle = { bold: false, italic: false, underline: false };
-  let isListItem = false;
-  let listType: 'bullet' | 'number' | undefined;
-  let listIndex = 0;
 
   for (const segment of segments) {
     if (segment.text.trim() === '') {
@@ -152,9 +163,6 @@ export async function generatePDF({ title, content, footer }: PDFContent): Promi
         y += lines.length * lineHeight;
         currentText = '';
       }
-      isListItem = true;
-      listType = segment.listType;
-      listIndex = segment.listIndex || 0;
     }
 
     if (JSON.stringify(currentStyle) !== JSON.stringify({
