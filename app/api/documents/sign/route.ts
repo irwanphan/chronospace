@@ -4,12 +4,12 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import { put } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { PDFDocument } from 'pdf-lib';
+import { decrypt } from '@/lib/encryption';
+import signpdf from 'node-signpdf';
+import { Session } from 'next-auth';
 
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-
-import signpdf from 'node-signpdf';
-import { Session } from 'next-auth';
 
 type SignPdfOptions = {
   passphrase: string;
@@ -32,12 +32,9 @@ async function addSignaturePlaceholder(pdfBuffer: Buffer): Promise<Buffer> {
   return Buffer.from(modifiedPdf);
 }
 
-function digitallySign(pdfBuffer: Buffer): Buffer {
-  const p12Path = join(process.cwd(), 'certificates', 'certificate.p12');
-  const p12Buffer = readFileSync(p12Path);
-
-  const signedPdf = signpdf.sign(pdfBuffer, p12Buffer, {
-    passphrase: process.env.P12_PASSPHRASE || '',
+async function digitallySign(pdfBuffer: Buffer, p12Buffer: Uint8Array, passphrase: string): Promise<Buffer> {
+  const signedPdf = signpdf.sign(pdfBuffer, Buffer.from(p12Buffer), {
+    passphrase: passphrase,
   } as SignPdfOptions);
 
   return signedPdf;
@@ -48,6 +45,25 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // Check for valid certificate
+    const activeCertificate = await prisma.userCertificate.findFirst({
+      where: {
+        userId: session.user.id,
+        isActive: true,
+        revokedAt: null,
+        expiresAt: {
+          gt: new Date()
+        }
+      }
+    });
+
+    if (!activeCertificate) {
+      return new NextResponse(
+        JSON.stringify({ error: 'No valid certificate found. Please generate a certificate first.' }), 
+        { status: 400 }
+      );
     }
 
     const { fileUrl, signatures } = await request.json();
@@ -105,29 +121,16 @@ export async function POST(request: Request) {
     const pdfBuffer = Buffer.from(pdfWithSignatureBytes);
 
     try {
-      // Coba tanda tangani secara digital
-      const p12Path = join(process.cwd(), 'certificates', 'certificate.p12');
-      if (!existsSync(p12Path)) {
-        // Jika tidak ada sertifikat, langsung upload versi dengan tanda tangan visual
-        return await uploadSignedPdf(pdfBuffer, fileName, session.user);
-      }
+      // Decrypt certificate password
+      const certificatePassword = await decrypt(activeCertificate.password);
       
-      // const p12Buffer = readFileSync(p12Path);
-      // const signedPdfBytes = await sign(
-      //   pdfBuffer,
-      //   p12Buffer,
-      //   process.env.P12_PASSPHRASE || '',
-      //   {
-      //     reason: 'Document Signing',
-      //     email: session.user.email || undefined,
-      //     location: 'Digital Signature',
-      //     signerName: session.user.name || 'Unknown'
-      //   }
-      // );
+      // Add placeholder and sign with user's certificate
       const pdfWithPlaceholder = await addSignaturePlaceholder(pdfBuffer);
-      const signedPdfBytes = digitallySign(pdfWithPlaceholder);
-
-
+      const signedPdfBytes = await digitallySign(
+        pdfWithPlaceholder, 
+        activeCertificate.p12cert,
+        certificatePassword
+      );
 
       return await uploadSignedPdf(signedPdfBytes, fileName, session.user);
     } catch (signError) {
