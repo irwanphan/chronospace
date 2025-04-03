@@ -65,7 +65,11 @@ export async function POST(request: Request) {
         }
       },
       include: {
-        user: true // Include user info for signature details
+        user: {
+          include: {
+            role: true // Include role information
+          }
+        }
       }
     });
 
@@ -94,6 +98,9 @@ export async function POST(request: Request) {
         signatures: {
           include: {
             user: true
+          },
+          orderBy: {
+            order: 'desc'
           }
         }
       }
@@ -107,7 +114,7 @@ export async function POST(request: Request) {
     }
 
     const originalPdfBuffer = await originalPdfResponse.arrayBuffer();
-    let pdfDoc = await PDFDocument.load(originalPdfBuffer);
+    const pdfDoc = await PDFDocument.load(originalPdfBuffer);
     const pages = pdfDoc.getPages();
 
     // Proses setiap tanda tangan visual
@@ -147,7 +154,7 @@ export async function POST(request: Request) {
       updateFieldAppearances: false
     });
     
-    let pdfBuffer = Buffer.from(pdfWithSignatureBytes);
+    const pdfBuffer = Buffer.from(pdfWithSignatureBytes);
 
     try {
       // Decrypt certificate password
@@ -157,7 +164,7 @@ export async function POST(request: Request) {
       // Add placeholder and sign with user's certificate
       console.log('Adding signature placeholder...');
       const pdfWithPlaceholder = await addSignaturePlaceholder(pdfBuffer, {
-        name: `${activeCertificate.user.name} (${activeCertificate.user.role})`,
+        name: `${activeCertificate.user.name} (${activeCertificate.user.role.roleName})`,
         reason: 'Document Signature',
         location: 'Indonesia',
         contactInfo: activeCertificate.user.email || 'ChronoSpace'
@@ -181,7 +188,7 @@ export async function POST(request: Request) {
         contentType: 'application/pdf'
       });
 
-      // Create or update document record
+      // Create document if it doesn't exist
       if (!document) {
         document = await prisma.document.create({
           data: {
@@ -192,13 +199,32 @@ export async function POST(request: Request) {
               connect: {
                 id: session.user.id
               }
+            },
+            signatures: {
+              create: [] // Initialize empty signatures array
+            }
+          },
+          include: {
+            signatures: {
+              include: {
+                user: true
+              }
             }
           }
         });
       }
 
+      if (!document) {
+        throw new Error('Failed to create or retrieve document');
+      }
+
+      // Get the next signature order
+      const nextOrder = document.signatures.length > 0 
+        ? Math.max(...document.signatures.map(s => s.order)) + 1 
+        : 0;
+
       // Add signature record
-      await prisma.documentSignature.create({
+      const newSignature = await prisma.documentSignature.create({
         data: {
           document: {
             connect: {
@@ -211,7 +237,8 @@ export async function POST(request: Request) {
             }
           },
           signedAt: new Date(),
-          signedFileUrl: signedUrl
+          signedFileUrl: signedUrl,
+          order: nextOrder
         }
       });
 
@@ -222,12 +249,16 @@ export async function POST(request: Request) {
         },
         data: {
           signedFileUrl: signedUrl,
-          signedAt: new Date()
+          signedAt: new Date(),
+          signedBy: session.user.id
         },
         include: {
           signatures: {
             include: {
               user: true
+            },
+            orderBy: {
+              order: 'asc'
             }
           }
         }
@@ -236,7 +267,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ 
         success: true, 
         document: updatedDoc,
-        signaturesCount: (updatedDoc.signatures || []).length
+        signaturesCount: updatedDoc.signatures.length,
+        latestSignature: newSignature
       });
     } catch (error) {
       console.error('Digital signing error:', error);

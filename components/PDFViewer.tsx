@@ -14,6 +14,7 @@ import Button from '@/components/ui/Button';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
 import { IconChevronLeft } from '@tabler/icons-react';
+import SignaturesList from '@/components/SignaturesList';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
@@ -460,7 +461,7 @@ export default function PDFViewer() {
             <div ref={containerRef} className="relative flex justify-center overflow-x-auto">
               {pdfData ? (
                 <Document
-                  key={documentKey} // Force re-render when key changes
+                  key={documentKey}
                   file={pdfData}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={(error) => {
@@ -529,8 +530,8 @@ export default function PDFViewer() {
           </Card>
         </div>
 
-        {session?.user?.access.workspaceAccess.signDocument && (
-          <div className="col-span-1">
+        <div className="col-span-1 space-y-6">
+          {session?.user?.access.workspaceAccess.signDocument && (
             <Card className="p-4 space-y-4 bg-white">
               <h2 className="text-lg font-semibold">Digital Signature</h2>
               <div className="border rounded p-2 bg-white">
@@ -560,8 +561,10 @@ export default function PDFViewer() {
                 </Button>
               </div>
             </Card>
-          </div>
-        )}
+          )}
+
+          {fileUrl && <SignaturesList fileUrl={fileUrl} />}
+        </div>
       </div>
 
       {numPages > 1 && (
