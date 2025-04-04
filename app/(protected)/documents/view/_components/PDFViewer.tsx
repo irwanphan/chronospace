@@ -14,6 +14,8 @@ import Button from '@/components/ui/Button';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
 import { IconChevronLeft } from '@tabler/icons-react';
+import SignaturesList from '@/components/SignaturesList';
+import CertificateStatus from '../../../../../components/CertificateStatus';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
@@ -50,6 +52,8 @@ export default function PDFViewer() {
         setIsLoading(true);
         const response = await fetch(`${fileUrl}?download=1`);
         if (!response.ok) throw new Error('Failed to fetch PDF');
+
+        console.log('response :', response);
         
         const blob = await response.blob();
         const dataUrl = URL.createObjectURL(blob);
@@ -415,24 +419,27 @@ export default function PDFViewer() {
             <IconChevronLeft className="w-4 h-4" stroke={4} />
           </Button>
           <h1 className="text-2xl font-semibold">Document Viewer</h1>
+          <div className="flex items-center gap-4 ml-6">
+            <div className="bg-gray-900 text-white rounded-md px-3 py-1 text-sm font-medium">
+              <span>{currentPage}</span>
+              <span className="text-gray-400"> / {numPages}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <label>Zoom:</label>
+              <select
+                value={scale}
+                onChange={(e) => setScale(Number(e.target.value))}
+                className="border rounded px-2 py-1"
+              >
+                <option value={1}>100%</option>
+                <option value={1.5}>150%</option>
+                <option value={2}>200%</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">
-            <span>{currentPage}</span>
-            <span className="text-gray-400"> / {numPages}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <label>Zoom:</label>
-            <select
-              value={scale}
-              onChange={(e) => setScale(Number(e.target.value))}
-              className="border rounded px-2 py-1"
-            >
-              <option value={1}>100%</option>
-              <option value={1.5}>150%</option>
-              <option value={2}>200%</option>
-            </select>
-          </div>
+        <div className="flex items-start gap-3">
+          <CertificateStatus />
           {activeSignature && (
             <button
               onClick={removeActiveSignature}
@@ -460,7 +467,7 @@ export default function PDFViewer() {
             <div ref={containerRef} className="relative flex justify-center overflow-x-auto">
               {pdfData ? (
                 <Document
-                  key={documentKey} // Force re-render when key changes
+                  key={documentKey}
                   file={pdfData}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={(error) => {
@@ -529,8 +536,8 @@ export default function PDFViewer() {
           </Card>
         </div>
 
-        {session?.user?.access.workspaceAccess.signDocument && (
-          <div className="col-span-1">
+        <div className="col-span-1 space-y-6">
+          {session?.user?.access.workspaceAccess.signDocument && (
             <Card className="p-4 space-y-4 bg-white">
               <h2 className="text-lg font-semibold">Digital Signature</h2>
               <div className="border rounded p-2 bg-white">
@@ -560,8 +567,10 @@ export default function PDFViewer() {
                 </Button>
               </div>
             </Card>
-          </div>
-        )}
+          )}
+
+          {fileUrl && <SignaturesList fileUrl={fileUrl} />}
+        </div>
       </div>
 
       {numPages > 1 && (

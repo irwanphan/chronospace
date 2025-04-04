@@ -44,6 +44,7 @@ export interface ActivityAccess {
   uploadDocument: boolean;
   deleteDocument: boolean;
   downloadDocument: boolean;
+  generateCertificate: boolean;
 }
 
 export interface WorkspaceAccess {

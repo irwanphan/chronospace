@@ -46,7 +46,8 @@ const ACTIVITY_ACCESS_ORDER = [
   'createDocument',
   'uploadDocument',
   'deleteDocument',
-  'downloadDocument'
+  'downloadDocument',
+  'generateCertificate'
 ] as const;
 
 const WORKSPACE_ACCESS_ORDER = [

@@ -22,13 +22,28 @@ export async function GET() {
             code: true,
             title: true,
           }
+        },
+        signatures: {
+          select: {
+            id: true,
+            order: true,
+            user: {
+              select: {
+                name: true,
+              }
+            }
+          }
         }
       }
     });
 
+    console.log('dbDocuments :', dbDocuments);
+
     // 3. Map dokumen dari blob dengan data dari database
     const documents = blobs.map(blob => {
-      const dbDoc = dbDocuments.find(doc => doc.fileUrl === blob.url);
+      const dbDoc = dbDocuments.find(doc => 
+        doc.fileUrl === blob.url || doc.signedFileUrl === blob.url
+      );
       
       return {
         id: dbDoc?.id || blob.url,
@@ -47,9 +62,12 @@ export async function GET() {
           entityCode: dbDoc.project.code,
           entityTitle: dbDoc.project.title,
         }] : [],
-        isOrphan: !dbDoc
+        isOrphan: !dbDoc,
+        isSigned: dbDoc?.signedFileUrl ? true : false
       };
     });
+
+    console.log('documents :', documents);
 
     return NextResponse.json({ 
       documents,

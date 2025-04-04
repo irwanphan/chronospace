@@ -112,15 +112,16 @@ const Sidebar = () => {
       
       <nav className="py-4">
         {navigation.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || 
+            (pathname.startsWith(item.href) && pathname.charAt(item.href.length) === '/');
           
           return (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                "h-11 flex items-center w-full transition-colors",
-                isCollapsed ? "px-4" : "px-4",
+                "min-h-11 flex items-center w-full transition-colors px-4 py-3",
+                isCollapsed ? "h-11" : "h-auto",
                 isActive 
                   ? "bg-blue-50 text-blue-600" 
                   : "text-gray-700 hover:bg-gray-100"
@@ -133,7 +134,7 @@ const Sidebar = () => {
                 )} />
               </div>
               <span className={cn(
-                "ml-3 transition-all duration-300 flex-shrink-0",
+                "ml-3 transition-all duration-300 leading-tight",
                 isCollapsed ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
               )}>
                 {item.name}

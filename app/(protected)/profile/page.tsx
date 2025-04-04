@@ -9,6 +9,7 @@ import { User } from '@/types/user';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import { IconCertificate } from '@tabler/icons-react';
 
 interface ActivityHistory {
   id: string;
@@ -29,14 +30,17 @@ export default function ProfilePage() {
   const [activityHistories, setActivityHistories] = useState<ActivityHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const canGenerateCertificate = session?.user?.access.activityAccess.generateCertificate;
+
   // Dummy data untuk activity
-  const activityData = {
-    totalContributions: 1274,
-    // Dummy data untuk activity heatmap
-    activityHeatmap: Array(52).fill(null).map(() => 
-      Math.floor(Math.random() * 5)
-    ),
-  };
+  // const activityData = {
+  //   totalContributions: 1274,
+  //   // Dummy data untuk activity heatmap
+  //   activityHeatmap: Array(52).fill(null).map(() => 
+  //     Math.floor(Math.random() * 5)
+  //   ),
+  // };
 
   const [userData, setUserData] = useState<User>({
     id: '',
@@ -87,28 +91,31 @@ export default function ProfilePage() {
   if (isLoading) return <LoadingSpin/>
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-full">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column - User Info */}
         <div className="md:col-span-1">
           <div className="sticky top-32">
             {/* Profile Picture & Basic Info */}
-            <div className="mb-6">
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100">
-              {userImage ? (
-                <Image
-                  src={userImage}
-                  alt={userName}
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl">
-                  {getInitials(userName)}
-                </div>
-              )}
+            <div className="p-4">
+              <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-100">
+                {userImage ? (
+                  <Image
+                    src={userImage}
+                    alt={userName}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl">
+                    {getInitials(userName)}
+                  </div>
+                )}
+              </div>
             </div>
+
+            <div className="flex flex-col mb-4">
               <h1 className="text-2xl font-bold mt-4">{userName}</h1>
               <h2 className="text-xl text-gray-600 font-light">{userRole}</h2>
             </div>
@@ -140,13 +147,26 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
+            <div className="mt-8 flex flex-wrap gap-2">
+              <button 
+                className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
                 onClick={() => router.push(`/user-management/${session?.user.id}/edit?ref=profile`)}
               >
                 <Pencil className="w-4 h-4" />
                 Edit Profile
               </button>
+              {canGenerateCertificate && (
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/user-management/${session?.user.id}/generate-certificate`);
+                  }}
+                >
+                  <IconCertificate className="w-4 h-4" />
+                  Generate Certificate
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -160,7 +180,7 @@ export default function ProfilePage() {
               {/* Contribution Stats */}
               <div className="mb-6">
                 <p className="text-gray-600">
-                  <span className="font-semibold text-black">{activityData.totalContributions}</span> contributions in the last year
+                  {/* <span className="font-semibold text-black">{activityData.totalContributions}</span> contributions in the last year */}
                 </p>
               </div>
 

@@ -46,6 +46,7 @@ declare module "next-auth" {
           uploadDocument: boolean;
           deleteDocument: boolean;
           downloadDocument: boolean;
+          generateCertificate: boolean;
         },
         workspaceAccess: {
           createPurchaseRequest: boolean;

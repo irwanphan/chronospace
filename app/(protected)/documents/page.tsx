@@ -20,6 +20,15 @@ interface Document {
   uploadedBy: string;
   uploader: {
     name: string;
+    role?: {
+      roleName: string;
+    };
+  };
+  signedByUser?: {
+    name: string;
+    role?: {
+      roleName: string;
+    };
   };
   usages: {
     entityType: string;
@@ -28,6 +37,7 @@ interface Document {
     entityTitle: string;
   }[];
   isOrphan: boolean;
+  isSigned: boolean;
 }
 
 const entityRoutes = {
@@ -46,6 +56,8 @@ export default function DocumentPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  console.log('documents :', documents);
 
   useEffect(() => {
     fetchDocuments();
@@ -157,7 +169,9 @@ export default function DocumentPage() {
             <div className="text-sm text-gray-500 px-4 h-10 flex items-center justify-center border border-gray-300 rounded-md gap-2 hover:border-blue-600 hover:text-blue-600 transition-all duration-300">
               Total Files: {documents.length}
               <span className="text-gray-500"> | </span>
-              Unused Files: {documents.filter(d => d.isOrphan).length}
+              Signed Files: {documents.filter(d => d.isSigned).length}
+              <span className="text-gray-500"> | </span>
+              Orphan Files: {documents.filter(d => d.isOrphan).length}
             </div>
             {session?.user?.access.activityAccess.createDocument && (
               <button
@@ -200,12 +214,28 @@ export default function DocumentPage() {
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-gray-500 self-start"/>
-                      <p className="text-sm">{doc.fileName}</p>
+                      <div>
+                        <p className="text-sm">{doc.fileName}</p>
+                        {doc.signedByUser && (
+                          <p className="text-xs text-gray-500">
+                            Signed by: {doc.signedByUser.name} ({doc.signedByUser.role?.roleName})
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </td>
                   {/* <td className="px-4 py-2">{doc.fileType}</td> */}
                   <td className="px-4 py-2">{formatBytes(doc.size)}</td>
-                  <td className="px-4 py-2">{doc.uploader.name}</td>
+                  <td className="px-4 py-2">
+                    {doc.uploader?.name ? (
+                      <div>
+                        <p>{doc.uploader.name}</p>
+                        {doc.uploader.role && (
+                          <p className="text-xs text-gray-500">{doc.uploader.role.roleName}</p>
+                        )}
+                      </div>
+                    ) : '-'}
+                  </td>
                   <td className="px-4 py-2">{formatDate(doc.uploadedAt)}</td>
                   {/* <td className="px-4 py-2">
                     {doc.isOrphan ? (

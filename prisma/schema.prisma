@@ -82,6 +82,8 @@ model User {
   signedDocuments          ProjectDocument[]           @relation("SignedDocuments")
   userDocuments            Document[]                  @relation("UserDocuments")
   userSignedDocuments      Document[]                  @relation("UserSignedDocuments")
+  certificates             UserCertificate[]
+  documentSignatures       DocumentSignature[]
 
   @@map("users")
 }
@@ -240,6 +242,7 @@ model ProjectDocument {
   signedBy      String?
   signedByUser  User?     @relation("SignedDocuments", fields: [signedBy], references: [id])
 
+  @@map("project_documents")
   @@index([projectId])
   @@index([uploadedBy])
   @@index([signedBy])
@@ -424,6 +427,8 @@ model ActivityHistory {
 
 model Document {
   id            String    @id @default(cuid())
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id])
   fileName      String
   fileUrl       String
   fileType      String?
@@ -437,13 +442,45 @@ model Document {
   signedBy      String?
   signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
 
-  // Optional project reference
-  projectId     String?
-  project       Project?  @relation(fields: [projectId], references: [id])
+  // Multiple signatures
+  signatures    DocumentSignature[]
 
+  @@map("documents")
+  @@index([projectId])
   @@index([uploadedBy])
   @@index([signedBy])
-  @@index([projectId])
-  @@map("documents")
+}
+
+model DocumentSignature {
+  id            String    @id @default(cuid())
+  documentId    String
+  document      Document  @relation(fields: [documentId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  signedAt      DateTime
+  signedFileUrl String
+  order         Int       @default(0)
+
+  @@map("document_signatures")
+  @@index([documentId])
+  @@index([userId])
+}
+
+model UserCertificate {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  serialNumber  String    @unique
+  p12cert       Bytes     // Store the P12 certificate
+  password      String    // Encrypted password for the P12
+  issuedAt     DateTime  @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  revocationReason String?
+  isActive     Boolean   @default(true)
+
+  @@index([userId])
+  @@index([serialNumber])
+  @@map("user_certificates")
 }
 

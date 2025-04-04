@@ -1,9 +1,9 @@
 'use client';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { MoreVertical, Edit, Trash, Eye, Key, Lock } from 'lucide-react';
-import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import { useRouter } from 'next/navigation';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
+import { MoreVertical, Edit, Trash, Eye, Key, Lock } from 'lucide-react';
 
 interface UserActionsProps {
   userId: string;

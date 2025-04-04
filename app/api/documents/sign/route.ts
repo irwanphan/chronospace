@@ -4,43 +4,47 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import { put } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { PDFDocument } from 'pdf-lib';
-
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
-
+import { decrypt } from '@/lib/encryption';
 import signpdf from 'node-signpdf';
-import { Session } from 'next-auth';
+import plainAddPlaceholder from 'node-signpdf/dist/helpers/plainAddPlaceholder';
 
-type SignPdfOptions = {
-  passphrase: string;
-};
+async function addSignaturePlaceholder(pdfBuffer: Buffer, signatureInfo: { 
+  name: string;
+  reason?: string;
+  location?: string;
+  contactInfo?: string;
+}): Promise<Buffer> {
+  try {
+    // Load and modify PDF
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const modifiedPdfBytes = await pdfDoc.save({
+      useObjectStreams: false,
+      addDefaultPage: false,
+      updateFieldAppearances: false
+    });
 
-async function addSignaturePlaceholder(pdfBuffer: Buffer): Promise<Buffer> {
-  const pdfDoc = await PDFDocument.load(pdfBuffer);
-  const form = pdfDoc.getForm();
-  const [page] = pdfDoc.getPages();
-
-  const textField = form.createTextField('Signature1');
-  textField.addToPage(page, {
-    x: 50,
-    y: 50,
-    width: 200,
-    height: 50,
-  });
-
-  const modifiedPdf = await pdfDoc.save();
-  return Buffer.from(modifiedPdf);
+    // Add placeholder with signer's info
+    return plainAddPlaceholder({
+      pdfBuffer: Buffer.from(modifiedPdfBytes),
+      reason: signatureInfo.reason || 'Digital Signature',
+      contactInfo: signatureInfo.contactInfo || 'ChronoSpace',
+      name: signatureInfo.name,
+      location: signatureInfo.location || 'Indonesia',
+      signatureLength: 16384
+    });
+  } catch (error) {
+    console.error('Error in addSignaturePlaceholder:', error);
+    throw error;
+  }
 }
 
-function digitallySign(pdfBuffer: Buffer): Buffer {
-  const p12Path = join(process.cwd(), 'certificates', 'certificate.p12');
-  const p12Buffer = readFileSync(p12Path);
-
-  const signedPdf = signpdf.sign(pdfBuffer, p12Buffer, {
-    passphrase: process.env.P12_PASSPHRASE || '',
-  } as SignPdfOptions);
-
-  return signedPdf;
+async function digitallySign(pdfBuffer: Buffer, p12Buffer: Uint8Array, passphrase: string): Promise<Buffer> {
+  try {
+    return signpdf.sign(pdfBuffer, Buffer.from(p12Buffer), { passphrase });
+  } catch (error) {
+    console.error('Error in digitallySign:', error);
+    throw error;
+  }
 }
 
 export async function POST(request: Request) {
@@ -50,18 +54,40 @@ export async function POST(request: Request) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
+    // Check for valid certificate
+    const activeCertificate = await prisma.userCertificate.findFirst({
+      where: {
+        userId: session.user.id,
+        isActive: true,
+        revokedAt: null,
+        expiresAt: {
+          gt: new Date()
+        }
+      },
+      include: {
+        user: {
+          include: {
+            role: true // Include role information
+          }
+        }
+      }
+    });
+
+    if (!activeCertificate) {
+      return new NextResponse(
+        JSON.stringify({ error: 'No valid certificate found. Please generate a certificate first.' }), 
+        { status: 400 }
+      );
+    }
+
     const { fileUrl, signatures } = await request.json();
     
     if (!fileUrl || !signatures?.length) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
 
-    // Generate nama file yang lebih pendek
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(2, 8);
-    const fileName = `signed_${timestamp}_${randomId}.pdf`;
-
     // Download dan load PDF asli
+    console.log('Downloading PDF:', fileUrl);
     const originalPdfResponse = await fetch(fileUrl);
     if (!originalPdfResponse.ok) {
       return new NextResponse('Failed to fetch original PDF', { status: 500 });
@@ -71,7 +97,7 @@ export async function POST(request: Request) {
     const pdfDoc = await PDFDocument.load(originalPdfBuffer);
     const pages = pdfDoc.getPages();
 
-    // Proses setiap tanda tangan
+    // Proses setiap tanda tangan visual
     for (const signature of signatures) {
       try {
         const signatureImageData = signature.dataUrl.split(',')[1];
@@ -101,39 +127,203 @@ export async function POST(request: Request) {
     }
 
     // Simpan PDF dengan tanda tangan visual
-    const pdfWithSignatureBytes = await pdfDoc.save();
+    console.log('Saving PDF with visual signatures...');
+    const pdfWithSignatureBytes = await pdfDoc.save({
+      useObjectStreams: false,
+      addDefaultPage: false,
+      updateFieldAppearances: false
+    });
+    
     const pdfBuffer = Buffer.from(pdfWithSignatureBytes);
 
     try {
-      // Coba tanda tangani secara digital
-      const p12Path = join(process.cwd(), 'certificates', 'certificate.p12');
-      if (!existsSync(p12Path)) {
-        // Jika tidak ada sertifikat, langsung upload versi dengan tanda tangan visual
-        return await uploadSignedPdf(pdfBuffer, fileName, session.user);
-      }
+      // Decrypt certificate password
+      console.log('Decrypting certificate password...');
+      const certificatePassword = await decrypt(activeCertificate.password);
       
-      // const p12Buffer = readFileSync(p12Path);
-      // const signedPdfBytes = await sign(
-      //   pdfBuffer,
-      //   p12Buffer,
-      //   process.env.P12_PASSPHRASE || '',
-      //   {
-      //     reason: 'Document Signing',
-      //     email: session.user.email || undefined,
-      //     location: 'Digital Signature',
-      //     signerName: session.user.name || 'Unknown'
-      //   }
-      // );
-      const pdfWithPlaceholder = await addSignaturePlaceholder(pdfBuffer);
-      const signedPdfBytes = digitallySign(pdfWithPlaceholder);
+      // Add placeholder and sign with user's certificate
+      console.log('Adding signature placeholder...');
+      const pdfWithPlaceholder = await addSignaturePlaceholder(pdfBuffer, {
+        name: `${activeCertificate.user.name} (${activeCertificate.user.role.roleName})`,
+        reason: 'Document Signature',
+        location: 'Indonesia',
+        contactInfo: activeCertificate.user.email || 'ChronoSpace'
+      });
 
+      console.log('Applying digital signature...');
+      const signedPdfBytes = await digitallySign(
+        pdfWithPlaceholder, 
+        activeCertificate.p12cert,
+        certificatePassword
+      );
 
+      // Get original filename without extension and clean it
+      let originalFileName = fileUrl.split('/').pop()?.split('.')[0] || 'document';
+      originalFileName = decodeURIComponent(originalFileName)
+        .replace(/%20/g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/%/g, '-');
 
-      return await uploadSignedPdf(signedPdfBytes, fileName, session.user);
-    } catch (signError) {
-      console.error('Digital signing error:', signError);
-      // Jika digital signing gagal, gunakan versi dengan tanda tangan visual saja
-      return await uploadSignedPdf(pdfBuffer, fileName, session.user);
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const randomId = Math.random().toString(36).substring(2, 6);
+      
+      // Extract the base name without any existing 'signed_' prefix
+      const baseName = originalFileName.startsWith('signed_') 
+        ? originalFileName.substring(7) 
+        : originalFileName;
+        
+      const signedFileName = `signed_documents/${baseName}_signed_${timestamp}_${randomId}.pdf`;
+
+      console.log('Uploading signed PDF...');
+      const { url: signedUrl } = await put(signedFileName, signedPdfBytes, {
+        access: 'public',
+        contentType: 'application/pdf'
+      });
+
+      // Get or create original document record
+      let originalDocument = await prisma.document.findFirst({
+        where: {
+          OR: [
+            { fileUrl: fileUrl },
+            { signedFileUrl: fileUrl }
+          ]
+        }
+      });
+
+      if (!originalDocument) {
+        // If original document doesn't exist in DB, create it
+        originalDocument = await prisma.document.create({
+          data: {
+            fileName: `${originalFileName}.pdf`,
+            fileUrl: fileUrl,
+            uploadedAt: new Date(),
+            uploader: {
+              connect: {
+                id: session.user.id
+              }
+            }
+          }
+        });
+      }
+
+      // Check if a signed version already exists
+      const existingSignedDoc = await prisma.document.findFirst({
+        where: {
+          fileUrl: originalDocument.fileUrl,
+          signedFileUrl: signedUrl
+        }
+      });
+
+      if (existingSignedDoc) {
+        console.log('Document already signed with this signature');
+        return new NextResponse(
+          JSON.stringify({ error: 'Document already signed with this signature' }), 
+          { status: 400 }
+        );
+      }
+
+      // Create new document for signed version
+      const signedDocument = await prisma.document.create({
+        data: {
+          fileName: `signed_${originalFileName}.pdf`,
+          fileUrl: originalDocument.fileUrl, // Keep reference to original
+          signedFileUrl: signedUrl,
+          uploadedAt: new Date(),
+          signedAt: new Date(),
+          signedByUser: {
+            connect: {
+              id: session.user.id
+            }
+          },
+          uploader: {
+            connect: {
+              id: session.user.id // Uploader is the signer for signed version
+            }
+          }
+        },
+        include: {
+          signatures: true,
+          uploader: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: {
+                select: {
+                  roleName: true
+                }
+              }
+            }
+          },
+          signedByUser: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: {
+                select: {
+                  roleName: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Create signature record
+      const newSignature = await prisma.documentSignature.create({
+        data: {
+          document: {
+            connect: {
+              id: signedDocument.id
+            }
+          },
+          user: {
+            connect: {
+              id: session.user.id
+            }
+          },
+          signedAt: new Date(),
+          signedFileUrl: signedUrl,
+          order: 0 // First signature for this document
+        }
+      });
+
+      // Get complete document info
+      const updatedDoc = await prisma.document.findUnique({
+        where: {
+          id: signedDocument.id
+        },
+        include: {
+          signatures: {
+            include: {
+              user: true
+            },
+            orderBy: {
+              order: 'asc'
+            }
+          },
+          uploader: true,
+          signedByUser: true
+        }
+      });
+
+      if (!updatedDoc) {
+        throw new Error('Failed to retrieve updated document');
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        document: updatedDoc,
+        signaturesCount: 1,
+        latestSignature: newSignature
+      });
+    } catch (error) {
+      console.error('Digital signing error:', error);
+      return new NextResponse(
+        JSON.stringify({ error: 'Failed to apply digital signature' }), 
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error in /api/documents/sign:', error);
@@ -145,32 +335,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
-
-async function uploadSignedPdf(pdfBytes: Buffer, fileName: string, user: Session['user']) {
-  const { url } = await put(fileName, pdfBytes, {
-    access: 'public',
-    contentType: 'application/pdf'
-  });
-
-  const signedDoc = await prisma.document.create({
-    data: {
-      fileName,
-      fileUrl: url,
-      signedFileUrl: url,
-      signedAt: new Date(),
-      uploader: {
-        connect: {
-          id: user.id
-        }
-      },
-      signedByUser: {
-        connect: {
-          id: user.id
-        }
-      }
-    }
-  });
-
-  return NextResponse.json({ success: true, document: signedDoc });
 } 
