@@ -91,28 +91,31 @@ export default function ProfilePage() {
   if (isLoading) return <LoadingSpin/>
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-full">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column - User Info */}
         <div className="md:col-span-1">
           <div className="sticky top-32">
             {/* Profile Picture & Basic Info */}
-            <div className="mb-6">
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100">
-              {userImage ? (
-                <Image
-                  src={userImage}
-                  alt={userName}
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl">
-                  {getInitials(userName)}
-                </div>
-              )}
+            <div className="p-4">
+              <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-100">
+                {userImage ? (
+                  <Image
+                    src={userImage}
+                    alt={userName}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl">
+                    {getInitials(userName)}
+                  </div>
+                )}
+              </div>
             </div>
+
+            <div className="flex flex-col mb-4">
               <h1 className="text-2xl font-bold mt-4">{userName}</h1>
               <h2 className="text-xl text-gray-600 font-light">{userRole}</h2>
             </div>

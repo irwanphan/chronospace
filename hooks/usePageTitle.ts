@@ -78,6 +78,18 @@ const pageConfigs: Record<string, { title: string; breadcrumbs: string[] }> = {
     title: 'Document Management',
     breadcrumbs: ['Home', 'Document Management']
   },
+  '/user-management/[id]/generate-certificate': {
+    title: 'User Management',
+    breadcrumbs: ['Home', 'User Management', 'Generate Certificate']
+  },
+  '/user-management/[id]/access-control': {
+    title: 'User Management',
+    breadcrumbs: ['Home', 'User Management', 'Access Control']
+  },
+  '/profile': {
+    title: 'User Profile',
+    breadcrumbs: ['Home', 'User Profile']
+  },
 };
 
 export function usePageTitle() {
