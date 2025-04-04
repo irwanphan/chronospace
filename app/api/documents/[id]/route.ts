@@ -12,7 +12,7 @@ function normalizeUrl(url: string): string {
       decodedUrl = decodeURIComponent(decodedUrl);
     }
     return decodedUrl;
-  } catch (e) {
+  } catch {
     return url;
   }
 }
@@ -99,7 +99,10 @@ export async function DELETE(
         else if (document?.signedFileUrl && document.fileUrl === fileUrl) {
           console.log('This is an original document with signed version, attempting to delete signed version:', document.signedFileUrl);
           try {
-            const signedBlob = blobs.find(blob => normalizeUrl(blob.url) === normalizeUrl(document.signedFileUrl));
+            const signedBlob = blobs.find(blob => 
+              document.signedFileUrl && 
+              normalizeUrl(blob.url) === normalizeUrl(document.signedFileUrl)
+            );
             if (signedBlob) {
               await del(signedBlob.url);
               console.log('Signed version deleted successfully');
