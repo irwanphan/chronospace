@@ -86,26 +86,6 @@ export async function POST(request: Request) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
 
-    // Get existing document to check previous signatures
-    let document = await prisma.document.findFirst({
-      where: {
-        OR: [
-          { fileUrl: fileUrl },
-          { signedFileUrl: fileUrl }
-        ]
-      },
-      include: {
-        signatures: {
-          include: {
-            user: true
-          },
-          orderBy: {
-            order: 'desc'
-          }
-        }
-      }
-    });
-
     // Download dan load PDF asli
     console.log('Downloading PDF:', fileUrl);
     const originalPdfResponse = await fetch(fileUrl);
