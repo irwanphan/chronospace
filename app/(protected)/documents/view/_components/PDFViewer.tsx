@@ -439,6 +439,7 @@ export default function PDFViewer() {
           </div>
         </div>
         <div className="flex items-start gap-3">
+          <CertificateStatus />
           {activeSignature && (
             <button
               onClick={removeActiveSignature}
@@ -448,7 +449,6 @@ export default function PDFViewer() {
               Remove Signature
             </button>
           )}
-          <CertificateStatus />
           {session?.user?.access.workspaceAccess.signDocument && (
             <Button onClick={saveSignedPdf}
               disabled={isSaving}
