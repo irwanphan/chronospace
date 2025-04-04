@@ -180,7 +180,10 @@ export async function POST(request: Request) {
       // Upload signed PDF
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 8);
-      const fileName = `signed_${timestamp}_${randomId}.pdf`;
+      
+      // Get original filename without extension
+      const originalFileName = fileUrl.split('/').pop()?.split('.')[0] || 'document';
+      const fileName = `signed_${originalFileName}.pdf`;
 
       console.log('Uploading signed PDF...');
       const { url: signedUrl } = await put(fileName, signedPdfBytes, {
@@ -188,47 +191,102 @@ export async function POST(request: Request) {
         contentType: 'application/pdf'
       });
 
-      // Create document if it doesn't exist
-      if (!document) {
-        document = await prisma.document.create({
+      // Get or create original document record
+      let originalDocument = await prisma.document.findFirst({
+        where: {
+          OR: [
+            { fileUrl: fileUrl },
+            { signedFileUrl: fileUrl }
+          ]
+        }
+      });
+
+      if (!originalDocument) {
+        // If original document doesn't exist in DB, create it
+        originalDocument = await prisma.document.create({
           data: {
-            fileName: fileUrl.split('/').pop() || 'document.pdf',
+            fileName: `${originalFileName}.pdf`,
             fileUrl: fileUrl,
             uploadedAt: new Date(),
             uploader: {
               connect: {
                 id: session.user.id
               }
-            },
-            signatures: {
-              create: [] // Initialize empty signatures array
-            }
-          },
-          include: {
-            signatures: {
-              include: {
-                user: true
-              }
             }
           }
         });
       }
 
-      if (!document) {
-        throw new Error('Failed to create or retrieve document');
+      // Check if a signed version already exists
+      const existingSignedDoc = await prisma.document.findFirst({
+        where: {
+          fileUrl: originalDocument.fileUrl,
+          signedFileUrl: signedUrl
+        }
+      });
+
+      if (existingSignedDoc) {
+        console.log('Document already signed with this signature');
+        return new NextResponse(
+          JSON.stringify({ error: 'Document already signed with this signature' }), 
+          { status: 400 }
+        );
       }
 
-      // Get the next signature order
-      const nextOrder = document.signatures.length > 0 
-        ? Math.max(...document.signatures.map(s => s.order)) + 1 
-        : 0;
+      // Create new document for signed version
+      const signedDocument = await prisma.document.create({
+        data: {
+          fileName: `signed_${originalFileName}.pdf`,
+          fileUrl: originalDocument.fileUrl, // Keep reference to original
+          signedFileUrl: signedUrl,
+          uploadedAt: new Date(),
+          signedAt: new Date(),
+          signedByUser: {
+            connect: {
+              id: session.user.id
+            }
+          },
+          uploader: {
+            connect: {
+              id: session.user.id // Uploader is the signer for signed version
+            }
+          }
+        },
+        include: {
+          signatures: true,
+          uploader: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: {
+                select: {
+                  roleName: true
+                }
+              }
+            }
+          },
+          signedByUser: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: {
+                select: {
+                  roleName: true
+                }
+              }
+            }
+          }
+        }
+      });
 
-      // Add signature record
+      // Create signature record
       const newSignature = await prisma.documentSignature.create({
         data: {
           document: {
             connect: {
-              id: document.id
+              id: signedDocument.id
             }
           },
           user: {
@@ -238,19 +296,14 @@ export async function POST(request: Request) {
           },
           signedAt: new Date(),
           signedFileUrl: signedUrl,
-          order: nextOrder
+          order: 0 // First signature for this document
         }
       });
 
-      // Update document with latest signed version
-      const updatedDoc = await prisma.document.update({
+      // Get complete document info
+      const updatedDoc = await prisma.document.findUnique({
         where: {
-          id: document.id
-        },
-        data: {
-          signedFileUrl: signedUrl,
-          signedAt: new Date(),
-          signedBy: session.user.id
+          id: signedDocument.id
         },
         include: {
           signatures: {
@@ -260,14 +313,20 @@ export async function POST(request: Request) {
             orderBy: {
               order: 'asc'
             }
-          }
+          },
+          uploader: true,
+          signedByUser: true
         }
       });
+
+      if (!updatedDoc) {
+        throw new Error('Failed to retrieve updated document');
+      }
 
       return NextResponse.json({ 
         success: true, 
         document: updatedDoc,
-        signaturesCount: updatedDoc.signatures.length,
+        signaturesCount: 1,
         latestSignature: newSignature
       });
     } catch (error) {

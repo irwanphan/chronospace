@@ -1,62 +1,138 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
-import { del, list } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
+import { del, list } from '@vercel/blob';
+
+function normalizeUrl(url: string): string {
+  try {
+    // Decode URL completely (handle multiple encodings)
+    let decodedUrl = url;
+    while (decodedUrl !== decodeURIComponent(decodedUrl)) {
+      decodedUrl = decodeURIComponent(decodedUrl);
+    }
+    return decodedUrl;
+  } catch (e) {
+    return url;
+  }
+}
 
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // List semua file di blob storage
-    const { blobs } = await list();
+    const fileUrl = normalizeUrl(params.id);
+    console.log('Attempting to delete file:', fileUrl);
     
-    // Cari blob yang akan dihapus
-    const foundBlob = blobs.find(blob => blob.url === params.id);
-    if (!foundBlob) {
-      return NextResponse.json(
-        { error: 'Document not found in blob storage' }, 
-        { status: 404 }
-      );
-    }
-
-    // Hapus dari blob storage
-    await del(foundBlob.url);
-
-    // Cek dan hapus dari database jika ada
+    // First try to find document in database by URL
     const document = await prisma.document.findFirst({
-      where: { fileUrl: foundBlob.url }
+      where: {
+        OR: [
+          { fileUrl: fileUrl },
+          { signedFileUrl: fileUrl }
+        ]
+      },
+      include: {
+        signatures: true
+      }
     });
 
+    console.log('Found document in database:', document ? 'yes' : 'no');
+
+    // If document exists in database, delete it and its signatures
     if (document) {
-      // Jika ada signed version, hapus juga
-      if (document.signedFileUrl) {
-        await del(document.signedFileUrl);
-      }
-      
-      // Hapus dari database
-      await prisma.document.delete({
-        where: { id: document.id }
+      console.log('Deleting document from database, ID:', document.id);
+      await prisma.$transaction(async (tx) => {
+        // Delete all signatures first
+        if (document.signatures.length > 0) {
+          console.log('Deleting signatures:', document.signatures.length);
+          await tx.documentSignature.deleteMany({
+            where: {
+              documentId: document.id
+            }
+          });
+        }
+
+        // Then delete the document
+        await tx.document.delete({
+          where: {
+            id: document.id
+          }
+        });
       });
+      console.log('Document deleted from database');
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Document deleted successfully',
-      wasInDatabase: !!document
-    });
+    // Always try to delete the file from blob storage
+    try {
+      // List all files to find the exact blob
+      console.log('Listing blobs...');
+      const { blobs } = await list();
+      console.log('Total blobs found:', blobs.length);
+      
+      // Find blob by normalized URL
+      const foundBlob = blobs.find(blob => {
+        const normalizedBlobUrl = normalizeUrl(blob.url);
+        const urlsMatch = normalizedBlobUrl === fileUrl;
+        if (urlsMatch) {
+          console.log('Found matching blob:', blob.url);
+        }
+        return urlsMatch;
+      });
+      
+      if (foundBlob) {
+        console.log('Deleting blob:', foundBlob.url);
+        await del(foundBlob.url);
+        console.log('Blob deleted successfully');
+        
+        // If this was a signed file, try to delete the original too
+        if (document?.fileUrl && document.fileUrl !== fileUrl) {
+          console.log('Attempting to delete original file:', document.fileUrl);
+          try {
+            const originalBlob = blobs.find(blob => normalizeUrl(blob.url) === normalizeUrl(document.fileUrl));
+            if (originalBlob) {
+              await del(originalBlob.url);
+              console.log('Original file deleted successfully');
+            }
+          } catch (error) {
+            console.error('Error deleting original file:', error);
+          }
+        }
+        
+        // If this was an original file, try to delete the signed version too
+        if (document?.signedFileUrl && document.signedFileUrl !== fileUrl) {
+          console.log('Attempting to delete signed file:', document.signedFileUrl);
+          try {
+            const signedBlob = blobs.find(blob => normalizeUrl(blob.url) === normalizeUrl(document.signedFileUrl));
+            if (signedBlob) {
+              await del(signedBlob.url);
+              console.log('Signed file deleted successfully');
+            }
+          } catch (error) {
+            console.error('Error deleting signed file:', error);
+          }
+        }
+      } else {
+        console.log('No matching blob found for URL:', fileUrl);
+      }
+    } catch (error) {
+      console.error('Error deleting file from blob storage:', error);
+    }
 
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting document:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete document' },
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Failed to delete document',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }), 
       { status: 500 }
     );
   }

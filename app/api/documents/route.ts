@@ -26,9 +26,13 @@ export async function GET() {
       }
     });
 
+    console.log('dbDocuments :', dbDocuments);
+
     // 3. Map dokumen dari blob dengan data dari database
     const documents = blobs.map(blob => {
-      const dbDoc = dbDocuments.find(doc => doc.fileUrl === blob.url);
+      const dbDoc = dbDocuments.find(doc => 
+        doc.fileUrl === blob.url || doc.signedFileUrl === blob.url
+      );
       
       return {
         id: dbDoc?.id || blob.url,
@@ -50,6 +54,8 @@ export async function GET() {
         isOrphan: !dbDoc
       };
     });
+
+    console.log('documents :', documents);
 
     return NextResponse.json({ 
       documents,
