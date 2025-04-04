@@ -22,6 +22,17 @@ export async function GET() {
             code: true,
             title: true,
           }
+        },
+        signatures: {
+          select: {
+            id: true,
+            order: true,
+            user: {
+              select: {
+                name: true,
+              }
+            }
+          }
         }
       }
     });
@@ -51,7 +62,8 @@ export async function GET() {
           entityCode: dbDoc.project.code,
           entityTitle: dbDoc.project.title,
         }] : [],
-        isOrphan: !dbDoc
+        isOrphan: !dbDoc,
+        isSigned: dbDoc?.signedFileUrl ? true : false
       };
     });
 

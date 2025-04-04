@@ -37,6 +37,7 @@ interface Document {
     entityTitle: string;
   }[];
   isOrphan: boolean;
+  isSigned: boolean;
 }
 
 const entityRoutes = {
@@ -168,7 +169,9 @@ export default function DocumentPage() {
             <div className="text-sm text-gray-500 px-4 h-10 flex items-center justify-center border border-gray-300 rounded-md gap-2 hover:border-blue-600 hover:text-blue-600 transition-all duration-300">
               Total Files: {documents.length}
               <span className="text-gray-500"> | </span>
-              Unused Files: {documents.filter(d => d.isOrphan).length}
+              Signed Files: {documents.filter(d => d.isSigned).length}
+              <span className="text-gray-500"> | </span>
+              Orphan Files: {documents.filter(d => d.isOrphan).length}
             </div>
             {session?.user?.access.activityAccess.createDocument && (
               <button
