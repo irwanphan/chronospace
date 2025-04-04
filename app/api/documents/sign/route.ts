@@ -157,13 +157,22 @@ export async function POST(request: Request) {
         certificatePassword
       );
 
-      // Upload signed PDF
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 8);
+      // Get original filename without extension and clean it
+      let originalFileName = fileUrl.split('/').pop()?.split('.')[0] || 'document';
+      originalFileName = decodeURIComponent(originalFileName)
+        .replace(/%20/g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/%/g, '-');
+
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const randomId = Math.random().toString(36).substring(2, 6);
       
-      // Get original filename without extension
-      const originalFileName = fileUrl.split('/').pop()?.split('.')[0] || 'document';
-      const signedFileName = `signed_documents/${originalFileName}_SIGNED_${timestamp}_${randomId}.pdf`;
+      // Extract the base name without any existing 'signed_' prefix
+      const baseName = originalFileName.startsWith('signed_') 
+        ? originalFileName.substring(7) 
+        : originalFileName;
+        
+      const signedFileName = `signed_documents/${baseName}_signed_${timestamp}_${randomId}.pdf`;
 
       console.log('Uploading signed PDF...');
       const { url: signedUrl } = await put(signedFileName, signedPdfBytes, {

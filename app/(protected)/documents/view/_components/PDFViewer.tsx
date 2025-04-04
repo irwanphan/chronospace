@@ -15,7 +15,7 @@ import LoadingSpin from '@/components/ui/LoadingSpin';
 import { Save, Trash2 } from 'lucide-react';
 import { IconChevronLeft } from '@tabler/icons-react';
 import SignaturesList from '@/components/SignaturesList';
-import CertificateStatus from './CertificateStatus';
+import CertificateStatus from '../../../../../components/CertificateStatus';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs`;
 
@@ -52,6 +52,8 @@ export default function PDFViewer() {
         setIsLoading(true);
         const response = await fetch(`${fileUrl}?download=1`);
         if (!response.ok) throw new Error('Failed to fetch PDF');
+
+        console.log('response :', response);
         
         const blob = await response.blob();
         const dataUrl = URL.createObjectURL(blob);
