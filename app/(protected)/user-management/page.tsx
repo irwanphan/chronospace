@@ -20,7 +20,6 @@ export default function UserManagementPage() {
   const canCreateUser = session?.user?.access?.activityAccess?.createUser;
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
-  const canGenerateCertificate = session?.user?.access?.activityAccess?.generateCertificate;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -153,7 +152,6 @@ export default function UserManagementPage() {
                       canManageUserAccess={canManageUserAccess ?? false}
                       canDeleteUser={canDeleteUser ?? false}
                       canCreateUser={canCreateUser ?? false}
-                      canGenerateCertificate={canGenerateCertificate ?? false}
                       onDelete={async () => {
                         const usersRes = await fetch('/api/user-management');
                         const usersData = await usersRes.json();

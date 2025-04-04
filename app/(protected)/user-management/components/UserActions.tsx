@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import { MoreVertical, Edit, Trash, Eye, Key, Lock } from 'lucide-react';
-import { IconCertificate } from '@tabler/icons-react';
 
 interface UserActionsProps {
   userId: string;
@@ -12,7 +11,6 @@ interface UserActionsProps {
   canManageUserAccess: boolean;
   canDeleteUser: boolean;
   canCreateUser: boolean;
-  canGenerateCertificate: boolean;
   onDelete: () => void;
 }
 
@@ -22,7 +20,6 @@ export default function UserActions({
   canManageUserAccess,
   canDeleteUser,
   canCreateUser,
-  canGenerateCertificate,
   onDelete 
 }: UserActionsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -98,18 +95,6 @@ export default function UserActions({
               Access Control
             </button>
           )}
-          {canGenerateCertificate && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/user-management/${userId}/generate-certificate`);
-              }}
-              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
-            >
-              <IconCertificate className="w-4 h-4" />
-              Generate Certificate
-            </button>
-          )}
           {canDeleteUser && (
             <button
               onClick={(e) => {
@@ -122,7 +107,7 @@ export default function UserActions({
               Delete
             </button>
           )}
-          {!canCreateUser && !canEditUser && !canDeleteUser && !canManageUserAccess && !canGenerateCertificate && (
+          {!canCreateUser && !canEditUser && !canDeleteUser && !canManageUserAccess && (
             <div className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
               <Lock className="w-4 h-4" />
               No Access

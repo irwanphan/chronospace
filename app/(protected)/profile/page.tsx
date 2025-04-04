@@ -9,6 +9,7 @@ import { User } from '@/types/user';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import { IconCertificate } from '@tabler/icons-react';
 
 interface ActivityHistory {
   id: string;
@@ -29,14 +30,17 @@ export default function ProfilePage() {
   const [activityHistories, setActivityHistories] = useState<ActivityHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const canGenerateCertificate = session?.user?.access.activityAccess.generateCertificate;
+
   // Dummy data untuk activity
-  const activityData = {
-    totalContributions: 1274,
-    // Dummy data untuk activity heatmap
-    activityHeatmap: Array(52).fill(null).map(() => 
-      Math.floor(Math.random() * 5)
-    ),
-  };
+  // const activityData = {
+  //   totalContributions: 1274,
+  //   // Dummy data untuk activity heatmap
+  //   activityHeatmap: Array(52).fill(null).map(() => 
+  //     Math.floor(Math.random() * 5)
+  //   ),
+  // };
 
   const [userData, setUserData] = useState<User>({
     id: '',
@@ -140,13 +144,26 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
+            <div className="mt-8 flex flex-wrap gap-2">
+              <button 
+                className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
                 onClick={() => router.push(`/user-management/${session?.user.id}/edit?ref=profile`)}
               >
                 <Pencil className="w-4 h-4" />
                 Edit Profile
               </button>
+              {canGenerateCertificate && (
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/user-management/${session?.user.id}/generate-certificate`);
+                  }}
+                >
+                  <IconCertificate className="w-4 h-4" />
+                  Generate Certificate
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -160,7 +177,7 @@ export default function ProfilePage() {
               {/* Contribution Stats */}
               <div className="mb-6">
                 <p className="text-gray-600">
-                  <span className="font-semibold text-black">{activityData.totalContributions}</span> contributions in the last year
+                  {/* <span className="font-semibold text-black">{activityData.totalContributions}</span> contributions in the last year */}
                 </p>
               </div>
 
