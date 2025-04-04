@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     // Upload ke Vercel Blob
-    const { url } = await put(file.name, file, {
+    const { url } = await put(`documents/${file.name}`, file, {
       access: 'public',
       contentType: 'application/pdf'
     });
