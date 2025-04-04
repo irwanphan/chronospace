@@ -91,31 +91,21 @@ export async function DELETE(
         await del(foundBlob.url);
         console.log('Blob deleted successfully');
         
-        // If this was a signed file, try to delete the original too
-        if (document?.fileUrl && document.fileUrl !== fileUrl) {
-          console.log('Attempting to delete original file:', document.fileUrl);
-          try {
-            const originalBlob = blobs.find(blob => normalizeUrl(blob.url) === normalizeUrl(document.fileUrl));
-            if (originalBlob) {
-              await del(originalBlob.url);
-              console.log('Original file deleted successfully');
-            }
-          } catch (error) {
-            console.error('Error deleting original file:', error);
-          }
+        // Jika ini adalah file yang ditandatangani, JANGAN hapus file asli
+        if (document?.signedFileUrl === fileUrl) {
+          console.log('This is a signed document, original document will be preserved');
         }
-        
-        // If this was an original file, try to delete the signed version too
-        if (document?.signedFileUrl && document.signedFileUrl !== fileUrl) {
-          console.log('Attempting to delete signed file:', document.signedFileUrl);
+        // Jika ini adalah file asli dan memiliki versi yang ditandatangani, hapus versi yang ditandatangani
+        else if (document?.signedFileUrl && document.fileUrl === fileUrl) {
+          console.log('This is an original document with signed version, attempting to delete signed version:', document.signedFileUrl);
           try {
             const signedBlob = blobs.find(blob => normalizeUrl(blob.url) === normalizeUrl(document.signedFileUrl));
             if (signedBlob) {
               await del(signedBlob.url);
-              console.log('Signed file deleted successfully');
+              console.log('Signed version deleted successfully');
             }
           } catch (error) {
-            console.error('Error deleting signed file:', error);
+            console.error('Error deleting signed version:', error);
           }
         }
       } else {

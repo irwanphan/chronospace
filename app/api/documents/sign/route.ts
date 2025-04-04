@@ -183,7 +183,7 @@ export async function POST(request: Request) {
       
       // Get original filename without extension
       const originalFileName = fileUrl.split('/').pop()?.split('.')[0] || 'document';
-      const signedFileName = `signed_documents/${originalFileName}_signed_${timestamp}_${randomId}.pdf`;
+      const signedFileName = `signed_documents/${originalFileName}_SIGNED_${timestamp}_${randomId}.pdf`;
 
       console.log('Uploading signed PDF...');
       const { url: signedUrl } = await put(signedFileName, signedPdfBytes, {
