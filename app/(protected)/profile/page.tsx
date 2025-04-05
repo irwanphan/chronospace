@@ -200,6 +200,7 @@ export default function ProfilePage() {
                       {history.action === "DELETE" && "Deleted "}
                       {history.action === "CHANGE_PASSWORD" && "Changed Password "}
                       {history.action === "CHANGE_OWN_PASSWORD" && "Changed Own Password "}
+                      {history.action === "GENERATE_CERTIFICATE" && "Generated Certificate "}
                       <span> 
                         {history.entityType === "PROJECT" && 
                           <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/project-planning/${history.entityId}`}>

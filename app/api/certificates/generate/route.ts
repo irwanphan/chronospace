@@ -50,6 +50,25 @@ export async function POST(request: Request) {
       validityDays: 365
     });
 
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'USER',
+        entityId: userId,
+        entityCode: null,
+        action: 'GENERATE_CERTIFICATE',
+        details: {
+          targetUser: {
+            id: userId,
+            name: user.name,
+          },
+          timestamp: new Date().toISOString(),
+          type: 'admin_change',
+          ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+        }
+      }
+    });
+
     return NextResponse.json({
       success: true,
       certificate: {
