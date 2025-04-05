@@ -118,7 +118,7 @@ export default function UserActions({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/user-management/${userId}/change-other-user-password`);
+                router.push(`/user-management/${userId}/change-password`);
                 setShowDropdown(false);
               }}
               className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
