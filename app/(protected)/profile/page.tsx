@@ -196,6 +196,10 @@ export default function ProfilePage() {
                   {activityHistories.map((history) => (
                     <li key={history.id} className="border-b pb-2">
                       {history.action === "CREATE" && "Created "}
+                      {history.action === "UPDATE" && "Updated "}
+                      {history.action === "DELETE" && "Deleted "}
+                      {history.action === "CHANGE_PASSWORD" && "Changed Password "}
+                      {history.action === "CHANGE_OWN_PASSWORD" && "Changed Own Password "}
                       <span> 
                         {history.entityType === "PROJECT" && 
                           <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/project-planning/${history.entityId}`}>
@@ -215,6 +219,11 @@ export default function ProfilePage() {
                         {history.entityType === "APPROVAL_SCHEMA" && 
                           <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/workspace-management/approval-schemas/${history.entityId}`}>
                             <span className="font-semibold">Approval Schema {history.entityCode}</span>
+                          </Link>
+                        }
+                        {history.entityType === "USER" && 
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/user-management/${history.entityId}`}>
+                            <span className="font-semibold">User {history.entityCode}</span>
                           </Link>
                         }
                       </span>
