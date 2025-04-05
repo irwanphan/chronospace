@@ -42,6 +42,7 @@ export async function POST(
       select: {
         id: true,
         password: true,
+        name: true,
       },
     });
 
@@ -86,11 +87,21 @@ export async function POST(
         userId: session.user.id,
         entityType: 'USER',
         entityId: params.id,
+        entityCode: null,
         action: isSelfChange ? 'CHANGE_OWN_PASSWORD' : 'CHANGE_USER_PASSWORD',
         details: {
-          userId: params.id,
-          changedBy: session.user.id,
-          timestamp: new Date(),
+          targetUser: {
+            id: params.id,
+            name: user.name,
+          },
+          changedBy: {
+            id: session.user.id,
+            name: session.user.name,
+          },
+          timestamp: new Date().toISOString(),
+          type: isSelfChange ? 'self_change' : 'admin_change',
+          ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+          userAgent: request.headers.get('user-agent'),
         },
       },
     });
