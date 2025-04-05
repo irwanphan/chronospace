@@ -153,7 +153,7 @@ export default function ProfilePage() {
                   className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
                   onClick={(e) => {
                     e.stopPropagation();
-                    router.push(`/user-management/${session?.user.id}/change-password`);
+                    router.push(`/user-management/${session?.user.id}/change-password?referer=profile`);
                   }}
                 >
                   <Lock className="w-4 h-4" />

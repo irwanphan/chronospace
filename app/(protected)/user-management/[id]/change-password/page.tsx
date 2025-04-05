@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import Card from '@/components/ui/Card';
 import ChangePasswordForm from './_components/ChangePasswordForm';
-import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { IconChevronLeft } from '@tabler/icons-react';
+import Link from 'next/link';
+import { headers } from 'next/headers';
 
 interface PageProps {
   params: {
@@ -16,6 +17,8 @@ interface PageProps {
 
 export default async function ChangePasswordPage({ params }: PageProps) {
   const session = await getServerSession(authOptions);
+  const headersList = headers();
+  const referer = headersList.get('referer') || '/user-management';
   
   if (!session?.user) {
     redirect('/auth/login');
@@ -51,7 +54,7 @@ export default async function ChangePasswordPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-2">
-        <Link href="/user-management" className="px-1">
+        <Link href={referer} className="px-1">
           <Button variant="ghost" className="px-1">
             <IconChevronLeft className="w-4 h-4" stroke={4} />
           </Button>
