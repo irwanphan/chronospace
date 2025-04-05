@@ -1,7 +1,8 @@
 'use client';
+
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Mail, IdCard, MapPin, Phone, Pencil } from 'lucide-react';
+import { Mail, IdCard, MapPin, Phone, Pencil, Lock } from 'lucide-react';
 import { formatDate, getInitials, stripHtmlTags } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
@@ -32,15 +33,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   const canGenerateCertificate = session?.user?.access.activityAccess.generateCertificate;
-
-  // Dummy data untuk activity
-  // const activityData = {
-  //   totalContributions: 1274,
-  //   // Dummy data untuk activity heatmap
-  //   activityHeatmap: Array(52).fill(null).map(() => 
-  //     Math.floor(Math.random() * 5)
-  //   ),
-  // };
+  const canChangePassword = session?.user?.access.activityAccess.changePassword;
 
   const [userData, setUserData] = useState<User>({
     id: '',
@@ -155,6 +148,18 @@ export default function ProfilePage() {
                 <Pencil className="w-4 h-4" />
                 Edit Profile
               </button>
+              {canChangePassword && (
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/user-management/${session?.user.id}/change-password`);
+                  }}
+                >
+                  <Lock className="w-4 h-4" />
+                  Change Password
+                </button>
+              )}
               {canGenerateCertificate && (
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 transition-all duration-300"
