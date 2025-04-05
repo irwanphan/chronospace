@@ -11,6 +11,8 @@ interface UserActionsProps {
   canManageUserAccess: boolean;
   canDeleteUser: boolean;
   canCreateUser: boolean;
+  canChangePassword: boolean;
+  canChangeOtherUserPassword: boolean;
   onDelete: () => void;
 }
 
@@ -20,6 +22,8 @@ export default function UserActions({
   canManageUserAccess,
   canDeleteUser,
   canCreateUser,
+  canChangePassword,
+  canChangeOtherUserPassword,
   onDelete 
 }: UserActionsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -93,6 +97,32 @@ export default function UserActions({
             >
               <Key className="w-4 h-4" />
               Access Control
+            </button>
+          )}
+          {canChangePassword && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/user-management/${userId}/change-password`);
+                setShowDropdown(false);
+              }}
+              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4" />
+              Change Password
+            </button>
+          )}
+          {canChangeOtherUserPassword && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/user-management/${userId}/change-other-user-password`);
+                setShowDropdown(false);
+              }}
+              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4" />
+              Change Other User Password
             </button>
           )}
           {canDeleteUser && (

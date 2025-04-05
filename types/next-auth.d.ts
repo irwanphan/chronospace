@@ -41,6 +41,8 @@ declare module "next-auth" {
           createUser: boolean;
           editUser: boolean;
           deleteUser: boolean;
+          changePassword: boolean;
+          changeOtherUserPassword: boolean;
           manageUserAccess: boolean;
           createDocument: boolean;
           uploadDocument: boolean;
