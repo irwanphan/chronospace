@@ -7,6 +7,7 @@ import { MoreVertical, Edit, Trash, Eye, Key, Lock } from 'lucide-react';
 
 interface UserActionsProps {
   userId: string;
+  sessionUserId: string;
   canEditUser: boolean;
   canManageUserAccess: boolean;
   canDeleteUser: boolean;
@@ -18,6 +19,7 @@ interface UserActionsProps {
 
 export default function UserActions({ 
   userId, 
+  sessionUserId,
   canEditUser,
   canManageUserAccess,
   canDeleteUser,
@@ -99,7 +101,7 @@ export default function UserActions({
               Access Control
             </button>
           )}
-          {canChangePassword && (
+          {canChangePassword && sessionUserId === userId && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -108,11 +110,11 @@ export default function UserActions({
               }}
               className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
             >
-              <Lock className="w-4 h-4" />
+              <Lock className="w-4 h-4 flex-shrink-0" />
               Change Password
             </button>
           )}
-          {canChangeOtherUserPassword && (
+          {canChangeOtherUserPassword && sessionUserId !== userId && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -121,8 +123,8 @@ export default function UserActions({
               }}
               className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
             >
-              <Lock className="w-4 h-4" />
-              Change Other User Password
+              <Lock className="w-4 h-4 flex-shrink-0" />
+              Change This User&apos;s Password
             </button>
           )}
           {canDeleteUser && (

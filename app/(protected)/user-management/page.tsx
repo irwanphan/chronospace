@@ -153,6 +153,7 @@ export default function UserManagementPage() {
                   <td className="px-3 py-2 text-right">
                     <UserActions 
                       userId={user.id.toString()}
+                      sessionUserId={session?.user?.id ?? ''}
                       canEditUser={canEditUser ?? false}
                       canManageUserAccess={canManageUserAccess ?? false}
                       canDeleteUser={canDeleteUser ?? false}
