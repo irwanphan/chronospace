@@ -202,8 +202,8 @@ export default function PDFViewer() {
       
       // Generate QR code with better readability
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
-        width: 120,
-        margin: 2,
+        width: 100,
+        margin: 1,
         errorCorrectionLevel: 'H',
         color: {
           dark: '#000000',
@@ -281,16 +281,16 @@ export default function PDFViewer() {
         qrCodeImg.set({
           scaleX: 1,
           scaleY: 1,
-          left: scaledWidth + (padding * 2),
-          top: padding,
+          left: scaledWidth + (padding * 1.2),
+          top: padding + 10,
           originX: 'left',
           originY: 'top'
         });
 
         // Add border
         const border = new fabric.Rect({
-          width: scaledWidth + (qrCodeImg.width! * 0.8) + (padding * 3),
-          height: Math.max(scaledHeight, qrCodeImg.height! * 0.8) + (padding * 2) + 40,
+          width: scaledWidth + (qrCodeImg.width! * 0.8) + (padding * 3) + 10,
+          height: Math.max(scaledHeight, qrCodeImg.height! * 0.8) + (padding * 2) + 33,
           fill: 'transparent',
           stroke: '#cdcdde',
           strokeWidth: 1,
@@ -304,7 +304,7 @@ export default function PDFViewer() {
         const signatureDateText = new fabric.Text(`Digitally signed on ${formatDate(new Date())}`, {
           fontSize: 10,
           fontFamily: 'Montserrat',
-          top: scaledHeight + (padding * 2.2),
+          top: scaledHeight + (padding * 1.2),
           left: scaledWidth / 2,
           originX: 'center',
           originY: 'top'
@@ -314,7 +314,7 @@ export default function PDFViewer() {
         const signerNameText = new fabric.Text(session?.user?.name || 'Unknown', {
           fontSize: 16,
           fontFamily: 'Montserrat',
-          top: scaledHeight + (padding * 3.7),
+          top: scaledHeight + (padding * 2.4),
           left: scaledWidth / 2,
           originX: 'center',
           originY: 'top'

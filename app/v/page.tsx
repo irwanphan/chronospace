@@ -98,7 +98,7 @@ export default function VerifyPage() {
           {verificationInfo.isValid ? (
             <div className="flex items-center gap-3 text-green-500">
               <CheckCircle2 className="w-6 h-6" />
-              <h1 className="text-xl font-semibold">Valid Digital Signature</h1>
+              <h1 className="text-xl font-semibold">Valid Digitally Signed Document</h1>
             </div>
           ) : (
             <div className="flex items-center gap-3 text-red-500">
