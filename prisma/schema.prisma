@@ -430,17 +430,18 @@ model Document {
   projectId     String?
   project       Project?  @relation(fields: [projectId], references: [id])
   fileName      String
-  fileUrl       String
+  fileUrl       String    @db.Text
   fileType      String?
   uploadedAt    DateTime  @default(now())
   uploadedBy    String
   uploader      User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
   
   // Digital signature fields
-  signedFileUrl String?
+  signedFileUrl String?   @db.Text
   signedAt      DateTime?
   signedBy      String?
   signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
+  verificationCode String? @unique // Unique code for document verification
 
   // Multiple signatures
   signatures    DocumentSignature[]
@@ -458,7 +459,7 @@ model DocumentSignature {
   userId        String
   user          User      @relation(fields: [userId], references: [id])
   signedAt      DateTime
-  signedFileUrl String
+  signedFileUrl String    @db.Text
   order         Int       @default(0)
 
   @@map("document_signatures")

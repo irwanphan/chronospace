@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import { fabric } from 'fabric';
 import { Document, Page, pdfjs } from 'react-pdf';
 import type { PDFPageProxy } from 'pdfjs-dist';
+import QRCode from 'qrcode';
 
 import { formatDate } from '@/lib/utils';
 import Card from '@/components/ui/Card';
@@ -190,11 +191,37 @@ export default function PDFViewer() {
     setActiveSignature(null);
   }, [activeSignature]);
 
-  const addSignatureToPdf = () => {
-    if (!signatureRef.current || !canvasRef.current) return;
+  const generateQRCode = async () => {
+    try {
+      // Generate a unique verification code
+      const verificationCode = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+      
+      // Generate verification URL with verification code
+      const verificationUrl = `${window.location.origin}/v?code=${encodeURIComponent(verificationCode)}`;
+      console.log('Generated verification URL:', verificationUrl);
+      
+      // Generate QR code with better readability
+      const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
+        width: 100,
+        margin: 1,
+        errorCorrectionLevel: 'H',
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      });
+
+      return { qrCodeDataUrl, verificationCode };
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      return null;
+    }
+  };
+
+  const addSignatureToPdf = async () => {
+    if (!signatureRef.current || !canvasRef.current || !fileUrl) return;
 
     // Ensure white background before getting data URL
-    // signatureRef.current.backgroundColor = '#ffffff';
     signatureRef.current.renderAll();
 
     const signatureData = signatureRef.current.toDataURL({
@@ -203,83 +230,116 @@ export default function PDFViewer() {
       multiplier: 2
     });
 
-    fabric.Image.fromURL(signatureData, (img) => {
-      if (!canvasRef.current) return;
+    // Generate QR code with verification code
+    const qrCodeResult = await generateQRCode();
 
-      const maxWidth = canvasRef.current.width! * 0.3;
-      const maxHeight = canvasRef.current.height! * 0.2;
-      const scale = Math.min(
-        maxWidth / img.width!,
-        maxHeight / img.height!
-      );
+    if (!qrCodeResult) return;
+    const { qrCodeDataUrl, verificationCode } = qrCodeResult;
 
-      const scaledWidth = img.width! * scale;
-      const scaledHeight = img.height! * scale;
-      const padding = 12;
+    fabric.Image.fromURL(signatureData, async (signatureImg) => {
+      if (!canvasRef.current || !qrCodeDataUrl) return;
 
-      const signatureGroup = new fabric.Group([], {
-        left: canvasRef.current.width! * 0.1,
-        top: canvasRef.current.height! * 0.1,
-        originX: 'left',
-        originY: 'top'
-      });
+      // Store verification code in canvas element's data attribute
+      const pdfCanvas = document.getElementById('pdfCanvas');
+      if (pdfCanvas) {
+        pdfCanvas.dataset.verificationCode = verificationCode;
+      }
 
-      const border = new fabric.Rect({
-        width: scaledWidth + (padding * 2),
-        height: scaledHeight + (padding * 2) + 30,
-        fill: 'transparent',
-        stroke: '#cdcdde',
-        strokeWidth: 1,
-        rx: 16,
-        ry: 16,
-        left: 0,
-        top: 0
-      });
+      // Create QR code image
+      fabric.Image.fromURL(qrCodeDataUrl, (qrCodeImg) => {
+        if (!canvasRef.current) return;
 
-      img.set({
-        scaleX: scale,
-        scaleY: scale,
-        left: padding,
-        top: padding,
-        originX: 'left',
-        originY: 'top',
-      });
+        const maxWidth = canvasRef.current.width! * 0.3;
+        const maxHeight = canvasRef.current.height! * 0.2;
+        const scale = Math.min(
+          maxWidth / signatureImg.width!,
+          maxHeight / signatureImg.height!
+        );
 
-      const signerName = new fabric.Text(session?.user?.name || 'Unknown', {
-        fontSize: 16,
-        fontFamily: 'Montserrat',
-        top: scaledHeight + (padding * 2),
-        left: (scaledWidth + (padding * 2)) / 2,
-        originX: 'center',
-        originY: 'top'
-      });
+        const scaledWidth = signatureImg.width! * scale;
+        const scaledHeight = signatureImg.height! * scale;
+        const padding = 12;
 
-      const signerTextInfo = new fabric.Text(`Digitally signed on ${formatDate(new Date())} by`, {
-        fontSize: 8,
-        fontFamily: 'Montserrat',
-        top: scaledHeight + (padding * 1.2),
-        left: (scaledWidth + (padding * 2)) / 2,
-        originX: 'center',
-        originY: 'top'
-      });
+        const signatureGroup = new fabric.Group([], {
+          left: canvasRef.current.width! * 0.1,
+          top: canvasRef.current.height! * 0.1,
+          originX: 'left',
+          originY: 'top'
+        });
 
-      signatureGroup.addWithUpdate(border);
-      signatureGroup.addWithUpdate(img);
-      signatureGroup.addWithUpdate(signerName);
-      signatureGroup.addWithUpdate(signerTextInfo);
-      signatureGroup.on('selected', () => {
+        // Position signature image
+        signatureImg.set({
+          scaleX: scale,
+          scaleY: scale,
+          left: padding,
+          top: padding,
+          originX: 'left',
+          originY: 'top',
+        });
+
+        // Position QR code with better spacing
+        qrCodeImg.set({
+          scaleX: 1,
+          scaleY: 1,
+          left: scaledWidth + (padding * 1.2),
+          top: padding + 10,
+          originX: 'left',
+          originY: 'top'
+        });
+
+        // Add border
+        const border = new fabric.Rect({
+          width: scaledWidth + (qrCodeImg.width! * 0.8) + (padding * 3) + 10,
+          height: Math.max(scaledHeight, qrCodeImg.height! * 0.8) + (padding * 2) + 33,
+          fill: 'transparent',
+          stroke: '#cdcdde',
+          strokeWidth: 1,
+          rx: 12,
+          ry: 12,
+          left: 0,
+          top: 0
+        });
+
+        // Add signature date text
+        const signatureDateText = new fabric.Text(`Digitally signed on ${formatDate(new Date())}`, {
+          fontSize: 10,
+          fontFamily: 'Montserrat',
+          top: scaledHeight + (padding * 1.2),
+          left: scaledWidth / 2,
+          originX: 'center',
+          originY: 'top'
+        });
+
+        // Add signer name centered under signature
+        const signerNameText = new fabric.Text(session?.user?.name || 'Unknown', {
+          fontSize: 16,
+          fontFamily: 'Montserrat',
+          top: scaledHeight + (padding * 2.4),
+          left: scaledWidth / 2,
+          originX: 'center',
+          originY: 'top'
+        });
+
+        signatureGroup.addWithUpdate(border);
+        signatureGroup.addWithUpdate(signatureImg);
+        signatureGroup.addWithUpdate(qrCodeImg);
+        signatureGroup.addWithUpdate(signatureDateText);
+        signatureGroup.addWithUpdate(signerNameText);
+
+        signatureGroup.on('selected', () => {
+          setActiveSignature(signatureGroup);
+        });
+
+        signatureGroup.on('deselected', () => {
+          setActiveSignature(null);
+        });
+
+        canvasRef.current.add(signatureGroup);
+        canvasRef.current.setActiveObject(signatureGroup);
         setActiveSignature(signatureGroup);
+        canvasRef.current.renderAll();
+        clearSignature();
       });
-
-      signatureGroup.on('deselected', () => {
-        setActiveSignature(null);
-      });
-
-      canvasRef.current.add(signatureGroup);
-      canvasRef.current.setActiveObject(signatureGroup);
-      setActiveSignature(signatureGroup);
-      canvasRef.current.renderAll();
-      clearSignature();
     });
   };
 
@@ -292,6 +352,13 @@ export default function PDFViewer() {
       const objects = canvasRef.current.getObjects();
       if (objects.length === 0) {
         throw new Error('No signatures found');
+      }
+
+      // Get verification code from canvas element's data attribute
+      const pdfCanvas = document.getElementById('pdfCanvas');
+      const verificationCode = pdfCanvas?.dataset.verificationCode;
+      if (!verificationCode) {
+        throw new Error('Missing verification code');
       }
 
       const signatures = objects.map(obj => ({
@@ -316,7 +383,8 @@ export default function PDFViewer() {
         },
         body: JSON.stringify({
           fileUrl,
-          signatures
+          signatures,
+          verificationCode
         }),
       });
 

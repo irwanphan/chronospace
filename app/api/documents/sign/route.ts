@@ -80,9 +80,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { fileUrl, signatures } = await request.json();
+    const { fileUrl, signatures, verificationCode } = await request.json();
     
-    if (!fileUrl || !signatures?.length) {
+    if (!fileUrl || !signatures?.length || !verificationCode) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
 
@@ -230,6 +230,7 @@ export async function POST(request: Request) {
           signedFileUrl: signedUrl,
           uploadedAt: new Date(),
           signedAt: new Date(),
+          verificationCode: verificationCode, // Add verification code
           signedByUser: {
             connect: {
               id: session.user.id
