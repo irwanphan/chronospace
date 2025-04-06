@@ -7,19 +7,25 @@ import { MoreVertical, Edit, Trash, Eye, Key, Lock } from 'lucide-react';
 
 interface UserActionsProps {
   userId: string;
+  sessionUserId: string;
   canEditUser: boolean;
   canManageUserAccess: boolean;
   canDeleteUser: boolean;
   canCreateUser: boolean;
+  canChangePassword: boolean;
+  canChangeOtherUserPassword: boolean;
   onDelete: () => void;
 }
 
 export default function UserActions({ 
   userId, 
+  sessionUserId,
   canEditUser,
   canManageUserAccess,
   canDeleteUser,
   canCreateUser,
+  canChangePassword,
+  canChangeOtherUserPassword,
   onDelete 
 }: UserActionsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -93,6 +99,32 @@ export default function UserActions({
             >
               <Key className="w-4 h-4" />
               Access Control
+            </button>
+          )}
+          {canChangePassword && sessionUserId === userId && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/user-management/${userId}/change-password`);
+                setShowDropdown(false);
+              }}
+              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4 flex-shrink-0" />
+              Change Password
+            </button>
+          )}
+          {canChangeOtherUserPassword && sessionUserId !== userId && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/user-management/${userId}/change-password`);
+                setShowDropdown(false);
+              }}
+              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4 flex-shrink-0" />
+              Change This User&apos;s Password
             </button>
           )}
           {canDeleteUser && (

@@ -21,12 +21,17 @@ export default function UserManagementPage() {
   const canEditUser = session?.user?.access?.activityAccess?.editUser;
   const canDeleteUser = session?.user?.access?.activityAccess?.deleteUser;
   const canManageUserAccess = session?.user?.access?.activityAccess?.manageUserAccess;
+  const canChangePassword = session?.user?.access?.activityAccess?.changePassword;
+  const canChangeOtherUserPassword = session?.user?.access?.activityAccess?.changeOtherUserPassword;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentUsers = users.slice(startIndex, endIndex);
+
+  console.log('can change password', canChangePassword);
+  console.log('can change other user password', canChangeOtherUserPassword);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -148,10 +153,13 @@ export default function UserManagementPage() {
                   <td className="px-3 py-2 text-right">
                     <UserActions 
                       userId={user.id.toString()}
+                      sessionUserId={session?.user?.id ?? ''}
                       canEditUser={canEditUser ?? false}
                       canManageUserAccess={canManageUserAccess ?? false}
                       canDeleteUser={canDeleteUser ?? false}
                       canCreateUser={canCreateUser ?? false}
+                      canChangePassword={canChangePassword ?? false}
+                      canChangeOtherUserPassword={canChangeOtherUserPassword ?? false}
                       onDelete={async () => {
                         const usersRes = await fetch('/api/user-management');
                         const usersData = await usersRes.json();

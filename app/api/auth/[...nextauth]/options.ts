@@ -44,6 +44,8 @@ interface ActivityAccess {
   createUser: boolean;
   editUser: boolean;
   deleteUser: boolean;
+  changePassword: boolean;
+  changeOtherUserPassword: boolean;
   manageUserAccess: boolean;
   createDocument: boolean;
   uploadDocument: boolean;
@@ -199,6 +201,8 @@ export const authOptions: AuthOptions = {
             createUser: false,
             editUser: false,
             deleteUser: false,
+            changePassword: false,
+            changeOtherUserPassword: false,
             manageUserAccess: false,
             createDocument: false,
             uploadDocument: false,
