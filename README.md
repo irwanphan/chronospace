@@ -86,6 +86,23 @@ ChronoSpace is a comprehensive system for managing budgets, projects, and purcha
   - UI/UX enhancements
   - Data fetching optimizations
 
+### Document Verification & Stability (2024-04-06)
+- Document Verification:
+  - QR code generation for signed documents
+  - Unique verification code system
+  - Document verification page
+  - Signature validation system
+- PDF Viewer Enhancements:
+  - Improved signature pad initialization
+  - Reduced flickering during reloads
+  - Better error handling for PDF loading
+  - Automatic retry mechanism
+- Digital Signature Updates:
+  - Enhanced signature positioning
+  - Improved QR code readability
+  - Better signature validation
+  - Cleaner verification URLs
+
 ## Technical Stack
 
 - **Framework:** Next.js 14 (App Router)
