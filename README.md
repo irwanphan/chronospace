@@ -3,40 +3,148 @@
 Streamline Projects, Budgets & Approvals in One Place.
 ChronoSpace is a comprehensive system for managing budgets, projects, and purchase requests built with Next.js 14, Prisma, and Tailwind CSS.
 
-## Features
+## Updates & Features
 
-- **User Management**
-  - Role-based access control
-  - User authentication with NextAuth
-  - Profile management
+### Initial Release (2024-01-24)
+- Core System Setup:
+  - Next.js 14 project initialization with TypeScript
+  - Authentication system with NextAuth.js
+  - Basic layout components (Header, Sidebar)
+  - Register and login pages
+  - Protected routes implementation
 
-- **Project Planning**
-  - Create and manage projects
-  - Track project status and deadlines
-  - Division-based project organization
-  - Project timeline visualization
-
-- **Budget Management**
-  - Budget planning and allocation
-  - Detailed budget items tracking
-  - Budget approval workflow
-  - Financial reporting
-
-- **Purchase Request**
-  - Create purchase requests from budgets
-  - Multi-item purchase requests
+### Authentication & User Management (2024-02-09)
+- Enhanced Authentication:
+  - Session management
+  - Role-based access control (RBAC)
+  - Protected route middleware
+  - User profile and avatar system
+- Workspace Management:
+  - Basic workspace layout
   - Vendor management
-  - Request status tracking
+  - Division management
+  - Role management
+- UI Improvements:
+  - Collapsible sidebar
+  - Responsive header
+  - Montserrat font integration
+  - Theme color system
 
-## Tech Stack
+### Project & Budget Planning (2024-03-01)
+- User Access Control:
+  - UAC page implementation
+  - Access control management
+  - Activity logging
+  - User session enhancements
+- Project Management:
+  - Project CRUD operations
+  - Work division integration
+  - Project status tracking
+  - Budget allocation system
+- Budget Planning:
+  - Budget creation and management
+  - Vendor integration
+  - Item management
+  - Budget status tracking
+- Purchase Request System:
+  - Basic PR creation
+  - Multi-step approval workflow
+  - Request tracking
+  - Budget integration
+
+### Workflow & Approval System (2024-03-15)
+- Enhanced Purchase Request:
+  - Approval workflow implementation
+  - Request history tracking
+  - Status indicators
+  - Decline functionality
+- Approval Schema:
+  - Multi-level approval system
+  - Role-based approvers
+  - Dynamic step configuration
+  - Budget limit validation
+- Data Validation:
+  - Type safety improvements
+  - Error handling enhancements
+  - Transaction client usage
+  - API route consistency
+
+### Document Management & Security (2024-04-05)
+- Document System:
+  - Document upload functionality
+  - PDF viewer implementation
+  - Digital signature integration
+  - Document version control
+- Security Enhancements:
+  - Digital certificate management
+  - Password change functionality
+  - Activity history logging
+  - Access control refinements
+- Performance Improvements:
+  - Loading state optimizations
+  - Error handling refinements
+  - UI/UX enhancements
+  - Data fetching optimizations
+
+## Technical Stack
 
 - **Framework:** Next.js 14 (App Router)
-- **Database:** PostgreSQL
+- **Database:** MySQL
 - **ORM:** Prisma
 - **Authentication:** NextAuth.js
 - **Styling:** Tailwind CSS
-- **UI Components:** shadcn/ui
-- **Icons:** Lucide Icons
+- **State Management:** React Hooks
+- **Form Handling:** React Hook Form
+- **Validation:** Zod
+- **Icons:** Lucide Icons, Tabler Icons
+
+## Features Overview
+
+### User Management & Access Control
+- Complete user lifecycle management
+- Role-based access control
+- Digital certificate management
+- Password management
+- Activity history/audit log
+
+### Project Planning
+- Project creation and management
+- Work division/breakdown
+- Timeline management
+- Status tracking
+
+### Budget Management
+- Budget planning and tracking
+- Budget items management
+- Approval system
+- Vendor management
+
+### Purchase Request System
+- PR creation and workflow
+- Multi-step approval process
+- Item management
+- Status tracking
+
+### Document Management
+- Document upload and storage
+- Digital signatures
+- Version control
+- Access control
+
+### Security
+- NextAuth authentication
+- Role-based authorization
+- Digital certificates
+- Activity logging
+- Audit trail
+
+### Technical Features
+- Server & client components
+- Type-safe development
+- Database transactions
+- Blob storage
+- Form validation
+- Responsive design
 
 ## Getting Started
 
