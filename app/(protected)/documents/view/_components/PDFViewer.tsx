@@ -192,18 +192,17 @@ export default function PDFViewer() {
   }, [activeSignature]);
 
   const generateQRCode = async (signatureData: {
-    signer: string;
-    timestamp: string;
     documentId: string;
   }) => {
     try {
-      // Generate verification URL with signature data
-      const verificationUrl = `${window.location.origin}/verify?doc=${signatureData.documentId}&signer=${encodeURIComponent(signatureData.signer)}&time=${signatureData.timestamp}`;
+      // Generate direct verification URL
+      const verificationUrl = `${window.location.origin}/verify/${signatureData.documentId}`;
       
-      // Generate QR code as data URL
+      // Generate simple QR code with verification URL
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
-        width: 100,
+        width: 120,
         margin: 1,
+        errorCorrectionLevel: 'L',
         color: {
           dark: '#000000',
           light: '#ffffff'
@@ -229,15 +228,11 @@ export default function PDFViewer() {
       multiplier: 2
     });
 
-    // Generate signature metadata
-    const timestamp = new Date().toISOString();
+    // Get document ID from URL
     const documentId = fileUrl?.split('/').pop()?.split('.')[0] || 'unknown';
-    const signerName = session?.user?.name || 'Unknown';
 
-    // Generate QR code
+    // Generate QR code with just document ID
     const qrCodeDataUrl = await generateQRCode({
-      signer: signerName,
-      timestamp,
       documentId
     });
 
@@ -257,26 +252,13 @@ export default function PDFViewer() {
 
         const scaledWidth = signatureImg.width! * scale;
         const scaledHeight = signatureImg.height! * scale;
-        const padding = 12;
+        const padding = 8;
 
         const signatureGroup = new fabric.Group([], {
           left: canvasRef.current.width! * 0.1,
           top: canvasRef.current.height! * 0.1,
           originX: 'left',
           originY: 'top'
-        });
-
-        // Add border
-        const border = new fabric.Rect({
-          width: scaledWidth + qrCodeImg.width! + (padding * 3),
-          height: Math.max(scaledHeight, qrCodeImg.height!) + (padding * 2) + 30,
-          fill: 'transparent',
-          stroke: '#cdcdde',
-          strokeWidth: 1,
-          rx: 16,
-          ry: 16,
-          left: 0,
-          top: 0
         });
 
         // Position signature image
@@ -291,51 +273,52 @@ export default function PDFViewer() {
 
         // Position QR code
         qrCodeImg.set({
-          scaleX: 0.5,
-          scaleY: 0.5,
-          left: scaledWidth + (padding * 2),
-          top: padding,
+          scaleX: 0.8,
+          scaleY: 0.8,
+          left: scaledWidth + (padding * 1.5),
+          top: padding + 17,
           originX: 'left',
           originY: 'top'
         });
 
-        // Add signer name
-        const signerName = new fabric.Text(session?.user?.name || 'Unknown', {
-          fontSize: 16,
+        // Add border
+        const border = new fabric.Rect({
+          width: scaledWidth + (qrCodeImg.width! * 0.8) + (padding * 3),
+          height: Math.max(scaledHeight, qrCodeImg.height! * 0.8) + (padding * 2) + 40,
+          fill: 'transparent',
+          stroke: '#cdcdde',
+          strokeWidth: 1,
+          rx: 12,
+          ry: 12,
+          left: 0,
+          top: 0
+        });
+
+        // Add signature date text
+        const signatureDateText = new fabric.Text(`Digitally signed on ${formatDate(new Date())}`, {
+          fontSize: 10,
           fontFamily: 'Montserrat',
-          top: Math.max(scaledHeight, qrCodeImg.height! * 0.5) + (padding * 2),
-          left: (scaledWidth + qrCodeImg.width! * 0.5 + (padding * 3)) / 2,
+          top: scaledHeight + (padding * 2.2),
+          left: scaledWidth / 2,
           originX: 'center',
           originY: 'top'
         });
 
-        // Add signature info
-        const signerTextInfo = new fabric.Text(`Digitally signed on ${formatDate(new Date())} by`, {
-          fontSize: 8,
+        // Add signer name centered under signature
+        const signerNameText = new fabric.Text(session?.user?.name || 'Unknown', {
+          fontSize: 14,
           fontFamily: 'Montserrat',
-          top: Math.max(scaledHeight, qrCodeImg.height! * 0.5) + (padding * 1.2),
-          left: (scaledWidth + qrCodeImg.width! * 0.5 + (padding * 3)) / 2,
+          top: scaledHeight + (padding * 3.3),
+          left: scaledWidth / 2,
           originX: 'center',
           originY: 'top'
-        });
-
-        // Add verification text
-        const verificationText = new fabric.Text('Scan to verify', {
-          fontSize: 8,
-          fontFamily: 'Montserrat',
-          top: padding + qrCodeImg.height! * 0.5 + 5,
-          left: scaledWidth + (padding * 2) + qrCodeImg.width! * 0.25,
-          originX: 'center',
-          originY: 'top',
-          fill: '#666'
         });
 
         signatureGroup.addWithUpdate(border);
         signatureGroup.addWithUpdate(signatureImg);
         signatureGroup.addWithUpdate(qrCodeImg);
-        signatureGroup.addWithUpdate(signerName);
-        signatureGroup.addWithUpdate(signerTextInfo);
-        signatureGroup.addWithUpdate(verificationText);
+        signatureGroup.addWithUpdate(signatureDateText);
+        signatureGroup.addWithUpdate(signerNameText);
 
         signatureGroup.on('selected', () => {
           setActiveSignature(signatureGroup);

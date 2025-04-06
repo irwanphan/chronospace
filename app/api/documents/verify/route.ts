@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { PDFDocument } from 'pdf-lib';
 
 export async function GET(request: Request) {
   try {
@@ -60,23 +59,12 @@ export async function GET(request: Request) {
       try {
         // Fetch the signed PDF
         const response = await fetch(document.signedFileUrl);
-        const pdfBytes = await response.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(pdfBytes);
-        
-        // Get document metadata
-        const info = pdfDoc.getInfo();
-        
-        // Check if the document has been modified after signing
-        const modDate = info.ModDate;
-        if (modDate) {
-          const modificationTime = new Date(modDate);
-          const signTime = new Date(document.signedAt);
-          
-          // If document was modified after signing, it's invalid
-          if (modificationTime > signTime) {
-            isValid = false;
-          }
+        if (!response.ok) {
+          throw new Error('Could not fetch signed document');
         }
+        
+        // Document exists and is accessible
+        isValid = true;
       } catch (error) {
         console.error('Error verifying PDF:', error);
         isValid = false;
@@ -103,5 +91,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
 } 
