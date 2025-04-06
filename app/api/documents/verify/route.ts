@@ -4,24 +4,23 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const docId = searchParams.get('doc');
-    const signer = searchParams.get('signer');
-    const time = searchParams.get('time');
+    const code = searchParams.get('code');
 
-    if (!docId || !signer || !time) {
+    if (!code) {
       return NextResponse.json(
-        { error: 'Missing required parameters' },
+        { error: 'Missing verification code' },
         { status: 400 }
       );
     }
 
+    // Clean the verification code
+    const cleanCode = decodeURIComponent(code.trim());
+    console.log('Searching for document with verification code:', cleanCode);
+
     // Find the document and its signatures
     const document = await prisma.document.findFirst({
       where: {
-        OR: [
-          { fileUrl: { contains: docId } },
-          { signedFileUrl: { contains: docId } }
-        ]
+        verificationCode: cleanCode
       },
       include: {
         signatures: {
@@ -36,6 +35,11 @@ export async function GET(request: Request) {
             signedAt: 'asc'
           }
         },
+        uploader: {
+          include: {
+            role: true
+          }
+        },
         signedByUser: {
           include: {
             role: true
@@ -44,6 +48,8 @@ export async function GET(request: Request) {
       }
     });
 
+    console.log('Document found:', document ? 'yes' : 'no');
+
     if (!document) {
       return NextResponse.json(
         { error: 'Document not found' },
@@ -51,36 +57,28 @@ export async function GET(request: Request) {
       );
     }
 
-    // Verify document integrity
-    let isValid = true;
-    
-    // If document has been signed
-    if (document.signedFileUrl && document.signedAt) {
-      try {
-        // Fetch the signed PDF
-        const response = await fetch(document.signedFileUrl);
-        if (!response.ok) {
-          throw new Error('Could not fetch signed document');
-        }
-        
-        // Document exists and is accessible
-        isValid = true;
-      } catch (error) {
-        console.error('Error verifying PDF:', error);
-        isValid = false;
-      }
-    }
+    // Document is valid if it has been signed
+    const isValid = !!document.signedFileUrl && !!document.signedAt;
+    console.log('Document is valid:', isValid);
 
     return NextResponse.json({
       isValid,
       document: {
         fileName: document.fileName,
+        signedFileUrl: document.signedFileUrl,
         signedAt: document.signedAt,
         signedBy: document.signedByUser ? {
           name: document.signedByUser.name,
           role: document.signedByUser.role.roleName
         } : null,
-        signatures: document.signatures
+        signatures: document.signatures.map(sig => ({
+          id: sig.id,
+          signedAt: sig.signedAt,
+          user: {
+            name: sig.user.name,
+            role: sig.user.role.roleName
+          }
+        }))
       }
     });
 

@@ -191,25 +191,27 @@ export default function PDFViewer() {
     setActiveSignature(null);
   }, [activeSignature]);
 
-  const generateQRCode = async (signatureData: {
-    documentId: string;
-  }) => {
+  const generateQRCode = async () => {
     try {
-      // Generate direct verification URL
-      const verificationUrl = `${window.location.origin}/verify/${signatureData.documentId}`;
+      // Generate a unique verification code
+      const verificationCode = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
       
-      // Generate simple QR code with verification URL
+      // Generate verification URL with verification code
+      const verificationUrl = `${window.location.origin}/v?code=${encodeURIComponent(verificationCode)}`;
+      console.log('Generated verification URL:', verificationUrl);
+      
+      // Generate QR code with better readability
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
         width: 120,
-        margin: 1,
-        errorCorrectionLevel: 'L',
+        margin: 2,
+        errorCorrectionLevel: 'H',
         color: {
           dark: '#000000',
           light: '#ffffff'
         }
       });
 
-      return qrCodeDataUrl;
+      return { qrCodeDataUrl, verificationCode };
     } catch (error) {
       console.error('Error generating QR code:', error);
       return null;
@@ -217,7 +219,7 @@ export default function PDFViewer() {
   };
 
   const addSignatureToPdf = async () => {
-    if (!signatureRef.current || !canvasRef.current) return;
+    if (!signatureRef.current || !canvasRef.current || !fileUrl) return;
 
     // Ensure white background before getting data URL
     signatureRef.current.renderAll();
@@ -228,16 +230,20 @@ export default function PDFViewer() {
       multiplier: 2
     });
 
-    // Get document ID from URL
-    const documentId = fileUrl?.split('/').pop()?.split('.')[0] || 'unknown';
+    // Generate QR code with verification code
+    const qrCodeResult = await generateQRCode();
 
-    // Generate QR code with just document ID
-    const qrCodeDataUrl = await generateQRCode({
-      documentId
-    });
+    if (!qrCodeResult) return;
+    const { qrCodeDataUrl, verificationCode } = qrCodeResult;
 
     fabric.Image.fromURL(signatureData, async (signatureImg) => {
       if (!canvasRef.current || !qrCodeDataUrl) return;
+
+      // Store verification code in canvas element's data attribute
+      const pdfCanvas = document.getElementById('pdfCanvas');
+      if (pdfCanvas) {
+        pdfCanvas.dataset.verificationCode = verificationCode;
+      }
 
       // Create QR code image
       fabric.Image.fromURL(qrCodeDataUrl, (qrCodeImg) => {
@@ -252,7 +258,7 @@ export default function PDFViewer() {
 
         const scaledWidth = signatureImg.width! * scale;
         const scaledHeight = signatureImg.height! * scale;
-        const padding = 8;
+        const padding = 12;
 
         const signatureGroup = new fabric.Group([], {
           left: canvasRef.current.width! * 0.1,
@@ -271,12 +277,12 @@ export default function PDFViewer() {
           originY: 'top',
         });
 
-        // Position QR code
+        // Position QR code with better spacing
         qrCodeImg.set({
-          scaleX: 0.8,
-          scaleY: 0.8,
-          left: scaledWidth + (padding * 1.5),
-          top: padding + 17,
+          scaleX: 1,
+          scaleY: 1,
+          left: scaledWidth + (padding * 2),
+          top: padding,
           originX: 'left',
           originY: 'top'
         });
@@ -348,6 +354,13 @@ export default function PDFViewer() {
         throw new Error('No signatures found');
       }
 
+      // Get verification code from canvas element's data attribute
+      const pdfCanvas = document.getElementById('pdfCanvas');
+      const verificationCode = pdfCanvas?.dataset.verificationCode;
+      if (!verificationCode) {
+        throw new Error('Missing verification code');
+      }
+
       const signatures = objects.map(obj => ({
         dataUrl: obj.toDataURL({
           format: 'png',
@@ -370,7 +383,8 @@ export default function PDFViewer() {
         },
         body: JSON.stringify({
           fileUrl,
-          signatures
+          signatures,
+          verificationCode
         }),
       });
 

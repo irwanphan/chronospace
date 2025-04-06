@@ -441,6 +441,7 @@ model Document {
   signedAt      DateTime?
   signedBy      String?
   signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
+  verificationCode String? @unique // Unique code for document verification
 
   // Multiple signatures
   signatures    DocumentSignature[]

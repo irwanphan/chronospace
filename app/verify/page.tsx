@@ -6,11 +6,12 @@ import { formatDate } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import { FileSignature, CheckCircle2, XCircle } from 'lucide-react';
-
+import Link from 'next/link';
 interface VerificationInfo {
   isValid: boolean;
   document: {
     fileName: string;
+    signedFileUrl: string;
     signedAt: string;
     signedBy: {
       name: string;
@@ -35,18 +36,19 @@ export default function VerifyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('searchParams : ', searchParams);
+  console.log('searchParams.get(code) : ', searchParams.get('code'));
+  console.log('verificationInfo : ', verificationInfo);
+
   useEffect(() => {
     const verifyDocument = async () => {
       try {
-        const docId = searchParams.get('doc');
-        const signer = searchParams.get('signer');
-        const time = searchParams.get('time');
-
-        if (!docId || !signer || !time) {
-          throw new Error('Missing verification parameters');
+        const code = searchParams.get('code');
+        if (!code) {
+          throw new Error('Missing verification code');
         }
 
-        const response = await fetch(`/api/documents/verify?doc=${docId}&signer=${signer}&time=${time}`);
+        const response = await fetch(`/api/documents/verify?code=${code}`);
         if (!response.ok) {
           throw new Error('Failed to verify document');
         }
@@ -109,7 +111,14 @@ export default function VerifyPage() {
         <div className="space-y-4">
           <div>
             <h2 className="text-sm font-medium text-gray-500">Document</h2>
-            <p className="text-lg">{verificationInfo.document.fileName}</p>
+            <Link href={verificationInfo.document.signedFileUrl} 
+              target="_blank" 
+              className="text-lg border border-gray-200 block p-2 rounded-md mt-2 hover:bg-gray-50 hover:border-blue-600 transition-all duration-300"
+              onClick={() => {
+                window.open(verificationInfo.document.signedFileUrl, '_blank');
+              }}
+            >
+              {verificationInfo.document.fileName}</Link>
           </div>
 
           <div>
