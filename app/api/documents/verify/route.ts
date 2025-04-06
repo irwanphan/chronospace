@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
+    const code = request.nextUrl.searchParams.get('code');
 
     if (!code) {
       return NextResponse.json(
@@ -76,7 +77,9 @@ export async function GET(request: Request) {
           signedAt: sig.signedAt,
           user: {
             name: sig.user.name,
-            role: sig.user.role.roleName
+            role: {
+              roleName: sig.user.role.roleName
+            }
           }
         }))
       }
