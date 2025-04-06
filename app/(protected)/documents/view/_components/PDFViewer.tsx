@@ -306,9 +306,9 @@ export default function PDFViewer() {
 
         // Add signer name centered under signature
         const signerNameText = new fabric.Text(session?.user?.name || 'Unknown', {
-          fontSize: 14,
+          fontSize: 16,
           fontFamily: 'Montserrat',
-          top: scaledHeight + (padding * 3.3),
+          top: scaledHeight + (padding * 3.7),
           left: scaledWidth / 2,
           originX: 'center',
           originY: 'top'
