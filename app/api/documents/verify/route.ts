@@ -1,72 +1,107 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import { prisma } from '@/lib/prisma';
+import { PDFDocument } from 'pdf-lib';
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
-    const fileUrl = searchParams.get('url');
-    if (!fileUrl) {
-      return new NextResponse('Missing file URL', { status: 400 });
+    const docId = searchParams.get('doc');
+    const signer = searchParams.get('signer');
+    const time = searchParams.get('time');
+
+    if (!docId || !signer || !time) {
+      return NextResponse.json(
+        { error: 'Missing required parameters' },
+        { status: 400 }
+      );
     }
 
-    // Get document info from database
+    // Find the document and its signatures
     const document = await prisma.document.findFirst({
       where: {
-        signedFileUrl: fileUrl
+        OR: [
+          { fileUrl: { contains: docId } },
+          { signedFileUrl: { contains: docId } }
+        ]
       },
       include: {
-        signedByUser: true
+        signatures: {
+          include: {
+            user: {
+              include: {
+                role: true
+              }
+            }
+          },
+          orderBy: {
+            signedAt: 'asc'
+          }
+        },
+        signedByUser: {
+          include: {
+            role: true
+          }
+        }
       }
     });
 
     if (!document) {
-      return NextResponse.json({
-        isDigitallySigned: false
-      });
+      return NextResponse.json(
+        { error: 'Document not found' },
+        { status: 404 }
+      );
     }
 
-    // If document is signed, get the certificate used
-    if (document.signedAt && document.signedByUser?.id) {
-      const certificate = await prisma.userCertificate.findFirst({
-        where: {
-          userId: document.signedByUser.id,
-          isActive: true,
-          revokedAt: null,
-          expiresAt: {
-            gt: new Date()
+    // Verify document integrity
+    let isValid = true;
+    
+    // If document has been signed
+    if (document.signedFileUrl && document.signedAt) {
+      try {
+        // Fetch the signed PDF
+        const response = await fetch(document.signedFileUrl);
+        const pdfBytes = await response.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(pdfBytes);
+        
+        // Get document metadata
+        const info = pdfDoc.getInfo();
+        
+        // Check if the document has been modified after signing
+        const modDate = info.ModDate;
+        if (modDate) {
+          const modificationTime = new Date(modDate);
+          const signTime = new Date(document.signedAt);
+          
+          // If document was modified after signing, it's invalid
+          if (modificationTime > signTime) {
+            isValid = false;
           }
         }
-      });
-
-      return NextResponse.json({
-        isDigitallySigned: true,
-        signedBy: document.signedByUser?.name,
-        signedAt: document.signedAt,
-        certificateInfo: certificate ? {
-          isValid: true,
-          expiresAt: certificate.expiresAt
-        } : undefined
-      });
+      } catch (error) {
+        console.error('Error verifying PDF:', error);
+        isValid = false;
+      }
     }
 
     return NextResponse.json({
-      isDigitallySigned: false
+      isValid,
+      document: {
+        fileName: document.fileName,
+        signedAt: document.signedAt,
+        signedBy: document.signedByUser ? {
+          name: document.signedByUser.name,
+          role: document.signedByUser.role.roleName
+        } : null,
+        signatures: document.signatures
+      }
     });
+
   } catch (error) {
-    console.error('Error in /api/documents/verify:', error);
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Failed to verify signature',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }), 
+    console.error('Verification error:', error);
+    return NextResponse.json(
+      { error: 'Failed to verify document' },
       { status: 500 }
     );
   }
+} 
 } 

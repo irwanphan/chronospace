@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import { fabric } from 'fabric';
 import { Document, Page, pdfjs } from 'react-pdf';
 import type { PDFPageProxy } from 'pdfjs-dist';
+import QRCode from 'qrcode';
 
 import { formatDate } from '@/lib/utils';
 import Card from '@/components/ui/Card';
@@ -190,11 +191,36 @@ export default function PDFViewer() {
     setActiveSignature(null);
   }, [activeSignature]);
 
-  const addSignatureToPdf = () => {
+  const generateQRCode = async (signatureData: {
+    signer: string;
+    timestamp: string;
+    documentId: string;
+  }) => {
+    try {
+      // Generate verification URL with signature data
+      const verificationUrl = `${window.location.origin}/verify?doc=${signatureData.documentId}&signer=${encodeURIComponent(signatureData.signer)}&time=${signatureData.timestamp}`;
+      
+      // Generate QR code as data URL
+      const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
+        width: 100,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      });
+
+      return qrCodeDataUrl;
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      return null;
+    }
+  };
+
+  const addSignatureToPdf = async () => {
     if (!signatureRef.current || !canvasRef.current) return;
 
     // Ensure white background before getting data URL
-    // signatureRef.current.backgroundColor = '#ffffff';
     signatureRef.current.renderAll();
 
     const signatureData = signatureRef.current.toDataURL({
@@ -203,83 +229,128 @@ export default function PDFViewer() {
       multiplier: 2
     });
 
-    fabric.Image.fromURL(signatureData, (img) => {
-      if (!canvasRef.current) return;
+    // Generate signature metadata
+    const timestamp = new Date().toISOString();
+    const documentId = fileUrl?.split('/').pop()?.split('.')[0] || 'unknown';
+    const signerName = session?.user?.name || 'Unknown';
 
-      const maxWidth = canvasRef.current.width! * 0.3;
-      const maxHeight = canvasRef.current.height! * 0.2;
-      const scale = Math.min(
-        maxWidth / img.width!,
-        maxHeight / img.height!
-      );
+    // Generate QR code
+    const qrCodeDataUrl = await generateQRCode({
+      signer: signerName,
+      timestamp,
+      documentId
+    });
 
-      const scaledWidth = img.width! * scale;
-      const scaledHeight = img.height! * scale;
-      const padding = 12;
+    fabric.Image.fromURL(signatureData, async (signatureImg) => {
+      if (!canvasRef.current || !qrCodeDataUrl) return;
 
-      const signatureGroup = new fabric.Group([], {
-        left: canvasRef.current.width! * 0.1,
-        top: canvasRef.current.height! * 0.1,
-        originX: 'left',
-        originY: 'top'
-      });
+      // Create QR code image
+      fabric.Image.fromURL(qrCodeDataUrl, (qrCodeImg) => {
+        if (!canvasRef.current) return;
 
-      const border = new fabric.Rect({
-        width: scaledWidth + (padding * 2),
-        height: scaledHeight + (padding * 2) + 30,
-        fill: 'transparent',
-        stroke: '#cdcdde',
-        strokeWidth: 1,
-        rx: 16,
-        ry: 16,
-        left: 0,
-        top: 0
-      });
+        const maxWidth = canvasRef.current.width! * 0.3;
+        const maxHeight = canvasRef.current.height! * 0.2;
+        const scale = Math.min(
+          maxWidth / signatureImg.width!,
+          maxHeight / signatureImg.height!
+        );
 
-      img.set({
-        scaleX: scale,
-        scaleY: scale,
-        left: padding,
-        top: padding,
-        originX: 'left',
-        originY: 'top',
-      });
+        const scaledWidth = signatureImg.width! * scale;
+        const scaledHeight = signatureImg.height! * scale;
+        const padding = 12;
 
-      const signerName = new fabric.Text(session?.user?.name || 'Unknown', {
-        fontSize: 16,
-        fontFamily: 'Montserrat',
-        top: scaledHeight + (padding * 2),
-        left: (scaledWidth + (padding * 2)) / 2,
-        originX: 'center',
-        originY: 'top'
-      });
+        const signatureGroup = new fabric.Group([], {
+          left: canvasRef.current.width! * 0.1,
+          top: canvasRef.current.height! * 0.1,
+          originX: 'left',
+          originY: 'top'
+        });
 
-      const signerTextInfo = new fabric.Text(`Digitally signed on ${formatDate(new Date())} by`, {
-        fontSize: 8,
-        fontFamily: 'Montserrat',
-        top: scaledHeight + (padding * 1.2),
-        left: (scaledWidth + (padding * 2)) / 2,
-        originX: 'center',
-        originY: 'top'
-      });
+        // Add border
+        const border = new fabric.Rect({
+          width: scaledWidth + qrCodeImg.width! + (padding * 3),
+          height: Math.max(scaledHeight, qrCodeImg.height!) + (padding * 2) + 30,
+          fill: 'transparent',
+          stroke: '#cdcdde',
+          strokeWidth: 1,
+          rx: 16,
+          ry: 16,
+          left: 0,
+          top: 0
+        });
 
-      signatureGroup.addWithUpdate(border);
-      signatureGroup.addWithUpdate(img);
-      signatureGroup.addWithUpdate(signerName);
-      signatureGroup.addWithUpdate(signerTextInfo);
-      signatureGroup.on('selected', () => {
+        // Position signature image
+        signatureImg.set({
+          scaleX: scale,
+          scaleY: scale,
+          left: padding,
+          top: padding,
+          originX: 'left',
+          originY: 'top',
+        });
+
+        // Position QR code
+        qrCodeImg.set({
+          scaleX: 0.5,
+          scaleY: 0.5,
+          left: scaledWidth + (padding * 2),
+          top: padding,
+          originX: 'left',
+          originY: 'top'
+        });
+
+        // Add signer name
+        const signerName = new fabric.Text(session?.user?.name || 'Unknown', {
+          fontSize: 16,
+          fontFamily: 'Montserrat',
+          top: Math.max(scaledHeight, qrCodeImg.height! * 0.5) + (padding * 2),
+          left: (scaledWidth + qrCodeImg.width! * 0.5 + (padding * 3)) / 2,
+          originX: 'center',
+          originY: 'top'
+        });
+
+        // Add signature info
+        const signerTextInfo = new fabric.Text(`Digitally signed on ${formatDate(new Date())} by`, {
+          fontSize: 8,
+          fontFamily: 'Montserrat',
+          top: Math.max(scaledHeight, qrCodeImg.height! * 0.5) + (padding * 1.2),
+          left: (scaledWidth + qrCodeImg.width! * 0.5 + (padding * 3)) / 2,
+          originX: 'center',
+          originY: 'top'
+        });
+
+        // Add verification text
+        const verificationText = new fabric.Text('Scan to verify', {
+          fontSize: 8,
+          fontFamily: 'Montserrat',
+          top: padding + qrCodeImg.height! * 0.5 + 5,
+          left: scaledWidth + (padding * 2) + qrCodeImg.width! * 0.25,
+          originX: 'center',
+          originY: 'top',
+          fill: '#666'
+        });
+
+        signatureGroup.addWithUpdate(border);
+        signatureGroup.addWithUpdate(signatureImg);
+        signatureGroup.addWithUpdate(qrCodeImg);
+        signatureGroup.addWithUpdate(signerName);
+        signatureGroup.addWithUpdate(signerTextInfo);
+        signatureGroup.addWithUpdate(verificationText);
+
+        signatureGroup.on('selected', () => {
+          setActiveSignature(signatureGroup);
+        });
+
+        signatureGroup.on('deselected', () => {
+          setActiveSignature(null);
+        });
+
+        canvasRef.current.add(signatureGroup);
+        canvasRef.current.setActiveObject(signatureGroup);
         setActiveSignature(signatureGroup);
+        canvasRef.current.renderAll();
+        clearSignature();
       });
-
-      signatureGroup.on('deselected', () => {
-        setActiveSignature(null);
-      });
-
-      canvasRef.current.add(signatureGroup);
-      canvasRef.current.setActiveObject(signatureGroup);
-      setActiveSignature(signatureGroup);
-      canvasRef.current.renderAll();
-      clearSignature();
     });
   };
 
