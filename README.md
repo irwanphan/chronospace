@@ -144,7 +144,11 @@ ChronoSpace is a comprehensive system for managing budgets, projects, and purcha
 
 ### Document Management
 - Document upload and storage
+- PDF viewer
 - Digital signatures
+- QR code generation
+- Document verification
+- Document history
 - Version control
 - Access control
 
@@ -214,7 +218,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Environment Variables
 
 ```env
-DATABASE_URL="postgresql://..."
+DATABASE_URL="mysql://..."
 NEXTAUTH_SECRET="your-secret"
 NEXTAUTH_URL="http://localhost:3000"
 ```
