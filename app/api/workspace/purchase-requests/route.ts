@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createPurchaseRequestNotifications } from '@/lib/notifications';
 
 export const revalidate = 0
 
@@ -21,7 +22,9 @@ interface RequestItem {
   vendorId: string;
 }
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     // console.log('Received request body:', body);
@@ -61,6 +64,16 @@ export async function POST(request: Request) {
         approvalSteps: true
       }
     });
+
+    // Create notifications for approvers
+    await createPurchaseRequestNotifications(
+      result.id,
+      result.code,
+      result.approvalSteps.map(step => ({
+        roleId: step.roleId,
+        specificUserId: step.specificUserId
+      }))
+    );
 
     return NextResponse.json(result);
   } catch (error) {
