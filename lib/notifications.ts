@@ -276,4 +276,64 @@ export async function checkAndCreateOverdueNotifications() {
     console.error('Error checking for overdue notifications:', error);
     throw error;
   }
+}
+
+export async function createRevisionSubmittedNotifications(
+  purchaseRequestId: string,
+  creatorName: string
+) {
+  try {
+    const purchaseRequest = await prisma.purchaseRequest.findUnique({
+      where: { id: purchaseRequestId },
+      include: {
+        approvalSteps: {
+          orderBy: { stepOrder: 'asc' },
+          include: {
+            role: true,
+            specificUser: true
+          }
+        }
+      }
+    });
+
+    if (!purchaseRequest) {
+      throw new Error('Purchase request not found');
+    }
+
+    // Get all users that need to be notified
+    const usersToNotify = new Set<string>();
+
+    // Get all approval steps
+    for (const step of purchaseRequest.approvalSteps) {
+      // If specific user is assigned
+      if (step.specificUserId) {
+        usersToNotify.add(step.specificUserId);
+      } else {
+        // Get users with the role
+        const usersWithRole = await prisma.userRole.findMany({
+          where: { roleId: step.roleId },
+          select: { userId: true }
+        });
+        usersWithRole.forEach(userRole => usersToNotify.add(userRole.userId));
+      }
+    }
+
+    // Remove creator from notification list (since they're the one making the revision)
+    usersToNotify.delete(purchaseRequest.createdBy);
+
+    // Create notifications for all users
+    const notificationPromises = Array.from(usersToNotify).map(userId =>
+      createNotification(
+        userId,
+        'Purchase Request Revised',
+        `Purchase Request ${purchaseRequest.code} has been revised by ${creatorName} and is ready for review.`,
+        'info'
+      )
+    );
+
+    await Promise.all(notificationPromises);
+  } catch (error) {
+    console.error('Error creating revision submitted notifications:', error);
+    throw error;
+  }
 } 
