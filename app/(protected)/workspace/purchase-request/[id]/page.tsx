@@ -105,6 +105,8 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [isDeclining, setIsDeclining] = useState(false);
   const [declineComment, setDeclineComment] = useState('');
 
+  console.log('canReview : ', canReview);
+
   // Debug
   console.log('purchaseRequest : ', purchaseRequest);
   // console.log('viewers : ', purchaseRequest?.viewers);
@@ -144,11 +146,11 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
     // Cek apakah user memiliki akses
     if (currentStep.specificUserId !== null) {
-      if (session.user.id === currentStep.specificUserId) {
+      if (session.user.id === currentStep.specificUserId && session.user.access.workspaceAccess.reviewApprovePurchaseRequest === true) {
         setCanReview(true);
       }
     } else {
-      if (session.user.roleId === currentStep.roleId) {
+      if (session.user.roleId === currentStep.roleId && session.user.access.workspaceAccess.reviewApprovePurchaseRequest === true) {
         setCanReview(true);
       }
     }
