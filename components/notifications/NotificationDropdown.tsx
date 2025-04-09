@@ -86,7 +86,8 @@ export default function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg 
+          border border-gray-200 z-50 overflow-y-auto max-h-[calc(100vh-10rem)]">
           <div className="p-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Notifications</h3>
             {loading ? (
