@@ -146,11 +146,11 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
 
     // Cek apakah user memiliki akses
     if (currentStep.specificUserId !== null) {
-      if (session.user.id === currentStep.specificUserId && session.user.access.workspaceAccess.reviewApprovePurchaseRequest === true) {
+      if (session.user.id === currentStep.specificUserId && session.user.access.workspaceAccess.reviewApprovePurchaseRequest) {
         setCanReview(true);
       }
     } else {
-      if (session.user.roleId === currentStep.roleId && session.user.access.workspaceAccess.reviewApprovePurchaseRequest === true) {
+      if (session.user.roleId === currentStep.roleId && session.user.access.workspaceAccess.reviewApprovePurchaseRequest) {
         setCanReview(true);
       }
     }

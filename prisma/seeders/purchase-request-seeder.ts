@@ -98,10 +98,10 @@ export async function purchaseRequestSeeder() {
 
       // Update PR status based on final approval step
       const lastStep = approvalSteps[approvalSteps.length - 1];
-      if (lastStep.status === 'Rejected') {
+      if (lastStep.status === 'Declined') {
         await prisma.purchaseRequest.update({
           where: { id: pr.id },
-          data: { status: 'Rejected' }
+          data: { status: 'Declined' }
         });
       } else if (lastStep.status === 'Approved') {
         await prisma.purchaseRequest.update({
@@ -113,9 +113,9 @@ export async function purchaseRequestSeeder() {
   }
 }
 
-function getRandomApprovalStatus(): 'Pending' | 'Approved' | 'Rejected' {
-  const statuses = ['Approved', 'Approved', 'Approved', 'Rejected']; // 75% chance of approval
-  return statuses[Math.floor(Math.random() * statuses.length)] as 'Pending' | 'Approved' | 'Rejected';
+function getRandomApprovalStatus(): 'Pending' | 'Approved' | 'Declined' {
+  const statuses = ['Approved', 'Approved', 'Approved', 'Declined']; // 75% chance of approval
+  return statuses[Math.floor(Math.random() * statuses.length)] as 'Pending' | 'Approved' | 'Declined';
 }
 
 function getRandomComment(): string {
@@ -126,17 +126,17 @@ function getRandomComment(): string {
     'Approved. Important for project timeline.'
   ];
 
-  const rejectedComments = [
-    'Rejected. Over budget allocation.',
-    'Rejected. Need more detailed justification.',
-    'Rejected. Please revise quantities.',
-    'Rejected. Consider alternative vendors.'
+  const declinedComments = [
+    'Declined. Over budget allocation.',
+    'Declined. Need more detailed justification.',
+    'Declined. Please revise quantities.',
+    'Declined. Consider alternative vendors.'
   ];
 
   if (Math.random() < 0.75) { // 75% chance of approval
     return approvedComments[Math.floor(Math.random() * approvedComments.length)];
   } else {
-    return rejectedComments[Math.floor(Math.random() * rejectedComments.length)];
+    return declinedComments[Math.floor(Math.random() * declinedComments.length)];
   }
 }
 
