@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { createDeclineNotifications } from "@/lib/notifications";
 
 export const revalidate = 0
 
@@ -11,6 +12,16 @@ export async function POST(
   try {
     const body = await request.json();
     const { stepOrder, actorId, comment, type } = body;
+
+    // Get actor name for notification
+    const actor = await prisma.user.findUnique({
+      where: { id: actorId },
+      select: { name: true }
+    });
+
+    if (!actor) {
+      throw new Error('Actor not found');
+    }
 
     // Update dalam transaksi
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -27,6 +38,7 @@ export async function POST(
           status: newStatus,
           actorId,
           actedAt: new Date(),
+          comment
         }
       });
 
@@ -60,11 +72,20 @@ export async function POST(
       return { updatedStep, nextStep };
     });
 
+    // Create notifications after transaction
+    await createDeclineNotifications(
+      params.id,
+      stepOrder,
+      actor.name,
+      comment,
+      type === 'revision'
+    );
+
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
-      { error: 'Failed to approve request' },
+      { error: 'Failed to decline request' },
       { status: 500 }
     );
   }

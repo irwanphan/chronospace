@@ -313,7 +313,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
 
       </div>
 
-      {status === 'authenticated' && canCreateRequest && (
+      {canCreateRequest && (
         <div className="relative">
           <CreateRequestFAB />
         </div>

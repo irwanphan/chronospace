@@ -84,6 +84,7 @@ model User {
   userSignedDocuments      Document[]                  @relation("UserSignedDocuments")
   certificates             UserCertificate[]
   documentSignatures       DocumentSignature[]
+  notifications            Notification[]
 
   @@map("users")
 }
@@ -483,5 +484,20 @@ model UserCertificate {
   @@index([userId])
   @@index([serialNumber])
   @@map("user_certificates")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String   @default("info") // 'info' | 'success' | 'warning' | 'error'
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("notifications")
 }
 

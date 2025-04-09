@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { createApprovalNotifications } from "@/lib/notifications";
 
 export const revalidate = 0
 
@@ -11,6 +12,16 @@ export async function POST(
   try {
     const body = await request.json();
     const { stepOrder, actorId, comment } = body;
+
+    // Get actor name for notification
+    const actor = await prisma.user.findUnique({
+      where: { id: actorId },
+      select: { name: true }
+    });
+
+    if (!actor) {
+      throw new Error('Actor not found');
+    }
 
     // Update dalam transaksi
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -25,7 +36,8 @@ export async function POST(
         data: {
           status: 'Approved',
           actorId,
-          actedAt: new Date()
+          actedAt: new Date(),
+          comment
         }
       });
 
@@ -58,6 +70,13 @@ export async function POST(
 
       return { updatedStep, nextStep };
     });
+
+    // Create notifications after transaction
+    await createApprovalNotifications(
+      params.id,
+      stepOrder,
+      actor.name
+    );
 
     return NextResponse.json(result);
   } catch (error) {

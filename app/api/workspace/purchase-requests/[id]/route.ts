@@ -4,6 +4,7 @@ import { getViewers, getCurrentApprover } from '@/lib/helpers';
 import { ApprovalStep } from '@/types/approval-schema';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { createRevisionSubmittedNotifications } from '@/lib/notifications';
 
 export const revalidate = 0
 
@@ -126,9 +127,6 @@ export async function PUT(
 
     const body = await request.json();
 
-    // console.log('received body', body);
-    // console.log("Final items before updating:", body.items);
-
     const itemList = await prisma.budgetedItem.findMany({
       where: {
         AND: [
@@ -147,7 +145,7 @@ export async function PUT(
         description: body.description,
         items: {
           deleteMany: {},
-            create: itemList.map((item) => ({
+          create: itemList.map((item) => ({
             budgetItemId: item.id,
             description: item.description,
             qty: item.qty,
@@ -167,7 +165,8 @@ export async function PUT(
             duration: step.duration,
             overtimeAction: step.overtimeAction
           }))
-        }
+        },
+        status: 'Submitted'
       },
       include: {
         items: {
@@ -179,8 +178,21 @@ export async function PUT(
       }
     });
 
-    // console.log('updatedRequest', updatedRequest);
-    // console.log('itemList', itemList);
+    await prisma.purchaseRequestHistory.create({
+      data: {
+        purchaseRequestId: params.id,
+        action: 'Revised',
+        actorId: session.user.id,
+        comment: 'Purchase request revised and resubmitted'
+      }
+    });
+
+    if (session.user.name) {
+      await createRevisionSubmittedNotifications(
+        params.id,
+        session.user.name
+      );
+    }
 
     return NextResponse.json(updatedRequest);
   } catch (error) {

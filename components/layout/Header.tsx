@@ -1,5 +1,5 @@
 'use client';
-import { Bell, Search, LogOut, User } from 'lucide-react';
+import { Search, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useRef } from 'react';
 import { signOut, useSession } from 'next-auth/react';
@@ -9,6 +9,7 @@ import { cn, getInitials } from '@/lib/utils';
 import Avatar from '@/components/ui/Avatar';
 import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import { usePageTitleStore } from '@/store/usePageTitleStore';
+import NotificationDropdown from '@/components/notifications/NotificationDropdown';
 
 const Header = () => {
   const { isCollapsed } = useSidebarStore();
@@ -41,7 +42,7 @@ const Header = () => {
         </div> */}
       </div>
       
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <div className="relative">
           <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input 
@@ -51,12 +52,7 @@ const Header = () => {
           />
         </div>
         
-        <button className="relative">
-          <Bell className="w-5 h-5 text-gray-600" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
-            2
-          </span>
-        </button>
+        <NotificationDropdown />
 
         <div className="relative" ref={userMenuRef}>
           <button 
