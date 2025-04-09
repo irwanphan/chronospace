@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import NotificationItem from './NotificationItem';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 interface Notification {
   id: string;
@@ -20,6 +21,9 @@ export default function NotificationDropdown() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(dropdownRef, () => setIsOpen(false));
 
   useEffect(() => {
     if (session?.user) {
@@ -72,7 +76,7 @@ export default function NotificationDropdown() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
