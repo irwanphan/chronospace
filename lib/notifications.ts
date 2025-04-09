@@ -88,44 +88,54 @@ export async function createApprovalNotifications(
       throw new Error('Purchase request not found');
     }
 
+    // Check if this is the final approval
+    const isFullyApproved = !purchaseRequest.approvalSteps.find(
+      step => step.stepOrder > currentStepOrder
+    );
+
     // Notify the creator
     await createNotification(
       purchaseRequest.createdBy,
-      'Purchase Request Approved',
-      `Your Purchase Request ${purchaseRequest.code} has been approved by ${approverName} at step ${currentStepOrder}.`,
+      isFullyApproved ? 'Purchase Request Fully Approved' : 'Purchase Request Approved',
+      isFullyApproved
+        ? `Your Purchase Request ${purchaseRequest.code} has been fully approved and is ready to be processed as a Purchase Order.`
+        : `Your Purchase Request ${purchaseRequest.code} has been approved by ${approverName} at step ${currentStepOrder}.`,
       'success'
     );
 
-    // Find next step if exists
-    const nextStep = purchaseRequest.approvalSteps.find(step => step.stepOrder === currentStepOrder + 1);
+    // If not fully approved, notify next step approvers
+    if (!isFullyApproved) {
+      // Find next step
+      const nextStep = purchaseRequest.approvalSteps.find(step => step.stepOrder === currentStepOrder + 1);
 
-    if (nextStep) {
-      // Get users to notify for next step
-      const usersToNotify = new Set<string>();
+      if (nextStep) {
+        // Get users to notify for next step
+        const usersToNotify = new Set<string>();
 
-      // If specific user is assigned
-      if (nextStep.specificUserId) {
-        usersToNotify.add(nextStep.specificUserId);
-      } else {
-        // Get users with the role
-        const usersWithRole = await prisma.userRole.findMany({
-          where: { roleId: nextStep.roleId },
-          select: { userId: true }
-        });
-        usersWithRole.forEach(userRole => usersToNotify.add(userRole.userId));
+        // If specific user is assigned
+        if (nextStep.specificUserId) {
+          usersToNotify.add(nextStep.specificUserId);
+        } else {
+          // Get users with the role
+          const usersWithRole = await prisma.userRole.findMany({
+            where: { roleId: nextStep.roleId },
+            select: { userId: true }
+          });
+          usersWithRole.forEach(userRole => usersToNotify.add(userRole.userId));
+        }
+
+        // Create notifications for next step approvers
+        const notificationPromises = Array.from(usersToNotify).map(userId =>
+          createNotification(
+            userId,
+            'Purchase Request Ready for Your Approval',
+            `Purchase Request ${purchaseRequest.code} has been approved by previous step and is now ready for your approval.`,
+            'info'
+          )
+        );
+
+        await Promise.all(notificationPromises);
       }
-
-      // Create notifications for next step approvers
-      const notificationPromises = Array.from(usersToNotify).map(userId =>
-        createNotification(
-          userId,
-          'Purchase Request Ready for Your Approval',
-          `Purchase Request ${purchaseRequest.code} has been approved by previous step and is now ready for your approval.`,
-          'info'
-        )
-      );
-
-      await Promise.all(notificationPromises);
     }
   } catch (error) {
     console.error('Error creating approval notifications:', error);
