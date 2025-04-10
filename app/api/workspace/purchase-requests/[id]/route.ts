@@ -136,46 +136,73 @@ export async function PUT(
       }
     });
     
-    const updatedRequest = await prisma.purchaseRequest.update({
-      where: {
-        id: params.id
-      },
-      data: {
-        title: body.title,
-        description: body.description,
-        items: {
-          deleteMany: {},
-          create: itemList.map((item) => ({
-            budgetItemId: item.id,
-            description: item.description,
-            qty: item.qty,
-            unit: item.unit,
-            unitPrice: item.unitPrice,
-            vendorId: item.vendorId
-          })),
+    const updatedRequest = await prisma.$transaction(async (tx) => {
+      // Free up all budgeted items associated with this PR
+      await tx.budgetedItem.updateMany({
+        where: {
+          purchaseRequestId: params.id
         },
-        approvalSteps: {
-          deleteMany: {},
-          create: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
-            roleId: step.roleId,
-            specificUserId: step.specificUserId,
-            stepOrder: index + 1,
-            status: "Pending",
-            budgetLimit: step.budgetLimit,
-            duration: step.duration,
-            overtimeAction: step.overtimeAction
-          }))
+        data: {
+          purchaseRequestId: null
+        }
+      });
+
+      // Update the PR with new items and approval steps
+      const updated = await tx.purchaseRequest.update({
+        where: {
+          id: params.id
         },
-        status: 'Submitted'
-      },
-      include: {
-        items: {
-          include: {
-            budgetItem: true
+        data: {
+          title: body.title,
+          description: body.description,
+          items: {
+            deleteMany: {},
+            create: itemList.map((item) => ({
+              budgetItemId: item.id,
+              description: item.description,
+              qty: item.qty,
+              unit: item.unit,
+              unitPrice: item.unitPrice,
+              vendorId: item.vendorId
+            })),
+          },
+          approvalSteps: {
+            deleteMany: {},
+            create: body.steps.map((step: ApprovalStepUpdate, index: number) => ({
+              roleId: step.roleId,
+              specificUserId: step.specificUserId,
+              stepOrder: index + 1,
+              status: "Pending",
+              budgetLimit: step.budgetLimit,
+              duration: step.duration,
+              overtimeAction: step.overtimeAction
+            }))
+          },
+          status: 'Submitted'
+        },
+        include: {
+          items: {
+            include: {
+              budgetItem: true
+            }
+          },
+          approvalSteps: true
+        }
+      });
+
+      // Link new items to this PR
+      await tx.budgetedItem.updateMany({
+        where: {
+          id: {
+            in: body.itemsIdReference
           }
         },
-        approvalSteps: true
-      }
+        data: {
+          purchaseRequestId: params.id
+        }
+      });
+
+      return updated;
     });
 
     await prisma.purchaseRequestHistory.create({

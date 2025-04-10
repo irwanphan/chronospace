@@ -101,7 +101,8 @@ export async function GET(
         items: {
           include: {
             purchaseRequestItems: true,
-            vendor: true
+            vendor: true,
+            purchaseRequest: true
           }
         }
       }
@@ -111,8 +112,8 @@ export async function GET(
     // 1. Belum ada di purchase request lain
     // 2. Atau sudah ada di purchase request ini
     const availableItems = budget?.items.filter(item => 
-      item.purchaseRequestItems.length === 0 || // belum digunakan di PR manapun
-      item.purchaseRequestItems.some(pri => pri.purchaseRequestId === params.id) // atau digunakan di PR ini
+      item.purchaseRequestId === null || 
+      item.purchaseRequest?.status === 'Declined'
     );
 
     // return {
