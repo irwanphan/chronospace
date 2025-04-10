@@ -80,6 +80,16 @@ export async function POST(
         }
       });
 
+      // Free up all budgeted items associated with this PR
+      await tx.budgetedItem.updateMany({
+        where: {
+          purchaseRequestId: params.id
+        },
+        data: {
+          purchaseRequestId: null
+        }
+      });
+
       return { updatedStep, nextSteps };
     });
 
