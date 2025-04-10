@@ -59,6 +59,19 @@ export async function POST(
           status: 'Pending'
         }
       });
+      
+      // jika tidak ada step selanjutnya, update purchase history menjadi fully approved
+      if (!nextStep) {
+        await tx.purchaseRequestHistory.create({
+          data: {
+            purchaseRequestId: params.id,
+            action: 'Fully Approved',
+            actorId,
+            comment: 'All approval steps have been completed'
+          }
+        });
+      }
+      
 
       // Update status PR
       await tx.purchaseRequest.update({

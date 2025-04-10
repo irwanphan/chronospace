@@ -109,7 +109,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [availableItems, setAvailableItems] = useState<BudgetItem[]>([]);
   console.log('selectedVendor', selectedVendor);
   // console.log('selectedItems', selectedItems);
-  // console.log('availableItems', availableItems);
+  console.log('availableItems', availableItems);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,6 +145,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
             }))
           });
           // initialize selectedItems and availableItems
+          console.log('data : ', data);
           setSelectedItems(data.purchaseRequest.items);
           setAvailableItems(data.availableItems);
 

@@ -10,7 +10,7 @@ export async function GET() {
         project: true,
         items: {
           include: {
-            purchaseRequestItems: true,
+            purchaseRequest: true,
             vendor: true
           }
         }
@@ -21,9 +21,10 @@ export async function GET() {
     });
 
     const availableBudgets = budgets.map(budget => {
-      // Filter items yang belum memiliki PR
+      // Filter items yang belum memiliki PR atau PR-nya sudah declined
       const availableItems = budget.items.filter(item => 
-        item.purchaseRequestItems.length === 0
+        item.purchaseRequestId === null || 
+        item.purchaseRequest?.status === 'Declined'
       );
 
       return {

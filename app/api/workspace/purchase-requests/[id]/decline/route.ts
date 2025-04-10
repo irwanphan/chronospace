@@ -52,14 +52,25 @@ export async function POST(
         }
       });
 
-      // Cek apakah masih ada step selanjutnya
-      const nextStep = await tx.purchaseRequestApproval.findFirst({
+      // Cek apakah masih ada step-step selanjutnya
+      const nextSteps = await tx.purchaseRequestApproval.findMany({
         where: {
           purchaseRequestId: params.id,
           stepOrder: { gt: stepOrder },
           status: 'Pending'
         }
       });
+
+      // Update nextStep menjadi Canceled
+      if (nextSteps.length > 0) {
+        await tx.purchaseRequestApproval.updateMany({
+          where: {
+            purchaseRequestId: params.id,
+            stepOrder: { gt: stepOrder }
+          },
+          data: { status: 'Canceled' }
+        });
+      }
 
       // Update status PR
       await tx.purchaseRequest.update({
@@ -69,7 +80,17 @@ export async function POST(
         }
       });
 
-      return { updatedStep, nextStep };
+      // Free up all budgeted items associated with this PR
+      await tx.budgetedItem.updateMany({
+        where: {
+          purchaseRequestId: params.id
+        },
+        data: {
+          purchaseRequestId: null
+        }
+      });
+
+      return { updatedStep, nextSteps };
     });
 
     // Create notifications after transaction

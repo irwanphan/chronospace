@@ -302,10 +302,13 @@ model BudgetedItem {
   vendorId             String
   vendor               Vendor                @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
   purchaseRequestItems PurchaseRequestItem[]
+  purchaseRequestId    String?              // Track which PR is using this item
+  purchaseRequest      PurchaseRequest?     @relation(fields: [purchaseRequestId], references: [id])
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
   @@index([budgetId])
+  @@index([purchaseRequestId])
   @@map("budgeted_items")
 }
 
@@ -341,6 +344,7 @@ model PurchaseRequest {
   createdBy     String
   user          User                      @relation(fields: [createdBy], references: [id])
   items         PurchaseRequestItem[]
+  budgetedItems BudgetedItem[]           // Add relation to BudgetedItem
   approvalSteps PurchaseRequestApproval[]
   createdAt     DateTime                  @default(now())
   updatedAt     DateTime                  @updatedAt

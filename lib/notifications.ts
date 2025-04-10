@@ -114,14 +114,39 @@ export async function createApprovalNotifications(
 
         // If specific user is assigned
         if (nextStep.specificUserId) {
-          usersToNotify.add(nextStep.specificUserId);
+          // Check if specific user has the required permission
+          const specificUser = await prisma.user.findUnique({
+            where: { id: nextStep.specificUserId },
+            include: { access: true }
+          });
+          if (specificUser?.access?.workspaceAccess) {
+            const workspaceAccess = typeof specificUser.access.workspaceAccess === 'string' 
+              ? JSON.parse(specificUser.access.workspaceAccess)
+              : specificUser.access.workspaceAccess;
+            if (workspaceAccess.reviewApprovePurchaseRequest) {
+              usersToNotify.add(nextStep.specificUserId);
+            }
+          }
         } else {
-          // Get users with the role
+          // Get users with the role and required permission
           const usersWithRole = await prisma.userRole.findMany({
             where: { roleId: nextStep.roleId },
-            select: { userId: true }
+            include: {
+              user: {
+                include: { access: true }
+              }
+            }
           });
-          usersWithRole.forEach(userRole => usersToNotify.add(userRole.userId));
+          usersWithRole.forEach(userRole => {
+            if (userRole.user.access?.workspaceAccess) {
+              const workspaceAccess = typeof userRole.user.access.workspaceAccess === 'string'
+                ? JSON.parse(userRole.user.access.workspaceAccess)
+                : userRole.user.access.workspaceAccess;
+              if (workspaceAccess.reviewApprovePurchaseRequest) {
+                usersToNotify.add(userRole.userId);
+              }
+            }
+          });
         }
 
         // Create notifications for next step approvers
