@@ -13,6 +13,8 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
+    console.log('Converting PR to PO, PR ID:', params.id);
+
     // Fetch the PR with all its related data
     const pr = await prisma.purchaseRequest.findUnique({
       where: { id: params.id },
@@ -41,6 +43,14 @@ export async function POST(
       );
     }
 
+    // Validate PR status
+    if (pr.status !== 'Approved') {
+      return NextResponse.json(
+        { error: 'Only approved purchase requests can be converted to PO' },
+        { status: 400 }
+      );
+    }
+
     // Check if a PO already exists for this PR
     const existingPO = await prisma.purchaseOrder.findUnique({
       where: { purchaseRequestId: pr.id }
@@ -66,41 +76,67 @@ export async function POST(
     
     const poCode = `PO/${pr.budget.workDivision.code}/${today.getFullYear()}/${String(poCount).padStart(4, '0')}`;
 
-    // Create PO with PR data
-    const po = await prisma.purchaseOrder.create({
-      data: {
-        code: poCode,
-        title: pr.title,
-        description: pr.description,
-        status: 'Draft',
-        userId: session.user.id,
-        budgetId: pr.budgetId,
-        purchaseRequestId: pr.id,
-        items: {
-          create: pr.items.map(item => ({
-            description: item.description,
-            qty: item.qty,
-            unit: item.unit,
-            unitPrice: item.unitPrice,
-            vendorId: item.vendorId,
-            budgetItemId: item.budgetItemId
-          }))
-        },
-        histories: {
-          create: {
-            action: 'Created',
-            actorId: session.user.id,
-            comment: `Created from Purchase Request ${pr.code}`
+    console.log('Creating PO with code:', poCode);
+
+    // Create PO with PR data in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create the PO
+      const po = await tx.purchaseOrder.create({
+        data: {
+          code: poCode,
+          title: pr.title,
+          description: pr.description,
+          status: 'Draft',
+          userId: session.user.id,
+          budgetId: pr.budgetId,
+          purchaseRequestId: pr.id,
+          items: {
+            create: pr.items.map(item => ({
+              description: item.description,
+              qty: item.qty,
+              unit: item.unit,
+              unitPrice: item.unitPrice,
+              vendorId: item.vendorId,
+              budgetItemId: item.budgetItemId
+            }))
+          },
+          histories: {
+            create: {
+              action: 'Created',
+              actorId: session.user.id,
+              comment: `Created from Purchase Request ${pr.code}`
+            }
           }
+        },
+        include: {
+          items: true,
+          histories: true
         }
-      },
-      include: {
-        items: true,
-        histories: true
-      }
+      });
+
+      // Update PR status to Completed
+      await tx.purchaseRequest.update({
+        where: { id: pr.id },
+        data: { 
+          status: 'Completed'
+        }
+      });
+
+      // Create PR history
+      await tx.purchaseRequestHistory.create({
+        data: {
+          purchaseRequestId: pr.id,
+          action: 'Completed',
+          actorId: session.user.id,
+          comment: `Purchase Request completed and converted to Purchase Order: ${poCode}`
+        }
+      });
+
+      return po;
     });
 
-    return NextResponse.json({ purchaseOrder: po });
+    console.log('Successfully created PO:', result.id);
+    return NextResponse.json({ purchaseOrder: result });
   } catch (error) {
     console.error('Error converting PR to PO:', error);
     return NextResponse.json(
