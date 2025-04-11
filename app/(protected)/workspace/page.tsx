@@ -13,7 +13,8 @@ import LoadingSpin from '@/components/ui/LoadingSpin';
 import WorkspaceStats from './components/WorkspaceStats';
 import { calculateRequestStats } from '@/lib/helpers';
 import Pagination from '@/components/Pagination';
-import { Grid2X2, List, Eye, CheckCircle } from 'lucide-react';
+import { Grid2X2, List, Eye } from 'lucide-react';
+import Card from '@/components/ui/Card';
 
 interface PurchaseRequest {
   id: string;
@@ -275,7 +276,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
 
         {/* Request List */}
         {displayAsList ? (
-          <div className="overflow-x-auto">
+          <Card className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
@@ -324,17 +325,9 @@ function WorkspaceContent({ session }: { session: Session | null }) {
                         {canViewRequest && (
                           <button
                             onClick={() => router.push(`/workspace/purchase-request/${request.id}`)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                            className="px-2 py-1 flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:border-blue-600 border transition-all duration-300 rounded-lg"
                           >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        )}
-                        {canReviewApproveRequest && (
-                          <button
-                            onClick={() => router.push(`/workspace/purchase-request/${request.id}`)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
-                          >
-                            <CheckCircle className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />View
                           </button>
                         )}
                       </div>
@@ -343,7 +336,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {currentPurchaseRequests.map((request) => {
