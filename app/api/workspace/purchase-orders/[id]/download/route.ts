@@ -177,7 +177,7 @@ export async function GET(
 
     // Generate PDF using puppeteer
     const browser = await puppeteer.launch({
-      headless: 'new'
+      headless: true
     });
     const page = await browser.newPage();
     await page.setContent(html);

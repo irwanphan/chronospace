@@ -533,6 +533,7 @@ model PurchaseOrder {
   purchaseRequest   PurchaseRequest       @relation(fields: [purchaseRequestId], references: [id])
   items             PurchaseOrderItem[]
   histories         PurchaseOrderHistory[]
+  printCount        Int                   @default(0)
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
 
