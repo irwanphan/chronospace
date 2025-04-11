@@ -85,6 +85,8 @@ model User {
   certificates             UserCertificate[]
   documentSignatures       DocumentSignature[]
   notifications            Notification[]
+  purchaseOrders           PurchaseOrder[]
+  purchaseOrderHistories   PurchaseOrderHistory[]
 
   @@map("users")
 }
@@ -110,6 +112,7 @@ model Vendor {
   updatedAt            DateTime              @updatedAt
   budgetedItems        BudgetedItem[]
   purchaseRequestItems PurchaseRequestItem[]
+  purchaseOrderItems   PurchaseOrderItem[]
 
   @@map("vendors")
 }
@@ -285,6 +288,7 @@ model Budget {
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
   PurchaseRequest       PurchaseRequest[]
+  purchaseOrders        PurchaseOrder[]
 
   @@index([projectId])
   @@index([workDivisionId])
@@ -306,6 +310,7 @@ model BudgetedItem {
   purchaseRequest      PurchaseRequest?     @relation(fields: [purchaseRequestId], references: [id])
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+  purchaseOrderItems   PurchaseOrderItem[]
 
   @@index([budgetId])
   @@index([purchaseRequestId])
@@ -349,6 +354,7 @@ model PurchaseRequest {
   createdAt     DateTime                  @default(now())
   updatedAt     DateTime                  @updatedAt
   histories     PurchaseRequestHistory[]
+  purchaseOrder PurchaseOrder?
 
   @@index([budgetId])
   @@map("purchase_requests")
@@ -503,5 +509,70 @@ model Notification {
 
   @@index([userId])
   @@map("notifications")
+}
+
+enum PurchaseOrderStatus {
+  Draft
+  Submitted
+  Approved
+  Completed
+  Cancelled
+}
+
+model PurchaseOrder {
+  id                String                @id @default(cuid())
+  code              String                @unique
+  title             String
+  description       String?
+  status            PurchaseOrderStatus   @default(Draft)
+  userId            String
+  user              User                  @relation(fields: [userId], references: [id])
+  budgetId          String
+  budget            Budget                @relation(fields: [budgetId], references: [id])
+  purchaseRequestId String                @unique
+  purchaseRequest   PurchaseRequest       @relation(fields: [purchaseRequestId], references: [id])
+  items             PurchaseOrderItem[]
+  histories         PurchaseOrderHistory[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([userId])
+  @@index([budgetId])
+  @@index([purchaseRequestId])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onUpdate: Cascade)
+  description     String
+  qty             Int
+  unit            String
+  unitPrice       Float
+  vendorId        String
+  vendor          Vendor        @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
+  budgetItemId    String
+  budgetItem      BudgetedItem  @relation(fields: [budgetItemId], references: [id], onUpdate: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([purchaseOrderId])
+  @@index([budgetItemId])
+  @@map("purchase_order_items")
+}
+
+model PurchaseOrderHistory {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onUpdate: Cascade)
+  action          String        // e.g., "Created", "Printed", "Completed"
+  actorId         String        // user yang melakukan action
+  actor           User          @relation(fields: [actorId], references: [id])
+  comment         String?       // optional comment
+  createdAt       DateTime      @default(now())
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_histories")
 }
 
