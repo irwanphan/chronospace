@@ -301,6 +301,20 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
               </table>
             </div>
 
+            <hr className="my-6" />
+            <div className="flex justify-end gap-2">
+              <Link
+                href="/workspace"
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              >
+                <ChevronLeft className="w-4 h-4" />Back
+              </Link>
+            </div>
+          </div>            
+        </Card>
+
+        <Card>
+          <div className="space-y-6"></div>
             <h2 className="text-lg font-medium mt-6 mb-4">History</h2>
             <div className="space-y-4">
               {/* PR History */}
@@ -347,22 +361,11 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
                         {formatDate(history.createdAt)}
                       </div>
                     </div>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
           </div>
 
-          <hr className="my-6" />
-
-          <div className="flex justify-end gap-2">
-            <Link
-              href="/workspace"
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
-            >
-              <ChevronLeft className="w-4 h-4" />Back
-            </Link>
-          </div>
         </Card>
       </div>
     </div>
