@@ -472,12 +472,12 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             </Link>
             {
               purchaseRequest?.status === "Approved" && isRequestor &&
-              <Link
-                href={`/workspace/purchase-request/${params.id}/create-order`}
+              <button
+                type="button"
                 className="px-4 py-2 border rounded-lg flex items-center bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300"
               >
                 <IconLicense className='w-4 h-4 mr-2' />Create Order
-              </Link>
+              </button>
             }
             {isRequestor && (
               purchaseRequest?.status === 'Revision' || 
