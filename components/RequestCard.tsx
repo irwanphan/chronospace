@@ -1,7 +1,7 @@
 import { getInitials } from "@/lib/utils";
 import Image from "next/image";
 import Avatar from "./ui/Avatar";
-import { ScanSearch } from "lucide-react";
+import { CheckCircle, ScanSearch } from "lucide-react";
 import Card from "./ui/Card";
 
 interface RequestCardProps {
@@ -153,18 +153,31 @@ export default function RequestCard({
             <button 
               onClick={onCheck}
               type="button"
-              className={`px-4 py-2 border rounded-lg flex items-center gap-1 
+              className={`px-4 py-2 border rounded-lg flex items-center gap-1 transition-all duration-300
               ${canReview && 
                 ( actors?.specificUserId === currentUserId || 
                   actors?.roleId === currentUserRole) ? 
                   'bg-blue-600 text-white hover:bg-blue-700' : 
-                  'bg-white hover:bg-gray-50'}
-              ${status === "Revision" && requestor.id === currentUserId &&
-                  'bg-yellow-600 text-white hover:bg-yellow-700'}
+                  status === "Revision" && requestor.id === currentUserId ?
+                    'bg-yellow-600 text-white hover:bg-yellow-700' :
+                  status === "Approved" && requestor.id === currentUserId ?
+                    'bg-blue-600 text-white hover:bg-blue-700' :
+                    'bg-white hover:bg-gray-50'}
               `}
           >
-            <ScanSearch className="w-5 h-5" />
-              Check {canReview && actors &&
+            {
+              status === "Approved" && requestor.id === currentUserId ?
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Create Order
+                </>
+              :
+                <>
+                  <ScanSearch className="w-5 h-5" />
+                  Check
+                </>
+            }
+              {canReview && actors &&
                 ( actors.specificUserId === currentUserId || 
                   actors.roleId === currentUserRole) && 
                   '& Review'}

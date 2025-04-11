@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
 import { Check, ChevronLeft, Pencil, X, PenSquare } from 'lucide-react';
-import { IconForbid } from '@tabler/icons-react';
+import { IconForbid, IconLicense } from '@tabler/icons-react';
 import { Modal } from '@/components/ui/Modal';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
@@ -470,6 +470,15 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             >
               <ChevronLeft className='w-4 h-4 mr-2' />Back
             </Link>
+            {
+              purchaseRequest?.status === "Approved" && isRequestor &&
+              <button
+                type="button"
+                className="px-4 py-2 border rounded-lg flex items-center bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300"
+              >
+                <IconLicense className='w-4 h-4 mr-2' />Create Order
+              </button>
+            }
             {isRequestor && (
               purchaseRequest?.status === 'Revision' || 
               !purchaseRequest?.approvalSteps.some(step => step.status === 'Approved')
