@@ -6,7 +6,7 @@ import Link from 'next/link';
 // import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { ChevronLeft, Download, Printer } from 'lucide-react';
+import { ChevronLeft, Download, Printer, CheckCircle2 } from 'lucide-react';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 // import { Modal } from '@/components/ui/Modal';
@@ -60,6 +60,22 @@ interface PurchaseOrder {
   purchaseRequest: {
     code: string;
     histories: PurchaseOrderHistory[];
+    approvalSteps: {
+      id: string;
+      stepOrder: number;
+      status: string;
+      approvedAt: string;
+      specificUser?: {
+        name: string;
+      };
+      role: {
+        roleName: string;
+      };
+      actor: {
+        name: string;
+      };
+      actedAt: string;
+    }[];
   };
 }
 
@@ -299,6 +315,37 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <h2 className="text-lg font-medium mt-6 mb-4">Total</h2>
+            <div className="text-right">
+              <span className="text-xl font-semibold">
+                {formatCurrency(purchaseOrder?.items.reduce((total, item) => total + (item.qty * item.unitPrice), 0) || 0)}
+              </span>
+            </div>
+
+            <h2 className="text-lg font-medium mt-6 mb-4">Approved by</h2>
+            <div className="space-y-4">
+              {purchaseOrder?.purchaseRequest?.approvalSteps
+                .filter(step => step.status === 'Approved')
+                .map(step => (
+                  <div key={step.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-700 font-medium">
+                        {step.actor ? step.actor.name : 'Unsung Hero'} 
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {step.role.roleName}
+                      </p>
+                      <p className="text-xs text-gray-600 italic">
+                        • approved at {formatDate(new Date(step.actedAt))}
+                      </p>
+                    </div>
+                    <div className="text-green-600">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                  </div>
+                ))}
             </div>
 
             <hr className="my-6" />

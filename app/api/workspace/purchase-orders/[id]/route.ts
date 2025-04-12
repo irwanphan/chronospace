@@ -43,6 +43,16 @@ export async function GET(
               include: {
                 actor: true
               }
+            },
+            approvalSteps: {
+              include: {
+                role: true,
+                specificUser: true,
+                actor: true
+              },
+              orderBy: {
+                stepOrder: 'asc'
+              }
             }
           }
         },
