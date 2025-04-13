@@ -61,42 +61,149 @@ export async function POST(
 
     // Generate HTML content for PDF
     const content = `
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 40px;
+          color: #333;
+          line-height: 1.6;
+        }
+        .header {
+          margin-bottom: 30px;
+        }
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+        .info-row {
+          display: flex;
+          margin-bottom: 10px;
+        }
+        .info-label {
+          color: #666;
+          width: 120px;
+        }
+        .info-value {
+          color: #333;
+          font-weight: 500;
+        }
+        .section-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin: 30px 0 20px;
+        }
+        .budget-info {
+          background: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0 30px;
+        }
+        th, td {
+          border: 1px solid #ddd;
+          padding: 12px;
+          text-align: left;
+        }
+        th {
+          background-color: #f8f9fa;
+          font-weight: 600;
+        }
+        .text-right {
+          text-align: right;
+        }
+        .total-section {
+          text-align: right;
+          margin: 20px 0;
+          font-size: 18px;
+          font-weight: bold;
+        }
+        .signatures {
+          margin-top: 50px;
+        }
+        .signature-box {
+          margin-bottom: 30px;
+        }
+        .signature-line {
+          border-top: 1px solid #333;
+          padding-top: 8px;
+          font-weight: 500;
+        }
+        .signature-role {
+          color: #666;
+          font-size: 14px;
+        }
+        .signature-date {
+          color: #666;
+          font-size: 12px;
+          font-style: italic;
+        }
+      </style>
+
       <div class="header">
-        <h1>Purchase Order</h1>
-        <h2>${po.code}</h2>
+        <h1>Purchase Order Details</h1>
       </div>
 
       <div class="info-grid">
         <div>
-          <div class="info-item">
+          <div class="info-row">
+            <div class="info-label">PO Code:</div>
+            <div class="info-value">${po.code}</div>
+          </div>
+          <div class="info-row">
             <div class="info-label">Created By:</div>
-            <div>${po.user.name}</div>
+            <div class="info-value">${po.user.name}</div>
           </div>
-          <div class="info-item">
-            <div class="info-label">Work Division:</div>
-            <div>${po.budget.workDivision.name}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Project:</div>
-            <div>${po.budget.project.title}</div>
+          <div class="info-row">
+            <div class="info-label">From PR:</div>
+            <div class="info-value">${po.purchaseRequest.code}</div>
           </div>
         </div>
         <div>
-          <div class="info-item">
-            <div class="info-label">Date:</div>
-            <div>${formatDate(po.createdAt)}</div>
+          <div class="info-row">
+            <div class="info-label">Created At:</div>
+            <div class="info-value">${formatDate(po.createdAt)}</div>
           </div>
-          <div class="info-item">
+          <div class="info-row">
+            <div class="info-label">Print Count:</div>
+            <div class="info-value">${po.printCount + 1}</div>
+          </div>
+          <div class="info-row">
             <div class="info-label">Status:</div>
-            <div>${po.status}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Purchase Request:</div>
-            <div>${po.purchaseRequest.code}</div>
+            <div class="info-value">${po.status}</div>
           </div>
         </div>
       </div>
 
+      <h2 class="section-title">Order Information</h2>
+      
+      <div class="budget-info">
+        <div class="info-row">
+          <div class="info-label">Related Budget:</div>
+          <div class="info-value">${po.budget.title}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Related Project:</div>
+          <div class="info-value">${po.budget.project.title}</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">Order Title:</div>
+        <div class="info-value">${po.title}</div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-label">Description:</div>
+        <div class="info-value">${po.description || '-'}</div>
+      </div>
+
+      <h2 class="section-title">Item List</h2>
       <table>
         <thead>
           <tr>
@@ -104,8 +211,8 @@ export async function POST(
             <th>Description</th>
             <th>Qty</th>
             <th>Unit</th>
-            <th>Unit Price</th>
-            <th>Total Price</th>
+            <th class="text-right">Unit Price</th>
+            <th class="text-right">Total Price</th>
             <th>Vendor</th>
           </tr>
         </thead>
@@ -125,14 +232,16 @@ export async function POST(
       </table>
 
       <div class="total-section">
-        <h3>Total: ${formatCurrency(po.items.reduce((sum: number, item: PurchaseOrderItem) => sum + (item.qty * item.unitPrice), 0))}</h3>
+        Total: ${formatCurrency(po.items.reduce((sum: number, item: PurchaseOrderItem) => sum + (item.qty * item.unitPrice), 0))}
       </div>
 
+      <h2 class="section-title">Approved by</h2>
       <div class="signatures">
         ${po.purchaseRequest.approvalSteps.map((step) => `
           <div class="signature-box">
             <div class="signature-line">${step.actor?.name || 'N/A'}</div>
             <div class="signature-role">${step.role.roleName}</div>
+            <div class="signature-date">• approved at ${step.actedAt ? formatDate(step.actedAt) : 'N/A'}</div>
           </div>
         `).join('')}
       </div>

@@ -223,7 +223,7 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
     <div>
       <div className="space-y-8 max-w-4xl">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold mb-4">Purchase Order Details</h1>
+          <h1 className="text-2xl font-semibold">Purchase Order Details</h1>
           <div className="flex items-center gap-2">
             {!purchaseOrder?.documentId ? (
               <button
