@@ -57,7 +57,7 @@ interface PurchaseRequest {
   };
 }
 
-type FilterType = 'in-queue' | 'stale' | 'approved' | 'all';
+type FilterType = 'in-queue' | 'stale' | 'approved' | 'completed' | 'all';
 
 export default function WorkspacePage() {
   const { data: session, status } = useSession();
@@ -121,7 +121,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
   const filterRequests = (requests: PurchaseRequest[]) => {
     switch (activeFilter) {
       case 'in-queue':
-        return requests.filter(req => req.status !== 'Approved');
+        return requests.filter(req => req.status !== 'Approved' && req.status !== 'Completed');
       
       case 'stale':
         const threeDaysAgo = new Date();
@@ -134,6 +134,9 @@ function WorkspaceContent({ session }: { session: Session | null }) {
       case 'approved':
         return requests.filter(req => req.status === 'Approved');
       
+      case 'completed':
+        return requests.filter(req => req.status === 'Completed');
+
       default:
         return requests;
     }
@@ -272,6 +275,16 @@ function WorkspaceContent({ session }: { session: Session | null }) {
                   onClick={() => handleFilterChange('approved')}
                 >
                   Approved
+                </button>
+                <button
+                  className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
+                    activeFilter === 'completed' 
+                      ? 'bg-blue-50 text-blue-600 border-blue-600' 
+                      : 'hover:bg-gray-50 border-gray-300'
+                  }`}
+                  onClick={() => handleFilterChange('completed')}
+                >
+                  Completed
                 </button>
                 <button 
                   className={`px-3 py-1 rounded-lg border text-sm transition-colors ${
