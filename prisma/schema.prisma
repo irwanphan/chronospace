@@ -437,30 +437,30 @@ model ActivityHistory {
 }
 
 model Document {
-  id            String    @id @default(cuid())
-  projectId     String?
-  project       Project?  @relation(fields: [projectId], references: [id])
-  fileName      String
-  fileUrl       String    @db.Text
-  fileType      String?
-  uploadedAt    DateTime  @default(now())
-  uploadedBy    String
-  uploader      User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
+  id          String    @id @default(cuid())
+  fileName    String
+  fileUrl     String
+  fileType    String?
+  fileData    Bytes?    // For storing PDF data
+  uploadedAt  DateTime  @default(now())
+  uploadedBy  String
+  uploader    User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
+  project     Project   @relation(fields: [projectId], references: [id])
+  projectId   String
+  entityType  String    // Type of entity (e.g., 'PURCHASE_ORDER')
+  entityId    String    // ID of the related entity
   
   // Digital signature fields
-  signedFileUrl String?   @db.Text
+  signedFileUrl String?
   signedAt      DateTime?
   signedBy      String?
   signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
-  verificationCode String? @unique // Unique code for document verification
 
-  // Multiple signatures
+  // Relations
   signatures    DocumentSignature[]
+  purchaseOrder PurchaseOrder?
 
   @@map("documents")
-  @@index([projectId])
-  @@index([uploadedBy])
-  @@index([signedBy])
 }
 
 model DocumentSignature {
@@ -534,12 +534,15 @@ model PurchaseOrder {
   items             PurchaseOrderItem[]
   histories         PurchaseOrderHistory[]
   printCount        Int                   @default(0)
+  documentId        String?               @unique  // Reference to generated document
+  document          Document?             @relation(fields: [documentId], references: [id])
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
 
   @@index([userId])
   @@index([budgetId])
   @@index([purchaseRequestId])
+  @@index([documentId])
   @@map("purchase_orders")
 }
 

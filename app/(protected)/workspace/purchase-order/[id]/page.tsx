@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 // import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { ChevronLeft, Download, Printer, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, Download, Printer, CheckCircle2, FileText } from 'lucide-react';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
-// import { Modal } from '@/components/ui/Modal';
+import { toast } from 'react-hot-toast';
 
 interface PurchaseOrderHistory {
   id: string;
@@ -77,16 +77,18 @@ interface PurchaseOrder {
       actedAt: string;
     }[];
   };
+  documentId?: string;
 }
 
 export default function ViewPurchaseOrderPage({ params }: { params: { id: string } }) {
-  // const router = useRouter();
+  const router = useRouter();
   // const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,7 +109,34 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
     fetchData();
   }, [params.id]);
 
+  const handleGenerateDocument = async () => {
+    try {
+      setIsGenerating(true);
+      const response = await fetch(`/api/purchase-order/${params.id}/generate`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate document');
+      }
+
+      const data = await response.json();
+      router.refresh();
+      toast.success('Document generated successfully');
+    } catch (error) {
+      console.error('Error generating document:', error);
+      toast.error('Failed to generate document');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handlePrint = async () => {
+    if (!purchaseOrder?.documentId) {
+      setError('Please generate the document first');
+      return;
+    }
+
     try {
       setIsPrinting(true);
       
@@ -138,6 +167,11 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
   };
 
   const handleDownload = async () => {
+    if (!purchaseOrder?.documentId) {
+      setError('Please generate the document first');
+      return;
+    }
+
     try {
       setIsDownloading(true);
       
@@ -188,22 +222,35 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold mb-4">Purchase Order Details</h1>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              disabled={isPrinting}
-              className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
-            >
-              <Printer className="w-4 h-4 mr-2" />
-              {isPrinting ? 'Printing...' : 'Print'}
-            </button>
-            <button
-              onClick={handleDownload}
-              disabled={isDownloading}
-              className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              {isDownloading ? 'Downloading...' : 'Download PDF'}
-            </button>
+            {!purchaseOrder?.documentId ? (
+              <button
+                onClick={handleGenerateDocument}
+                disabled={isGenerating}
+                className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                {isGenerating ? 'Generating...' : 'Generate Document'}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handlePrint}
+                  disabled={isPrinting}
+                  className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  {isPrinting ? 'Printing...' : 'Print'}
+                </button>
+                <button
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {isDownloading ? 'Downloading...' : 'Download PDF'}
+                </button>
+              </>
+            )}
           </div>
         </div>
 
