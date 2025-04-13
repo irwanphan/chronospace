@@ -28,12 +28,15 @@ export async function POST(request: Request) {
       data: {
         fileName: title,
         fileUrl: blob.url,
-        fileType: 'pdf',
+        fileType: 'application/pdf',
         uploader: {
           connect: {
             id: session.user.id
           }
-        }
+        },
+        entityType: 'DOCUMENT',
+        entityId: '', // Empty string since this is a standalone document
+        fileData: pdfBuffer
       }
     });
 

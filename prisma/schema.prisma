@@ -85,6 +85,8 @@ model User {
   certificates             UserCertificate[]
   documentSignatures       DocumentSignature[]
   notifications            Notification[]
+  purchaseOrders           PurchaseOrder[]
+  purchaseOrderHistories   PurchaseOrderHistory[]
 
   @@map("users")
 }
@@ -110,6 +112,7 @@ model Vendor {
   updatedAt            DateTime              @updatedAt
   budgetedItems        BudgetedItem[]
   purchaseRequestItems PurchaseRequestItem[]
+  purchaseOrderItems   PurchaseOrderItem[]
 
   @@map("vendors")
 }
@@ -285,6 +288,7 @@ model Budget {
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
   PurchaseRequest       PurchaseRequest[]
+  purchaseOrders        PurchaseOrder[]
 
   @@index([projectId])
   @@index([workDivisionId])
@@ -306,6 +310,7 @@ model BudgetedItem {
   purchaseRequest      PurchaseRequest?     @relation(fields: [purchaseRequestId], references: [id])
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+  purchaseOrderItems   PurchaseOrderItem[]
 
   @@index([budgetId])
   @@index([purchaseRequestId])
@@ -349,6 +354,7 @@ model PurchaseRequest {
   createdAt     DateTime                  @default(now())
   updatedAt     DateTime                  @updatedAt
   histories     PurchaseRequestHistory[]
+  purchaseOrder PurchaseOrder?
 
   @@index([budgetId])
   @@map("purchase_requests")
@@ -431,30 +437,30 @@ model ActivityHistory {
 }
 
 model Document {
-  id            String    @id @default(cuid())
-  projectId     String?
-  project       Project?  @relation(fields: [projectId], references: [id])
-  fileName      String
-  fileUrl       String    @db.Text
-  fileType      String?
-  uploadedAt    DateTime  @default(now())
-  uploadedBy    String
-  uploader      User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
+  id          String    @id @default(cuid())
+  fileName    String
+  fileUrl     String
+  fileType    String?
+  fileData    Bytes?    // For storing PDF data
+  uploadedAt  DateTime  @default(now())
+  uploadedBy  String
+  uploader    User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
+  project     Project?  @relation(fields: [projectId], references: [id])
+  projectId   String?
+  entityType  String    // Type of entity (e.g., 'PURCHASE_ORDER')
+  entityId    String    // ID of the related entity
   
   // Digital signature fields
-  signedFileUrl String?   @db.Text
+  signedFileUrl String?
   signedAt      DateTime?
   signedBy      String?
   signedByUser  User?     @relation("UserSignedDocuments", fields: [signedBy], references: [id])
-  verificationCode String? @unique // Unique code for document verification
 
-  // Multiple signatures
+  // Relations
   signatures    DocumentSignature[]
+  purchaseOrder PurchaseOrder?
 
   @@map("documents")
-  @@index([projectId])
-  @@index([uploadedBy])
-  @@index([signedBy])
 }
 
 model DocumentSignature {
@@ -503,5 +509,74 @@ model Notification {
 
   @@index([userId])
   @@map("notifications")
+}
+
+enum PurchaseOrderStatus {
+  Draft
+  Submitted
+  Approved
+  Completed
+  Cancelled
+}
+
+model PurchaseOrder {
+  id                String                @id @default(cuid())
+  code              String                @unique
+  title             String
+  description       String?
+  status            PurchaseOrderStatus   @default(Draft)
+  userId            String
+  user              User                  @relation(fields: [userId], references: [id])
+  budgetId          String
+  budget            Budget                @relation(fields: [budgetId], references: [id])
+  purchaseRequestId String                @unique
+  purchaseRequest   PurchaseRequest       @relation(fields: [purchaseRequestId], references: [id])
+  items             PurchaseOrderItem[]
+  histories         PurchaseOrderHistory[]
+  printCount        Int                   @default(0)
+  documentId        String?               @unique  // Reference to generated document
+  document          Document?             @relation(fields: [documentId], references: [id])
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([userId])
+  @@index([budgetId])
+  @@index([purchaseRequestId])
+  @@index([documentId])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onUpdate: Cascade)
+  description     String
+  qty             Int
+  unit            String
+  unitPrice       Float
+  vendorId        String
+  vendor          Vendor        @relation(fields: [vendorId], references: [id], onUpdate: Cascade)
+  budgetItemId    String
+  budgetItem      BudgetedItem  @relation(fields: [budgetItemId], references: [id], onUpdate: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([purchaseOrderId])
+  @@index([budgetItemId])
+  @@map("purchase_order_items")
+}
+
+model PurchaseOrderHistory {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onUpdate: Cascade)
+  action          String        // e.g., "Created", "Printed", "Completed"
+  actorId         String        // user yang melakukan action
+  actor           User          @relation(fields: [actorId], references: [id])
+  comment         String?       // optional comment
+  createdAt       DateTime      @default(now())
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_histories")
 }
 

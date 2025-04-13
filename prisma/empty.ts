@@ -10,6 +10,9 @@ async function main() {
   await prisma.approvalStep.deleteMany();
   await prisma.approvalSchema.deleteMany();
   await prisma.activityHistory.deleteMany();
+  await prisma.purchaseOrderItem.deleteMany();
+  await prisma.purchaseOrderHistory.deleteMany();
+  await prisma.purchaseOrder.deleteMany();
   await prisma.purchaseRequestItem.deleteMany();
   await prisma.purchaseRequestApproval.deleteMany();
   await prisma.purchaseRequestHistory.deleteMany();

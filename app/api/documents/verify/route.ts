@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // Find the document and its signatures
     const document = await prisma.document.findFirst({
       where: {
-        verificationCode: cleanCode
+        signedFileUrl: cleanCode
       },
       include: {
         signatures: {

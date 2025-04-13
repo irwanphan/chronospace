@@ -197,6 +197,8 @@ export async function POST(request: Request) {
             fileName: `${originalFileName}.pdf`,
             fileUrl: fileUrl,
             uploadedAt: new Date(),
+            entityType: 'DOCUMENT',
+            entityId: '', // Empty string since this is a standalone document
             uploader: {
               connect: {
                 id: session.user.id
@@ -230,7 +232,6 @@ export async function POST(request: Request) {
           signedFileUrl: signedUrl,
           uploadedAt: new Date(),
           signedAt: new Date(),
-          verificationCode: verificationCode, // Add verification code
           signedByUser: {
             connect: {
               id: session.user.id
@@ -238,36 +239,15 @@ export async function POST(request: Request) {
           },
           uploader: {
             connect: {
-              id: session.user.id // Uploader is the signer for signed version
+              id: session.user.id
             }
-          }
+          },
+          entityType: 'DOCUMENT',
+          entityId: originalDocument.id // Reference to the original document
         },
         include: {
           signatures: true,
-          uploader: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: {
-                select: {
-                  roleName: true
-                }
-              }
-            }
-          },
-          signedByUser: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: {
-                select: {
-                  roleName: true
-                }
-              }
-            }
-          }
+          signedByUser: true
         }
       });
 
@@ -304,7 +284,6 @@ export async function POST(request: Request) {
               order: 'asc'
             }
           },
-          uploader: true,
           signedByUser: true
         }
       });

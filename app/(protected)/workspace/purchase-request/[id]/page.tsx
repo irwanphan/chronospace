@@ -104,6 +104,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
   const [declineComment, setDeclineComment] = useState('');
+  const [isConverting, setIsConverting] = useState(false);
 
   console.log('canReview : ', canReview);
 
@@ -252,6 +253,27 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
       setError('Failed to approve request');
     } finally {
       setIsApproving(false);
+    }
+  };
+
+  const handleConvertToPO = async () => {
+    try {
+      setIsConverting(true);
+      const response = await fetch(`/api/workspace/purchase-requests/${params.id}/convert-to-po`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to convert PR to PO');
+      }
+
+      const data = await response.json();
+      router.push(`/workspace/purchase-order/${data.purchaseOrder.id}`);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Failed to convert PR to PO');
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -474,9 +496,12 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
               purchaseRequest?.status === "Approved" && isRequestor &&
               <button
                 type="button"
+                onClick={handleConvertToPO}
+                disabled={isConverting}
                 className="px-4 py-2 border rounded-lg flex items-center bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300"
               >
-                <IconLicense className='w-4 h-4 mr-2' />Create Order
+                <IconLicense className='w-4 h-4 mr-2' />
+                {isConverting ? 'Converting...' : 'Create Order'}
               </button>
             }
             {isRequestor && (
