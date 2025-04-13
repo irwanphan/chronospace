@@ -154,17 +154,7 @@ export async function POST(
         uploadedBy: session.user.id,
         projectId: po.budget.project.id,
         entityType: 'PURCHASE_ORDER',
-        entityId: po.id,
-        uploader: {
-          connect: {
-            id: session.user.id
-          }
-        },
-        project: {
-          connect: {
-            id: po.budget.project.id
-          }
-        }
+        entityId: po.id
       }
     });
 
