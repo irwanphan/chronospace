@@ -29,10 +29,13 @@ export async function POST(request: Request) {
         fileName: title,
         fileUrl: blob.url,
         fileType: 'application/pdf',
-        uploadedBy: session.user.id,
+        uploader: {
+          connect: {
+            id: session.user.id
+          }
+        },
         entityType: 'DOCUMENT',
         entityId: '', // Empty string since this is a standalone document
-        projectId: '', // Empty string since this is a standalone document
         fileData: pdfBuffer
       }
     });

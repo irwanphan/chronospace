@@ -445,8 +445,8 @@ model Document {
   uploadedAt  DateTime  @default(now())
   uploadedBy  String
   uploader    User      @relation("UserDocuments", fields: [uploadedBy], references: [id])
-  project     Project   @relation(fields: [projectId], references: [id])
-  projectId   String
+  project     Project?  @relation(fields: [projectId], references: [id])
+  projectId   String?
   entityType  String    // Type of entity (e.g., 'PURCHASE_ORDER')
   entityId    String    // ID of the related entity
   

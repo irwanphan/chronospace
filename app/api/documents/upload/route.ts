@@ -34,7 +34,9 @@ export async function POST(request: Request) {
           connect: {
             id: session.user.id
           }
-        }
+        },
+        entityType: 'DOCUMENT',
+        entityId: '' // Empty string since this is a standalone document
       }
     });
 
