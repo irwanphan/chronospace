@@ -85,7 +85,6 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
   const [error, setError] = useState<string | null>(null);
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
@@ -169,54 +168,6 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
     }
   };
 
-  const handleDownload = async () => {
-    if (!purchaseOrder?.documentId) {
-      setError('Please generate the document first');
-      return;
-    }
-
-    try {
-      setIsDownloading(true);
-      
-      // First increment the print count
-      const response = await fetch(`/api/workspace/purchase-orders/${params.id}/increment-print-count`, {
-        method: 'POST'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update print count');
-      }
-
-      // Then trigger download
-      const downloadResponse = await fetch(`/api/workspace/purchase-orders/${params.id}/download`);
-      if (!downloadResponse.ok) {
-        throw new Error('Failed to download document');
-      }
-
-      const blob = await downloadResponse.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${purchaseOrder?.code || 'purchase-order'}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      // Refresh the data to get updated print count
-      const refreshResponse = await fetch(`/api/workspace/purchase-orders/${params.id}`);
-      if (refreshResponse.ok) {
-        const data = await refreshResponse.json();
-        setPurchaseOrder(data.purchaseOrder);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setError('Failed to download document');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   if (isLoading) return <LoadingSpin />;
 
   return (
@@ -244,14 +195,15 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
                   <Printer className="w-4 h-4 mr-2" />
                   {isPrinting ? 'Printing...' : 'Print'}
                 </button>
-                <button
-                  onClick={handleDownload}
-                  disabled={isDownloading}
+                <Link
+                  href={`/api/documents/${purchaseOrder.documentId}/download`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  {isDownloading ? 'Downloading...' : 'Download PDF'}
-                </button>
+                  Download PDF
+                </Link>
               </>
             )}
           </div>
