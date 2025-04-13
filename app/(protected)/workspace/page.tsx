@@ -237,7 +237,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
           </div>
         </div>
 
-        {type === 'purchase-order' && <PurchaseOrderList />}
+        {type === 'purchase-order' && <PurchaseOrderList displayAsList={displayAsList} />}
         {(!type || type === 'purchase-request') && (
           <>
             
