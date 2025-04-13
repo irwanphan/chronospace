@@ -200,7 +200,7 @@ export async function POST(
             <div class="signatures">
               ${po.purchaseRequest.approvalSteps.map(step => `
                 <div class="signature-box">
-                  <div class="signature-line">${step.actor.name}</div>
+                  <div class="signature-line">${step.actor?.name || ''}</div>
                   <div class="signature-role">${step.role.roleName}</div>
                 </div>
               `).join('')}
@@ -212,7 +212,7 @@ export async function POST(
 
     // Generate PDF using puppeteer
     const browser = await puppeteer.launch({
-      headless: 'new'
+      headless: true
     });
     const page = await browser.newPage();
     await page.setContent(html);
