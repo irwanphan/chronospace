@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 // import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
 import { ChevronLeft, Download, Printer, CheckCircle2, FileText } from 'lucide-react';
@@ -81,7 +80,6 @@ interface PurchaseOrder {
 }
 
 export default function ViewPurchaseOrderPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
   // const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,8 +118,13 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
         throw new Error('Failed to generate document');
       }
 
-      const data = await response.json();
-      router.refresh();
+      // Refresh the data to get the updated documentId
+      const refreshResponse = await fetch(`/api/workspace/purchase-orders/${params.id}`);
+      if (refreshResponse.ok) {
+        const { purchaseOrder: updatedPO } = await refreshResponse.json();
+        setPurchaseOrder(updatedPO);
+      }
+
       toast.success('Document generated successfully');
     } catch (error) {
       console.error('Error generating document:', error);
@@ -287,6 +290,18 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
                   'text-gray-900'
                 }`}>{purchaseOrder?.status}</span>
               </div>
+              {purchaseOrder?.documentId && (
+                <div className="text-sm text-gray-500">
+                  Document: <a 
+                    href={`/api/documents/${purchaseOrder.documentId}/download`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-blue-600 hover:underline"
+                  >
+                    Download PDF
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </Card>
