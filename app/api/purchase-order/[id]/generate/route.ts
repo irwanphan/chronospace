@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { generatePDF } from '@/lib/pdf-generator';
 import type { PurchaseOrderItem } from '@prisma/client';
+import { put } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
 
@@ -144,11 +145,17 @@ export async function POST(
       footer: `Generated on ${formatDate(new Date())}`
     });
 
+    // Upload PDF to Vercel Blob
+    const { url } = await put(`documents/PO-${po.code}.pdf`, pdfBuffer, {
+      access: 'public',
+      contentType: 'application/pdf'
+    });
+
     // Create document record
     const document = await prisma.document.create({
       data: {
         fileName: `PO-${po.code}.pdf`,
-        fileUrl: '',
+        fileUrl: url,
         fileType: 'application/pdf',
         fileData: pdfBuffer,
         uploadedBy: session.user.id,
