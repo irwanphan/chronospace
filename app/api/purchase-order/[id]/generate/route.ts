@@ -170,6 +170,7 @@ export async function POST(
       where: { id: po.id },
       data: {
         documentId: document.id,
+        status: 'Completed',
         printCount: {
           increment: 1
         }
@@ -180,13 +181,13 @@ export async function POST(
     await prisma.purchaseOrderHistory.create({
       data: {
         purchaseOrderId: po.id,
-        action: 'Generated',
+        action: 'Generated Document',
         actorId: session.user.id,
-        comment: 'Document generated'
+        comment: `Generated document with code ${po.code} and marked as Completed`
       }
     });
 
-    return NextResponse.json({ success: true, document: document });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error generating purchase order document:', error);
     return NextResponse.json(
