@@ -181,80 +181,66 @@ function WorkspaceContent({ session }: { session: Session | null }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Workspace</h1>
-        <div className="flex items-center gap-4">
-          <Link 
-            href="?type=purchase-request" 
-            className={`text-gray-600 px-2 h-8 py-1 border-b-2 transition-all duration-300 ${
-              (!type || type === 'purchase-request') ? 'border-blue-600 text-blue-600' : 'border-transparent hover:border-blue-600'
-            }`}
-          >
-            Purchase Request
-          </Link>
-          <Link 
-            href="?type=purchase-order" 
-            className={`text-gray-600 px-2 h-8 py-1 border-b-2 transition-all duration-300 ${
-              type === 'purchase-order' ? 'border-blue-600 text-blue-600' : 'border-transparent hover:border-blue-600'
-            }`}
-          >
-            Purchase Order
-          </Link>
+      <div className="max-w-full">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Overview</h1>
         </div>
-      </div>
 
-      {type === 'purchase-order' && <PurchaseOrderList />}
-      {(!type || type === 'purchase-request') && (
-        <>
-          <div className="max-w-full">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-semibold">Overview</h1>
-            </div>
+        { error && (
+          <div className="mb-4">
+            <p className="text-red-500">{error}</p>
+          </div>
+        )}
 
-            { error && (
-              <div className="mb-4">
-                <p className="text-red-500">{error}</p>
-              </div>
-            )}
+        {/* Filter Tabs */}
+        <div className="flex flex-row gap-4 border-b border-gray-200 mb-4 justify-between">
+          <div className="flex items-center gap-4">
+            <Link 
+              href="?type=purchase-request" 
+              className={`px-2 h-8 py-1 border-b-2 transition-all duration-300 ${
+                (!type || type === 'purchase-request') ? 'border-blue-600 text-blue-600' : 'border-transparent hover:border-blue-600'
+              }`}
+            >
+              Purchase Request
+            </Link>
+            <Link 
+              href="?type=purchase-order" 
+              className={`px-2 h-8 py-1 border-b-2 transition-all duration-300 ${
+                type === 'purchase-order' ? 'border-blue-600 text-blue-600' : 'border-transparent hover:border-blue-600'
+              }`}
+            >
+              Purchase Order
+            </Link>
+            <Link href="?type=memo" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
+              Memo
+            </Link>
+          </div>
 
-            {/* Filter Tabs */}
-            <div className="flex flex-row gap-4 border-b border-gray-200 mb-4 justify-between">
-              <div className="flex items-center gap-4">
-                <Link href="?type=all" className="text-blue-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
-                  Show All Request
-                </Link>
-                <Link href="?type=purchase-request" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
-                  Purchase Request
-                </Link>
-                <Link href="?type=purchase-order" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
-                  Purchase Order
-                </Link>
-                <Link href="?type=memo" className="text-gray-600 px-2 h-8 py-1 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300">
-                  Memo
-                </Link>
-              </div>
+          <div className="flex items-center gap-2">
+            {/* clickable button showing thumbnail and list */}
+            <button 
+              className={`px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300 ${
+                !displayAsList ? 'text-blue-600 border-blue-600' : 'text-gray-600'
+              }`} 
+              onClick={() => setDisplayAsList(false)}
+            >
+              <Grid2X2 className="w-5 h-5" />
+            </button>
+            <button 
+              className={`px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300 ${
+                displayAsList ? 'text-blue-600 border-blue-600' : 'text-gray-600'
+              }`} 
+              onClick={() => setDisplayAsList(true)}
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
-              <div className="flex items-center gap-2">
-                {/* clickable button showing thumbnail and list */}
-                <button 
-                  className={`px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300 ${
-                    !displayAsList ? 'text-blue-600 border-blue-600' : 'text-gray-600'
-                  }`} 
-                  onClick={() => setDisplayAsList(false)}
-                >
-                  <Grid2X2 className="w-5 h-5" />
-                </button>
-                <button 
-                  className={`px-2 h-8 border-b-2 border-transparent hover:border-blue-600 transition-all duration-300 ${
-                    displayAsList ? 'text-blue-600 border-blue-600' : 'text-gray-600'
-                  }`} 
-                  onClick={() => setDisplayAsList(true)}
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
+        {type === 'purchase-order' && <PurchaseOrderList />}
+        {(!type || type === 'purchase-request') && (
+          <>
+            
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex items-center gap-2">
                 <button 
@@ -404,15 +390,15 @@ function WorkspaceContent({ session }: { session: Session | null }) {
               onPageChange={setCurrentPage}
             />
 
-          </div>
+          </>
+        )}
 
-          {canCreateRequest && (
-            <div className="relative">
-              <CreateRequestFAB />
-            </div>
-          )}
-        </>
-      )}
+        {canCreateRequest && (
+          <div className="relative">
+            <CreateRequestFAB />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
