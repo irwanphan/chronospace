@@ -78,6 +78,7 @@ export async function GET(
             }
           }
         },
+        purchaseOrder: true,
         histories: {
           include: {
             actor: true
