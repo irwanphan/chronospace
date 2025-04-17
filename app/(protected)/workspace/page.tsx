@@ -104,14 +104,14 @@ function WorkspaceContent({ session }: { session: Session | null }) {
     viewPurchaseRequest: false,
     editPurchaseRequest: false,
     reviewApprovePurchaseRequest: false,
-    viewPurchaseOrder: false,
+    viewOthersPurchaseRequest: false,
+    viewOtherDivisionPurchaseRequest: false,
     createPurchaseOrder: false,
+    viewPurchaseOrder: false,
     viewOthersPurchaseOrder: false,
     viewOtherDivisionPurchaseOrder: false,
     generatePurchaseOrderDocument: false,
-    signDocument: false,
-    viewOthersPurchaseRequest: false,
-    viewOtherDivisionPurchaseRequest: false
+    signDocument: false
   };
 
   const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
