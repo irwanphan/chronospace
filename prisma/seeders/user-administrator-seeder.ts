@@ -6,12 +6,23 @@ const password = "password";
 export async function userAdministratorSeeder() {
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // Create role first
+  const role = await prisma.role.create({
+    data: { 
+      roleCode: 'ADMIN',
+      roleName: 'Administrator',
+      description: 'Administrator',
+      upperLevel: null,
+      budgetLimit: 0,
+    },
+  });
+
   const userData = [
     { 
       name: 'John CEO', 
       email: 'magus@chronospace.id', 
       password: hashedPassword, 
-      roleId: 'administrator', 
+      roleId: role.id, 
       phone: '000', 
       workDivisionId: 'RND', 
       employeeId: 'CHR', 
@@ -26,20 +37,10 @@ export async function userAdministratorSeeder() {
     data: userData[0]
   });
 
-  await prisma.role.create({
-    data: { 
-      roleCode: 'ADMIN',
-      roleName: 'Administrator',
-      description: 'Administrator',
-      upperLevel: null,
-      budgetLimit: 0,
-    },
-  });
-
   await prisma.userRole.create({
     data: {
       userId: user.id,
-      roleId: 'administrator',
+      roleId: role.id,
     },
   });
 
