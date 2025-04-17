@@ -56,6 +56,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: true,
           viewOthersPurchaseOrder: true,
           viewOtherDivisionPurchaseOrder: true,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -112,6 +113,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: false,
           viewOthersPurchaseOrder: false,
           viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -168,6 +170,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: false,
           viewOthersPurchaseOrder: false,
           viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -281,6 +284,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: false,
           viewOthersPurchaseOrder: false,
           viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -337,6 +341,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: false,
           viewOthersPurchaseOrder: false,
           viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -393,6 +398,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: false,
           viewOthersPurchaseOrder: false,
           viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -448,6 +454,7 @@ export async function userAccessSeeder() {
           viewPurchaseOrder: false,
           viewOthersPurchaseOrder: false,
           viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       }
