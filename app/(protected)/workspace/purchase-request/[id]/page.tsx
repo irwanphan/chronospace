@@ -69,6 +69,9 @@ interface PurchaseRequest {
     specificUserId: string;
     roleId: string;
   };
+  purchaseOrder: {
+    id: string;
+  } | null;
 }
 type ApprovalStep = {
   roleId: string;
@@ -492,8 +495,20 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             >
               <ChevronLeft className='w-4 h-4 mr-2' />Back
             </Link>
-            {
-              purchaseRequest?.status === "Approved" && isRequestor &&
+            {purchaseRequest?.status === "Completed" && purchaseRequest?.purchaseOrder && (
+              <button
+                type="button"
+                onClick={() => {
+                  const poId = (purchaseRequest.purchaseOrder as { id: string }).id;
+                  router.push(`/workspace/purchase-order/${poId}`);
+                }}
+                disabled={isConverting}
+                className="px-4 py-2 border rounded-lg flex items-center bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300"
+              >
+                <IconLicense className='w-4 h-4 mr-2' />View Order
+              </button>
+            )}
+            {purchaseRequest?.status === "Approved" && isRequestor && (
               <button
                 type="button"
                 onClick={handleConvertToPO}
@@ -503,7 +518,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                 <IconLicense className='w-4 h-4 mr-2' />
                 {isConverting ? 'Converting...' : 'Create Order'}
               </button>
-            }
+            )}
             {isRequestor && (
               purchaseRequest?.status === 'Revision' || 
               !purchaseRequest?.approvalSteps.some(step => step.status === 'Approved')
