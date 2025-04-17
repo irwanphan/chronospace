@@ -60,7 +60,8 @@ export async function GET(
           include: {
             actor: true
           }
-        }
+        },
+        document: true
       }
     });
 

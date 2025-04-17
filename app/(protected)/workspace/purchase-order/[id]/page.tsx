@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { ChevronLeft, Download, Printer, CheckCircle2, FileText } from 'lucide-react';
+import { ChevronLeft, Download, Printer, CheckCircle2, FileText, Eye } from 'lucide-react';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 import { toast } from 'react-hot-toast';
@@ -77,6 +77,10 @@ interface PurchaseOrder {
     }[];
   };
   documentId?: string;
+  document?: {
+    fileUrl: string;
+    fileName: string;
+  };
 }
 
 export default function ViewPurchaseOrderPage({ params }: { params: { id: string } }) {
@@ -91,7 +95,7 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/workspace/purchase-orders/${params.id}`);
+        const response = await fetch(`/api/workspace/purchase-orders/${params.id}?include=document`);
         if (response.ok) {
           const data = await response.json();
           setPurchaseOrder(data.purchaseOrder);
@@ -187,6 +191,14 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
               </button>
             ) : (
               <>
+                <Link
+                  href={`/documents/view?url=${encodeURIComponent(purchaseOrder.document?.fileUrl || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+                >
+                  <Eye className="w-4 h-4 mr-2" /> View PDF
+                </Link>
                 <button
                   onClick={handlePrint}
                   disabled={isPrinting}
@@ -244,14 +256,12 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
               </div>
               {purchaseOrder?.documentId && (
                 <div className="text-sm text-gray-500">
-                  Document: <a 
-                    href={`/api/documents/${purchaseOrder.documentId}/download`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  Document: <Link 
+                    href={`/documents/view?url=${encodeURIComponent(purchaseOrder.document?.fileUrl || '')}`}
                     className="font-semibold text-blue-600 hover:underline"
                   >
-                    Download PDF
-                  </a>
+                    {purchaseOrder.document?.fileName}
+                  </Link>
                 </div>
               )}
             </div>
