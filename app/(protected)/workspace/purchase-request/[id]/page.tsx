@@ -108,14 +108,14 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [isDeclining, setIsDeclining] = useState(false);
   const [declineComment, setDeclineComment] = useState('');
   const [isConverting, setIsConverting] = useState(false);
-
-  console.log('canReview : ', canReview);
+  const canCreatePurchaseOrder = session?.user?.access?.workspaceAccess?.createPurchaseOrder || false;
+  // console.log('canReview : ', canReview);
 
   // Debug
-  console.log('purchaseRequest : ', purchaseRequest);
+  // console.log('purchaseRequest : ', purchaseRequest);
   // console.log('viewers : ', purchaseRequest?.viewers);
   // console.log('current user role : ', `role-${session?.user?.roleId}`);
-  console.log('current step : ', currentStep);
+  // console.log('current step : ', currentStep);
   // console.log('has access : ', hasAccess);
 
   useEffect(() => {
@@ -508,7 +508,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
                 <IconLicense className='w-4 h-4 mr-2' />View Order
               </button>
             )}
-            {purchaseRequest?.status === "Approved" && isRequestor && (
+            {purchaseRequest?.status === "Approved" && canCreatePurchaseOrder && isRequestor && (
               <button
                 type="button"
                 onClick={handleConvertToPO}
