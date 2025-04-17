@@ -21,6 +21,11 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const roles = await prisma.role.findMany({
+      where: {
+        roleCode: {
+          not: 'ADMIN',
+        },
+      },
       select: {
         id: true,
         roleName: true,
