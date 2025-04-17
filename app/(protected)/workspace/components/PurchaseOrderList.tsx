@@ -75,6 +75,14 @@ export default function PurchaseOrderList(
     );
   }
 
+  if (purchaseOrders.length === 0) {
+    return (
+      <div className="flex p-3">
+        <p className="text-gray-500">No purchase orders found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
 

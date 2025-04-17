@@ -109,7 +109,7 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
   const handleGenerateDocument = async () => {
     try {
       setIsGenerating(true);
-      const response = await fetch(`/api/purchase-order/${params.id}/generate`, {
+      const response = await fetch(`/api/workspace/purchase-orders/${params.id}/generate`, {
         method: 'POST',
       });
       
