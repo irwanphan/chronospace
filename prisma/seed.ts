@@ -9,6 +9,7 @@ import { approvalSchemaSeeder } from './seeders/approval-schema-seeder';
 import { projectSeeder } from './seeders/project-seeder';
 import { budgetSeeder } from './seeders/budget-seeder';
 import { purchaseRequestSeeder } from './seeders/purchase-request-seeder';
+import { userAdministratorSeeder } from './seeders/user-administrator-seeder';
 
 async function main() {
   // Clear existing data
@@ -39,6 +40,7 @@ async function main() {
   await prisma.role.deleteMany();
   // Seeders
   await workDivisionSeeder();
+  await userAdministratorSeeder();
   await roleSeeder();
   await userSeeder();
   await userAccessSeeder();

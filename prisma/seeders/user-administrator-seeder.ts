@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 const password = "password";
 
-export async function userSeeder() {
+export async function userAdministratorSeeder() {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const userData = [
