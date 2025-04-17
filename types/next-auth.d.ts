@@ -55,6 +55,13 @@ declare module "next-auth" {
           viewPurchaseRequest: boolean;
           editPurchaseRequest: boolean;
           reviewApprovePurchaseRequest: boolean;
+          viewOthersPurchaseRequest: boolean;
+          viewOtherDivisionPurchaseRequest: boolean;
+          createPurchaseOrder: boolean;
+          viewPurchaseOrder: boolean;
+          viewOthersPurchaseOrder: boolean;
+          viewOtherDivisionPurchaseOrder: boolean;
+          generatePurchaseOrderDocument: boolean;
           signDocument: boolean;
         };
       };

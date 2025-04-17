@@ -5,61 +5,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import { AdapterUser } from "next-auth/adapters";
 import bcrypt from "bcryptjs";
+import { MenuAccess, ActivityAccess, WorkspaceAccess } from "@/types/access-control";
 
 interface CustomUser extends DefaultUser {
   role: string;
   roleId: string;
   emailVerified: Date | null;
-}
-
-interface MenuAccess {
-  timeline: boolean;
-  workspace: boolean;
-  projectPlanning: boolean;
-  budgetPlanning: boolean;
-  userManagement: boolean;
-  workspaceManagement: boolean;
-  documents: boolean;
-}
-
-interface ActivityAccess {
-  createProject: boolean;
-  editProject: boolean;
-  deleteProject: boolean;
-  createBudget: boolean;
-  editBudget: boolean;
-  deleteBudget: boolean;
-  createWorkDivision: boolean;
-  editWorkDivision: boolean;
-  deleteWorkDivision: boolean;
-  createRole: boolean;
-  editRole: boolean;
-  deleteRole: boolean;
-  createVendor: boolean;
-  editVendor: boolean;
-  deleteVendor: boolean;
-  createApprovalSchema: boolean;
-  editApprovalSchema: boolean;
-  deleteApprovalSchema: boolean;
-  createUser: boolean;
-  editUser: boolean;
-  deleteUser: boolean;
-  changePassword: boolean;
-  changeOtherUserPassword: boolean;
-  manageUserAccess: boolean;
-  createDocument: boolean;
-  uploadDocument: boolean;
-  deleteDocument: boolean;
-  downloadDocument: boolean;
-  generateCertificate: boolean;
-}
-
-interface WorkspaceAccess {
-  createPurchaseRequest: boolean;
-  reviewApprovePurchaseRequest: boolean;
-  viewPurchaseRequest: boolean;
-  editPurchaseRequest: boolean;
-  signDocument: boolean;
 }
 
 export const authOptions: AuthOptions = {
@@ -212,10 +163,17 @@ export const authOptions: AuthOptions = {
           },
           workspaceAccess: (userAccess?.workspaceAccess as unknown as WorkspaceAccess) || {
             createPurchaseRequest: false,
-            reviewApprovePurchaseRequest: false,
             viewPurchaseRequest: false,
             editPurchaseRequest: false,
-            signDocument: false
+            reviewApprovePurchaseRequest: false,
+            viewOthersPurchaseRequest: false,
+            viewOtherDivisionPurchaseRequest: false,
+            createPurchaseOrder: false,
+            viewPurchaseOrder: false,
+            viewOthersPurchaseOrder: false,
+            viewOtherDivisionPurchaseOrder: false,
+            generatePurchaseOrderDocument: false,
+            signDocument: false,
           }
         };
       }
