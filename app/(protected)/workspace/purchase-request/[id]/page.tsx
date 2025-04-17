@@ -109,6 +109,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
   const [declineComment, setDeclineComment] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const canCreatePurchaseOrder = session?.user?.access?.workspaceAccess?.createPurchaseOrder || false;
+  const canViewPurchaseOrder = session?.user?.access?.workspaceAccess?.viewPurchaseOrder || false;
   // console.log('canReview : ', canReview);
 
   // Debug
@@ -495,7 +496,7 @@ export default function ViewRequestPage({ params }: { params: { id: string } }) 
             >
               <ChevronLeft className='w-4 h-4 mr-2' />Back
             </Link>
-            {purchaseRequest?.status === "Completed" && purchaseRequest?.purchaseOrder && (
+            {purchaseRequest?.status === "Completed" && canViewPurchaseOrder && purchaseRequest?.purchaseOrder && (
               <button
                 type="button"
                 onClick={() => {
