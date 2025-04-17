@@ -5,11 +5,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { stripHtmlTags } from '@/lib/utils';
-import { ChevronLeft, Download, Printer, CheckCircle2, FileText } from 'lucide-react';
+import { ChevronLeft, Download, Printer, CheckCircle2, FileText, Eye } from 'lucide-react';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 import { toast } from 'react-hot-toast';
-
+import { useUserAccess } from '@/hooks/useUserAccess';
 interface PurchaseOrderHistory {
   id: string;
   action: string;
@@ -77,6 +77,10 @@ interface PurchaseOrder {
     }[];
   };
   documentId?: string;
+  document?: {
+    fileUrl: string;
+    fileName: string;
+  };
 }
 
 export default function ViewPurchaseOrderPage({ params }: { params: { id: string } }) {
@@ -86,12 +90,14 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const canGenerateDocument = useUserAccess('workspaceAccess', 'generatePurchaseOrderDocument');
+  console.log('canGenerateDocument : ', canGenerateDocument);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/workspace/purchase-orders/${params.id}`);
+        const response = await fetch(`/api/workspace/purchase-orders/${params.id}?include=document`);
         if (response.ok) {
           const data = await response.json();
           setPurchaseOrder(data.purchaseOrder);
@@ -109,7 +115,7 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
   const handleGenerateDocument = async () => {
     try {
       setIsGenerating(true);
-      const response = await fetch(`/api/purchase-order/${params.id}/generate`, {
+      const response = await fetch(`/api/workspace/purchase-orders/${params.id}/generate`, {
         method: 'POST',
       });
       
@@ -179,14 +185,24 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
             {!purchaseOrder?.documentId ? (
               <button
                 onClick={handleGenerateDocument}
-                disabled={isGenerating}
-                className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+                disabled={isGenerating || !canGenerateDocument}
+                className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50 transition-all duration-300
+                disabled:opacity-50 border-transparent hover:border-gray-600 disabled:hover:border-red-600
+                disabled:cursor-not-allowed"
               >
                 <FileText className="w-4 h-4 mr-2" />
                 {isGenerating ? 'Generating...' : 'Generate Document'}
               </button>
             ) : (
               <>
+                <Link
+                  href={`/documents/view?url=${encodeURIComponent(purchaseOrder.document?.fileUrl || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+                >
+                  <Eye className="w-4 h-4 mr-2" /> View PDF
+                </Link>
                 <button
                   onClick={handlePrint}
                   disabled={isPrinting}
@@ -244,14 +260,12 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
               </div>
               {purchaseOrder?.documentId && (
                 <div className="text-sm text-gray-500">
-                  Document: <a 
-                    href={`/api/documents/${purchaseOrder.documentId}/download`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  Document: <Link 
+                    href={`/documents/view?url=${encodeURIComponent(purchaseOrder.document?.fileUrl || '')}`}
                     className="font-semibold text-blue-600 hover:underline"
                   >
-                    Download PDF
-                  </a>
+                    {purchaseOrder.document?.fileName}
+                  </Link>
                 </div>
               )}
             </div>

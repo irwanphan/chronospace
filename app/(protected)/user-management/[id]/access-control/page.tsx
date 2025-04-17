@@ -55,6 +55,13 @@ const WORKSPACE_ACCESS_ORDER = [
   'viewPurchaseRequest',
   'editPurchaseRequest',
   'reviewApprovePurchaseRequest',
+  'viewOthersPurchaseRequest',
+  'viewOtherDivisionPurchaseRequest',
+  'createPurchaseOrder',
+  'viewPurchaseOrder',
+  'viewOthersPurchaseOrder',
+  'viewOtherDivisionPurchaseOrder',
+  'generatePurchaseOrderDocument',
   'signDocument'
 ] as const;
 
@@ -204,7 +211,7 @@ export default function UserAccessControlPage({ params }: { params: { id: string
         {/* Workspace Access */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Workspace Access</h2>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {WORKSPACE_ACCESS_ORDER.map((key) => (
               <label key={key} className="flex items-center space-x-2 cursor-pointer">
                 <input

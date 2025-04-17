@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils';
 import { ChevronRight, FileText, Printer, Download } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import LoadingSpin from '@/components/ui/LoadingSpin';
+import { useUserAccess } from '@/hooks/useUserAccess';
 
 interface PurchaseOrder {
   id: string;
@@ -40,6 +41,9 @@ export default function PurchaseOrderList(
   const [error, setError] = useState<string | null>(null);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
 
+  const canGenerateDocument = useUserAccess('workspaceAccess', 'generatePurchaseOrderDocument');
+  const canViewPurchaseOrder = useUserAccess('workspaceAccess', 'viewPurchaseOrder');
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,6 +75,14 @@ export default function PurchaseOrderList(
     return (
       <div className="bg-red-500 text-white p-4 rounded-lg">
         {error}
+      </div>
+    );
+  }
+
+  if (purchaseOrders.length === 0) {
+    return (
+      <div className="flex p-3">
+        <p className="text-gray-500">No purchase orders found</p>
       </div>
     );
   }
@@ -120,14 +132,18 @@ export default function PurchaseOrderList(
                             href={`/api/documents/${po.documentId}/download`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 hover:bg-gray-100 rounded-lg"
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                              disabled:hover:border-red-500 border border-transparent hover:border-gray-600 border-1
+                              disabled:cursor-not-allowed"
                             title="Download PDF"
                           >
                             <Download className="w-4 h-4" />
                           </a>
                           <button
                             onClick={() => window.print()}
-                            className="p-2 hover:bg-gray-100 rounded-lg"
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                              disabled:hover:border-red-500 border border-transparent hover:border-gray-600 border-1
+                              disabled:cursor-not-allowed"
                             title="Print"
                           >
                             <Printer className="w-4 h-4" />
@@ -135,19 +151,25 @@ export default function PurchaseOrderList(
                         </>
                       ) : (
                         <button
-                          onClick={() => window.location.href = `/api/purchase-order/${po.id}/generate`}
-                          className="p-2 hover:bg-gray-100 rounded-lg"
+                          onClick={() => window.location.href = `/api/workspace/purchase-orders/${po.id}/generate`}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                            disabled:hover:border-red-500 border border-transparent border-1
+                            disabled:cursor-not-allowed"
                           title="Generate Document"
+                          disabled={!canGenerateDocument}
                         >
                           <FileText className="w-4 h-4" />
                         </button>
                       )}
-                      <Link
-                        href={`/workspace/purchase-order/${po.id}`}
-                        className="p-2 hover:bg-gray-100 rounded-lg"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Link>
+                      {canViewPurchaseOrder && (
+                        <Link
+                          href={`/workspace/purchase-order/${po.id}`}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                          border border-transparent hover:border-gray-600 border-1"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -187,14 +209,18 @@ export default function PurchaseOrderList(
                         href={`/api/documents/${po.documentId}/download`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 hover:bg-gray-100 rounded-lg"
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                          disabled:hover:border-red-500 border border-transparent hover:border-gray-600 border-1
+                          disabled:cursor-not-allowed"
                         title="Download PDF"
                       >
                         <Download className="w-5 h-5" />
                       </a>
                       <button
                         onClick={() => window.print()}
-                        className="p-2 hover:bg-gray-100 rounded-lg"
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                          disabled:hover:border-red-500 border border-transparent hover:border-gray-600 border-1
+                          disabled:cursor-not-allowed"
                         title="Print"
                       >
                         <Printer className="w-5 h-5" />
@@ -202,19 +228,26 @@ export default function PurchaseOrderList(
                     </>
                   ) : (
                     <button
-                      onClick={() => window.location.href = `/api/purchase-order/${po.id}/generate`}
-                      className="p-2 hover:bg-gray-100 rounded-lg"
+                      onClick={() => window.location.href = `/api/workspace/purchase-orders/${po.id}/generate`}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                        disabled:hover:border-red-500 
+                        border border-transparent hover:border-gray-600 border-1
+                        disabled:cursor-not-allowed"
                       title="Generate Document"
+                      disabled={!canGenerateDocument}
                     >
                       <FileText className="w-5 h-5" />
                     </button>
                   )}
-                  <Link
-                    href={`/workspace/purchase-order/${po.id}`}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Link>
+                  {canViewPurchaseOrder && (
+                    <Link
+                      href={`/workspace/purchase-order/${po.id}`}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                        border border-transparent hover:border-gray-600 border-1"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </Link>
+                  )}
                 </div>
               </div>
             </Card>

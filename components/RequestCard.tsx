@@ -25,6 +25,7 @@ interface RequestCardProps {
   onCheck?: () => void;
   canCheck?: boolean;
   canReview?: boolean;
+  canCreatePurchaseOrder?: boolean;
   reviewers?: {
     specificUserIds: string[];
     roleIds: string[];
@@ -54,6 +55,7 @@ export default function RequestCard({
   canReview,
   reviewers,
   actors,
+  canCreatePurchaseOrder,
 }: RequestCardProps) {
 
   console.log('actors: ', actors);
@@ -161,13 +163,13 @@ export default function RequestCard({
                   'bg-blue-600 text-white hover:bg-blue-700' : 
                   status === "Revision" && requestor.id === currentUserId ?
                     'bg-yellow-600 text-white hover:bg-yellow-700' :
-                  status === "Approved" && requestor.id === currentUserId ?
+                  status === "Approved" && canCreatePurchaseOrder && requestor.id === currentUserId ?
                     'bg-blue-600 text-white hover:bg-blue-700' :
                     'bg-white hover:bg-gray-50'}
               `}
           >
             {
-              status === "Approved" && requestor.id === currentUserId ?
+              status === "Approved" && canCreatePurchaseOrder && requestor.id === currentUserId ?
                 <>
                   <CheckCircle className="w-5 h-5" />
                   Create Order

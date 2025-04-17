@@ -50,6 +50,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: true,
+          viewOthersPurchaseRequest: true,
+          viewOtherDivisionPurchaseRequest: true,
+          createPurchaseOrder: true,
+          viewPurchaseOrder: true,
+          viewOthersPurchaseOrder: true,
+          viewOtherDivisionPurchaseOrder: true,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -100,6 +107,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: false,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -150,6 +164,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: false,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -200,6 +221,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: false,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: false,
           signDocument: true
         }
       },
@@ -250,6 +278,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: true,
           reviewApprovePurchaseRequest: true,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -300,6 +335,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: false,
           reviewApprovePurchaseRequest: true,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -350,6 +392,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: false,
           reviewApprovePurchaseRequest: true,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       },
@@ -399,6 +448,13 @@ export async function userAccessSeeder() {
           viewPurchaseRequest: true,
           editPurchaseRequest: false,
           reviewApprovePurchaseRequest: true,
+          viewOthersPurchaseRequest: false,
+          viewOtherDivisionPurchaseRequest: false,
+          createPurchaseOrder: false,
+          viewPurchaseOrder: false,
+          viewOthersPurchaseOrder: false,
+          viewOtherDivisionPurchaseOrder: false,
+          generatePurchaseOrderDocument: true,
           signDocument: true
         }
       }

@@ -26,6 +26,14 @@ interface UserPost {
 export async function GET() {
   try {
     const users = await prisma.user.findMany({
+      where: {
+        isActive: true,
+        role: {
+          roleCode: {
+            not: 'ADMIN',
+          },
+        },
+      },
       include: {
         role: true,
         workDivision: true,
