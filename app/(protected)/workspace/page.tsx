@@ -104,13 +104,21 @@ function WorkspaceContent({ session }: { session: Session | null }) {
     viewPurchaseRequest: false,
     editPurchaseRequest: false,
     reviewApprovePurchaseRequest: false,
-    signDocument: false
+    viewPurchaseOrder: false,
+    createPurchaseOrder: false,
+    viewOthersPurchaseOrder: false,
+    viewOtherDivisionPurchaseOrder: false,
+    generatePurchaseOrderDocument: false,
+    signDocument: false,
+    viewOthersPurchaseRequest: false,
+    viewOtherDivisionPurchaseRequest: false
   };
 
   const canCreateRequest: boolean = session?.user?.access?.workspaceAccess?.createPurchaseRequest || defaultAccess.createPurchaseRequest;
   const canViewRequest: boolean = session?.user?.access?.workspaceAccess?.viewPurchaseRequest || defaultAccess.viewPurchaseRequest;
   const canReviewApproveRequest: boolean = session?.user?.access?.workspaceAccess?.reviewApprovePurchaseRequest || defaultAccess.reviewApprovePurchaseRequest;
-
+  const canCreatePurchaseOrder: boolean = session?.user?.access?.workspaceAccess?.createPurchaseOrder || defaultAccess.createPurchaseOrder;
+  
   const itemsPerPage = displayAsList ? 10 : 6;
 
   const handleFilterChange = (filter: FilterType) => {
@@ -390,6 +398,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
                       canReview={canReviewApproveRequest}
                       reviewers={request.viewers}
                       actors={request.actors}
+                      canCreatePurchaseOrder={canCreatePurchaseOrder}
                     />
                   );
                 })}
