@@ -9,7 +9,7 @@ import { ChevronLeft, Download, Printer, CheckCircle2, FileText, Eye } from 'luc
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 import { toast } from 'react-hot-toast';
-
+import { useUserAccess } from '@/hooks/useUserAccess';
 interface PurchaseOrderHistory {
   id: string;
   action: string;
@@ -90,6 +90,8 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const canGenerateDocument = useUserAccess('workspaceAccess', 'generatePurchaseOrderDocument');
+  console.log('canGenerateDocument : ', canGenerateDocument);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -183,8 +185,10 @@ export default function ViewPurchaseOrderPage({ params }: { params: { id: string
             {!purchaseOrder?.documentId ? (
               <button
                 onClick={handleGenerateDocument}
-                disabled={isGenerating}
-                className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50"
+                disabled={isGenerating || !canGenerateDocument}
+                className="px-4 py-2 border rounded-lg flex items-center hover:bg-gray-50 transition-all duration-300
+                disabled:opacity-50 border-transparent hover:border-gray-600 disabled:hover:border-red-600
+                disabled:cursor-not-allowed"
               >
                 <FileText className="w-4 h-4 mr-2" />
                 {isGenerating ? 'Generating...' : 'Generate Document'}
