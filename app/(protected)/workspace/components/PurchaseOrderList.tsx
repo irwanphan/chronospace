@@ -42,7 +42,7 @@ export default function PurchaseOrderList(
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
 
   const canGenerateDocument = useUserAccess('workspaceAccess', 'generatePurchaseOrderDocument');
-  console.log(canGenerateDocument);
+  const canViewPurchaseOrder = useUserAccess('workspaceAccess', 'viewPurchaseOrder');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,14 +161,15 @@ export default function PurchaseOrderList(
                           <FileText className="w-4 h-4" />
                         </button>
                       )}
-                      <Link
-                        href={`/workspace/purchase-order/${po.id}`}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
-                          disabled:hover:border-red-500 border border-transparent hover:border-gray-600 border-1
-                          disabled:cursor-not-allowed"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Link>
+                      {canViewPurchaseOrder && (
+                        <Link
+                          href={`/workspace/purchase-order/${po.id}`}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                          border border-transparent hover:border-gray-600 border-1"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -238,14 +239,15 @@ export default function PurchaseOrderList(
                       <FileText className="w-5 h-5" />
                     </button>
                   )}
-                  <Link
-                    href={`/workspace/purchase-order/${po.id}`}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
-                      disabled:hover:border-red-500 border border-transparent hover:border-gray-600 border-1
-                      disabled:cursor-not-allowed"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Link>
+                  {canViewPurchaseOrder && (
+                    <Link
+                      href={`/workspace/purchase-order/${po.id}`}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300
+                        border border-transparent hover:border-gray-600 border-1"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </Link>
+                  )}
                 </div>
               </div>
             </Card>
