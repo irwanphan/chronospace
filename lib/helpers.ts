@@ -27,7 +27,7 @@ export const calculateBudgetStats = (budgets: Budget[]) => {
   const delayed = budgets.filter((b: Budget) => {
     const startDate = new Date(b.startDate);
     const today = new Date();
-    return startDate < today && b.status === 'Not Started';
+    return startDate < today && b.status === 'Draft';
   }).length;
   const upcoming = budgets.filter((b: Budget) => {
     const finishDate = new Date(b.finishDate);

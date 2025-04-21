@@ -70,9 +70,22 @@ export async function POST(
             comment: 'All approval steps have been completed'
           }
         });
+
+        const purchaseRequest = await tx.purchaseRequest.findUnique({
+          where: { id: params.id },
+          select: { budgetId: true }
+        });
+
+        await tx.budget.update({
+          where: {
+            id: purchaseRequest?.budgetId
+          },
+          data: {
+            status: 'Completed'
+          }
+        });
       }
       
-
       // Update status PR
       await tx.purchaseRequest.update({
         where: { id: params.id },

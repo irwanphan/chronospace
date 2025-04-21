@@ -183,10 +183,10 @@ export default function RequestCard({
               {canReview && actors &&
                 ( actors.specificUserId === currentUserId || 
                   actors.roleId === currentUserRole) && 
-                  '& Review'}
+                  ' & Review'}
                 {
                   status === "Revision" && requestor.id === currentUserId &&
-                  '& Revision'
+                  ' & Revision'
                 }
           </button>
         )}
