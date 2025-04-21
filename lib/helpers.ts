@@ -5,7 +5,7 @@ import { ApprovalStep } from '@/types/approval-schema';
 
 export const calculateProjectStats = (projects: Project[]) => {
   const allocated = projects.filter((p: Project) => p.status === 'Allocated').length;
-  const active = projects.filter((p: Project) => p.status === 'Active').length;
+  const active = projects.filter((p: Project) => p.status === 'In Progress').length;
   const delayed = projects.filter((p: Project) => {
     const finishDate = new Date(p.finishDate);
     const today = new Date();
