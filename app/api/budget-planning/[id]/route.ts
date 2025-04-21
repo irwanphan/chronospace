@@ -97,7 +97,7 @@ export async function PUT(
                 qty: Number(item.qty),
                 unit: item.unit,
                 unitPrice: Number(item.unitPrice),
-                vendorId: item.vendor.vendorId,
+                vendorId: item.vendorId,
               }))
             }
           }
