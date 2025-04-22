@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { BudgetedItem } from '@/types/budget';
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
@@ -130,6 +132,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     // Check if budget has any purchase requests
     const purchaseRequests = await prisma.purchaseRequest.findMany({
       where: { budgetId: params.id },
@@ -148,6 +155,13 @@ export async function DELETE(
 
     // Hapus dalam transaction untuk memastikan konsistensi
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const budget = await tx.budget.findUnique({
+        where: { id: params.id },
+        include: {
+          items: true
+        }
+      });
+
       // 1. Hapus purchase request items yang terkait dengan budgeted items
       await tx.purchaseRequestItem.deleteMany({
         where: {
@@ -166,8 +180,26 @@ export async function DELETE(
       await tx.budget.delete({
         where: { id: params.id }
       });
+
+      // 4. Catat pada log
+      await tx.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          entityType: 'BUDGET',
+          entityId: params.id,
+          action: 'DELETE',
+          details: {
+            id: budget?.id,
+            title: budget?.title,
+            year: budget?.year,
+            workDivisionId: budget?.workDivisionId,
+            totalBudget: budget?.totalBudget,
+            startDate: budget?.startDate?.toISOString(),
+            finishDate: budget?.finishDate?.toISOString()
+          }
+        }
+      });
     });
-    
     return NextResponse.json({ message: 'Budget deleted successfully' });
   } catch (error) {
     console.error('Error deleting budget:', error);
