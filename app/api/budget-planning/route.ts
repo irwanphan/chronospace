@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         data: {
           userId: session.user.id,
           entityType: 'BUDGET',
-          entityId: budget?.id,
+          entityId: budget?.code,
           action: 'CREATE',
           details: {
             id: budget?.id,

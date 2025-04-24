@@ -120,7 +120,7 @@ export async function PUT(
         data: {
           userId: session.user.id,
           entityType: 'BUDGET',
-          entityId: params.id,
+          entityId: updatedBudget?.code || '',
           action: 'UPDATE',
           details: {
             id: updatedBudget?.id,
@@ -209,7 +209,7 @@ export async function DELETE(
         data: {
           userId: session.user.id,
           entityType: 'BUDGET',
-          entityId: params.id,
+          entityId: budget?.code || '',
           action: 'DELETE',
           details: {
             id: budget?.id,
