@@ -61,6 +61,11 @@ export async function PUT(
     const body = await request.json();
     console.log('Received data:', body);
 
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     // Use transaction to ensure data consistency
     const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Delete purchase request items yang terkait dengan budgeted items
@@ -108,6 +113,24 @@ export async function PUT(
           items: true,
           project: true,
           workDivision: true,
+        }
+      });
+
+      await tx.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          entityType: 'BUDGET',
+          entityId: params.id,
+          action: 'UPDATE',
+          details: {
+            id: updatedBudget?.id,
+            title: updatedBudget?.title,
+            year: updatedBudget?.year,
+            workDivisionId: updatedBudget?.workDivisionId,
+            totalBudget: updatedBudget?.totalBudget,
+            startDate: updatedBudget?.startDate?.toISOString(),
+            finishDate: updatedBudget?.finishDate?.toISOString()
+          }
         }
       });
 
