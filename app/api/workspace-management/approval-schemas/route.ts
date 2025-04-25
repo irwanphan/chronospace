@@ -1,21 +1,28 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
 interface RequestStep {
-  roleId: string;
+  role: string;
   specificUserId?: string;
-  budgetLimit?: number;
+  limit?: number;
   duration: number;
   overtimeAction: 'Notify and Wait' | 'Auto Decline';
-  stepOrder: number;  
+  order: number;
 }
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
-    console.log('Received data:', body);
+    // console.log('Received data:', body);
 
     // Validasi data yang diterima
     if (!body.name || !body.workDivisions || !body.approvalSteps) {
@@ -38,18 +45,18 @@ export async function POST(request: Request) {
       workDivisionIds: body.workDivisions,
       roleIds: body.roles,
       approvalSteps: {
-        create: body.approvalSteps.map((step: RequestStep) => ({
-          roleId: step.roleId,
-          specificUserId: step.specificUserId,
+        create: body.approvalSteps.map((step: RequestStep, index: number) => ({
+          roleId: step.role,
+          specificUserId: step.specificUserId || null,
           duration: step.duration,
-          overtimeAction: step.overtimeAction,
-          limit: step.budgetLimit,
-          stepOrder: step.stepOrder
+          overtimeAction: step.overtimeAction || 'Notify and Wait',
+          budgetLimit: step.limit || null,
+          stepOrder: step.order || index + 1
         }))
       }
     };
 
-    console.log('Formatted data:', formattedData);
+    // console.log('Formatted data:', formattedData);
 
     try {
       const schema = await prisma.approvalSchema.create({
@@ -58,6 +65,21 @@ export async function POST(request: Request) {
           approvalSteps: true
         }
       });
+
+      await prisma.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          entityType: 'APPROVAL_SCHEMA',
+          entityId: schema.name,
+          action: 'CREATE',
+          details: {
+            name: schema.name,
+            documentType: schema.documentType,
+            description: schema.description
+          }
+        }
+      });
+      
       return NextResponse.json(schema);
     } catch (dbError) {
       console.error('Database error:', dbError);

@@ -5,7 +5,7 @@ import { ApprovalStep } from '@/types/approval-schema';
 
 export const calculateProjectStats = (projects: Project[]) => {
   const allocated = projects.filter((p: Project) => p.status === 'Allocated').length;
-  const active = projects.filter((p: Project) => p.status === 'Active').length;
+  const active = projects.filter((p: Project) => p.status === 'In Progress').length;
   const delayed = projects.filter((p: Project) => {
     const finishDate = new Date(p.finishDate);
     const today = new Date();
@@ -27,7 +27,7 @@ export const calculateBudgetStats = (budgets: Budget[]) => {
   const delayed = budgets.filter((b: Budget) => {
     const startDate = new Date(b.startDate);
     const today = new Date();
-    return startDate < today && b.status === 'Not Started';
+    return startDate < today && b.status === 'Draft';
   }).length;
   const upcoming = budgets.filter((b: Budget) => {
     const finishDate = new Date(b.finishDate);

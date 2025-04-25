@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
@@ -63,6 +65,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
 
     // Cek apakah division code sudah digunakan division lain
@@ -90,6 +97,24 @@ export async function PUT(
         upperWorkDivisionId: body.upperWorkDivisionId,
       },
     });
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'WORK_DIVISION',
+        entityId: division.code,
+        action: 'UPDATE',
+        details: {
+          id: division.id,
+          code: division.code,
+          name: division.name,
+          description: division.description,
+          headId: division.headId,
+          upperWorkDivisionId: division.upperWorkDivisionId
+        }
+      }
+    });
+
     return NextResponse.json(division);
   } catch (error) {
     console.error('Error updating work division:', error);
@@ -105,10 +130,21 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     // Check if division is used in approval schemas
     const workDivision = await prisma.workDivision.findUnique({
       where: { id: params.id },
-      select: { code: true }
+      select: { 
+        code: true,
+        name: true,
+        description: true,
+        headId: true,
+        upperWorkDivisionId: true
+      }
     });
 
     const schemasWithDivision = await prisma.approvalSchema.findMany({
@@ -167,7 +203,24 @@ export async function DELETE(
     await prisma.workDivision.delete({
       where: { id: params.id },
     });
-    
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'WORK_DIVISION',
+        entityId: workDivision?.code || '',
+        action: 'DELETE',
+        details: {
+          id: params.id,
+          code: workDivision?.code,
+          name: workDivision?.name,
+          description: workDivision?.description,
+          headId: workDivision?.headId,
+          upperWorkDivisionId: workDivision?.upperWorkDivisionId
+        }
+      }
+    });
+
     return NextResponse.json({ message: 'Work division deleted successfully' });
   } catch (error) {
     console.error('Error deleting work division:', error);

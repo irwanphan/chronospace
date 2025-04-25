@@ -1,15 +1,22 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { VendorService } from '@/services/vendor.service';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
     
     // Log untuk debugging
-    console.log('Request body:', body);
+    // console.log('Request body:', body);
 
     // Cek apakah email atau vendor code sudah ada
     const [existingEmail, existingCode] = await Promise.all([
@@ -38,6 +45,22 @@ export async function POST(request: Request) {
         email: body.email,
         phone: body.phone,
         address: body.address,
+      }
+    });
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'VENDOR',
+        entityId: vendor.vendorCode,
+        action: 'CREATE',
+        details: {
+          vendorCode: vendor.vendorCode,
+          vendorName: vendor.vendorName,
+          email: vendor.email,
+          phone: vendor.phone,
+          address: vendor.address
+        }
       }
     });
 

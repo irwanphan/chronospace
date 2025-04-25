@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
@@ -33,6 +35,11 @@ export async function GET() {
 // POST: Create new budget
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
     console.log('Received request body:', body);
 
@@ -70,6 +77,24 @@ export async function POST(request: Request) {
       await tx.project.update({
         where: { id: body.projectId },
         data: { status: 'Allocated' }
+      });
+
+      await tx.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          entityType: 'BUDGET',
+          entityId: budget?.code,
+          action: 'CREATE',
+          details: {
+            id: budget?.id,
+            title: budget?.title,
+            year: budget?.year,
+            workDivisionId: budget?.workDivisionId,
+            totalBudget: budget?.totalBudget,
+            startDate: budget?.startDate?.toISOString(),
+            finishDate: budget?.finishDate?.toISOString()
+          }
+        }
       });
 
       return budget;

@@ -79,7 +79,7 @@ export default function WorkDivisionPage() {
         </div>
       )}
 
-      <Card className="mb-8 overflow-hidden">
+      <Card className="mb-8">
         <table className="w-full">
           <thead>
             <tr className="border-b">

@@ -136,7 +136,7 @@ function WorkspaceContent({ session }: { session: Session | null }) {
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
         return requests.filter(req => {
           const createdDate = new Date(req.createdAt);
-          return createdDate < threeDaysAgo && req.status !== 'Approved';
+          return createdDate < threeDaysAgo && req.status !== 'Completed' && req.status !== 'Declined';
         });
       
       case 'approved':

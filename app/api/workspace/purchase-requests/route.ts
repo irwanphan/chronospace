@@ -120,6 +120,41 @@ export async function POST(request: NextRequest) {
         }
       });
 
+      // Update budget status to 'In Progress'
+      await tx.budget.update({
+        where: {
+          id: body.budgetId
+        },
+        data: { 
+          status: 'In Progress'
+        }
+      });
+
+      // Update project status to 'In Progress'
+      await tx.project.update({
+        where: {
+          id: body.projectId
+        },
+        data: { status: 'In Progress' }
+      });
+
+      // Update project history
+      await tx.projectHistory.create({
+        data: {
+          projectId: body.projectId,
+          projectCode: body.code,
+          action: 'Submitted for Approval',
+          userId: session.user.id,
+          changes: {
+            code: body.code,
+            title: body.title,
+            description: body.description,
+            workDivisionId: body.workDivisionId,
+          },
+          timestamp: new Date(),
+        }
+      });
+
       // Create history
       await tx.purchaseRequestHistory.create({
         data: {
@@ -128,6 +163,23 @@ export async function POST(request: NextRequest) {
           actorId: session.user.id,
           comment: 'Purchase request submitted'
         }
+      });
+
+      // Buat activity history
+      await tx.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          entityType: 'PURCHASE_REQUEST',
+          entityId: purchaseRequest.id,
+          entityCode: purchaseRequest.code,
+          action: 'CREATE',
+          details: {
+            code: purchaseRequest.code,
+            title: purchaseRequest.title,
+            description: purchaseRequest.description
+          },
+          timestamp: new Date(),
+        },
       });
 
       return purchaseRequest;
