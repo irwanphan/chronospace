@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
@@ -62,6 +64,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
     
     // Validate required fields
@@ -106,6 +113,20 @@ export async function PUT(
       }
     });
 
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'APPROVAL_SCHEMA',
+        entityId: updatedSchema.name,
+        action: 'UPDATE',
+        details: {
+          name: updatedSchema.name,
+          documentType: updatedSchema.documentType,
+          description: updatedSchema.description
+        }
+      }
+    });
+    
     return NextResponse.json(updatedSchema);
   } catch (error) {
     console.error('Error updating schema:', error);
@@ -121,10 +142,54 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.approvalSchema.delete({
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // Get schema details for activity history
+    const schema = await prisma.approvalSchema.findUnique({
       where: { id: params.id },
+      include: {
+        approvalSteps: true
+      }
     });
-    
+
+    if (!schema) {
+      return NextResponse.json(
+        { error: 'Approval schema not found' },
+        { status: 404 }
+      );
+    }
+
+    // Delete in transaction to ensure data consistency
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete approval steps first
+      await tx.approvalStep.deleteMany({
+        where: { schemaId: params.id }
+      });
+
+      // 2. Delete the schema
+      await tx.approvalSchema.delete({
+        where: { id: params.id }
+      });
+
+      // 3. Record activity history
+      await tx.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          entityType: 'APPROVAL_SCHEMA',
+          entityId: schema.name,
+          action: 'DELETE',
+          details: {
+            name: schema.name,
+            documentType: schema.documentType,
+            description: schema.description,
+          }
+        }
+      });
+    });
+
     return NextResponse.json({ message: 'Approval schema deleted successfully' });
   } catch (error) {
     console.error('Error deleting approval schema:', error);

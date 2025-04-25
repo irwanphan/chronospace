@@ -21,7 +21,7 @@ export default function ApprovalSchemaPage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentSchemas = schemas.slice(startIndex, endIndex);
+  const currentSchemas = schemas?.slice(startIndex, endIndex) || [];
 
   // console.log('schemas : ', schemas)
 
@@ -66,7 +66,7 @@ export default function ApprovalSchemaPage() {
       setIsLoading(true);
       const refreshData = await fetch('/api/workspace-management/approval-schemas');
       const data = await refreshData.json();
-      setSchemas(data.schemas);
+      setSchemas(data.approvalSchemas || []);
     } catch (error) {
       console.error('Failed to refresh data:', error);
       setError('Failed to refresh data');
