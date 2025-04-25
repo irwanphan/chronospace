@@ -40,7 +40,7 @@ export async function PUT(
     if (!session?.user?.email) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
-    
+
     const body = await request.json();
 
     // Cek apakah role code sudah digunakan role lain
@@ -99,6 +99,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     // Check if role is being used in any purchase request approval
     const purchaseRequestApprovalsWithRole = await prisma.purchaseRequestApproval.findMany({
       where: { roleId: params.id }
@@ -135,10 +140,26 @@ export async function DELETE(
       );
     }
 
-    await prisma.role.delete({
+    const role = await prisma.role.delete({
       where: { id: params.id },
     });
-    
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'ROLE',
+        entityId: role.roleCode,
+        action: 'DELETE',
+        details: {
+          id: role.id,
+          roleCode: role.roleCode,
+          roleName: role.roleName,
+          description: role.description,
+          budgetLimit: role.budgetLimit
+        }
+      }
+    });
+
     return NextResponse.json({ message: 'Role deleted successfully' });
   } catch (error) {
     console.error('Error deleting role:', error);
