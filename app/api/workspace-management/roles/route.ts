@@ -22,7 +22,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const role = await RoleService.create(data);
+    // Map approvalLimit to budgetLimit
+    const roleData = {
+      ...data,
+      budgetLimit: data.approvalLimit,
+      approvalLimit: undefined
+    };
+
+    const role = await RoleService.create(roleData);
 
     // Record activity history
     await prisma.activityHistory.create({
