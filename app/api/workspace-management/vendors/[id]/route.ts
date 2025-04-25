@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
@@ -34,6 +36,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
 
     // Cek apakah email atau vendor code sudah digunakan vendor lain
@@ -76,6 +83,23 @@ export async function PUT(
         address: body.address,
       },
     });
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'VENDOR',
+        entityId: vendor.vendorCode,
+        action: 'UPDATE',
+        details: {
+          vendorCode: vendor.vendorCode,
+          vendorName: vendor.vendorName,
+          email: vendor.email,
+          phone: vendor.phone,
+          address: vendor.address
+        }
+      }
+    });
+
     return NextResponse.json(vendor);
   } catch (error) {
     console.error('Error updating vendor:', error);
@@ -91,6 +115,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     // Check if vendor is being used in any purchase request
     const purchaseRequestsWithVendor = await prisma.purchaseRequestItem.findMany({
       where: { vendorId: params.id }
@@ -115,10 +144,26 @@ export async function DELETE(
       );
     }
 
-    await prisma.vendor.delete({
+    const vendor = await prisma.vendor.delete({
       where: { id: params.id },
     });
-    
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'VENDOR',
+        entityId: vendor.vendorCode,
+        action: 'DELETE',
+        details: {
+          vendorCode: vendor.vendorCode,
+          vendorName: vendor.vendorName,
+          email: vendor.email,
+          phone: vendor.phone,
+          address: vendor.address
+        }
+      }
+    });
+
     return NextResponse.json({ message: 'Vendor deleted successfully' });
   } catch (error) {
     console.error('Error deleting vendor:', error);
