@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
@@ -34,6 +36,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+    
     const body = await request.json();
 
     // Cek apakah role code sudah digunakan role lain
@@ -60,6 +67,23 @@ export async function PUT(
         budgetLimit: body.budgetLimit,
       },
     });
+
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'ROLE',
+        entityId: role.roleCode,
+        action: 'UPDATE',
+        details: {
+          id: role.id,
+          roleCode: role.roleCode,
+          roleName: role.roleName,
+          description: role.description,
+          budgetLimit: role.budgetLimit
+        }
+      }
+    });
+
     return NextResponse.json(role);
   } catch (error) {
     console.error('Error updating role:', error);

@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
 import { RoleService } from '@/services/role.service';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 export const revalidate = 0
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const data = await req.json();
 
     if (data.roleCode === 'ADMIN') {
@@ -16,6 +23,24 @@ export async function POST(req: Request) {
     }
 
     const role = await RoleService.create(data);
+
+    // Record activity history
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        entityType: 'ROLE',
+        entityId: role.roleCode,
+        action: 'CREATE',
+        details: {
+          id: role.id,
+          roleCode: role.roleCode,
+          roleName: role.roleName,
+          description: role.description,
+          budgetLimit: role.budgetLimit
+        }
+      }
+    });
+
     return NextResponse.json(role, { status: 201 });
   } catch (error) {
     console.error('Failed to create role:', error);
