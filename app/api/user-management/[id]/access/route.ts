@@ -17,6 +17,11 @@ export async function PUT(
 
     const { menuAccess, activityAccess, workspaceAccess } = await request.json();
 
+    // get the difference between the old and new access
+    const oldAccess = await prisma.userAccess.findUnique({
+      where: { userId: params.id },
+    });
+
     const updatedAccess = await prisma.userAccess.upsert({
       where: {
         userId: params.id,
@@ -32,11 +37,6 @@ export async function PUT(
         activityAccess,
         workspaceAccess,
       },
-    });
-
-    // get the difference between the old and new access
-    const oldAccess = await prisma.userAccess.findUnique({
-      where: { userId: params.id },
     });
 
     const difference = {
