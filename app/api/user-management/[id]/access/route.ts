@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 export const revalidate = 0
 
@@ -8,6 +10,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const { menuAccess, activityAccess, workspaceAccess } = await request.json();
 
     const updatedAccess = await prisma.userAccess.upsert({
@@ -25,6 +32,20 @@ export async function PUT(
         activityAccess,
         workspaceAccess,
       },
+    });
+
+    // activity history
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        action: 'UPDATE',
+        entityType: 'USER',
+        entityId: params.id,
+        entityCode: null,
+        details: {
+          // TODO: add details change access only
+        }
+      }
     });
 
     return NextResponse.json(updatedAccess);
