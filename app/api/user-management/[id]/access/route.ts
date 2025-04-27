@@ -34,6 +34,17 @@ export async function PUT(
       },
     });
 
+    // get the difference between the old and new access
+    const oldAccess = await prisma.userAccess.findUnique({
+      where: { userId: params.id },
+    });
+
+    const difference = {
+      menuAccess: updatedAccess.menuAccess !== oldAccess?.menuAccess,
+      activityAccess: updatedAccess.activityAccess !== oldAccess?.activityAccess,
+      workspaceAccess: updatedAccess.workspaceAccess !== oldAccess?.workspaceAccess,
+    };
+
     // activity history
     await prisma.activityHistory.create({
       data: {
@@ -43,7 +54,7 @@ export async function PUT(
         entityId: params.id,
         entityCode: null,
         details: {
-          // TODO: add details change access only
+          difference
         }
       }
     });
