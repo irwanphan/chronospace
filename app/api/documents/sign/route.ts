@@ -292,6 +292,22 @@ export async function POST(request: Request) {
         throw new Error('Failed to retrieve updated document');
       }
 
+      // activity history
+      await prisma.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          action: 'SIGN',
+          entityType: 'DOCUMENT',
+          entityId: signedDocument.id,
+          entityCode: signedDocument.fileName,
+          details: {
+            documentUrl: signedDocument.fileUrl,
+            signedBy: updatedDoc.signedByUser?.name || '',
+            signedAt: updatedDoc.signedAt
+          }
+        }
+      });
+
       return NextResponse.json({ 
         success: true, 
         document: updatedDoc,
