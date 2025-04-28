@@ -6,7 +6,7 @@ ChronoSpace is a comprehensive system for managing budgets, projects, and purcha
 
 ## 🚀 Latest Updates
 
-### Document Verification & Stability (2024-04-06)
+### Document Verification & Stability (2025-04-06)
 - Document Verification:
   - QR code generation for signed documents
   - Unique verification code system
@@ -156,7 +156,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## 📋 Updates & Features
 
-### Initial Release (2024-01-24)
+### Initial Release (2025-01-24)
 - Core System Setup:
   - Next.js 14 project initialization with TypeScript
   - Authentication system with NextAuth.js
@@ -164,7 +164,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Register and login pages
   - Protected routes implementation
 
-### Authentication & User Management (2024-02-09)
+### Authentication & User Management (2025-02-09)
 - Enhanced Authentication:
   - Session management
   - Role-based access control (RBAC)
@@ -181,7 +181,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Montserrat font integration
   - Theme color system
 
-### Project & Budget Planning (2024-03-01)
+### Project & Budget Planning (2025-03-01)
 - User Access Control:
   - UAC page implementation
   - Access control management
@@ -203,7 +203,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Request tracking
   - Budget integration
 
-### Workflow & Approval System (2024-03-15)
+### Workflow & Approval System (2025-03-15)
 - Enhanced Purchase Request:
   - Approval workflow implementation
   - Request history tracking
@@ -220,7 +220,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Transaction client usage
   - API route consistency
 
-### Document Management & Security (2024-04-05)
+### Document Management & Security (2025-04-05)
 - Document System:
   - Document upload functionality
   - PDF viewer implementation
@@ -236,3 +236,72 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Error handling refinements
   - UI/UX enhancements
   - Data fetching optimizations
+
+### Document Verification & Stability (2025-04-06)
+- Document Verification:
+  - QR code generation for signed documents
+  - Unique verification code system
+  - Document verification page
+  - Signature validation system
+- PDF Viewer Enhancements:
+  - Improved signature pad initialization
+  - Reduced flickering during reloads
+  - Better error handling for PDF loading
+  - Automatic retry mechanism
+- Digital Signature Updates:
+  - Enhanced signature positioning
+  - Improved QR code readability
+  - Better signature validation
+  - Cleaner verification URLs
+
+### Dashboard & Session Validation (2025-04-11)
+- Dashboard View
+  - Implemented toggle between dashboard and list view
+  - Added search functionality to switch between specific documents
+  - Added pagination
+- Session Validation
+  - Added session validation to prevent unauthenticated access to protected routes
+
+### Purchase Order & Dashboard (2025-04-13)
+- Purchase Order
+  - Added purchase order creation
+  - Added purchase order document generation
+  - Added purchase order history
+- Dashboard
+  - Added dashboard switch between purchase order and request
+  - Updated status management for purchase order and request
+
+### Document Management & UI Enhancements (2025-04-17)
+- Document Management
+  - Enhanced document upload functionality
+  - Improved document version control
+  - Added document history tracking
+  - Implemented document deletion with validation
+- UI Improvements
+  - Enhanced document viewer interface
+  - Improved loading states
+  - Better error handling
+  - Optimized performance for large documents
+- Security
+  - Added document access validation
+  - Enhanced user permission checks
+  - Improved audit logging for document operations
+
+### Purchase Order & Document Integration (2025-04-25)
+- Purchase Order Enhancements
+  - Improved purchase order document generation
+  - Enhanced purchase order history tracking
+  - Added purchase order status management
+  - Implemented purchase order validation
+- Document Integration
+  - Added purchase order document attachment
+  - Enhanced document preview for purchase orders
+  - Improved document versioning for purchase orders
+  - Added document access control for purchase orders
+- UI/UX Improvements
+  - Enhanced purchase order interface
+  - Improved document viewer integration
+  - Better status indicators
+  - Optimized loading states
+
+
