@@ -26,6 +26,7 @@ interface WorkDivision {
 export default function ProjectPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     budgetAllocated: 0,
@@ -41,8 +42,9 @@ export default function ProjectPlanningPage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentProjects = projects.slice(startIndex, endIndex);
+  const currentProjects = filteredProjects.slice(startIndex, endIndex);
 
+  // Fetch projects
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -50,7 +52,10 @@ export default function ProjectPlanningPage() {
         if (response.ok) {
           const data = await response.json();
           setProjects(data.projects);
+          setFilteredProjects(data.projects);
           setWorkDivisions(data.workDivisions);
+          // Initially select all divisions
+          setSelectedDivisions(data.workDivisions.map((div: WorkDivision) => div.id));
           setStats(calculateProjectStats(data.projects));
         }
       } catch (error) {
@@ -62,6 +67,16 @@ export default function ProjectPlanningPage() {
 
     fetchProjects();
   }, []);
+
+  // Apply filters when selectedDivisions changes
+  useEffect(() => {
+    const filtered = projects.filter(project => 
+      selectedDivisions.includes(project.workDivisionId)
+    );
+    setFilteredProjects(filtered);
+    setStats(calculateProjectStats(filtered));
+    setCurrentPage(1); // Reset to first page when filter changes
+  }, [selectedDivisions, projects]);
 
   const handleDivisionToggle = (divisionId: string) => {
     setSelectedDivisions(prev => 
@@ -208,7 +223,7 @@ export default function ProjectPlanningPage() {
 
       <Pagination
         currentPage={currentPage}
-        totalItems={projects.length}
+        totalItems={filteredProjects.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />
