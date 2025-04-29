@@ -50,6 +50,7 @@ export default function ProjectPlanningPage() {
         if (response.ok) {
           const data = await response.json();
           setProjects(data.projects);
+          setWorkDivisions(data.workDivisions);
           setStats(calculateProjectStats(data.projects));
         }
       } catch (error) {
@@ -60,22 +61,6 @@ export default function ProjectPlanningPage() {
     };
 
     fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    const fetchWorkDivisions = async () => {
-      try {
-        const response = await fetch('/api/work-divisions');
-        const data = await response.json();
-        setWorkDivisions(data);
-        // Initially select all divisions
-        setSelectedDivisions(data.map((div: WorkDivision) => div.id));
-      } catch (error) {
-        console.error('Error fetching work divisions:', error);
-      }
-    };
-
-    fetchWorkDivisions();
   }, []);
 
   const handleDivisionToggle = (divisionId: string) => {
@@ -129,7 +114,7 @@ export default function ProjectPlanningPage() {
             <PopoverContent className="w-80 p-4 bg-white">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium">Filter by Work Division</h3>
+                  <h3 className="text-sm font-medium">Filter by Work Division</h3>
                   <div className="flex gap-2">
                     <button
                       onClick={handleSelectAll}
