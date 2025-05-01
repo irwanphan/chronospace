@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import VendorActions from './components/VendorActions';
 import { Vendor } from '@/types/vendor';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [filteredVendors, setFilteredVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,7 +18,9 @@ export default function VendorsPage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentVendors = vendors.slice(startIndex, endIndex);
+  const currentVendors = filteredVendors.slice(startIndex, endIndex);
+
+  const [searchKeyword, setSearchKeyword] = useState('');
   
   useEffect(() => {
     fetchVendors();
@@ -33,6 +36,7 @@ export default function VendorsPage() {
       const data = await response.json();
       // Memastikan data adalah array
       setVendors(Array.isArray(data) ? data : []);
+      setFilteredVendors(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch vendors:', error);
       setError('Failed to load vendors');
@@ -41,6 +45,23 @@ export default function VendorsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!vendors) return;
+
+    let filtered = [...vendors];
+
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      filtered = filtered.filter(vendor => 
+        vendor.vendorName?.toLowerCase().includes(keyword) ||
+        vendor.email?.toLowerCase().includes(keyword)
+      );
+    }
+
+    setFilteredVendors(filtered);
+    setCurrentPage(1);
+  }, [searchKeyword, vendors]);
 
   if (isLoading) return <LoadingSpin />
 
@@ -56,12 +77,10 @@ export default function VendorsPage() {
               type="search"
               placeholder="Search..."
               className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-50">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -95,7 +114,7 @@ export default function VendorsPage() {
               <tr>
                 <td colSpan={4} className="text-center py-4">Loading...</td>
               </tr>
-            ) : vendors.length === 0 ? (
+            ) : filteredVendors.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center py-4 text-gray-500">
                   No vendors found
@@ -125,7 +144,7 @@ export default function VendorsPage() {
       </Card>
       <Pagination
         currentPage={currentPage}
-        totalItems={vendors.length}
+        totalItems={filteredVendors.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />
