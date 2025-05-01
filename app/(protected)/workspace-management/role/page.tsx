@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { Role } from '@/types/role';
 import { stripHtmlTags } from '@/lib/utils';
 import RoleActions from './components/RoleActions';
@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 
 export default function RolePage() {
   const [roles, setRoles] = useState<Role[]>([]);
+  const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,7 +19,9 @@ export default function RolePage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentRoles = roles.slice(startIndex, endIndex);
+  const currentRoles = filteredRoles.slice(startIndex, endIndex);
+
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
     fetchRoles();
@@ -33,6 +36,7 @@ export default function RolePage() {
       }
       const data = await response.json();
       setRoles(Array.isArray(data) ? data : []);
+      setFilteredRoles(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
       setError('Failed to load roles');
@@ -41,6 +45,23 @@ export default function RolePage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!roles) return;
+
+    let filtered = [...roles];
+    
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      filtered = filtered.filter(role => 
+        role.roleName?.toLowerCase().includes(keyword) ||
+        role.description?.toLowerCase().includes(keyword)
+      );
+    }
+
+    setFilteredRoles(filtered);
+    setCurrentPage(1);
+  }, [searchKeyword, roles]);
 
   if (isLoading) return <LoadingSpin />
 
@@ -56,12 +77,10 @@ export default function RolePage() {
               type="search"
               placeholder="Search..."
               className="pl-10 pr-4 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-50">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -96,7 +115,7 @@ export default function RolePage() {
               <tr>
                 <td colSpan={5} className="text-center py-4">Loading...</td>
               </tr>
-            ) : roles.length === 0 ? (
+            ) : filteredRoles.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-4 text-gray-500">
                   No roles found
@@ -139,7 +158,7 @@ export default function RolePage() {
       </Card>
       <Pagination
         currentPage={currentPage}
-        totalItems={roles.length}
+        totalItems={filteredRoles.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />
