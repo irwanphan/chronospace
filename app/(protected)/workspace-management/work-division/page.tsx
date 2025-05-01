@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import DivisionActions from './components/DivisionActions';
 import { WorkDivision } from '@/types/work-division';
 import { stripHtmlTags } from '@/lib/utils';
@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 
 export default function WorkDivisionPage() {
   const [divisions, setDivisions] = useState<WorkDivision[]>([]);
+  const [filteredDivisions, setFilteredDivisions] = useState<WorkDivision[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -18,7 +19,9 @@ export default function WorkDivisionPage() {
   const itemsPerPage = 10;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentDivisions = divisions?.slice(startIndex, endIndex) || [];
+  const currentDivisions = filteredDivisions?.slice(startIndex, endIndex) || [];
+
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,11 +32,14 @@ export default function WorkDivisionPage() {
           throw new Error('Failed to fetch data');
         }
         const data = await response.json();
-        setDivisions(data.workDivisions || []);
+        const workDivisions = data.workDivisions || [];
+        setDivisions(workDivisions);
+        setFilteredDivisions(workDivisions);
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setError('Failed to load data');
         setDivisions([]);
+        setFilteredDivisions([]);
       } finally {
         setIsLoading(false);
       }
@@ -41,6 +47,26 @@ export default function WorkDivisionPage() {
     fetchData();
   }, []);
 
+  // Apply filters when searchKeyword changes
+  useEffect(() => {
+    if (!divisions) return;
+
+    let filtered = [...divisions];
+
+    // Filter by search keyword
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      filtered = filtered.filter(division => 
+        division.name?.toLowerCase().includes(keyword) ||
+        division.code?.toLowerCase().includes(keyword) ||
+        division.description?.toLowerCase().includes(keyword) ||
+        division.head?.name?.toLowerCase().includes(keyword)
+      );
+    }
+
+    setFilteredDivisions(filtered);
+    setCurrentPage(1); // Reset to first page when filter changes
+  }, [searchKeyword, divisions]);
 
   if (isLoading) return <LoadingSpin />
 
@@ -53,14 +79,12 @@ export default function WorkDivisionPage() {
             <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="search"
-              placeholder="Search..."
+              placeholder="Search by name, code, or division head..."
               className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-50">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -96,10 +120,12 @@ export default function WorkDivisionPage() {
               <tr>
                 <td colSpan={6} className="text-center py-4">Loading...</td>
               </tr>
-            ) : divisions.length === 0 ? (
+            ) : filteredDivisions.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No work divisions found
+                  {searchKeyword.trim() 
+                    ? `No divisions found matching "${searchKeyword}"`
+                    : "No work divisions found"}
                 </td>
               </tr>
             ) : (
@@ -120,7 +146,9 @@ export default function WorkDivisionPage() {
                       onDelete={async () => {
                         const divisionsRes = await fetch('/api/workspace-management/work-division');
                         const divisionsData = await divisionsRes.json();
-                        setDivisions(divisionsData.workDivisions);
+                        const newDivisions = divisionsData.workDivisions || [];
+                        setDivisions(newDivisions);
+                        setFilteredDivisions(newDivisions);
                       }} 
                     />
                   </td>
@@ -132,7 +160,7 @@ export default function WorkDivisionPage() {
       </Card>
       <Pagination
         currentPage={currentPage}
-        totalItems={divisions.length}
+        totalItems={filteredDivisions.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />
