@@ -66,30 +66,36 @@ export default function ApprovalSchemaPage() {
 
     let filtered = [...schemas];
 
-    // Filter by division
-    if (selectedDivisions.length > 0) {
-      filtered = filtered.filter(schema => 
-        schema.applicableWorkDivisions.some(division => 
-          selectedDivisions.includes(division.id || '')
-        )
-      );
-    }
+    // If no divisions or roles selected, show no schemas
+    if (selectedDivisions.length === 0 || selectedRoles.length === 0) {
+      filtered = [];
+    } else {
+      // Filter by division
+      if (selectedDivisions.length > 0) {
+        filtered = filtered.filter(schema => 
+          schema.applicableWorkDivisions.some(division => 
+            selectedDivisions.includes(division.id || '')
+          )
+        );
+      }
 
-    // Filter by role
-    if (selectedRoles.length > 0) {
-      filtered = filtered.filter(schema =>
-        schema.applicableRoles.some(role =>
-          selectedRoles.includes(role.id || '')
-        )
-      );
-    }
-    
-    if (searchKeyword.trim()) {
-      const keyword = searchKeyword.trim().toLowerCase();
-      filtered = filtered.filter(schema => 
-        schema.name?.toLowerCase().includes(keyword) ||
-        schema.documentType?.toLowerCase().includes(keyword)
-      );
+      // Filter by role
+      if (selectedRoles.length > 0) {
+        filtered = filtered.filter(schema =>
+          schema.applicableRoles.some(role =>
+            selectedRoles.includes(role.id || '')
+          )
+        );
+      }
+      
+      // Filter by search keyword
+      if (searchKeyword.trim()) {
+        const keyword = searchKeyword.trim().toLowerCase();
+        filtered = filtered.filter(schema => 
+          schema.name?.toLowerCase().includes(keyword) ||
+          schema.documentType?.toLowerCase().includes(keyword)
+        );
+      }
     }
 
     setFilteredSchemas(filtered);
@@ -139,10 +145,7 @@ export default function ApprovalSchemaPage() {
   };
 
   const handleSelectAll = () => {
-    const allDivisionIds = schemas.flatMap(schema => 
-      schema.applicableWorkDivisions.map(div => div.id || '')
-    );
-    setSelectedDivisions([...new Set(allDivisionIds)]);
+    setSelectedDivisions(workDivisions.map(div => div.id || ''));
   };
 
   const handleDeselectAll = () => {
@@ -158,10 +161,7 @@ export default function ApprovalSchemaPage() {
   };
 
   const handleSelectAllRoles = () => {
-    const allRoleIds = schemas.flatMap(schema => 
-      schema.applicableRoles.map(role => role.id || '')
-    ); 
-    setSelectedRoles([...new Set(allRoleIds)]);
+    setSelectedRoles(roles.map(role => role.id || ''));
   };
 
   const handleDeselectAllRoles = () => {
