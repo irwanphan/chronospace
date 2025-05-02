@@ -44,7 +44,13 @@ export async function GET() {
     });
 
     const workDivisions = await prisma.workDivision.findMany();
-    const roles = await prisma.role.findMany();
+    const roles = await prisma.role.findMany({
+      where: {
+        roleCode: {
+          not: 'ADMIN',
+        },
+      },
+    });
 
     return NextResponse.json({ users, workDivisions, roles });
   } catch (error) {
