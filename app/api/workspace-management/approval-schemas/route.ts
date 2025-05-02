@@ -115,7 +115,13 @@ export async function GET() {
           createdAt: 'desc',
         },
       }),
-      prisma.role.findMany(),
+      prisma.role.findMany({
+        where: {
+          roleCode: {
+            not: 'ADMIN',
+          },
+        },
+      }),
       prisma.workDivision.findMany()
     ]);
 
