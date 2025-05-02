@@ -12,6 +12,9 @@ import Pagination from '@/components/Pagination';
 import BudgetStatsOverview from './components/BudgetStatsOverview';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { WorkDivision } from '@/types/work-division';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function BudgetPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,12 +32,26 @@ export default function BudgetPlanningPage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentBudgets = budgets.slice(startIndex, endIndex);
+  const [filteredBudgets, setFilteredBudgets] = useState<Budget[]>([]);
+  const currentBudgets = filteredBudgets.slice(startIndex, endIndex);
 
   const { data: session, status } = useSession();
   const canEditBudget = status === 'authenticated' && session?.user.access.activityAccess.editBudget || false;
   const canDeleteBudget = status === 'authenticated' && session?.user.access.activityAccess.deleteBudget || false;
   const canCreateBudget = status === 'authenticated' && session?.user.access.activityAccess.createBudget || false;
+
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const statusOptions = [
+    'Draft',
+    'In Progress',
+    'Completed',
+    'Delayed'
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +60,11 @@ export default function BudgetPlanningPage() {
         if (response.ok) {
           const data = await response.json();
           setBudgets(data.budgets);
+          setFilteredBudgets(data.budgets);
+          setWorkDivisions(data.divisions);
+          // Initialize with all divisions and statuses selected
+          setSelectedDivisions(data.divisions.map((div: WorkDivision) => div.id));
+          setSelectedStatuses(statusOptions);
           setStats(calculateBudgetStats(data.budgets));
         }
       } catch (error) {
@@ -53,6 +75,70 @@ export default function BudgetPlanningPage() {
     };
     fetchData();
   }, []);
+  
+  // Apply filters when selectedDivisions, selectedStatuses, or searchKeyword changes
+  useEffect(() => {
+    let filtered = budgets;
+
+    // Filter by division
+    if (selectedDivisions.length > 0) {
+      filtered = filtered.filter(budget => 
+        selectedDivisions.includes(budget.workDivisionId)
+      );
+    }
+
+    // Filter by status
+    if (selectedStatuses.length > 0) {
+      filtered = filtered.filter(budget => 
+        selectedStatuses.includes(budget.status)
+      );
+    }
+
+    // Filter by search keyword
+    if (searchKeyword) {
+      const keyword = searchKeyword.toLowerCase();
+      filtered = filtered.filter(budget => 
+        budget.title.toLowerCase().includes(keyword) ||
+        budget.code.toLowerCase().includes(keyword)
+      );
+    }
+
+    setFilteredBudgets(filtered);
+    setStats(calculateBudgetStats(filtered));
+    setCurrentPage(1); // Reset to first page when filter changes
+  }, [selectedDivisions, selectedStatuses, searchKeyword, budgets]);
+
+  const handleDivisionToggle = (divisionId: string) => {
+    setSelectedDivisions(prev => 
+      prev.includes(divisionId)
+        ? prev.filter(id => id !== divisionId)
+        : [...prev, divisionId]
+    );
+  };
+
+  const handleStatusToggle = (status: string) => {
+    setSelectedStatuses(prev => 
+      prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectedDivisions(workDivisions.map(div => div.id));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedDivisions([]);
+  };
+
+  const handleSelectAllStatuses = () => {
+    setSelectedStatuses(statusOptions);
+  };
+
+  const handleDeselectAllStatuses = () => {
+    setSelectedStatuses([]);
+  };
 
   if (isLoading) return <LoadingSpin />
 
@@ -80,12 +166,102 @@ export default function BudgetPlanningPage() {
               type="text"
               placeholder="Search..."
               className="w-full pl-10 pr-4 py-2 border rounded-lg"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
             />
           </div>
-          <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
+          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <PopoverTrigger asChild>
+              <button className="px-4 py-2 border rounded-lg flex items-center gap-2 hover:bg-gray-50">
+                <Filter className="w-4 h-4" />
+                Filter
+                {(selectedDivisions.length < workDivisions.length || selectedStatuses.length < statusOptions.length) && (
+                  <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                    {selectedDivisions.length}/{workDivisions.length} Div, {selectedStatuses.length}/{statusOptions.length} Status
+                  </span>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4 bg-white">
+              <div className="space-y-6">
+                {/* Work Division Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Filter by Work Division</h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSelectAll}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={handleDeselectAll}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {workDivisions.map((division) => (
+                      <div key={division.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={division.id}
+                          checked={selectedDivisions.includes(division.id)}
+                          onCheckedChange={() => handleDivisionToggle(division.id)}
+                        />
+                        <label
+                          htmlFor={division.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {division.name} ({division.code})
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Filter by Status</h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSelectAllStatuses}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={handleDeselectAllStatuses}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {statusOptions.map((status) => (
+                      <div key={status} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={status}
+                          checked={selectedStatuses.includes(status)}
+                          onCheckedChange={() => handleStatusToggle(status)}
+                        />
+                        <label
+                          htmlFor={status}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {status}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="flex items-center gap-3">
           {status === 'authenticated' && canCreateBudget && (

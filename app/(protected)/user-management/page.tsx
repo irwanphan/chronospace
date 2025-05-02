@@ -168,7 +168,7 @@ export default function UserManagementPage() {
                 Filter
                 {(selectedWorkDivision.length < workDivisions.length || selectedRole.length < roles.length) && (
                   <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                    {selectedWorkDivision.length + selectedRole.length}/{workDivisions.length + roles.length}
+                    {selectedWorkDivision.length}/{workDivisions.length} Div, {selectedRole.length}/{roles.length} Role
                   </span>
                 )}
               </button>
@@ -285,10 +285,14 @@ export default function UserManagementPage() {
               <tr>
                 <td colSpan={6} className="text-center py-4">Loading...</td>
               </tr>
-            ) : users.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No users found
+                  {searchKeyword.trim() 
+                    ? `No users found matching "${searchKeyword}"`
+                    : selectedWorkDivision.length === 0 || selectedRole.length === 0
+                    ? "Please select at least one division and role"
+                    : "No users found"}
                 </td>
               </tr>
             ) : (
