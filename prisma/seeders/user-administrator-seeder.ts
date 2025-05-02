@@ -19,7 +19,7 @@ export async function userAdministratorSeeder() {
 
   const userData = [
     { 
-      name: 'John CEO', 
+      name: 'Magus', 
       email: 'magus@chronospace.id', 
       password: hashedPassword, 
       roleId: role.id, 
