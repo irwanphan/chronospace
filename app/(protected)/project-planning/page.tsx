@@ -10,10 +10,23 @@ import StatsOverview from './components/StatsOverview';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+interface WorkDivision {
+  id: string;
+  name: string;
+  code: string;
+}
 
 export default function ProjectPlanningPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     budgetAllocated: 0,
@@ -22,11 +35,26 @@ export default function ProjectPlanningPage() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const statusOptions = [
+    'Not Allocated',
+    'Allocated',
+    'In Progress',
+    'Completed',
+    'Delayed'
+  ];
+
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentProjects = projects.slice(startIndex, endIndex);
+  const currentProjects = filteredProjects.slice(startIndex, endIndex);
 
+  // Fetch projects
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -34,6 +62,11 @@ export default function ProjectPlanningPage() {
         if (response.ok) {
           const data = await response.json();
           setProjects(data.projects);
+          setFilteredProjects(data.projects);
+          setWorkDivisions(data.workDivisions);
+          // Initially select all divisions and statuses
+          setSelectedDivisions(data.workDivisions.map((div: WorkDivision) => div.id));
+          setSelectedStatuses(statusOptions);
           setStats(calculateProjectStats(data.projects));
         }
       } catch (error) {
@@ -45,6 +78,70 @@ export default function ProjectPlanningPage() {
 
     fetchProjects();
   }, []);
+
+  // Apply filters when selectedDivisions, selectedStatuses, or searchKeyword changes
+  useEffect(() => {
+    let filtered = projects;
+
+    // Filter by division
+    if (selectedDivisions.length > 0) {
+      filtered = filtered.filter(project => 
+        selectedDivisions.includes(project.workDivisionId)
+      );
+    }
+
+    // Filter by status
+    if (selectedStatuses.length > 0) {
+      filtered = filtered.filter(project => 
+        selectedStatuses.includes(project.status)
+      );
+    }
+
+    // Filter by search keyword
+    if (searchKeyword) {
+      const keyword = searchKeyword.toLowerCase();
+      filtered = filtered.filter(project => 
+        project.title.toLowerCase().includes(keyword) ||
+        project.code.toLowerCase().includes(keyword)
+      );
+    }
+
+    setFilteredProjects(filtered);
+    setStats(calculateProjectStats(filtered));
+    setCurrentPage(1); // Reset to first page when filter changes
+  }, [selectedDivisions, selectedStatuses, searchKeyword, projects]);
+
+  const handleDivisionToggle = (divisionId: string) => {
+    setSelectedDivisions(prev => 
+      prev.includes(divisionId)
+        ? prev.filter(id => id !== divisionId)
+        : [...prev, divisionId]
+    );
+  };
+
+  const handleStatusToggle = (status: string) => {
+    setSelectedStatuses(prev => 
+      prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectedDivisions(workDivisions.map(div => div.id));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedDivisions([]);
+  };
+
+  const handleSelectAllStatuses = () => {
+    setSelectedStatuses(statusOptions);
+  };
+
+  const handleDeselectAllStatuses = () => {
+    setSelectedStatuses([]);
+  };
 
   if (isLoading) return <LoadingSpin />
 
@@ -62,14 +159,104 @@ export default function ProjectPlanningPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by title or code..."
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
             />
           </div>
-          <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
+          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <PopoverTrigger asChild>
+              <button className="px-4 py-2 border rounded-lg flex items-center gap-2 hover:bg-gray-50">
+                <Filter className="w-4 h-4" />
+                Filter
+                {(selectedDivisions.length < workDivisions.length || selectedStatuses.length < statusOptions.length) && (
+                  <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                    {selectedDivisions.length + selectedStatuses.length}/{workDivisions.length + statusOptions.length}
+                  </span>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4 bg-white">
+              <div className="space-y-6">
+                {/* Work Division Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Filter by Work Division</h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSelectAll}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={handleDeselectAll}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {workDivisions.map((division) => (
+                      <div key={division.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={division.id}
+                          checked={selectedDivisions.includes(division.id)}
+                          onCheckedChange={() => handleDivisionToggle(division.id)}
+                        />
+                        <label
+                          htmlFor={division.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {division.name} ({division.code})
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Filter by Status</h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSelectAllStatuses}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={handleDeselectAllStatuses}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {statusOptions.map((status) => (
+                      <div key={status} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={status}
+                          checked={selectedStatuses.includes(status)}
+                          onCheckedChange={() => handleStatusToggle(status)}
+                        />
+                        <label
+                          htmlFor={status}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {status}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -128,7 +315,7 @@ export default function ProjectPlanningPage() {
 
       <Pagination
         currentPage={currentPage}
-        totalItems={projects.length}
+        totalItems={filteredProjects.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />

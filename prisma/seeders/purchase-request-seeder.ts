@@ -54,9 +54,11 @@ export async function purchaseRequestSeeder() {
       if (vendorItems.length < 2) continue;
 
       // Create PR for this vendor's items
+      const uniqueCode = generateId(`${budget.project.workDivisionId}-${budget.id}-${vendorId}`);
+
       const pr = await prisma.purchaseRequest.create({
         data: {
-          code: generateId(budget.project.workDivisionId),
+          code: uniqueCode,
           title: `PR for ${budget.title} - ${vendorId}`,
           description: `Purchase request for ${budget.title} items from vendor ${vendorId}`,
           budgetId: budget.id,

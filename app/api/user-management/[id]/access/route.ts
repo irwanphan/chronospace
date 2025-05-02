@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 export const revalidate = 0
 
@@ -8,7 +10,17 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const { menuAccess, activityAccess, workspaceAccess } = await request.json();
+
+    // get the difference between the old and new access
+    const oldAccess = await prisma.userAccess.findUnique({
+      where: { userId: params.id },
+    });
 
     const updatedAccess = await prisma.userAccess.upsert({
       where: {
@@ -25,6 +37,26 @@ export async function PUT(
         activityAccess,
         workspaceAccess,
       },
+    });
+
+    const difference = {
+      menuAccess: updatedAccess.menuAccess !== oldAccess?.menuAccess,
+      activityAccess: updatedAccess.activityAccess !== oldAccess?.activityAccess,
+      workspaceAccess: updatedAccess.workspaceAccess !== oldAccess?.workspaceAccess,
+    };
+
+    // activity history
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        action: 'UPDATE',
+        entityType: 'USER',
+        entityId: params.id,
+        entityCode: null,
+        details: {
+          difference
+        }
+      }
     });
 
     return NextResponse.json(updatedAccess);

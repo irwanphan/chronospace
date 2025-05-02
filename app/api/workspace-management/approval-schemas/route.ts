@@ -107,13 +107,21 @@ export async function GET() {
             include: {
               role: true,
             },
-          }
+          },
+          workDivisions: true,
+          roles: true
         },
         orderBy: {
           createdAt: 'desc',
         },
       }),
-      prisma.role.findMany(),
+      prisma.role.findMany({
+        where: {
+          roleCode: {
+            not: 'ADMIN',
+          },
+        },
+      }),
       prisma.workDivision.findMany()
     ]);
 
@@ -129,7 +137,11 @@ export async function GET() {
         ) : []
     }));
 
-    return NextResponse.json({ approvalSchemas: transformedSchemas });
+    return NextResponse.json({ 
+      approvalSchemas: transformedSchemas,
+      workDivisions,
+      roles
+    });
   } catch (error) {
     console.error('Failed to fetch schemas:', error);
     return NextResponse.json(

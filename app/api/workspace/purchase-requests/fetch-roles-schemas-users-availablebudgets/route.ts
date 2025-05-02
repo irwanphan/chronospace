@@ -38,11 +38,24 @@ export async function GET() {
     }).filter(budget => budget.items.length > 0); // Hanya budget yang masih punya items
 
     const [roles, users, schemas] = await Promise.all([
-      prisma.role.findMany(),
+      prisma.role.findMany({
+        where: {
+          roleCode: {
+            not: 'ADMIN',
+          },
+        },
+      }),
       prisma.user.findMany({
         include: {
           role: true
-        }
+        },
+        where: {
+          role: {
+            roleCode: {
+              not: 'ADMIN',
+            },
+          },
+        },
       }),
       prisma.approvalSchema.findMany({
         include: {

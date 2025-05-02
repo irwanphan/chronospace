@@ -21,6 +21,11 @@ export async function GET(
           id: true,
           roleName: true,
         },
+        where: {
+          roleCode: {
+            not: 'ADMIN',
+          },
+        },
       }), 
       prisma.workDivision.findMany({
         select: {

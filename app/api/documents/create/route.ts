@@ -40,6 +40,21 @@ export async function POST(request: Request) {
       }
     });
 
+    // activity history
+    await prisma.activityHistory.create({
+      data: {
+        userId: session.user.id,
+        action: 'CREATE',
+        entityType: 'DOCUMENT',
+        entityId: document.id,
+        entityCode: document.fileName,
+        details: {
+          documentUrl: document.fileUrl
+        }
+      }
+    });
+    
+
     return NextResponse.json({ success: true, document });
   } catch (error) {
     console.error('Error creating document:', error);

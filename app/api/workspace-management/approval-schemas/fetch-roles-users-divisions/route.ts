@@ -12,12 +12,24 @@ export async function GET() {
           roleName: true,
           budgetLimit: true,
         },
+        where: {
+          roleCode: {
+            not: 'ADMIN',
+          },
+        },
       }),
       prisma.user.findMany({
         select: {
           id: true,
           name: true,
           role: true,
+        },
+        where: {
+          role: {
+            roleCode: {
+              not: 'ADMIN',
+            },
+          },
         },
       }),
       prisma.workDivision.findMany({

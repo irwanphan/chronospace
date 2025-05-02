@@ -15,7 +15,9 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ projects });
+    const workDivisions = await prisma.workDivision.findMany();
+
+    return NextResponse.json({ projects, workDivisions });
   } catch (error) {
     console.error('Error fetching projects:', error);
     return NextResponse.json(
