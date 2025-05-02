@@ -6,7 +6,15 @@ export const revalidate = 0
 export async function GET() {
   try {
     const [users, workDivisions] = await Promise.all([
-      prisma.user.findMany(),
+      prisma.user.findMany({
+        where: {
+          role: {
+            roleCode: {
+              not: 'ADMIN',
+            },
+          },
+        },
+      }),
       prisma.workDivision.findMany({
         select: {
           id: true,
