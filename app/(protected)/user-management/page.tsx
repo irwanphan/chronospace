@@ -11,10 +11,15 @@ import UserActions from './components/UserActions';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Role } from '@/types/role';
+import { WorkDivision } from '@/types/work-division';
 
 export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const canCreateUser = session?.user?.access?.activityAccess?.createUser;
@@ -28,10 +33,17 @@ export default function UserManagementPage() {
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentUsers = users.slice(startIndex, endIndex);
+  const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
-  console.log('can change password', canChangePassword);
-  console.log('can change other user password', canChangeOtherUserPassword);
+  const [selectedWorkDivision, setSelectedWorkDivision] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [workDivisions, setWorkDivisions] = useState<WorkDivision[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  // console.log('can change password', canChangePassword);
+  // console.log('can change other user password', canChangeOtherUserPassword);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -42,8 +54,13 @@ export default function UserManagementPage() {
           throw new Error('Failed to fetch data');
         }
         const data = await response.json();
-        console.log(data);
         setUsers(data.users || []);
+        setFilteredUsers(data.users || []);
+        setWorkDivisions(data.workDivisions || []);
+        setRoles(data.roles || []);
+        // Initialize with all divisions and roles selected
+        setSelectedWorkDivision(data.workDivisions.map((div: WorkDivision) => div.id || ''));
+        setSelectedRole(data.roles.map((role: Role) => role.id || ''));
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setError('Failed to load data');
@@ -54,6 +71,71 @@ export default function UserManagementPage() {
     };
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (!users) return;
+
+    let filtered = [...users];
+
+    // If no divisions or roles selected, show no users
+    if (selectedWorkDivision.length === 0 || selectedRole.length === 0) {
+      filtered = [];
+    } else {
+      // Filter by division
+      if (selectedWorkDivision.length > 0) {
+        filtered = filtered.filter(user => selectedWorkDivision.includes(user.workDivisionId || ''));
+      }
+
+      // Filter by role
+      if (selectedRole.length > 0) {
+        filtered = filtered.filter(user => selectedRole.includes(user.roleId || ''));
+      }
+
+      // Filter by search keyword
+      if (searchKeyword.trim()) {
+        const keyword = searchKeyword.trim().toLowerCase();
+        filtered = filtered.filter(user => 
+          user.name.toLowerCase().includes(keyword) ||
+          user.email.toLowerCase().includes(keyword)
+        );
+      }
+    }
+
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
+  }, [users, selectedWorkDivision, selectedRole, searchKeyword]);
+
+  const handleWorkDivisionToggle = (divisionId: string) => {
+    setSelectedWorkDivision(prev => 
+      prev.includes(divisionId)
+        ? prev.filter(id => id !== divisionId)
+        : [...prev, divisionId]
+    );
+  };
+
+  const handleSelectAllWorkDivisions = () => {
+    setSelectedWorkDivision(workDivisions.map(div => div.id || ''));
+  };
+
+  const handleDeselectAllWorkDivisions = () => {
+    setSelectedWorkDivision([]);
+  };
+
+  const handleRoleToggle = (roleId: string) => {
+    setSelectedRole(prev => 
+      prev.includes(roleId)
+        ? prev.filter(id => id !== roleId)
+        : [...prev, roleId]
+    );
+  };
+
+  const handleSelectAllRoles = () => {
+    setSelectedRole(roles.map(role => role.id || ''));
+  };
+
+  const handleDeselectAllRoles = () => {
+    setSelectedRole([]);
+  };
 
   if (isLoading) return <LoadingSpin />
 
@@ -75,12 +157,103 @@ export default function UserManagementPage() {
               type="text"
               placeholder="Search..."
               className="w-full pl-10 pr-4 py-2 border rounded-lg"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
             />
           </div>
-          <button className="px-4 py-2 border rounded-lg flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
+          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <PopoverTrigger asChild>
+              <button className="px-4 py-2 border rounded-lg flex items-center gap-2 hover:bg-gray-50">
+                <Filter className="w-4 h-4" />
+                Filter
+                {(selectedWorkDivision.length < workDivisions.length || selectedRole.length < roles.length) && (
+                  <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                    {selectedWorkDivision.length + selectedRole.length}/{workDivisions.length + roles.length}
+                  </span>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4 bg-white">
+              <div className="space-y-6">
+                {/* Work Division Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Filter by Work Division</h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSelectAllWorkDivisions}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={handleDeselectAllWorkDivisions}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {workDivisions.map((division) => (
+                      <div key={division.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={division.id}
+                          checked={selectedWorkDivision.includes(division.id || '')}
+                          onCheckedChange={() => handleWorkDivisionToggle(division.id || '')}
+                        />
+                        <label
+                          htmlFor={division.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {division.name} ({division.code})
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Role Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Filter by Role</h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSelectAllRoles}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={handleDeselectAllRoles}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {roles.map((role) => (
+                      <div key={role.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={role.id}
+                          checked={selectedRole.includes(role.id || '')}
+                          onCheckedChange={() => handleRoleToggle(role.id || '')}
+                        />
+                        <label
+                          htmlFor={role.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {role.roleName}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="flex items-center gap-3">
           {canCreateUser && (
@@ -176,7 +349,7 @@ export default function UserManagementPage() {
 
       <Pagination
         currentPage={currentPage}
-        totalItems={users.length}
+        totalItems={filteredUsers.length}
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />

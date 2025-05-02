@@ -43,7 +43,10 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ users });
+    const workDivisions = await prisma.workDivision.findMany();
+    const roles = await prisma.role.findMany();
+
+    return NextResponse.json({ users, workDivisions, roles });
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(
