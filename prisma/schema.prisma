@@ -87,6 +87,7 @@ model User {
   notifications            Notification[]
   purchaseOrders           PurchaseOrder[]
   purchaseOrderHistories   PurchaseOrderHistory[]
+  timelineItems            TimelineItem[]
 
   @@map("users")
 }
@@ -578,5 +579,65 @@ model PurchaseOrderHistory {
 
   @@index([purchaseOrderId])
   @@map("purchase_order_histories")
+}
+
+model TimelineItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  date        DateTime
+  type        String   // "birthday", "event", "news", "link"
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  creator     User     @relation(fields: [createdBy], references: [id])
+  
+  // Common fields for all types
+  imageUrl    String?
+  
+  // Type-specific fields
+  eventId     String?  @unique
+  event       TimelineEvent? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  newsId      String?  @unique
+  news        TimelineNews? @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  
+  linkId      String?  @unique
+  link        TimelineLink? @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@map("timeline_items")
+}
+
+model TimelineEvent {
+  id          String       @id @default(cuid())
+  location    String?
+  startTime   DateTime?
+  endTime     DateTime?
+  organizer   String?
+  isAllDay    Boolean      @default(false)
+  timelineItem TimelineItem?
+
+  @@map("timeline_events")
+}
+
+model TimelineNews {
+  id          String       @id @default(cuid())
+  source      String?
+  url         String?
+  content     String?      @db.Text
+  timelineItem TimelineItem?
+
+  @@map("timeline_news")
+}
+
+model TimelineLink {
+  id          String       @id @default(cuid())
+  url         String
+  category    String?
+  importance  Int          @default(0)
+  timelineItem TimelineItem?
+
+  @@map("timeline_links")
 }
 
