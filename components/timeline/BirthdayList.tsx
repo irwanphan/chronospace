@@ -134,7 +134,7 @@ export default function BirthdayList() {
 
   return (
     <div className="relative">
-      <div className="relative flex items-center bg-sky-500 rounded-xl px-12 pt-6 pb-8 overflow-hidden">
+      <div className="relative flex items-center bg-sky-500 rounded-xl px-12 pt-6 pb-8 overflow-hidden hover:shadow-lg transition-all duration-300">
         <button 
           onClick={goToPrevious} 
           disabled={isAnimating}
