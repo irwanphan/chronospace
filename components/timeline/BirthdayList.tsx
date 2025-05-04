@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { GiftIcon, Cake, ChevronLeft, ChevronRight } from 'lucide-react';
-import Card from '../ui/Card';
+import Image from 'next/image';
+import { GiftIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type User = {
   id: string;
@@ -17,6 +17,8 @@ export default function BirthdayList() {
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     // Langsung gunakan mock data tanpa fetch API
@@ -61,16 +63,56 @@ export default function BirthdayList() {
     setIsLoading(false);
   }, []);
 
-  const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? upcomingBirthdays.length - 1 : prevIndex - 1
-    );
+  const handleSlide = (direction: 'left' | 'right') => {
+    if (isAnimating) return;
+    
+    setDirection(direction);
+    setIsAnimating(true);
+    
+    // Menunggu animasi slide out selesai sebelum mengubah index
+    setTimeout(() => {
+      if (direction === 'left') {
+        setCurrentIndex((prevIndex) => 
+          prevIndex === 0 ? upcomingBirthdays.length - 1 : prevIndex - 1
+        );
+      } else {
+        setCurrentIndex((prevIndex) => 
+          prevIndex === upcomingBirthdays.length - 1 ? 0 : prevIndex + 1
+        );
+      }
+      
+      // Reset direction setelah index berubah untuk memulai animasi slide in
+      setDirection(null);
+      
+      // Reset isAnimating setelah animasi selesai
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 300);
+    }, 300);
   };
 
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === upcomingBirthdays.length - 1 ? 0 : prevIndex + 1
-    );
+  const goToPrevious = () => handleSlide('left');
+  const goToNext = () => handleSlide('right');
+
+  const jumpToSlide = (index: number) => {
+    if (isAnimating || index === currentIndex) return;
+    
+    // Tentukan arah berdasarkan indeks yang dituju
+    const dir: 'left' | 'right' = 
+      index > currentIndex ? 'right' : 'left';
+      
+    // Jika loncat dari akhir ke awal atau sebaliknya
+    if (Math.abs(index - currentIndex) > 1) {
+      if (index === 0 && currentIndex === upcomingBirthdays.length - 1) {
+        handleSlide('right');
+      } else if (index === upcomingBirthdays.length - 1 && currentIndex === 0) {
+        handleSlide('left');
+      } else {
+        handleSlide(dir);
+      }
+    } else {
+      handleSlide(dir);
+    }
   };
 
   if (isLoading) {
@@ -83,70 +125,83 @@ export default function BirthdayList() {
 
   const currentUser = upcomingBirthdays[currentIndex];
 
+  // Menentukan kelas untuk animasi slide
+  const getSlideAnimation = () => {
+    if (direction === 'left') return 'animate-slide-out-right';
+    if (direction === 'right') return 'animate-slide-out-left';
+    return 'animate-slide-in';
+  };
+
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-2 mb-3">
-        <Cake className="w-5 h-5 text-pink-500" />
-        <h3 className="text-lg font-medium">Upcoming Birthdays</h3>
-      </div>
-      
-      <Card className="relative flex items-center bg-pink-100">
+    <div className="relative">
+      <div className="relative flex items-center bg-sky-500 rounded-xl px-12 pt-6 pb-8 overflow-hidden">
         <button 
           onClick={goToPrevious} 
-          className="absolute left-4 z-10 p-1 bg-white rounded-full shadow-md text-pink-500 hover:text-pink-700 hover:bg-pink-50"
+          disabled={isAnimating}
+          className="absolute left-4 z-10 p-1 bg-white border border-transparent rounded-full shadow-md text-blue-500 hover:text-blue-700 hover:border-blue-600 transition-all duration-300 disabled:opacity-50"
           aria-label="Previous birthday"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         
-        <div className="w-full flex justify-center px-10">
+        <div className="w-full relative h-24">
           <div 
-            key={currentUser.id} 
-            className="flex items-center gap-4 min-w-[250px] max-w-sm border border-pink-100 shadow-sm"
+            key={`slide-${currentUser.id}`}
+            className={`absolute inset-0 flex justify-between px-4 transition-all duration-300 ${getSlideAnimation()}`}
+            style={{
+              opacity: isAnimating ? 0 : 1,
+              transform: `translateX(${direction ? (direction === 'left' ? '100%' : '-100%') : '0'})`
+            }}
           >
-            <div className="w-14 h-14 bg-pink-200 rounded-full flex items-center justify-center text-pink-600">
+            <div 
+              className="flex items-center gap-4 text-white"
+            >
+              <div className="flex flex-col gap-1">
+                <p className="text-sm">Upcoming Birthday</p>
+                <p className="font-semibold text-lg">{currentUser.name}</p>
+                <div className="flex items-center gap-1 text-sm">
+                  <span>
+                    {currentUser.daysUntilBirthday === 0 
+                      ? 'Today!' 
+                      : currentUser.daysUntilBirthday === 1 
+                        ? 'Tomorrow!' 
+                        : `In ${currentUser.daysUntilBirthday} days`}
+                  </span>
+                  <span>•</span>
+                  <span>{format(new Date(currentUser.birthday), 'MMM d')}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-16 h-16 bg-sky-200 rounded-full self-center flex items-center justify-center text-sky-600">
               {currentUser.image ? (
-                <img src={currentUser.image} alt={currentUser.name} className="w-full h-full rounded-full object-cover" />
+                <Image src={currentUser.image} alt={currentUser.name} className="w-full h-full rounded-full object-cover" width={56} height={56} />
               ) : (
                 <GiftIcon className="w-7 h-7" />
               )}
-            </div>
-            
-            <div>
-              <p className="font-medium text-lg">{currentUser.name}</p>
-              <div className="flex items-center gap-1 text-sm text-pink-700">
-                <span>
-                  {currentUser.daysUntilBirthday === 0 
-                    ? 'Today!' 
-                    : currentUser.daysUntilBirthday === 1 
-                      ? 'Tomorrow!' 
-                      : `In ${currentUser.daysUntilBirthday} days`}
-                </span>
-                <span>•</span>
-                <span>{format(new Date(currentUser.birthday), 'MMM d')}</span>
-              </div>
             </div>
           </div>
         </div>
         
         <button 
-          onClick={goToNext} 
-          className="absolute right-4 z-10 p-1 bg-white rounded-full shadow-md text-pink-500 hover:text-pink-700 hover:bg-pink-50"
+          onClick={goToNext}
+          disabled={isAnimating}
+          className="absolute right-4 z-10 p-1 bg-white border border-transparent rounded-full shadow-md text-blue-500 hover:text-blue-700 hover:border-blue-600 transition-all duration-300 disabled:opacity-50"
           aria-label="Next birthday"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
-      </Card>
+      </div>
       
       {/* Pagination dots */}
-      <div className="flex justify-center mt-3 gap-1">
+      <div className="flex justify-center mt-3 gap-1 relative bottom-8 left-0 right-0 z-10">
         {upcomingBirthdays.map((_, index) => (
           <span 
             key={index} 
-            className={`block h-2 w-2 rounded-full ${
-              index === currentIndex ? 'bg-pink-500' : 'bg-pink-200'
+            className={`block h-2 w-2 rounded-full transition-all duration-300 ${
+              index === currentIndex ? 'bg-sky-800 scale-125' : 'bg-sky-200 hover:bg-sky-300'
             }`}
-            onClick={() => setCurrentIndex(index)}
+            onClick={() => jumpToSlide(index)}
             role="button"
             tabIndex={0}
             aria-label={`Go to birthday ${index + 1}`}
