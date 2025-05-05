@@ -141,7 +141,7 @@ export default function TimelineItemModal({
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as Record<string, string | boolean | number>),
           [child]: type === 'checkbox' 
             ? (e.target as HTMLInputElement).checked 
             : value
