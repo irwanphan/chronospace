@@ -197,7 +197,8 @@ export default function TimelineList({ type }: TimelineListProps) {
       {totalPages > 1 && (
         <Pagination
           currentPage={page}
-          totalPages={totalPages}
+          totalItems={totalPages * 5}
+          itemsPerPage={5}
           onPageChange={setPage}
         />
       )}
