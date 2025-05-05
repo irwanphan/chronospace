@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import Link from 'next/link';
 import Pagination from '@/components/Pagination';
 import Button from '@/components/ui/Button';
 import { Calendar, Newspaper, Link2, ExternalLink, Edit, Trash2 } from 'lucide-react';
@@ -204,7 +203,30 @@ export default function TimelineList({ type }: TimelineListProps) {
       
       {/* Edit Modal would go here */}
       
-      {/* Delete Confirmation Modal would go here */}
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Confirm Delete</h3>
+            <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
