@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import Pagination from '@/components/Pagination';
 import Button from '@/components/ui/Button';
 import { Calendar, Newspaper, Link2, ExternalLink, Edit, Trash2 } from 'lucide-react';
+import TimelineItemModal from '@/components/timeline/TimelineItemModal';
 
 type TimelineItemType = {
   id: string;
@@ -201,7 +202,15 @@ export default function TimelineList({ type }: TimelineListProps) {
         />
       )}
       
-      {/* Edit Modal would go here */}
+      {/* Edit Modal */}
+      {isEditModalOpen && currentItem && (
+        <TimelineItemModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          initialType={currentItem.type}
+          itemToEdit={currentItem}
+        />
+      )}
       
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
