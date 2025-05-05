@@ -48,51 +48,46 @@ export default function TimelinePage() {
       </div>
 
       {/*  set 2 columns, first is scrollable, second is fixed */}
-      {/* 1st column takes 2/3 of the width, 2nd column takes 1/3 of the width */}
-      {/* 2nd column becomes first in mobile and scrollable */}
-      <div className="flex gap-4">
-        <div className="flex-1 overflow-y-auto">
-          <TimelineList />
+      {/* 1st column takes 2/3 of the width, 2nd column takes 1/3 of the width but is sticky */}
+      <div className="flex gap-4 relative">
+        <div className="flex-1 overflow-y-auto h-full">
+          <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="event">Events</TabsTrigger>
+              <TabsTrigger value="news">News</TabsTrigger>
+              <TabsTrigger value="link">Links</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all">
+              <TimelineList type={null} />
+            </TabsContent>
+            
+            <TabsContent value="event">
+              <TimelineList type="event" />
+            </TabsContent>
+            
+            <TabsContent value="news">
+              <TimelineList type="news" />
+            </TabsContent>
+            
+            <TabsContent value="link">
+              <TimelineList type="link" />
+            </TabsContent>
+          </Tabs>
+
+          <TimelineItemModal 
+            isOpen={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            initialType={activeTab !== 'all' ? activeTab : 'event'}
+          />
+          {/* <TimelineList /> */}
         </div>
-        <div className="w-1/3">
+        <div className="w-1/3 sticky top-24 self-start max-h-screen overflow-y-auto">
           <BirthdayList />
         </div>
       </div>
       
-
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-
-        {/* <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="event">Events</TabsTrigger>
-            <TabsTrigger value="news">News</TabsTrigger>
-            <TabsTrigger value="link">Links</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all">
-            <TimelineList type={null} />
-          </TabsContent>
-          
-          <TabsContent value="event">
-            <TimelineList type="event" />
-          </TabsContent>
-          
-          <TabsContent value="news">
-            <TimelineList type="news" />
-          </TabsContent>
-          
-          <TabsContent value="link">
-            <TimelineList type="link" />
-          </TabsContent>
-        </Tabs> */}
-      </div>
-
-      <TimelineItemModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        initialType={activeTab !== 'all' ? activeTab : 'event'}
-      />
     </div>
   );
 } 
