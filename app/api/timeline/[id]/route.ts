@@ -158,6 +158,16 @@ export async function PUT(
         },
       });
 
+      await prisma.activityHistory.create({
+        data: {
+          userId: session.user.id,
+          action: 'update',
+          entityType: 'timelineItem',
+          entityId: id,
+          details: JSON.stringify(timelineItem),
+          timestamp: new Date(),
+        },
+      });
       return updatedItemWithRelations;
     });
 
