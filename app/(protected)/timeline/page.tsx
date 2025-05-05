@@ -33,7 +33,7 @@ export default function TimelinePage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Timeline</h1>
-        {/* <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Link href="/timeline/management">
             <Button variant="outline" className="flex items-center gap-2">
               <Settings size={16} />
@@ -44,7 +44,7 @@ export default function TimelinePage() {
             <PlusCircle size={16} />
             <span>Add New</span>
           </Button>
-        </div> */}
+        </div>
       </div>
 
       {/*  set 2 columns, first is scrollable, second is fixed */}
@@ -52,7 +52,7 @@ export default function TimelinePage() {
       {/* 2nd column becomes first in mobile and scrollable */}
       <div className="flex gap-4">
         <div className="flex-1 overflow-y-auto">
-          {/* <TimelineList /> */}
+          <TimelineList />
         </div>
         <div className="w-1/3">
           <BirthdayList />

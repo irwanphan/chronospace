@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET a specific timeline item
 export async function GET(
@@ -79,35 +77,52 @@ export async function PUT(
       );
     }
 
-    // Base data to update
-    const updateData: any = {
-      title,
-      description,
-      date: date ? new Date(date) : undefined,
-      isPublic,
-      imageUrl,
-      updatedAt: new Date(),
-    };
+    // Gunakan transaksi untuk update
+    const updatedItem = await prisma.$transaction(async (tx) => {
+      // Update item utama
+      const timelineItem = await tx.timelineItem.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          date: date ? new Date(date) : undefined,
+          isPublic,
+          imageUrl,
+          updatedAt: new Date(),
+        },
+      });
 
-    // Handle type-specific data
-    if (existingItem.type === 'event' && specificData.event) {
-      // Update event data
-      if (existingItem.eventId) {
-        await prisma.timelineEvent.update({
+      // Update related entities jika perlu
+      if (existingItem.type === 'event' && specificData.event && existingItem.eventId) {
+        const { location, organizer, isAllDay } = specificData.event;
+        let startTime = null;
+        let endTime = null;
+        
+        // Konversi waktu hanya jika isAllDay false dan nilai time tidak kosong
+        if (!isAllDay) {
+          if (specificData.event.startTime) {
+            const startTimeDate = new Date(specificData.event.startTime);
+            startTime = isNaN(startTimeDate.getTime()) ? null : startTimeDate;
+          }
+          
+          if (specificData.event.endTime) {
+            const endTimeDate = new Date(specificData.event.endTime);
+            endTime = isNaN(endTimeDate.getTime()) ? null : endTimeDate;
+          }
+        }
+        
+        await tx.timelineEvent.update({
           where: { id: existingItem.eventId },
           data: {
-            location: specificData.event.location,
-            startTime: specificData.event.startTime ? new Date(specificData.event.startTime) : null,
-            endTime: specificData.event.endTime ? new Date(specificData.event.endTime) : null,
-            organizer: specificData.event.organizer,
-            isAllDay: specificData.event.isAllDay ?? false,
+            location,
+            startTime,
+            endTime,
+            organizer,
+            isAllDay: isAllDay ?? false,
           },
         });
-      }
-    } else if (existingItem.type === 'news' && specificData.news) {
-      // Update news data
-      if (existingItem.newsId) {
-        await prisma.timelineNews.update({
+      } else if (existingItem.type === 'news' && specificData.news && existingItem.newsId) {
+        await tx.timelineNews.update({
           where: { id: existingItem.newsId },
           data: {
             source: specificData.news.source,
@@ -115,11 +130,8 @@ export async function PUT(
             content: specificData.news.content,
           },
         });
-      }
-    } else if (existingItem.type === 'link' && specificData.link) {
-      // Update link data
-      if (existingItem.linkId) {
-        await prisma.timelineLink.update({
+      } else if (existingItem.type === 'link' && specificData.link && existingItem.linkId) {
+        await tx.timelineLink.update({
           where: { id: existingItem.linkId },
           data: {
             url: specificData.link.url,
@@ -128,24 +140,25 @@ export async function PUT(
           },
         });
       }
-    }
 
-    // Update main timeline item
-    const updatedItem = await prisma.timelineItem.update({
-      where: { id },
-      data: updateData,
-      include: {
-        event: true,
-        news: true,
-        link: true,
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+      // Fetch updated item with all relations
+      const updatedItemWithRelations = await tx.timelineItem.findUnique({
+        where: { id },
+        include: {
+          event: true,
+          news: true,
+          link: true,
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
           },
         },
-      },
+      });
+
+      return updatedItemWithRelations;
     });
 
     return NextResponse.json(updatedItem);

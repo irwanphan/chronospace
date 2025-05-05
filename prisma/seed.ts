@@ -10,6 +10,7 @@ import { projectSeeder } from './seeders/project-seeder';
 import { budgetSeeder } from './seeders/budget-seeder';
 import { purchaseRequestSeeder } from './seeders/purchase-request-seeder';
 import { userAdministratorSeeder } from './seeders/user-administrator-seeder';
+import { timelineEventSeeder } from './seeders/timeline-event-seeder';
 
 async function main() {
   // Clear existing data
@@ -34,6 +35,10 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.userAccess.deleteMany();
   await prisma.userRole.deleteMany();
+  await prisma.timelineLink.deleteMany();
+  await prisma.timelineNews.deleteMany();
+  await prisma.timelineEvent.deleteMany();
+  await prisma.timelineItem.deleteMany();
   await prisma.user.deleteMany();
   await prisma.vendor.deleteMany();
   await prisma.workDivision.deleteMany();
@@ -49,6 +54,7 @@ async function main() {
   await projectSeeder();
   await budgetSeeder();
   await purchaseRequestSeeder();
+  await timelineEventSeeder();
 }
   
 main()
