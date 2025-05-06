@@ -142,7 +142,7 @@ export default function TimelineList({ type }: TimelineListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="divide-y">
+      <div className="">
         {items.map((item) => (
           <Card key={item.id} className="py-4 mb-4">
             <div className="flex items-start justify-between">

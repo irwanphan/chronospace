@@ -53,8 +53,9 @@ export default function TimelinePage() {
       <div className="flex gap-4 relative">
         <div className="flex-1 overflow-y-auto h-full">
           <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All</TabsTrigger>
+            <TabsList className="fixed bottom-8 left-24 bg-white z-10 border border-blue-500 px-4 rounded-full hover:shadow-md transition-all duration-300">
+              <p className="text-sm font-medium">Filter by:</p>
+              <TabsTrigger value="all">All</TabsTrigger> 
               <TabsTrigger value="event">Events</TabsTrigger>
               <TabsTrigger value="news">News</TabsTrigger>
               <TabsTrigger value="link">Links</TabsTrigger>
