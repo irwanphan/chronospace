@@ -587,10 +587,12 @@ model TimelineItem {
   eventId     String?        @unique
   newsId      String?        @unique
   linkId      String?        @unique
+  thoughtId   String?        @unique
   creator     User           @relation(fields: [createdBy], references: [id])
   event       TimelineEvent? @relation(fields: [eventId], references: [id], onDelete: Cascade)
   link        TimelineLink?  @relation(fields: [linkId], references: [id], onDelete: Cascade)
   news        TimelineNews?  @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  thought     TimelineThought? @relation(fields: [thoughtId], references: [id], onDelete: Cascade)
 
   @@index([createdBy], map: "timeline_items_createdBy_fkey")
   @@map("timeline_items")
@@ -626,6 +628,15 @@ model TimelineLink {
   timelineItem TimelineItem?
 
   @@map("timeline_links")
+}
+
+model TimelineThought {
+  id           String        @id @default(cuid())
+  content      String        @db.Text
+  mood         String?
+  timelineItem TimelineItem?
+
+  @@map("timeline_thoughts")
 }
 
 enum PurchaseOrderStatus {

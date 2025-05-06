@@ -30,6 +30,10 @@ type TimelineItemType = {
     category: string | null;
     importance: number;
   };
+  thought?: {
+    content: string;
+    mood: string | null;
+  };
 };
 
 type TimelineItemModalProps = {
@@ -69,6 +73,10 @@ export default function TimelineItemModal({
       category: '',
       importance: 0,
     },
+    thought: {
+      content: '',
+      mood: '',
+    },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,6 +109,10 @@ export default function TimelineItemModal({
           category: itemToEdit.link?.category || '',
           importance: itemToEdit.link?.importance || 0,
         },
+        thought: {
+          content: itemToEdit.thought?.content || '',
+          mood: itemToEdit.thought?.mood || '',
+        },
       });
     } else {
       // Reset form on open
@@ -127,6 +139,10 @@ export default function TimelineItemModal({
           url: '',
           category: '',
           importance: 0,
+        },
+        thought: {
+          content: '',
+          mood: '',
         },
       });
     }
@@ -171,6 +187,10 @@ export default function TimelineItemModal({
     
     if (formData.type === 'link' && !formData.link.url) {
       newErrors['link.url'] = 'URL is required for links';
+    }
+    
+    if (formData.type === 'thought' && !formData.thought.content.trim()) {
+      newErrors['thought.content'] = 'Content is required for thoughts';
     }
     
     setErrors(newErrors);
@@ -232,6 +252,7 @@ export default function TimelineItemModal({
             <option value="event">Event</option>
             <option value="news">News</option>
             <option value="link">External Link</option>
+            <option value="thought">Thought</option>
           </select>
         </div>
         
@@ -504,6 +525,59 @@ export default function TimelineItemModal({
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2"
               />
+            </div>
+          </div>
+        )}
+        
+        {formData.type === 'thought' && (
+          <div className="space-y-4 border-t pt-4">
+            <h3 className="font-medium">What&apos;s on your mind?</h3>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                <div className="flex items-center gap-1">
+                  <FileText className="w-4 h-4" />
+                  <span>Content <span className="text-red-500">*</span></span>
+                </div>
+              </label>
+              <textarea
+                name="thought.content"
+                value={formData.thought.content}
+                onChange={handleChange}
+                className={`w-full border ${
+                  errors['thought.content'] ? 'border-red-500' : 'border-gray-300'
+                } rounded-md px-3 py-2`}
+                rows={4}
+                placeholder="Share your thoughts..."
+              />
+              {errors['thought.content'] && (
+                <p className="text-red-500 text-sm mt-1">{errors['thought.content']}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                <div className="flex items-center gap-1">
+                  <Tag className="w-4 h-4" />
+                  <span>Mood</span>
+                </div>
+              </label>
+              <select
+                name="thought.mood"
+                value={formData.thought.mood}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+              >
+                <option value="">Select your mood</option>
+                <option value="happy">Happy 😊</option>
+                <option value="excited">Excited 🎉</option>
+                <option value="calm">Calm 😌</option>
+                <option value="thoughtful">Thoughtful 🤔</option>
+                <option value="tired">Tired 😴</option>
+                <option value="sad">Sad 😢</option>
+                <option value="angry">Angry 😠</option>
+                <option value="anxious">Anxious 😰</option>
+              </select>
             </div>
           </div>
         )}

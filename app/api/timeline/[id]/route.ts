@@ -15,6 +15,7 @@ export async function GET(
         event: true,
         news: true,
         link: true,
+        thought: true,
         creator: {
           select: {
             id: true,
@@ -139,6 +140,14 @@ export async function PUT(
             importance: specificData.link.importance ?? 0,
           },
         });
+      } else if (existingItem.type === 'thought' && specificData.thought && existingItem.thoughtId) {
+        await tx.timelineThought.update({
+          where: { id: existingItem.thoughtId },
+          data: {
+            content: specificData.thought.content,
+            mood: specificData.thought.mood,
+          },
+        });
       }
 
       // Fetch updated item with all relations
@@ -148,13 +157,14 @@ export async function PUT(
           event: true,
           news: true,
           link: true,
+          thought: true,
           creator: {
             select: {
               id: true,
               name: true,
               image: true,
-            },
-          },
+            }
+          }
         },
       });
 

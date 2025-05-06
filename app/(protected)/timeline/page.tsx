@@ -57,6 +57,7 @@ export default function TimelinePage() {
             <TabsList className="fixed bottom-8 left-24 bg-white z-10 border border-blue-500 px-4 rounded-full hover:shadow-md transition-all duration-300">
               <p className="text-sm font-medium">Filter by:</p>
               <TabsTrigger value="all">All</TabsTrigger> 
+              <TabsTrigger value="thought">Thoughts</TabsTrigger>
               <TabsTrigger value="event">Events</TabsTrigger>
               <TabsTrigger value="news">News</TabsTrigger>
               <TabsTrigger value="link">Links</TabsTrigger>
@@ -64,6 +65,10 @@ export default function TimelinePage() {
             
             <TabsContent value="all">
               <TimelineList type={null} />
+            </TabsContent>
+            
+            <TabsContent value="thought">
+              <TimelineList type="thought" />
             </TabsContent>
             
             <TabsContent value="event">

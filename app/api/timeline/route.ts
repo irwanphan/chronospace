@@ -23,6 +23,7 @@ export async function GET(request: Request) {
         event: true,
         news: true,
         link: true,
+        thought: true,
         creator: {
           select: {
             id: true,
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
       let eventId = null;
       let newsId = null;
       let linkId = null;
+      let thoughtId = null;
       
       // Buat entitas berdasarkan tipe
       if (type === 'event' && specificData.event) {
@@ -140,6 +142,16 @@ export async function POST(request: Request) {
         });
         
         linkId = linkCreated.id;
+      } else if (type === 'thought' && specificData.thought) {
+        // Buat thought
+        const thoughtCreated = await tx.timelineThought.create({
+          data: {
+            content: specificData.thought.content,
+            mood: specificData.thought.mood,
+          }
+        });
+        
+        thoughtId = thoughtCreated.id;
       }
       
       // Buat timeline item dengan ID yang sesuai
@@ -155,11 +167,13 @@ export async function POST(request: Request) {
           eventId,
           newsId,
           linkId,
+          thoughtId,
         },
         include: {
           event: true,
           news: true,
           link: true,
+          thought: true,
           creator: {
             select: {
               id: true,
