@@ -4,8 +4,15 @@ import { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import Pagination from '@/components/Pagination';
 import Button from '@/components/ui/Button';
-import { Calendar, Newspaper, Link2, ExternalLink, Edit, Trash2 } from 'lucide-react';
+import { 
+  ExternalLink, 
+  Edit, 
+  Trash2 
+} from 'lucide-react';
 import TimelineItemModal from '@/components/timeline/TimelineItemModal';
+import Card from '../ui/Card';
+import Avatar from '../ui/Avatar';
+import { getInitials } from '@/lib/utils';
 
 type TimelineItemType = {
   id: string;
@@ -108,18 +115,18 @@ export default function TimelineList({ type }: TimelineListProps) {
     }
   };
 
-  const TypeIcon = ({ type }: { type: string }) => {
-    switch(type) {
-      case 'event':
-        return <Calendar className="w-5 h-5 text-blue-500" />;
-      case 'news':
-        return <Newspaper className="w-5 h-5 text-green-500" />;
-      case 'link':
-        return <Link2 className="w-5 h-5 text-purple-500" />;
-      default:
-        return null;
-    }
-  };
+  // const TypeIcon = ({ type }: { type: string }) => {
+  //   switch(type) {
+  //     case 'event':
+  //       return <Calendar className="w-5 h-5 text-blue-500" />;
+  //     case 'news':
+  //       return <Newspaper className="w-5 h-5 text-green-500" />;
+  //     case 'link':
+  //       return <Link2 className="w-5 h-5 text-purple-500" />;
+  //     default:
+  //       return null;
+  //   }
+  // };
 
   if (isLoading) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -137,14 +144,17 @@ export default function TimelineList({ type }: TimelineListProps) {
     <div className="space-y-6">
       <div className="divide-y">
         {items.map((item) => (
-          <div key={item.id} className="py-4">
+          <Card key={item.id} className="py-4 mb-4">
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-3">
                 <div className="mt-1">
-                  <TypeIcon type={item.type} />
+                  {/* <TypeIcon type={item.type} /> */}
+                  <Avatar>
+                    {getInitials(item.creator.name)}
+                  </Avatar>
                 </div>
                 <div>
-                  <h3 className="font-medium">{item.title}</h3>
+                  <h3 className="font-medium">{item.creator.name}</h3>
                   <p className="text-sm text-gray-500">
                     {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
                     {item.type === 'event' && item.event?.location && (
@@ -155,6 +165,9 @@ export default function TimelineList({ type }: TimelineListProps) {
                     )}
                   </p>
                   
+                  {item.title && (
+                    <p className="mt-2 text-md font-semibold text-gray-700">{item.title}</p>
+                  )}
                   {item.description && (
                     <p className="mt-2 text-sm text-gray-700">{item.description}</p>
                   )}
@@ -190,7 +203,7 @@ export default function TimelineList({ type }: TimelineListProps) {
                 </Button>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
       

@@ -84,7 +84,7 @@ export default function TimelinePage() {
           />
           {/* <TimelineList /> */}
         </div>
-        <div className="w-1/3 sticky top-24 self-start max-h-screen overflow-y-auto">
+        <div className="w-1/3 sticky top-24 self-start max-h-screen overflow-hidden">
           <BirthdaySlides />
 
           <EventSlides />
