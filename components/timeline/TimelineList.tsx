@@ -13,6 +13,8 @@ import TimelineItemModal from '@/components/timeline/TimelineItemModal';
 import Card from '../ui/Card';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '@/lib/utils';
+import { IconClockFilled, IconMapPinFilled, IconQuoteFilled } from '@tabler/icons-react';
+import LoadingSpin from '../ui/LoadingSpin';
 
 type TimelineItemType = {
   id: string;
@@ -119,21 +121,8 @@ export default function TimelineList({ type }: TimelineListProps) {
     }
   };
 
-  // const TypeIcon = ({ type }: { type: string }) => {
-  //   switch(type) {
-  //     case 'event':
-  //       return <Calendar className="w-5 h-5 text-blue-500" />;
-  //     case 'news':
-  //       return <Newspaper className="w-5 h-5 text-green-500" />;
-  //     case 'link':
-  //       return <Link2 className="w-5 h-5 text-purple-500" />;
-  //     default:
-  //       return null;
-  //   }
-  // };
-
   if (isLoading) {
-    return <div className="p-4 text-center">Loading...</div>;
+    return <LoadingSpin />
   }
 
   if (items.length === 0) {
@@ -150,31 +139,36 @@ export default function TimelineList({ type }: TimelineListProps) {
         {items.map((item) => (
           <Card key={item.id} className="py-4 mb-4">
             <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start space-x-3 w-full">
                 <div className="mt-1">
                   {/* <TypeIcon type={item.type} /> */}
                   <Avatar>
                     {getInitials(item.creator.name)}
                   </Avatar>
                 </div>
-                <div>
+                <div className="flex flex-col gap-1 w-full">
                   <h3 className="font-medium">{item.creator.name}</h3>
                   <p className="text-sm text-gray-500">
                     {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
-                    {item.type === 'event' && item.event?.location && (
-                      <> • {item.event.location}</>
-                    )}
                     {item.type === 'news' && item.news?.source && (
                       <> • {item.news.source}</>
                     )}
                   </p>
                   
-                  {item.title && (
-                    <p className="mt-2 text-md font-semibold text-gray-700">{item.title}</p>
-                  )}
-                  {item.description && (
-                    <p className="mt-2 text-sm text-gray-700">{item.description}</p>
-                  )}
+                  <div className={`${item.type === 'event' ? 'p-3 border block w-full border-gray-200 rounded-xl' : 'mt-2'}`}>
+                    {item.title && item.type !== 'thought' && (
+                      <p className="text-md font-semibold text-gray-700">{item.title}</p>
+                    )}
+                    {item.type === 'event' && item.event?.location && (
+                      <p className="text-sm text-gray-500 flex items-center gap-1"><IconMapPinFilled className="w-4 h-4" />{item.event.location}</p>
+                    )}
+                    {item.type === 'event' && item.event?.startTime && item.event?.endTime && (
+                      <p className="text-sm text-gray-500 flex items-center gap-1"><IconClockFilled className="w-4 h-4" />{item.event.startTime} - {item.event.endTime}</p>
+                    )}
+                    {item.description && item.type !== 'thought' && (
+                      <p className="mt-2 text-sm text-gray-700">{item.description}</p>
+                    )}
+                  </div>
                   
                   {item.type === 'link' && item.link?.url && (
                     <a 
@@ -189,11 +183,14 @@ export default function TimelineList({ type }: TimelineListProps) {
                   )}
                   
                   {item.type === 'thought' && item.thought?.content && (
-                    <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-100">
-                      <p className="text-gray-700">{item.thought.content}</p>
-                      {item.thought.mood && (
-                        <p className="mt-1 text-sm text-gray-500">Mood: {item.thought.mood}</p>
-                      )}
+                    <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-100 flex gap-1">
+                      <IconQuoteFilled className="w-8 h-8 text-gray-400" />
+                      <div>
+                        <p className="text-gray-700">{item.thought.content}</p>
+                        {item.thought.mood && (
+                          <p className="mt-1 text-sm text-gray-500">{item.creator.name} is feeling {item.thought.mood}</p>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
