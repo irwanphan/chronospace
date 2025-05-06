@@ -33,7 +33,11 @@ export default function TimelinePage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Timeline</h1>
+        {/* <h1 className="text-2xl font-semibold">Timeline</h1> */}
+        <Button onClick={handleAddNew} className="flex items-center gap-2">
+          <PlusCircle size={16} />
+          <span>Post on Timeline</span>
+        </Button>
         <div className="flex items-center gap-2">
           <Link href="/timeline/management">
             <Button variant="outline" className="flex items-center gap-2">
@@ -41,10 +45,7 @@ export default function TimelinePage() {
               <span>Manage</span>
             </Button>
           </Link>
-          <Button onClick={handleAddNew} className="flex items-center gap-2">
-            <PlusCircle size={16} />
-            <span>Add New</span>
-          </Button>
+          
         </div>
       </div>
 
