@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import Button from '@/components/ui/Button';
 import { PlusCircle, Calendar, Newspaper, Link2, Edit, Trash2, Check, X } from 'lucide-react';
@@ -40,7 +39,6 @@ type TimelineItemType = {
 };
 
 export default function TimelineManagementPage() {
-  const router = useRouter();
   const [items, setItems] = useState<TimelineItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -270,7 +268,7 @@ export default function TimelineManagementPage() {
       <TimelineItemModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        itemToEdit={itemToEdit}
+        itemToEdit={itemToEdit ?? undefined}
         initialType={filter !== 'all' ? filter : undefined}
       />
     </div>
