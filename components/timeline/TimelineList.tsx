@@ -44,6 +44,10 @@ type TimelineItemType = {
     category: string | null;
     importance: number;
   };
+  thought?: {
+    content: string;
+    mood: string | null;
+  };
 };
 
 type TimelineListProps = {
@@ -182,6 +186,15 @@ export default function TimelineList({ type }: TimelineListProps) {
                       <ExternalLink className="w-4 h-4" />
                       Visit Link
                     </a>
+                  )}
+                  
+                  {item.type === 'thought' && item.thought?.content && (
+                    <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-100">
+                      <p className="text-gray-700">{item.thought.content}</p>
+                      {item.thought.mood && (
+                        <p className="mt-1 text-sm text-gray-500">Mood: {item.thought.mood}</p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
