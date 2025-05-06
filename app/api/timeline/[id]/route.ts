@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 
 // GET a specific timeline item
 export async function GET(
@@ -49,7 +50,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'You must be logged in to update timeline items' },
@@ -128,7 +129,7 @@ export async function PUT(
           data: {
             source: specificData.news.source,
             url: specificData.news.url,
-            content: specificData.news.content,
+            content: null,
           },
         });
       } else if (existingItem.type === 'link' && specificData.link && existingItem.linkId) {
@@ -170,12 +171,14 @@ export async function PUT(
 
       await prisma.activityHistory.create({
         data: {
-          userId: session.user.id,
           action: 'update',
           entityType: 'timelineItem',
           entityId: id,
           details: JSON.stringify(timelineItem),
           timestamp: new Date(),
+          user: {
+            connect: { id: session.user.id }
+          }
         },
       });
       return updatedItemWithRelations;
@@ -197,7 +200,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'You must be logged in to delete timeline items' },

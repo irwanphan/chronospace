@@ -137,7 +137,7 @@ export async function POST(request: Request) {
           data: {
             source: specificData.news.source,
             url: specificData.news.url,
-            content: specificData.news.content,
+            content: null,
           }
         });
         

@@ -473,23 +473,6 @@ export default function TimelineItemModal({
                 placeholder="Enter news URL"
               />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                <div className="flex items-center gap-1">
-                  <FileText className="w-4 h-4" />
-                  <span>Content</span>
-                </div>
-              </label>
-              <textarea
-                name="news.content"
-                value={formData.news.content}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                rows={3}
-                placeholder="Enter news content"
-              />
-            </div>
           </div>
         )}
         
