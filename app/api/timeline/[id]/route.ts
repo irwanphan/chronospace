@@ -84,9 +84,9 @@ export async function PUT(
       const timelineItem = await tx.timelineItem.update({
         where: { id },
         data: {
-          title,
-          description,
-          date: date ? new Date(date) : undefined,
+          title: existingItem.type === 'thought' ? 'Thought' : title,
+          description: existingItem.type === 'thought' ? specificData.thought?.content?.substring(0, 50) + '...' : description,
+          date: existingItem.type === 'thought' ? new Date() : (date ? new Date(date) : undefined),
           isPublic,
           imageUrl,
           updatedAt: new Date(),

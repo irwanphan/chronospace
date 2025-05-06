@@ -151,6 +151,19 @@ export default function TimelineItemModal({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
+    if (name === 'type' && value === 'thought') {
+      // Jika tipe berubah menjadi thought, kosongkan title, atur description ke empty, dan atur date ke hari ini
+      const today = new Date().toISOString().split('T')[0];
+      setFormData(prev => ({
+        ...prev,
+        type: value,
+        title: '',
+        description: '',
+        date: today
+      }));
+      return;
+    }
+    
     if (name.includes('.')) {
       // Handle nested properties (e.g., event.location)
       const [parent, child] = name.split('.');
@@ -177,11 +190,11 @@ export default function TimelineItemModal({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.title.trim()) {
+    if (formData.type !== 'thought' && !formData.title.trim()) {
       newErrors.title = 'Title is required';
     }
     
-    if (!formData.date) {
+    if (formData.type !== 'thought' && !formData.date) {
       newErrors.date = 'Date is required';
     }
     
@@ -256,53 +269,67 @@ export default function TimelineItemModal({
           </select>
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className={`w-full border ${
-              errors.title ? 'border-red-500' : 'border-gray-300'
-            } rounded-md px-3 py-2`}
-            placeholder="Enter title"
-          />
-          {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-        </div>
+        {formData.type !== 'thought' && (
+          <>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className={`w-full border ${
+                  errors.title ? 'border-red-500' : 'border-gray-300'
+                } rounded-md px-3 py-2`}
+                placeholder="Enter title"
+              />
+              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Date <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  className={`w-full border ${
+                    errors.date ? 'border-red-500' : 'border-gray-300'
+                  } rounded-md px-3 py-2`}
+                />
+              </div>
+              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                rows={3}
+                placeholder="Enter description"
+              />
+            </div>
+          </>
+        )}
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Date <span className="text-red-500">*</span>
-          </label>
-          <div className="flex items-center">
-            <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+        {formData.type === 'thought' && (
+          <div className="mb-4">
             <input
-              type="date"
+              type="hidden"
               name="date"
               value={formData.date}
-              onChange={handleChange}
-              className={`w-full border ${
-                errors.date ? 'border-red-500' : 'border-gray-300'
-              } rounded-md px-3 py-2`}
             />
           </div>
-          {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
-        </div>
-        
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2"
-            rows={3}
-            placeholder="Enter description"
-          />
-        </div>
+        )}
         
         <div className="mb-4">
           <label className="flex items-center gap-2">

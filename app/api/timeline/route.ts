@@ -73,11 +73,22 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, description, date, type, isPublic, imageUrl, ...specificData } = body;
     
-    if (!title || !date || !type) {
-      return NextResponse.json(
-        { error: 'Title, date, and type are required' },
-        { status: 400 }
-      );
+    // Validasi khusus berdasarkan tipe
+    if (type === 'thought') {
+      if (!specificData.thought?.content) {
+        return NextResponse.json(
+          { error: 'Content is required for thoughts' },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Untuk tipe lain, validasi seperti biasa
+      if (!title || !date || !type) {
+        return NextResponse.json(
+          { error: 'Title, date, and type are required' },
+          { status: 400 }
+        );
+      }
     }
 
     // Gunakan transaction untuk membuat item dan related entities
@@ -157,9 +168,9 @@ export async function POST(request: Request) {
       // Buat timeline item dengan ID yang sesuai
       const timelineItem = await tx.timelineItem.create({
         data: {
-          title,
-          description,
-          date: new Date(date),
+          title: type === 'thought' ? 'Thought' : title,
+          description: type === 'thought' ? specificData.thought?.content?.substring(0, 50) + '...' : description,
+          date: type === 'thought' ? new Date() : new Date(date),
           type,
           isPublic: isPublic ?? true,
           imageUrl,
