@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Button from '@/components/ui/Button';
 import TimelineList from '@/components/timeline/TimelineList';
 import { PlusCircle, Settings } from 'lucide-react';
-import BirthdayList from '@/components/timeline/BirthdayList';
+import BirthdaySlides from '@/components/timeline/BirthdaySlides';
+import EventSlides from '@/components/timeline/EventSlides';
 import TimelineItemModal from '@/components/timeline/TimelineItemModal';
 
 export default function TimelinePage() {
@@ -84,7 +85,9 @@ export default function TimelinePage() {
           {/* <TimelineList /> */}
         </div>
         <div className="w-1/3 sticky top-24 self-start max-h-screen overflow-y-auto">
-          <BirthdayList />
+          <BirthdaySlides />
+
+          <EventSlides />
         </div>
       </div>
       

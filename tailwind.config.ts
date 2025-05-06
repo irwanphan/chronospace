@@ -29,6 +29,25 @@ export default {
       fontFamily: {
         montserrat: ['var(--font-montserrat)', 'Circular', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
+      keyframes: {
+        'slide-in': {
+          '0%': { opacity: '0', transform: 'translateX(0)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'slide-out-left': {
+          '0%': { opacity: '1', transform: 'translateX(0)' },
+          '100%': { opacity: '0', transform: 'translateX(-100%)' },
+        },
+        'slide-out-right': {
+          '0%': { opacity: '1', transform: 'translateX(0)' },
+          '100%': { opacity: '0', transform: 'translateX(100%)' },
+        },
+      },
+      animation: {
+        'slide-in': 'slide-in 0.3s ease-out',
+        'slide-out-left': 'slide-out-left 0.3s ease-out',
+        'slide-out-right': 'slide-out-right 0.3s ease-out',
+      },
     },
   },
   plugins: [],

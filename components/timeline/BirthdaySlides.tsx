@@ -13,7 +13,7 @@ type User = {
   daysUntilBirthday: number;
 };
 
-export default function BirthdayList() {
+export default function BirthdaySlides() {
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -173,7 +173,7 @@ export default function BirthdayList() {
               </div>
             </div>
 
-            <div className="w-16 h-16 bg-sky-200 rounded-full self-center flex items-center justify-center text-sky-600">
+            <div className="w-16 min-w-16 h-16 bg-sky-200 rounded-full self-center flex items-center justify-center text-sky-600">
               {currentUser.image ? (
                 <Image src={currentUser.image} alt={currentUser.name} className="w-full h-full rounded-full object-cover" width={56} height={56} />
               ) : (
