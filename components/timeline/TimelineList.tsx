@@ -7,7 +7,8 @@ import Button from '@/components/ui/Button';
 import { 
   ExternalLink, 
   Edit, 
-  Trash2 
+  Trash2,
+  MoreVertical
 } from 'lucide-react';
 import TimelineItemModal from '@/components/timeline/TimelineItemModal';
 import Card from '../ui/Card';
@@ -64,10 +65,30 @@ export default function TimelineList({ type }: TimelineListProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<TimelineItemType | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   useEffect(() => {
     fetchItems();
   }, [type, page]);
+
+  useEffect(() => {
+    // Add click outside listener to close the dropdown menu
+    function handleClickOutside(event: MouseEvent) {
+      if (!activeMenu) return;
+      
+      const target = event.target as Element;
+      const clickedOnMenu = target.closest(`[data-item-id="${activeMenu}"]`);
+      
+      if (!clickedOnMenu) {
+        setActiveMenu(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeMenu]);
 
   const fetchItems = async () => {
     setIsLoading(true);
@@ -197,20 +218,47 @@ export default function TimelineList({ type }: TimelineListProps) {
               </div>
               
               <div className="flex space-x-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleEdit(item)}
-                  className="p-1 h-8 w-8 flex items-center justify-center"
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleDelete(item)}
-                  className="p-1 h-8 w-8 flex items-center justify-center text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="relative" data-item-id={item.id}>
+                  <Button
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMenu(activeMenu === item.id ? null : item.id);
+                    }}
+                    className="p-1 h-8 w-8 flex items-center justify-center"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                  
+                  {activeMenu === item.id && (
+                    <div 
+                      className="absolute right-0 mt-1 w-36 bg-white shadow-lg rounded-md overflow-hidden z-10 border border-gray-200"
+                      data-item-id={item.id}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => {
+                          handleEdit(item);
+                          setActiveMenu(null);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDelete(item);
+                          setActiveMenu(null);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
