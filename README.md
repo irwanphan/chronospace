@@ -4,25 +4,6 @@
 
 ChronoSpace is a comprehensive system for managing budgets, projects, and purchase requests built with Next.js 14, Prisma, and Tailwind CSS.
 
-## 🚀 Latest Updates
-
-### Document Verification & Stability (2025-04-06)
-- Document Verification:
-  - QR code generation for signed documents
-  - Unique verification code system
-  - Document verification page
-  - Signature validation system
-- PDF Viewer Enhancements:
-  - Improved signature pad initialization
-  - Reduced flickering during reloads
-  - Better error handling for PDF loading
-  - Automatic retry mechanism
-- Digital Signature Updates:
-  - Enhanced signature positioning
-  - Improved QR code readability
-  - Better signature validation
-  - Cleaner verification URLs
-
 [View Full Changelog](#updates--features)
 
 ## ✨ Key Features
@@ -304,4 +285,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Better status indicators
   - Optimized loading states
 
-
+### Document Verification & Security (2025-05-03)
+- Filtering & Searching
+  - Added filtering options and searching for Users, Approval Schemas, Projects & Budget Plannings
+  - Added searching for Vendors, Roles, Work Divisions
+  - Filtering options are by Work Division, Roles & Status
+- Update Activity Log

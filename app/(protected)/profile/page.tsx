@@ -201,6 +201,9 @@ export default function ProfilePage() {
                       {history.action === "CHANGE_PASSWORD" && "Changed Password "}
                       {history.action === "CHANGE_OWN_PASSWORD" && "Changed Own Password "}
                       {history.action === "GENERATE_CERTIFICATE" && "Generated Certificate "}
+                      {history.action === "CREATE_TIMELINE_ITEM" && "Created Timeline Item "}
+                      {history.action === "UPDATE_TIMELINE_ITEM" && "Updated Timeline Item "}
+                      {history.action === "DELETE_TIMELINE_ITEM" && "Deleted Timeline Item "}
                       <span> 
                         {history.entityType === "PROJECT" && 
                           <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/project-planning/${history.entityId}`}>
@@ -225,6 +228,11 @@ export default function ProfilePage() {
                         {history.entityType === "USER" && 
                           <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/user-management/${history.entityId}`}>
                             <span className="font-semibold">User {history.entityCode}</span>
+                          </Link>
+                        }
+                        {history.entityType === "TIMELINEITEM" && 
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/timeline?highlight=${history.entityId}`}>
+                            <span className="font-semibold">Post on Timeline: {history.entityCode || history.entityId}</span>
                           </Link>
                         }
                       </span>

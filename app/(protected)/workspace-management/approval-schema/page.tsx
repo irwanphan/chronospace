@@ -70,9 +70,9 @@ export default function ApprovalSchemaPage() {
     if (selectedDivisions.length === 0 || selectedRoles.length === 0) {
       filtered = [];
     } else {
-      // Filter by division
-      if (selectedDivisions.length > 0) {
-        filtered = filtered.filter(schema => 
+    // Filter by division
+    if (selectedDivisions.length > 0) {
+      filtered = filtered.filter(schema => 
           schema.applicableWorkDivisions.some(division => 
             selectedDivisions.includes(division.id || '')
           )
@@ -85,16 +85,16 @@ export default function ApprovalSchemaPage() {
           schema.applicableRoles.some(role =>
             selectedRoles.includes(role.id || '')
           )
-        );
-      }
-      
+      );
+    }
+    
       // Filter by search keyword
-      if (searchKeyword.trim()) {
-        const keyword = searchKeyword.trim().toLowerCase();
-        filtered = filtered.filter(schema => 
-          schema.name?.toLowerCase().includes(keyword) ||
-          schema.documentType?.toLowerCase().includes(keyword)
-        );
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      filtered = filtered.filter(schema => 
+        schema.name?.toLowerCase().includes(keyword) ||
+        schema.documentType?.toLowerCase().includes(keyword)
+      );
       }
     }
 

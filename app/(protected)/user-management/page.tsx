@@ -84,20 +84,20 @@ export default function UserManagementPage() {
       // Filter by division
       if (selectedWorkDivision.length > 0) {
         filtered = filtered.filter(user => selectedWorkDivision.includes(user.workDivisionId || ''));
-      }
+    }
 
       // Filter by role
       if (selectedRole.length > 0) {
         filtered = filtered.filter(user => selectedRole.includes(user.roleId || ''));
-      }
+    }
 
       // Filter by search keyword
-      if (searchKeyword.trim()) {
-        const keyword = searchKeyword.trim().toLowerCase();
-        filtered = filtered.filter(user => 
-          user.name.toLowerCase().includes(keyword) ||
-          user.email.toLowerCase().includes(keyword)
-        );
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      filtered = filtered.filter(user => 
+        user.name.toLowerCase().includes(keyword) ||
+        user.email.toLowerCase().includes(keyword)
+      );
       }
     }
 
