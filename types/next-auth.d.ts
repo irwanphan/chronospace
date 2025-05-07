@@ -12,6 +12,7 @@ declare module "next-auth" {
       access: {
         menuAccess: {
           timeline: boolean;
+          timelineManagement: boolean;
           workspace: boolean;
           projectPlanning: boolean;
           budgetPlanning: boolean;
@@ -49,6 +50,9 @@ declare module "next-auth" {
           deleteDocument: boolean;
           downloadDocument: boolean;
           generateCertificate: boolean;
+          createTimelineItem: boolean;
+          editTimelineItem: boolean;
+          deleteTimelineItem: boolean;
         },
         workspaceAccess: {
           createPurchaseRequest: boolean;

@@ -10,12 +10,17 @@ import { PlusCircle, Settings } from 'lucide-react';
 import BirthdaySlides from '@/components/timeline/BirthdaySlides';
 import EventSlides from '@/components/timeline/EventSlides';
 import TimelineItemModal from '@/components/timeline/TimelineItemModal';
+import { useSession } from 'next-auth/react';
 
 const TimelinePageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const canManageTimeline = user?.access?.menuAccess?.timelineManagement;
+  const canCreateTimelineItem = user?.access?.activityAccess?.createTimelineItem;
 
   useEffect(() => {
     // Update URL when tab changes
@@ -34,19 +39,22 @@ const TimelinePageContent = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         {/* <h1 className="text-2xl font-semibold">Timeline</h1> */}
-        <Button onClick={handleAddNew} className="flex items-center gap-2">
-          <PlusCircle size={16} />
-          <span>Post on Timeline</span>
-        </Button>
-        <div className="flex items-center gap-2">
-          <Link href="/timeline/management">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Settings size={16} />
-              <span>Manage</span>
-            </Button>
-          </Link>
-          
-        </div>
+        {canCreateTimelineItem && (
+          <Button onClick={handleAddNew} className="flex items-center gap-2">
+            <PlusCircle size={16} />
+            <span>Post on Timeline</span>
+          </Button>
+        )}
+        {canManageTimeline && (
+          <div className="flex items-center gap-2">
+            <Link href="/timeline/management">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Settings size={16} />
+                <span>Manage</span>
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/*  set 2 columns, first is scrollable, second is fixed */}

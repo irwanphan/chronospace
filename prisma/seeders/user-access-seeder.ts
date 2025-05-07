@@ -7,6 +7,7 @@ export async function userAccessSeeder() {
         userId: 'cm71xui7r000asgprkai2jfkb', // ceo user id
         menuAccess: {
           timeline: true,
+          timelineManagement: true,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -43,7 +44,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,
@@ -64,6 +68,7 @@ export async function userAccessSeeder() {
         userId: 'g239g84h9g49q28g9hq82g9hf', // cfo user id
         menuAccess: {
           timeline: true,
+          timelineManagement: true,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -100,7 +105,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: true,
@@ -121,6 +129,7 @@ export async function userAccessSeeder() {
         userId: '29ihvdiuw8r9bdjivue9289vh', // cto user id
         menuAccess: {
           timeline: true,
+          timelineManagement: true,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -157,7 +166,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: true,
@@ -178,6 +190,7 @@ export async function userAccessSeeder() {
         userId: 'fg71xui7r000asgpgraji935t', // staff user id
         menuAccess: {
           timeline: true,
+          timelineManagement: false,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -214,7 +227,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: true,
@@ -235,6 +251,7 @@ export async function userAccessSeeder() {
         userId: '289fhvr2gih9rg8ha9ih98a9f', // hr user id
         menuAccess: {
           timeline: true,
+          timelineManagement: false,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -271,7 +288,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: true, 
@@ -292,6 +312,7 @@ export async function userAccessSeeder() {
         userId: '389fuii7r0sdv8huqweuqrevu', // gm user id  
         menuAccess: {
           timeline: true,
+          timelineManagement: false,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -328,7 +349,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,
@@ -349,6 +373,7 @@ export async function userAccessSeeder() {
         userId: 'ertetrcm71x2fhs89hd00asgp', // dh user id
         menuAccess: {
           timeline: true,
+          timelineManagement: false,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
@@ -385,7 +410,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,
@@ -406,11 +434,13 @@ export async function userAccessSeeder() {
         userId: '35u8t9wrhidvbs487w3g8iwr9', // another dh user id
         menuAccess: {
           timeline: true,
+          timelineManagement: false,
           workspace: true,
           projectPlanning: true,
           budgetPlanning: true,
           userManagement: true,
-          workspaceManagement: true 
+          workspaceManagement: true,
+          documents: true
         },
         activityAccess: {
           createProject: true,  
@@ -441,7 +471,10 @@ export async function userAccessSeeder() {
           uploadDocument: true,
           deleteDocument: true,
           downloadDocument: true,
-          generateCertificate: true
+          generateCertificate: true,
+          createTimelineItem: true,
+          editTimelineItem: true,
+          deleteTimelineItem: true
         },
         workspaceAccess: {
           createPurchaseRequest: false,

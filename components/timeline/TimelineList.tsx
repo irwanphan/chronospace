@@ -16,7 +16,7 @@ import Avatar from '../ui/Avatar';
 import { getInitials } from '@/lib/utils';
 import { IconClockFilled, IconMapPinFilled, IconQuoteFilled } from '@tabler/icons-react';
 import LoadingSpin from '../ui/LoadingSpin';
-
+import { useSession } from 'next-auth/react';
 type TimelineItemType = {
   id: string;
   title: string;
@@ -58,6 +58,11 @@ type TimelineListProps = {
 };
 
 export default function TimelineList({ type }: TimelineListProps) {
+  const { data: session } = useSession();
+  const user = session?.user;
+  const canEditTimelineItem = user?.access?.activityAccess?.editTimelineItem;
+  const canDeleteTimelineItem = user?.access?.activityAccess?.deleteTimelineItem;
+
   const [items, setItems] = useState<TimelineItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -236,26 +241,33 @@ export default function TimelineList({ type }: TimelineListProps) {
                       data-item-id={item.id}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        onClick={() => {
-                          handleEdit(item);
-                          setActiveMenu(null);
-                        }}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleDelete(item);
-                          setActiveMenu(null);
-                        }}
-                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </button>
+                      {canEditTimelineItem && (
+                        <button
+                          onClick={() => {
+                            handleEdit(item);
+                            setActiveMenu(null);
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </button>
+                      )}
+                      {canDeleteTimelineItem && (
+                        <button
+                          onClick={() => {
+                            handleDelete(item);
+                            setActiveMenu(null);
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </button>
+                      )}
+                      { !canEditTimelineItem && !canDeleteTimelineItem && (
+                        <p className="text-sm text-gray-500">No access</p>
+                      )}
                     </div>
                   )}
                 </div>

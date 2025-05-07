@@ -1,5 +1,6 @@
 export interface MenuAccess {
   timeline: boolean;
+  timelineManagement: boolean;
   workspace: boolean;
   projectPlanning: boolean;
   budgetPlanning: boolean;
@@ -45,6 +46,10 @@ export interface ActivityAccess {
   deleteDocument: boolean;
   downloadDocument: boolean;
   generateCertificate: boolean;
+
+  createTimelineItem: boolean;
+  editTimelineItem: boolean;
+  deleteTimelineItem: boolean;
 }
 
 export interface WorkspaceAccess {
