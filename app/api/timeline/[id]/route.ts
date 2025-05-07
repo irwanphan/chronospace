@@ -171,14 +171,12 @@ export async function PUT(
 
       await prisma.activityHistory.create({
         data: {
-          action: 'update',
-          entityType: 'timelineItem',
+          action: 'UPDATE',
+          entityType: 'TIMELINEITEM',
           entityId: id,
           details: JSON.stringify(timelineItem),
           timestamp: new Date(),
-          user: {
-            connect: { id: session.user.id }
-          }
+          userId: session.user.id,
         },
       });
       return updatedItemWithRelations;

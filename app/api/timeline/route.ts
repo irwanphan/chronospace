@@ -194,6 +194,18 @@ export async function POST(request: Request) {
           },
         },
       });
+
+      // Update history
+      await prisma.activityHistory.create({
+        data: {
+          entityId: timelineItem.id,
+          entityType: 'TIMELINEITEM',
+          details: JSON.stringify(timelineItem),
+          userId: session.user.id,
+          timestamp: new Date(),
+          action: 'CREATE',
+        },
+      });
       
       return timelineItem;
     });
