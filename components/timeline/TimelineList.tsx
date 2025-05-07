@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import Pagination from '@/components/Pagination';
 import Button from '@/components/ui/Button';
 import { 
@@ -14,7 +14,7 @@ import TimelineItemModal from '@/components/timeline/TimelineItemModal';
 import Card from '../ui/Card';
 import Avatar from '../ui/Avatar';
 import { getInitials } from '@/lib/utils';
-import { IconClockFilled, IconMapPinFilled, IconQuoteFilled } from '@tabler/icons-react';
+import { IconCalendarFilled, IconClockFilled, IconMapPinFilled, IconQuoteFilled } from '@tabler/icons-react';
 import LoadingSpin from '../ui/LoadingSpin';
 import { useSession } from 'next-auth/react';
 type TimelineItemType = {
@@ -188,8 +188,14 @@ export default function TimelineList({ type }: TimelineListProps) {
                     {item.type === 'event' && item.event?.location && (
                       <p className="text-sm text-gray-500 flex items-center gap-1"><IconMapPinFilled className="w-4 h-4" />{item.event.location}</p>
                     )}
+                    {item.type === 'event' && item.date && (
+                      <p className="text-sm text-gray-500 flex items-center gap-1"><IconCalendarFilled className="w-4 h-4" />{format(new Date(item.date), 'dd MMMM yyyy')}</p>
+                    )}
                     {item.type === 'event' && item.event?.startTime && item.event?.endTime && (
-                      <p className="text-sm text-gray-500 flex items-center gap-1"><IconClockFilled className="w-4 h-4" />{item.event.startTime} - {item.event.endTime}</p>
+                      <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <IconClockFilled className="w-4 h-4" />
+                        {format(new Date(item.event.startTime), 'HH:mm')} - {format(new Date(item.event.endTime), 'HH:mm')}
+                      </p>
                     )}
                     {item.description && item.type !== 'thought' && (
                       <p className="mt-2 text-sm text-gray-700">{item.description}</p>
@@ -210,7 +216,7 @@ export default function TimelineList({ type }: TimelineListProps) {
                   
                   {item.type === 'thought' && item.thought?.content && (
                     <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-100 flex gap-1">
-                      <IconQuoteFilled className="w-8 h-8 text-gray-400" />
+                      <IconQuoteFilled className="w-8 min-w-8 h-8 text-gray-400" />
                       <div>
                         <p className="text-gray-700">{item.thought.content}</p>
                         {item.thought.mood && (
