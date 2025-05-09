@@ -209,106 +209,108 @@ export default function DocumentPage() {
               </tr>
             </thead>
             <tbody>
-              {documents.map((doc) => (
-                <tr key={doc.id} className={`border-b hover:bg-blue-50 ${doc.isOrphan ? 'bg-gray-100' : ''}`}>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-gray-500 self-start"/>
-                      <div>
-                        <p className="text-sm">{doc.fileName}</p>
-                        {doc.signedByUser && (
-                          <p className="text-xs text-gray-500">
-                            Signed by: {doc.signedByUser.name} ({doc.signedByUser.role?.roleName})
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  {/* <td className="px-4 py-2">{doc.fileType}</td> */}
-                  <td className="px-4 py-2">{formatBytes(doc.size)}</td>
-                  <td className="px-4 py-2">
-                    {doc.uploader?.name ? (
-                      <div>
-                        <p>{doc.uploader.name}</p>
-                        {doc.uploader.role && (
-                          <p className="text-xs text-gray-500">{doc.uploader.role.roleName}</p>
-                        )}
-                      </div>
-                    ) : '-'}
-                  </td>
-                  <td className="px-4 py-2">{formatDate(doc.uploadedAt)}</td>
-                  {/* <td className="px-4 py-2">
-                    {doc.isOrphan ? (
-                      <span className="text-red-600">Unused</span>
-                    ) : (
-                      <span className="text-green-600">In Use</span>
-                    )}
-                  </td> */}
-                  <td className="px-4 py-2">
-                    {doc.usages.length > 0 ? (
-                      <div className="space-y-1">
-                        {doc.usages.map((usage, index) => (
-                          <div key={index} className="flex items-center gap-1 text-sm">
-                            <span className="font-medium">{usage.entityType}:</span>
-                            <a
-                              href={`/${entityRoutes[usage.entityType as keyof typeof entityRoutes]}/${usage.entityId}`}
-                              className="text-blue-600 hover:underline flex items-center gap-1"
-                            >
-                              {usage.entityCode}
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-500">-</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      {session?.user?.access.activityAccess.downloadDocument && (
-                        <a
-                          href={doc.downloadUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline flex items-center gap-1"
-                        >
-                          <Download className="w-4 h-4" />
-                        </a>
-                      )}
-                      {doc.fileType === 'PDF' && (
-                        <a
-                          href={
-                            // doc.isOrphan ? 
-                            `/documents/view?url=${encodeURIComponent(doc.fileUrl)}` 
-                            // :
-                            // `/documents/${doc.id}`
-                          }
-                          className="text-blue-600 hover:underline flex items-center gap-1"
-                        >
-                          <IconFileSearch className="w-4 h-4" />
-                        </a>
-                      )}
-                      {/* {doc.isOrphan && ( */}
-                      {session?.user?.access.activityAccess.deleteDocument && (
-                        <button
-                          onClick={() => handleDelete(doc.fileUrl)}
-                          disabled={deletingFileUrl === doc.fileUrl}
-                          className={`text-red-600 hover:underline flex items-center gap-1 ${
-                            deletingFileUrl === doc.fileUrl ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          {deletingFileUrl === doc.fileUrl ? (
-                            <Trash2 className="w-4 h-4 animate-pulse" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
+              {documents
+                .filter(doc => !doc.fileUrl.includes('profile-pictures/'))
+                .map((doc) => (
+                  <tr key={doc.id} className={`border-b hover:bg-blue-50 ${doc.isOrphan ? 'bg-gray-100' : ''}`}>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-500 self-start"/>
+                        <div>
+                          <p className="text-sm">{doc.fileName}</p>
+                          {doc.signedByUser && (
+                            <p className="text-xs text-gray-500">
+                              Signed by: {doc.signedByUser.name} ({doc.signedByUser.role?.roleName})
+                            </p>
                           )}
-                        </button>
+                        </div>
+                      </div>
+                    </td>
+                    {/* <td className="px-4 py-2">{doc.fileType}</td> */}
+                    <td className="px-4 py-2">{formatBytes(doc.size)}</td>
+                    <td className="px-4 py-2">
+                      {doc.uploader?.name ? (
+                        <div>
+                          <p>{doc.uploader.name}</p>
+                          {doc.uploader.role && (
+                            <p className="text-xs text-gray-500">{doc.uploader.role.roleName}</p>
+                          )}
+                        </div>
+                      ) : '-'}
+                    </td>
+                    <td className="px-4 py-2">{formatDate(doc.uploadedAt)}</td>
+                    {/* <td className="px-4 py-2">
+                      {doc.isOrphan ? (
+                        <span className="text-red-600">Unused</span>
+                      ) : (
+                        <span className="text-green-600">In Use</span>
                       )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td> */}
+                    <td className="px-4 py-2">
+                      {doc.usages.length > 0 ? (
+                        <div className="space-y-1">
+                          {doc.usages.map((usage, index) => (
+                            <div key={index} className="flex items-center gap-1 text-sm">
+                              <span className="font-medium">{usage.entityType}:</span>
+                              <a
+                                href={`/${entityRoutes[usage.entityType as keyof typeof entityRoutes]}/${usage.entityId}`}
+                                className="text-blue-600 hover:underline flex items-center gap-1"
+                              >
+                                {usage.entityCode}
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        {session?.user?.access.activityAccess.downloadDocument && (
+                          <a
+                            href={doc.downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline flex items-center gap-1"
+                          >
+                            <Download className="w-4 h-4" />
+                          </a>
+                        )}
+                        {doc.fileType === 'PDF' && (
+                          <a
+                            href={
+                              // doc.isOrphan ? 
+                              `/documents/view?url=${encodeURIComponent(doc.fileUrl)}` 
+                              // :
+                              // `/documents/${doc.id}`
+                            }
+                            className="text-blue-600 hover:underline flex items-center gap-1"
+                          >
+                            <IconFileSearch className="w-4 h-4" />
+                          </a>
+                        )}
+                        {/* {doc.isOrphan && ( */}
+                        {session?.user?.access.activityAccess.deleteDocument && (
+                          <button
+                            onClick={() => handleDelete(doc.fileUrl)}
+                            disabled={deletingFileUrl === doc.fileUrl}
+                            className={`text-red-600 hover:underline flex items-center gap-1 ${
+                              deletingFileUrl === doc.fileUrl ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                          >
+                            {deletingFileUrl === doc.fileUrl ? (
+                              <Trash2 className="w-4 h-4 animate-pulse" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </Card>
