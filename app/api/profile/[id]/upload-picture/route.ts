@@ -38,7 +38,7 @@ export async function POST(
     });
 
     // Update user's profile picture in database
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: { id: params.id },
       data: { image: url }
     });
