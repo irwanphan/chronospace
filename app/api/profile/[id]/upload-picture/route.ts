@@ -50,7 +50,7 @@ export async function POST(
         action: 'UPDATE',
         entityType: 'USER',
         entityId: params.id,
-        entityCode: null,
+        entityCode: 'profile picture',
         details: {
           type: 'profile_picture_update',
           newImageUrl: url

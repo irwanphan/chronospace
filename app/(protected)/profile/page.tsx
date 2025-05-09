@@ -278,7 +278,9 @@ export default function ProfilePage() {
                           </Link>
                         }
                         {history.entityType === "USER" && 
-                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/user-management/${history.entityId}`}>
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" 
+                            href={ history.entityId === session?.user.id ? `/profile` : `/user-management/${history.entityId}`}
+                          >
                             <span className="font-semibold">User {history.entityCode}</span>
                           </Link>
                         }
