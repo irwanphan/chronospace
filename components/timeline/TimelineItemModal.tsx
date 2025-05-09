@@ -43,6 +43,14 @@ type TimelineItemModalProps = {
   itemToEdit?: TimelineItemType;
 };
 
+// Helper untuk konversi ISO string ke 'HH:mm'
+function toTimeInputValue(dateString: string | null | undefined) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  return date.toISOString().substring(11, 16); // 'HH:mm'
+}
+
 export default function TimelineItemModal({
   isOpen,
   onClose,
@@ -94,8 +102,8 @@ export default function TimelineItemModal({
         imageUrl: itemToEdit.imageUrl || '',
         event: {
           location: itemToEdit.event?.location || '',
-          startTime: itemToEdit.event?.startTime || '',
-          endTime: itemToEdit.event?.endTime || '',
+          startTime: toTimeInputValue(itemToEdit.event?.startTime),
+          endTime: toTimeInputValue(itemToEdit.event?.endTime),
           organizer: itemToEdit.event?.organizer || '',
           isAllDay: itemToEdit.event?.isAllDay || false,
         },
