@@ -104,8 +104,8 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (session?.user && token.sub) {
-        const userAccess = await prisma.userAccess.findUnique({
-          where: { userId: token.sub }
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub }
         });
 
         session.user.id = token.sub;
@@ -120,6 +120,12 @@ export const authOptions: AuthOptions = {
             }
           }
         }))?.roleName || '';
+
+        session.user.image = dbUser?.image || null;
+
+        const userAccess = await prisma.userAccess.findUnique({
+          where: { userId: token.sub }
+        });
         session.user.access = {
           menuAccess: (userAccess?.menuAccess as unknown as MenuAccess) || {
             timeline: false,

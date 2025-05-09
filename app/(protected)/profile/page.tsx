@@ -24,7 +24,7 @@ interface ActivityHistory {
 }
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const userName = session?.user?.name || "Guest";
   const userRole = session?.user?.role || "User";
   const [activityHistories, setActivityHistories] = useState<ActivityHistory[]>([]);
@@ -104,6 +104,7 @@ export default function ProfilePage() {
       if (userResponse.ok) {
         const userData = await userResponse.json();
         setUserData(userData.user);
+        await update();
       }
     } catch (error) {
       console.error('Error uploading profile picture:', error);
