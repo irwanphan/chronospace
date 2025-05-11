@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Mail, IdCard, MapPin, Phone, Pencil, Lock } from 'lucide-react';
+import { Mail, IdCard, MapPin, Phone, Pencil, Lock, Camera } from 'lucide-react';
 import { formatDate, getInitials, stripHtmlTags } from '@/lib/utils';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
@@ -24,13 +24,13 @@ interface ActivityHistory {
 }
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const userName = session?.user?.name || "Guest";
-  const userImage = session?.user?.image;
   const userRole = session?.user?.role || "User";
   const [activityHistories, setActivityHistories] = useState<ActivityHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const [isUploading, setIsUploading] = useState(false);
 
   const canGenerateCertificate = session?.user?.access.activityAccess.generateCertificate;
   const canChangePassword = session?.user?.access.activityAccess.changePassword;
@@ -81,6 +81,39 @@ export default function ProfilePage() {
     fetchData();
   }, [session?.user.id]);
 
+  const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`/api/profile/${session?.user.id}/upload-picture`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload profile picture');
+      }
+
+      // Refresh user data
+      const userResponse = await fetch(`/api/profile/${session?.user.id}`);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUserData(userData.user);
+        await update();
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      alert('Failed to upload profile picture');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   if (isLoading) return <LoadingSpin/>
 
   return (
@@ -91,20 +124,39 @@ export default function ProfilePage() {
           <div className="sticky top-32">
             {/* Profile Picture & Basic Info */}
             <div className="p-4">
-              <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-100">
-                {userImage ? (
+              <div className="relative w-40 h-40 rounded-full overflow-hidden bg-gray-100 group">
+                {isUploading && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 bg-opacity-50">
+                    <LoadingSpin />
+                  </div>
+                )}
+                {userData.image ? (
                   <Image
-                    src={userImage}
+                    src={userData.image}
                     alt={userName}
-                    width={32}
-                    height={32}
-                    className="object-cover"
+                    width={160}
+                    height={160}
+                    className="object-cover w-full h-full"
                   />
                 ) : (
                   <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white text-4xl">
                     {getInitials(userName)}
                   </div>
                 )}
+                <label 
+                  htmlFor="profile-picture-upload" 
+                  className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <Camera className="w-8 h-8 text-white" />
+                </label>
+                <input
+                  id="profile-picture-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfilePictureUpload}
+                  disabled={isUploading}
+                />
               </div>
             </div>
 
@@ -226,7 +278,9 @@ export default function ProfilePage() {
                           </Link>
                         }
                         {history.entityType === "USER" && 
-                          <Link className="hover:underline text-blue-600 transition-all duration-300" href={`/user-management/${history.entityId}`}>
+                          <Link className="hover:underline text-blue-600 transition-all duration-300" 
+                            href={ history.entityId === session?.user.id ? `/profile` : `/user-management/${history.entityId}`}
+                          >
                             <span className="font-semibold">User {history.entityCode}</span>
                           </Link>
                         }

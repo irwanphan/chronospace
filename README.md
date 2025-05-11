@@ -291,3 +291,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - Added searching for Vendors, Roles, Work Divisions
   - Filtering options are by Work Division, Roles & Status
 - Update Activity Log
+
+### Profile Picture Upload (2025-05-09)
+- Timeline
+  - Added timeline post
+  - Added timeline management
+- Profile
+  - Added profile picture update
+  - Filter profile picture update from activity
