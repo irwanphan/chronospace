@@ -6,6 +6,7 @@ import { useSidebarStore } from '@/store/useSidebarStore';
 import { cn } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
 import { IconBrandMinecraft, IconBriefcaseFilled, IconCoins, IconId, IconLayoutDashboardFilled, IconStack2Filled, IconSubtask } from '@tabler/icons-react';
+import Logo from '@/public/logo.svg';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -39,12 +40,12 @@ const Sidebar = () => {
   }
 
   const navigation = [
-    {
-      name: 'Timeline',
-      href: '/timeline',
-      icon: IconLayoutDashboardFilled,
-      show: userAccess.timeline
-    },
+    // {
+    //   name: 'Timeline',
+    //   href: '/timeline',
+    //   icon: IconLayoutDashboardFilled,
+    //   show: userAccess.timeline
+    // },
     {
       name: 'Workspace',
       href: '/workspace',
@@ -93,9 +94,9 @@ const Sidebar = () => {
           onClick={toggleSidebar}
           className="w-full h-full flex items-center px-4"
         >
-          <div className="w-8 h-8 flex-shrink-0">
+          <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
             <Image
-              src="/logo.svg"
+              src={Logo}
               alt="ChronoSpace Logo"
               width={40}
               height={40}
