@@ -9,6 +9,7 @@ import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
 import { Budget } from '@/types/budget';
 import { Vendor } from '@/types/vendor';
+import { BudgetYear } from '@/types/budget-year';
 import { formatDate } from '@/lib/utils';
 
 interface FormData {
@@ -39,6 +40,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
   const [selectedItems, setSelectedItems] = useState<BudgetItem[]>([]);
   const [budgetPlan, setBudgetPlan] = useState<Budget>({} as Budget);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [budgetYears, setBudgetYears] = useState<BudgetYear[]>([]);
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [error, setError] = useState<string>('');
   const [newItem, setNewItem] = useState<BudgetItem>({
@@ -73,6 +75,7 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
 
         setSelectedItems(data.items); 
         setVendors(data.vendors);
+        setBudgetYears(data.budgetYears || []);
         setBudgetPlan(data);
         setFormData({
           projectId: data.projectId,
@@ -246,18 +249,30 @@ export default function EditBudgetPage({ params }: { params: { id: string } }) {
 
               <div>
                 <label className="block mb-1.5">
-                  Year <span className="text-red-500">*</span>
+                  Fiscal Year <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.year}
                   onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                   required
+                  disabled={budgetYears.length === 0}
                 >
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
+                  {budgetYears.length === 0 ? (
+                    <option value={formData.year}>{formData.year}</option>
+                  ) : (
+                    budgetYears.map((budgetYear) => (
+                      <option key={budgetYear.id} value={budgetYear.year.toString()}>
+                        {budgetYear.year}
+                      </option>
+                    ))
+                  )}
                 </select>
+                {budgetYears.length === 0 && (
+                  <p className="mt-1 text-sm text-amber-600">
+                    Current year may not be active. Please check Budget Year settings.
+                  </p>
+                )}
               </div>
 
               <div>

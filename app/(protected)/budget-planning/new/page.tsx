@@ -7,6 +7,7 @@ import { Plus, X } from 'lucide-react';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { Project } from '@/types/project';
 import { Vendor } from '@/types/vendor';
+import { BudgetYear } from '@/types/budget-year';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/Modal';
 import { formatDate, generateId } from '@/lib/utils';
@@ -60,6 +61,7 @@ export default function NewBudgetPage() {
     vendor: ''
   });
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [budgetYears, setBudgetYears] = useState<BudgetYear[]>([]);
   const [selectedWorkDivision, setSelectedWorkDivision] = useState<string>('');
   const [budgetCode, setBudgetCode] = useState<string>('');
   const [requestDate, setRequestDate] = useState<string>('');
@@ -71,6 +73,15 @@ export default function NewBudgetPage() {
         const data = await response.json();
         setProjects(data.projects || []);
         setVendors(data.vendors || []);
+        setBudgetYears(data.budgetYears || []);
+        
+        // Set default year to first active budget year if available
+        if (data.budgetYears && data.budgetYears.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            year: data.budgetYears[0].year.toString()
+          }));
+        }
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -286,18 +297,30 @@ export default function NewBudgetPage() {
 
               <div>
                 <label className="block mb-1.5">
-                  Year <span className="text-red-500">*</span>
+                  Fiscal Year <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.year}
                   onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                   required
+                  disabled={budgetYears.length === 0}
                 >
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
+                  {budgetYears.length === 0 ? (
+                    <option value="">No active budget years available</option>
+                  ) : (
+                    budgetYears.map((budgetYear) => (
+                      <option key={budgetYear.id} value={budgetYear.year.toString()}>
+                        {budgetYear.year}
+                      </option>
+                    ))
+                  )}
                 </select>
+                {budgetYears.length === 0 && (
+                  <p className="mt-1 text-sm text-amber-600">
+                    Please add active budget years in Workspace Management → Budget Year
+                  </p>
+                )}
               </div>
 
               <div>

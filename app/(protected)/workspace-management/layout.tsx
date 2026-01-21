@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { IconActivity, IconBuildingSkyscraper, IconIdBadge2, IconSchema, IconUsersGroup } from '@tabler/icons-react';
+import { IconActivity, IconBuildingSkyscraper, IconCalendar, IconIdBadge2, IconSchema, IconUsersGroup } from '@tabler/icons-react';
 
 const subNavigation = [
   {
@@ -24,6 +24,11 @@ const subNavigation = [
     name: 'Approval Schema',
     href: '/workspace-management/approval-schema',
     icon: IconSchema
+  },
+  {
+    name: 'Budget Year',
+    href: '/workspace-management/budget-year',
+    icon: IconCalendar
   },
   {
     name: 'Activity Log',
