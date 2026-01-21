@@ -76,12 +76,12 @@ const Sidebar = () => {
       icon: IconSubtask,
       show: userAccess.workspaceManagement
     },
-    {
-      name: 'Documents',
-      href: '/documents',
-      icon: IconBrandMinecraft,
-      show: userAccess.documents
-    }
+    // {
+    //   name: 'Documents',
+    //   href: '/documents',
+    //   icon: IconBrandMinecraft,
+    //   show: userAccess.documents
+    // }
   ].filter(item => item.show);
 
   return (

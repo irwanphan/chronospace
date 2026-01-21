@@ -639,6 +639,16 @@ model TimelineThought {
   @@map("timeline_thoughts")
 }
 
+model BudgetYear {
+  id        String   @id @default(cuid())
+  year      Int      @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("budget_years")
+}
+
 enum PurchaseOrderStatus {
   Draft
   Submitted
