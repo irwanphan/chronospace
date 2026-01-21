@@ -33,9 +33,13 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={() => onOpenChange(false)}>
+    <div 
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" 
+      onClick={() => onOpenChange(false)}
+    >
       <div 
         ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 relative"
       >
         <button

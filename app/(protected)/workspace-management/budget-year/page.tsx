@@ -1,11 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState, useRef } from 'react';
 import { BudgetYear } from '@/types/budget-year';
-import { Search, Plus, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import { Search, Edit, ToggleLeft, ToggleRight, Trash2, Save, X } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import LoadingSpin from '@/components/ui/LoadingSpin';
 import Card from '@/components/ui/Card';
+import BudgetYearRangeSelector from '@/components/BudgetYearRangeSelector';
+import { Dialog } from '@/components/ui/Dialog';
 
 export default function BudgetYearPage() {
   const [budgetYears, setBudgetYears] = useState<BudgetYear[]>([]);
@@ -21,10 +22,86 @@ export default function BudgetYearPage() {
   const currentBudgetYears = filteredBudgetYears.slice(startIndex, endIndex);
 
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [isRangeUpdating, setIsRangeUpdating] = useState(false);
+  const [isEditRangeModalOpen, setIsEditRangeModalOpen] = useState(false);
+  const [fromYear, setFromYear] = useState<number | ''>('');
+  const [toYear, setToYear] = useState<number | ''>('');
+  const [isSaving, setIsSaving] = useState(false);
+  const rangeSelectorRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     fetchBudgetYears();
   }, []);
+
+  useEffect(() => {
+    // Set initial from/to values based on active years
+    if (budgetYears.length > 0 && isEditRangeModalOpen) {
+      const activeYears = budgetYears.filter(by => by.isActive).map(by => by.year);
+      if (activeYears.length > 0) {
+        setFromYear(Math.min(...activeYears));
+        setToYear(Math.max(...activeYears));
+      } else {
+        const sortedYears = [...budgetYears].sort((a, b) => a.year - b.year);
+        setFromYear(sortedYears[0]?.year || '');
+        setToYear(sortedYears[sortedYears.length - 1]?.year || '');
+      }
+    }
+  }, [budgetYears, isEditRangeModalOpen]);
+
+  const handleOpenEditRangeModal = () => {
+    setIsEditRangeModalOpen(true);
+  };
+
+  const handleCloseEditRangeModal = () => {
+    setIsEditRangeModalOpen(false);
+    setFromYear('');
+    setToYear('');
+  };
+
+  const handleSaveRange = async () => {
+    if (!fromYear || !toYear) {
+      alert('Please fill in both From and To years');
+      return;
+    }
+
+    if (typeof fromYear !== 'number' || typeof toYear !== 'number') {
+      alert('Years must be valid numbers');
+      return;
+    }
+
+    if (fromYear > toYear) {
+      alert('From year must be less than or equal to To year');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/workspace-management/budget-year/bulk-range', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startYear: fromYear,
+          endYear: toYear,
+          action: 'activate',
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update budget year range');
+      }
+
+      await fetchBudgetYears();
+      handleCloseEditRangeModal();
+    } catch (error) {
+      console.error('Error updating budget year range:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update budget year range');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const fetchBudgetYears = async () => {
     try {
@@ -108,6 +185,35 @@ export default function BudgetYearPage() {
     }
   };
 
+  const handleRangeUpdate = async (startYear: number, endYear: number) => {
+    setIsRangeUpdating(true);
+    try {
+      const response = await fetch('/api/workspace-management/budget-year/bulk-range', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startYear,
+          endYear,
+          action: 'activate',
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update budget year range');
+      }
+
+      await fetchBudgetYears();
+    } catch (error) {
+      console.error('Error updating budget year range:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update budget year range');
+    } finally {
+      setIsRangeUpdating(false);
+    }
+  };
+
   if (isLoading) return <LoadingSpin />;
 
   return (
@@ -130,19 +236,31 @@ export default function BudgetYearPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href="/workspace-management/budget-year/new"
-            className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          <button
+            onClick={handleOpenEditRangeModal}
+            className="flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
           >
-            <Plus className="w-4 h-4" />
-            Add Budget Year
-          </Link>
+            <Edit className="w-4 h-4" />
+            Edit Budget Years Range
+          </button>
         </div>
       </div>
 
       {error && (
         <div className="text-red-500 text-center py-4 bg-red-50 border border-red-200 rounded-lg">
           {error}
+        </div>
+      )}
+
+      {/* Range Selector Component */}
+      {budgetYears.length > 0 && (
+        <div ref={rangeSelectorRef}>
+          <BudgetYearRangeSelector
+            budgetYears={budgetYears}
+            onRangeUpdate={handleRangeUpdate}
+            onRefresh={fetchBudgetYears}
+            isLoading={isRangeUpdating}
+          />
         </div>
       )}
 
@@ -209,6 +327,98 @@ export default function BudgetYearPage() {
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
       />
+
+      {/* Edit Range Modal */}
+      <Dialog open={isEditRangeModalOpen} onOpenChange={setIsEditRangeModalOpen}>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Edit Budget Years Range</h2>
+            <button
+              onClick={handleCloseEditRangeModal}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                Set the range of years that can be activated or deactivated. Years outside this range will be automatically deactivated.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="fromYear" className="block text-sm font-medium text-gray-700 mb-2">
+                  From Year
+                </label>
+                <input
+                  id="fromYear"
+                  type="number"
+                  value={fromYear}
+                  onChange={(e) => setFromYear(e.target.value ? parseInt(e.target.value) : '')}
+                  placeholder="e.g., 2020"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  min={1900}
+                  max={2100}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="toYear" className="block text-sm font-medium text-gray-700 mb-2">
+                  To Year
+                </label>
+                <input
+                  id="toYear"
+                  type="number"
+                  value={toYear}
+                  onChange={(e) => setToYear(e.target.value ? parseInt(e.target.value) : '')}
+                  placeholder="e.g., 2025"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  min={1900}
+                  max={2100}
+                />
+              </div>
+            </div>
+
+            {fromYear && toYear && fromYear > toYear && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-600">
+                  From year must be less than or equal to To year
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t">
+              <button
+                onClick={handleCloseEditRangeModal}
+                disabled={isSaving}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveRange}
+                disabled={isSaving || !fromYear || !toYear || fromYear > toYear}
+                className="flex items-center gap-2 px-6 py-2 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Save Range</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
