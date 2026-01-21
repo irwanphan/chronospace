@@ -5,7 +5,7 @@ export const revalidate = 0
 
 export async function GET() {
   try {
-    const [projects, vendors] = await Promise.all([
+    const [projects, vendors, budgetYears] = await Promise.all([
       prisma.project.findMany({
         where: {
           status: "Not Allocated"
@@ -38,12 +38,25 @@ export async function GET() {
         orderBy: {
           vendorName: 'asc'
         }
+      }),
+      prisma.budgetYear.findMany({
+        where: {
+          isActive: true
+        },
+        select: {
+          id: true,
+          year: true
+        },
+        orderBy: {
+          year: 'desc'
+        }
       })
     ]);
 
     return NextResponse.json({ 
       projects, 
-      vendors, 
+      vendors,
+      budgetYears,
       timestamp: new Date().toISOString() 
     });
   } catch (error) {

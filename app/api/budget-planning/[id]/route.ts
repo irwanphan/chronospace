@@ -25,7 +25,21 @@ export async function GET(
       },
     });
 
-    const vendors = await prisma.vendor.findMany();
+    const [vendors, budgetYears] = await Promise.all([
+      prisma.vendor.findMany(),
+      prisma.budgetYear.findMany({
+        where: {
+          isActive: true
+        },
+        select: {
+          id: true,
+          year: true
+        },
+        orderBy: {
+          year: 'desc'
+        }
+      })
+    ]);
 
     if (!budget) {
       return NextResponse.json(
@@ -40,6 +54,7 @@ export async function GET(
     return NextResponse.json({
       ...budget,
       vendors,
+      budgetYears,
       startDate: budget.startDate?.toISOString(),
       finishDate: budget.finishDate?.toISOString(),
     });
