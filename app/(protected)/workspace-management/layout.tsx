@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { IconActivity, IconBuildingSkyscraper, IconCalendar, IconIdBadge2, IconSchema, IconUsersGroup } from '@tabler/icons-react';
+import Card from '@/components/ui/Card';
 
 const subNavigation = [
   {
@@ -45,8 +46,8 @@ export default function WorkspaceManagementLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex gap-6">
-      <div className="w-64 pr-4 shrink-0 fixed">
+    <div className="flex gap-6 w-full">
+      <Card className="w-64 shrink-0 h-fit">
         <nav className="space-y-1">
           {subNavigation.map((item) => {
             const isActive = pathname === item.href;
@@ -71,8 +72,8 @@ export default function WorkspaceManagementLayout({
             );
           })}
         </nav>
-      </div>
-      <div className="flex-1 ml-64">
+      </Card>
+      <div className="flex-1 w-full overflow-x-auto">
         {children}
       </div>
     </div>

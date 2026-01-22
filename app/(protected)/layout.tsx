@@ -16,7 +16,7 @@ export default function ProtectedLayout({
   return (
     <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1">
+      <div className="flex-1 overflow-x-hidden">
         <Header />
         <main className={cn(
           `
@@ -24,8 +24,9 @@ export default function ProtectedLayout({
             min-h-screen 
             p-6 pt-24
             bg-white
+            w-full
             transition-all duration-300`,
-          isCollapsed ? "ml-16" : "ml-64"
+          // isCollapsed ? "ml-16" : "ml-64"
         )}>
           {children}
         </main>

@@ -27,7 +27,7 @@ const Sidebar = () => {
   if (status === "loading") {
     return (
       <aside className={cn(
-        "fixed left-0 top-0 h-screen bg-white border-r",
+        "ralative left-0 top-0 h-screen bg-white border-r",
         isCollapsed ? "w-16" : "w-64"
       )}>
         <div className="py-4 space-y-2">
@@ -86,7 +86,7 @@ const Sidebar = () => {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 h-screen bg-white border-r overflow-hidden transition-all duration-300",
+      "relative left-0 top-0 h-screen bg-white border-r overflow-hidden transition-all duration-300",
       isCollapsed ? "w-16" : "w-64"
     )}>
       <div className="h-16 border-b flex items-center">
